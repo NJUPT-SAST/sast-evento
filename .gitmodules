@@ -3,4 +3,4 @@
 	url = https://github.com/Serein207/sast-link-cxx-sdk.git
 [submodule "ui/modules/surrealism-ui"]
 	path = ui/modules/surrealism-ui
-	url = https://github.com/Surrealism-All/SurrealismUI
+	url = https://github.com/Surrealism-All/SurrealismUI.git
