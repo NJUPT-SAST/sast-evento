@@ -1,0 +1,11 @@
+import {MainView} from "./index.slint";
+import {ROOT_GLOBAL} from "./global.slint";
+
+export component App inherits Window {
+    callback loginClicked <=> main-view.startLink;
+    height: ROOT-GLOBAL.window-height;
+    width: ROOT-GLOBAL.window-width;
+    title: "SAST Evento";
+    icon: @image-url("assets/app_icon.png");
+    main_view := MainView { }
+}

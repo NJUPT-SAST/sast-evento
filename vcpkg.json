@@ -1,0 +1,26 @@
+{
+    "name": "demo",
+    "dependencies": [
+        {
+            "name": "boost-system"
+        },
+        {
+            "name": "boost-beast"
+        },
+        {
+            "name": "boost-url"
+        },
+        {
+            "name": "openssl"
+        },
+        {
+            "name": "nlohmann-json"
+        },
+        {
+            "name": "spdlog"
+        },
+        {
+            "name": "gtest"
+        }
+    ]
+}

@@ -1,0 +1,37 @@
+import { Hello } from "../components/index.slint";
+import { SButton, SText } from "@surrealism";
+
+export component MainView {
+    callback startLink;
+
+    eventoLogo := Image {
+        width: 150px;
+        height: 150px;
+        x: (root.width - self.width) / 2;
+        source: @image-url("../assets/app_icon.svg");
+    }
+
+    title := SText {
+        x: (root.width - self.width) / 2;
+        y: eventoLogo.y + eventoLogo.height;
+        text: "SAST Evento";
+        font-size: 35px;
+    }
+
+    linkButton := SButton {
+        x: (root.width - self.width) / 2;
+        y: title.y + title.height + 30px;
+        show-icon: true;
+        icon: @image-url("../assets/sast_link.svg");
+        text: "使用Link登入";
+        clicked => {
+            root.startLink();
+        }
+    }
+
+    infoText := SText {
+        x: (root.width - self.width) / 2;
+        y: linkButton.y + linkButton.height + 30px;
+        text: "SAST-C++组开发";
+    }
+}

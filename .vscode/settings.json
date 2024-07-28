@@ -1,0 +1,11 @@
+{
+    "cmake.configureArgs": [
+        "-DCMAKE_TOOLCHAIN_FILE=$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+    ],
+    "slint.libraryPaths": {
+        "surrealism": "ui/modules/surrealism-ui/index.slint"
+    },
+    "slint.lsp-args": [
+        "-Lsurrealism=ui/modules/surrealism-ui/index.slint"
+    ],
+}

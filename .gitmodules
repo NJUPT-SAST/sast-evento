@@ -1,0 +1,6 @@
+[submodule "3rdpart/sast-link-cxx-sdk"]
+	path = 3rdpart/sast-link-cxx-sdk
+	url = https://github.com/Serein207/sast-link-cxx-sdk.git
+[submodule "ui/modules/surrealism-ui"]
+	path = ui/modules/surrealism-ui
+	url = https://github.com/Surrealism-All/SurrealismUI
