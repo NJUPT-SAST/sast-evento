@@ -1,0 +1,22 @@
+name: "Format Check"
+on:
+  pull_request:
+    paths:
+    - "src/**"
+    - ".github/workflows/format-check.yml"
+  push:
+    paths: 
+    - "src/**"
+    - ".github/workflows/format-check.yml"
+jobs:
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Clang Format Check
+      uses: jidicula/clang-format-action@v4.13.0
+      with:
+        clang-format-version: '18'
+        check-path: 'src'
