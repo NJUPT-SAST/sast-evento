@@ -58,18 +58,19 @@ git clone --recursive https://github.com/NJUPT-SAST/sast-evento.git
 
 - 构建
 
+Windows Cmd:
+```shell
+cmake -B build -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
+cmake --build build
+```
 Windows Powershell:
 ```shell
-cd sast-evento
-mkdir build
 cmake -B build -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 cmake --build build
 ```
-Linux & MacOS & Windows Cmd:
+Linux & MacOS:
 ```shell
-cd sast-evento
-mkdir build
-cmake -B build -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
+cmake -B build -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
 cmake --build build
 ```
 
@@ -79,4 +80,5 @@ cmake --build build
 - [OpenSSL](https://github.com/openssl/openssl)
 - [Slint](https://github.com/slint-ui/slint)
 - [Google Test](https://github.com/google/googletest)
+- [nlohmann-json](https://github.com/nlohmann/json)
 - [spdlog](https://github.com/gabime/spdlog)
