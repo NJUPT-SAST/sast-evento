@@ -127,6 +127,7 @@ jobs:
         category: "/language:${{matrix.language}}"
     
     - name: Send message to feishu
+      if: ${{ failure() }}
       uses: foxundermoon/feishu-action@v2
       with:
         url: ${{ secrets.WEBHOOK_URL }}
