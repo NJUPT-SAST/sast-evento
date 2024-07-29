@@ -1,5 +1,5 @@
 {
-    "name": "demo",
+    "name": "sast-evento",
     "dependencies": [
         {
             "name": "boost-system"
