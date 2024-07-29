@@ -62,6 +62,9 @@ jobs:
 
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
+        vcpkgJsonGlob: 'vcpkg.json'
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
