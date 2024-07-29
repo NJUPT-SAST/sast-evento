@@ -91,6 +91,9 @@ jobs:
           ${{ github.workspace }}/build/_deps
           ${{ github.workspace }}/build/cargo
           ${{ github.workspace }}/build/vcpkg_installed
+          ${{ github.workspace }}/build/corrosion
+          ${{ github.workspace }}/build/lib
+          ${{ github.workspace }}/build/3rdpart
         key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
     # Initializes the CodeQL tools for scanning.

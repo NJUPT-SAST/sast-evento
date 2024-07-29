@@ -1,0 +1,87 @@
+name: cpp-linter
+
+permissions:
+  checks: write
+  pull-requests: write
+  repository-projects: write
+  contents: write 
+
+on:
+  pull_request:
+    branches: [main, dev]
+    paths: ['**.c', '**.cpp', '**.h', '**.hpp', '**.cxx', '**.hxx', '**.cc', '**.hh', '**CMakeLists.txt', 'meson.build', '**.cmake']
+  push:
+    branches: [main, dev]
+    paths: ['**.c', '**.cpp', '**.h', '**.hpp', '**.cxx', '**.hxx', '**.cc', '**.hh', '**CMakeLists.txt', 'meson.build', '**.cmake']
+
+env:
+  BUILD_TYPE: Release
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
+
+jobs:
+  cpp-linter:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+  
+    - name: Setup vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
+        ./bootstrap-vcpkg.sh
+        ./vcpkg integrate install
+        # add vcpkg to PATH
+        echo "${{ github.workspace }}/vcpkg" >> $GITHUB_PATH    
+
+    - name: Setup Ninja
+      uses: seanmiddleditch/gha-setup-ninja@v3
+      with:
+          version: "1.11.1"
+
+    - name: Export GitHub Actions cache environment variables
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');    
+
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/build/_deps
+          ${{ github.workspace }}/build/cargo
+          ${{ github.workspace }}/build/vcpkg_installed
+          ${{ github.workspace }}/build/corrosion
+          ${{ github.workspace }}/build/lib
+          ${{ github.workspace }}/build/3rdpart
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+        
+    - name: Configure CMake
+      run: cmake -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake -B build -G Ninja
+
+    - name: linter
+      uses: cpp-linter/cpp-linter-action@v2
+      id: linter
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        version: '16'
+        style: file
+        database: ${{github.workspace}}/build
+        extra-args: '-std=c++20 -Wall'
+        tidy-checks: 'clang-diagnostic-*,clang-analyzer-*,cppcoreguidelines-*,modernize-*,-modernize-use-trailing-return-type'
+        thread-comments: ${{ github.event_name == 'pull_request' && 'update' }}
+        file-annotations: true
+        tidy-review: true
+        step-summary: true
+        lines-changed-only: false
+        files-changed-only: true
+
+    - name: Failed if needed
+      if: steps.linter.outputs.checks-failed > 0
+      run: exit 1
