@@ -21,7 +21,7 @@
         },
         {
             "name": "msvc",
-            "inherits": "native",
+            "inherits": "base",
             "hidden": true,
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "cl.exe",
@@ -64,20 +64,24 @@
     "buildPresets": [
         {
             "name": "native",
+            "configurePreset": "native",
             "displayName": "Ninja Multi-Config"
         },
         {
             "name": "native-debug",
+            "inherits": "native",
             "displayName": "Native Debug",
             "configuration": "Debug"
         },
         {
             "name": "native-release",
+            "inherits": "native",
             "displayName": "Native Release",
             "configuration": "Release"
         },
         {
             "name": "native-relwithdebinfo",
+            "inherits": "native",
             "displayName": "Native RelWithDebInfo",
             "configuration": "RelWithDebInfo"
         }
