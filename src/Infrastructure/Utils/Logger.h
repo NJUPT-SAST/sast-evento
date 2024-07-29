@@ -19,10 +19,10 @@ public:
                     std::size_t thread_count) {
         spdlog::file_event_handlers handlers;
         handlers.after_open = [](spdlog::filename_t filename, std::FILE* fstream) {
-            fputs("*** Start SAST-Evento-Desktop ***\n", fstream);
+            fputs("[Start SAST-Evento-Desktop]\n", fstream);
         };
         handlers.before_close = [](spdlog::filename_t filename, std::FILE* fstream) {
-            fputs("*** End SAST-Evento-Desktop ***\n\n\n\n\n", fstream);
+            fputs("[End SAST-Evento-Desktop]\n\n\n\n\n", fstream);
         };
         std::shared_ptr<spdlog::sinks::daily_file_sink_mt> fileSink
             = std::make_shared<spdlog::sinks::daily_file_sink_mt>(filepath, 0, 0, false, 0, handlers);
@@ -33,6 +33,11 @@ public:
                                                               spdlog::sinks_init_list{fileSink,
                                                                                       stdoutSink},
                                                               _threadPool);
+
+#ifdef EVENTO_RELEASE
+        stdoutSink->set_level(Level::off);
+#endif
+
         _asyncLogger->set_level(level);
         _asyncLogger->set_error_handler(
             [&](const std::string& msg) { _asyncLogger->error("*** LOGGER ERROR ***: {}", msg); });
@@ -42,6 +47,7 @@ public:
          * https://github.com/gabime/spdlog/wiki/3.-Custom-formatting
          */
         stdoutSink->set_pattern("\033[36m[%Y-%m-%d %H:%M:%S.%e] \033[92m[%n] \033[0m%^[%l]%$ %v");
+        spdlog::set_default_logger(_asyncLogger);
     }
     auto getLogger() { return _asyncLogger; }
     Level getLogLevel() const { return _asyncLogger->level(); }
@@ -58,13 +64,3 @@ private:
     std::shared_ptr<spdlog::async_logger> _asyncLogger;
     std::shared_ptr<spdlog::details::thread_pool> _threadPool;
 };
-
-#define INIT_LOGGER(...) Logger::getInstance()->initLogger(__VA_ARGS__)
-#define GET_LOG_LEVEL() Logger::getInstance()->getLogLevel()
-#define SET_LOG_LEVEL(level) Logger::getInstance()->setLogLevel(level)
-#define LOG_TRACE(...) Logger::getInstance()->getLogger()->trace(__VA_ARGS__)
-#define LOG_DEBUG(...) Logger::getInstance()->getLogger()->debug(__VA_ARGS__)
-#define LOG_INFO(...) Logger::getInstance()->getLogger()->info(__VA_ARGS__)
-#define LOG_WARN(...) Logger::getInstance()->getLogger()->warn(__VA_ARGS__)
-#define LOG_ERROR(...) Logger::getInstance()->getLogger()->error(__VA_ARGS__)
-#define LOG_CRITICAL(...) Logger::getInstance()->getLogger()->critical(__VA_ARGS__)

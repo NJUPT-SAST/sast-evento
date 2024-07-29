@@ -30,6 +30,13 @@ find_package(nlohmann_json REQUIRED)
 
 add_executable(${PROJECT_NAME})
 
+# definitions for Logger
+target_compile_definitions(${PROJECT_NAME}
+    PUBLIC
+        $<$<CONFIG:Debug>:EVENTO_DEBUG>
+        $<$<CONFIG:Release>:EVENTO_RELEASE>
+)
+
 # source code
 add_subdirectory(src)
 # sast-link-sdk

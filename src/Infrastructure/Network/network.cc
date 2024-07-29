@@ -15,9 +15,9 @@ void start_sast_link() {
             []() -> net::awaitable<void> {
                 auto result = co_await sast_link::login();
                 if (result) {
-                    LOG_INFO("code: {}\n", result.value());
+                    spdlog::info("code: {}\n", result.value());
                 } else {
-                    LOG_ERROR("Login failed: {}\n", result.error());
+                    spdlog::error("Login failed: {}\n", result.error());
                 }
             },
             net::detached);
