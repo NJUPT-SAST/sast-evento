@@ -481,7 +481,8 @@ private:
         static debug_source_location current() noexcept { return {"???", 0, 0, "?"}; }
     };
 #ifndef DEBUG_SOURCE_LOCATION_FAKER
-#define DEBUG_SOURCE_LOCATION_FAKER {__FILE__, __LINE__, 0, __func__}
+#define DEBUG_SOURCE_LOCATION_FAKER \
+    { __FILE__, __LINE__, 0, __func__ }
 #endif
 #define DEBUG_SOURCE_LOCATION debug::debug_source_location
 #endif
@@ -612,8 +613,8 @@ private:
             std::is_same<T, char16_t>::value || std::is_same<T, char32_t>::value
             || std::is_same<T, wchar_t>::value) {
             auto f = oss.flags();
-            oss << "'\\"
-                << " xu U"[sizeof(T)] << std::hex << std::setfill('0') << std::setw(sizeof(T) * 2)
+            oss << "'\\" << " xu U"[sizeof(T)] << std::hex << std::setfill('0')
+                << std::setw(sizeof(T) * 2)
 #if DEBUG_HEXADECIMAL_UPPERCASE
                 << std::uppercase
 #endif
@@ -953,8 +954,8 @@ private:
                                 && debug_cond_unicode_char<T>::value>::type> {
         void operator()(std::ostream& oss, T const& t) const {
             auto f = oss.flags();
-            oss << "'\\"
-                << " xu U"[sizeof(T)] << std::hex << std::setfill('0') << std::setw(sizeof(T) * 2)
+            oss << "'\\" << " xu U"[sizeof(T)] << std::hex << std::setfill('0')
+                << std::setw(sizeof(T) * 2)
 #if DEBUG_HEXADECIMAL_UPPERCASE
                 << std::uppercase
 #endif
