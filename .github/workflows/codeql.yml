@@ -73,9 +73,9 @@ jobs:
         echo "${{ github.workspace }}/vcpkg" >> $GITHUB_PATH
 
     - name: Setup Ninja
-      uses: seanmiddleditch/gha-setup-ninja@v3
+      uses: imesense/gha-setup-ninja@v0.2
       with:
-          version: "1.11.1"
+        version: '1.12.1'
           
     - name: Export GitHub Actions cache environment variables
       uses: actions/github-script@v7
