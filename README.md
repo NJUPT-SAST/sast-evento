@@ -37,41 +37,57 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 项目基于 [MIT License](./LICENSE) 发布
 
-## 开始
+## 参与开发
 
 ### 先决条件
 
-- 一个支持C++20或更高标准的编译器
+- 一个支持 C++20 或更高标准的编译器
 - CMake 3.15 或更高版本
-- vcpkg包管理器
-- rust工具链
+- vcpkg 包管理器
+- Rust 工具链
 
-### 克隆与构建
+### 克隆
 
-- 克隆此仓库
-
-```
+```bash
 git clone --recursive https://github.com/NJUPT-SAST/sast-evento.git
-``````
-
-我们建议使用VScode打开和编辑项目。我们特别保留`.vscode`文件夹用于基本设置和扩展。
-
-- 构建
-
-Windows Cmd:
-```shell
-cmake -B build -DCMAKE_TOOLCHAIN_FILE="%VCPKG_ROOT%/scripts/buildsystems/vcpkg.cmake"
-cmake --build build
 ```
-Windows Powershell:
-```shell
-cmake -B build -DCMAKE_TOOLCHAIN_FILE="$Env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-cmake --build build
+
+注意：本项目使用了子模块，所以请确保使用 `--recursive` 参数来克隆仓库，或者在克隆后执行以下命令：
+
+```bash
+git submodule update --init --recursive
 ```
-Linux & MacOS:
-```shell
-cmake -B build -DCMAKE_TOOLCHAIN_FILE="$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake"
-cmake --build build
+
+### 提交检查 Hook
+本项目使用 [pre-commit](https://pre-commit.com/) 来进行提交检查，以确保代码风格一致性。请先安装 pre-commit 工具：
+```bash
+# For Arch Linux
+sudo pacman -S pre-commit
+# For Pipx users (cross-platform)
+pipx install pre-commit
+```
+
+然后在克隆项目后执行以下命令安装 pre-commit 钩子：
+
+```bash
+pre-commit install
+```
+
+> [!TIP]  
+> 如果您认为工具提供的结果不可靠，可使用 `git commit --no-verify` 临时跳过提交检查。
+
+### 构建
+> [!TIP]  
+> 我们建议使用 VScode 打开和编辑项目。我们特别保留 `.vscode` 文件夹用于基本设置和扩展。
+
+本项目使用 CMake Presets 来快速配置和构建项目，所需命令行如下：
+
+```bash
+# 对于 Windows 平台，请保证编译工具集相关环境变量已经配置
+# 您可以使用 `vcpkg env` 命令进入正确设置环境变量的 shell
+cmake --preset native
+# 根据需要，可换用 `native-debug`, `native-release` 或 `native-relwithdebinfo` 预设
+cmake --build --preset native
 ```
 
 ### 项目依赖
