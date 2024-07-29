@@ -34,5 +34,9 @@
 # clangd cache
 .cache
 
+# CMake user presets
+CMakeUserPresets.json
+
 # CMake build directory
-build
+/build
+/out
