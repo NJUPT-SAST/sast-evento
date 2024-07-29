@@ -91,7 +91,7 @@ jobs:
           ${{ github.workspace }}/build/_deps
           ${{ github.workspace }}/build/cargo
           ${{ github.workspace }}/build/vcpkg_installed
-        key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('**/lockfiles') }}
+        key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -122,3 +122,25 @@ jobs:
       uses: github/codeql-action/analyze@v3
       with:
         category: "/language:${{matrix.language}}"
+    
+    - name: Send message to feishu
+      uses: foxundermoon/feishu-action@v2
+      with:
+        url: ${{ secrets.WEBHOOK_URL }}
+        msg_type: post
+        content: |
+          post:
+            zh_cn:
+              title: sast-evento repo CodeQL analysis
+              content:
+              - - tag: text
+                  text: "repository: ${{ github.repository }}"
+              - - tag: text
+                  text: "committer: ${{ github.actor }}"
+              - - tag: text
+                  text: 'compare: '
+                - tag: a
+                  text: "${{ github.event.compare }}"
+                  href: ${{ github.event.compare }}
+              - - tag: text
+                  text: "job status: ${{ job.status }}"
