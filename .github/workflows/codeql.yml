@@ -92,13 +92,13 @@ jobs:
         patterns: |
           -**/*
           +src/**/*
-        input: sarif-results/${{ matrix.language }}.sarif
-        output: sarif-results/${{ matrix.language }}.sarif
+        input: sarif-results/cpp.sarif
+        output: sarif-results/cpp.sarif
     
     - name: Upload CodeQL Analysis Results
       uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: sarif-results/${{ matrix.language }}.sarif
+        sarif_file: sarif-results/cpp.sarif
     
     - name: Send message to feishu
       if: ${{ failure() }}
