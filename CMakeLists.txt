@@ -4,7 +4,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-project(sast-evento LANGUAGES CXX)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.cmake/)
+include(Version)
+
+project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
 # find Slint
 find_package(Slint QUIET)
@@ -32,9 +35,9 @@ add_executable(${PROJECT_NAME})
 
 # definitions for Logger
 target_compile_definitions(${PROJECT_NAME}
-    PUBLIC
-        $<$<CONFIG:Debug>:EVENTO_DEBUG>
-        $<$<CONFIG:Release>:EVENTO_RELEASE>
+  PUBLIC
+    $<$<CONFIG:Debug>:EVENTO_DEBUG>
+    $<$<CONFIG:Release>:EVENTO_RELEASE>
 )
 
 # source code
@@ -43,12 +46,12 @@ add_subdirectory(src)
 add_subdirectory(3rdpart/sast-link-cxx-sdk)
 
 slint_target_sources(${PROJECT_NAME} ui/app.slint
-    LIBRARY_PATHS surrealism=${CMAKE_SOURCE_DIR}/ui/modules/surrealism-ui/index.slint
+  LIBRARY_PATHS surrealism=${CMAKE_SOURCE_DIR}/ui/modules/surrealism-ui/index.slint
 )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
 
 # On Windows, copy the Slint DLL next to the application binary so that it's found.
 if (WIN32)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
 endif()

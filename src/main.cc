@@ -3,7 +3,9 @@
 #include <app.h>
 
 int main(int argc, char** argv) {
-    Logger::getInstance()->initLogger(Logger::Level::debug, "logs/evento.log", 8192, 1);
+    Logger logger;
+    logger.initLogger(Logger::Level::debug, "logs/evento.log", 8192, 1);
+    spdlog::info("SAST Evento version: v" VERSION_FULL);
     auto ui = App::create();
     ui->on_loginClicked(start_sast_link);
     ui->run();
