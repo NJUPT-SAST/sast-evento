@@ -9,14 +9,10 @@
 class Logger {
 public:
     using Level = spdlog::level::level_enum;
-    static Logger* getInstance() {
-        static Logger s_instance;
-        return &s_instance;
-    }
-    void initLogger(Level level,
-                    const std::string& filepath,
-                    std::size_t q_max_items,
-                    std::size_t thread_count) {
+    Logger(Level level,
+           const std::string& filepath,
+           std::size_t q_max_items = 8192,
+           std::size_t thread_count = 1) {
         spdlog::file_event_handlers handlers;
         handlers.after_open = [](spdlog::filename_t filename, std::FILE* fstream) {
             fputs("[Start SAST-Evento-Desktop]\n", fstream);
@@ -37,7 +33,6 @@ public:
 #ifdef EVENTO_RELEASE
         stdoutSink->set_level(Level::off);
 #endif
-
         _asyncLogger->set_level(level);
         _asyncLogger->set_error_handler(
             [&](const std::string& msg) { _asyncLogger->error("*** LOGGER ERROR ***: {}", msg); });
@@ -49,18 +44,14 @@ public:
         stdoutSink->set_pattern("\033[36m[%Y-%m-%d %H:%M:%S.%e] \033[92m[%n] \033[0m%^[%l]%$ %v");
         spdlog::set_default_logger(_asyncLogger);
     }
-    auto getLogger() { return _asyncLogger; }
-    Level getLogLevel() const { return _asyncLogger->level(); }
+    auto& logger() { return _asyncLogger; }
+    [[nodiscard]] Level logLevel() const { return _asyncLogger->level(); }
     void setLogLevel(Level level) { _asyncLogger->set_level(level); }
-    ~Logger() {
-        // spdlog::drop("evento-logger");
-        spdlog::shutdown();
-    }
+    Logger(const Logger&) = delete;
+    Logger& operator=(const Logger&) = delete;
+    ~Logger() { spdlog::shutdown(); }
 
 private:
-    Logger() = default;
-    Logger(const Logger&) = delete;
-    Logger& operator==(const Logger&) = delete;
     std::shared_ptr<spdlog::async_logger> _asyncLogger;
     std::shared_ptr<spdlog::details::thread_pool> _threadPool;
 };
