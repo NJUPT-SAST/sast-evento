@@ -3,9 +3,11 @@ import {ROOT_GLOBAL} from "./global.slint";
 
 export component App inherits Window {
     callback loginClicked <=> main-view.startLink;
-    height: ROOT-GLOBAL.window-height;
-    width: ROOT-GLOBAL.window-width;
+    in-out property <string> version-string <=> main-view.version-string;
+    min-height: ROOT-GLOBAL.window-height;
+    min-width: ROOT-GLOBAL.window-width;
     title: "SAST Evento";
+    background: white;
     icon: @image-url("assets/app_icon.png");
     main-view := MainView {
         y: 120px;

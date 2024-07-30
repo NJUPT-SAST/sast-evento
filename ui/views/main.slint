@@ -3,6 +3,7 @@ import { SText, SButton } from "../modules/surrealism-ui/index.slint";
 
 export component MainView {
     callback startLink <=> link-button.clicked;
+    in-out property <string> version-string <=> version-label.text;
     evento-image := Image {
         height: 240px;
         width: 700px;
@@ -38,7 +39,6 @@ export component MainView {
 
     version-label := SText {
         y: group-label.y + group-label.height + 5px;
-        text: "v0.0.0-alpha";
         theme: Light;
     }
 }
