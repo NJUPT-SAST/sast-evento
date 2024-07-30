@@ -1,5 +1,5 @@
 <div align=center>
-  <img width=64 src="ui/assets/app_icon.svg">
+  <img width=64 src="ui/assets/image/icon/evento.svg">
 </div>
 
 <h1 align="center">

@@ -1,7 +1,12 @@
-//! global styles
+import { EventoImageToken } from "./assets/index.slint";
+
 export global ROOT_GLOBAL {
-  in-out property <length> window-height : 760px;
-  in-out property <length> window-width : 1340px;
-  in-out property <length> font-size : 16px;
-  in-out property <length> padding : 0px;
+    in-out property <length> window-height: 760px;
+    in-out property <length> window-width: 1340px;
+    in-out property <length> font-size: 16px;
+    in-out property <length> padding: 0px;
+}
+
+export global Token {
+    out property image <=> EventoImageToken.image;
 }

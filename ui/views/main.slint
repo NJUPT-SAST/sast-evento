@@ -1,5 +1,5 @@
-import { Hello } from "../components/index.slint";
 import { SText, SButton } from "../modules/surrealism-ui/index.slint";
+import { Token } from "../global.slint";
 
 export component MainView {
     callback startLink <=> link-button.clicked;
@@ -7,7 +7,7 @@ export component MainView {
     evento-image := Image {
         height: 240px;
         width: 700px;
-        source: @image-url("../assets/evento_black.png");
+        source: Token.image.display.evento;
     }
 
     link-button := SButton {
@@ -19,7 +19,7 @@ export component MainView {
         theme: Dark;
         border-radius: 12px;
         show-icon: true;
-        icon: @image-url("../assets/sast_link.svg");
+        icon: Token.image.icon.sast-link;
     }
 
     visitor-button := SButton {

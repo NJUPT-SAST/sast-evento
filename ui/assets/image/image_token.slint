@@ -1,0 +1,131 @@
+struct ImgPair {
+    light: image,
+    dark: image,
+}
+
+struct EventoIconCollection {
+    evento: image,
+    sast_link: image,
+    home: image,
+}
+
+struct EventoDisplayCollection {
+    evento: image,
+    avatar: [image],
+    event: {
+        default: [image],
+        union: [image],
+
+        cpp: [image],
+        csharp: [image],
+        frontend: [image],
+        backend: [image],
+        game: [image],
+        lambda: [image],
+        python: [image],
+    },
+    no_image: image,
+}
+
+struct EventoImageCollection {
+    icon: EventoIconCollection,
+    display: EventoDisplayCollection,
+}
+
+export global EventoImageToken {
+    out property <EventoImageCollection> image:{
+        icon: icon,
+        display: display,
+    };
+    //
+    // TODO(theme): link icon change to darkmode with theme system, replace TO_REPLACE
+    pure function switcher(is-light: bool, img: ImgPair) -> image {
+        return is-light ? img.light : img.dark;
+    }
+    property <bool> TO_REPLACE: true;
+    //
+    // icon used as small image in button, navbar and so on
+    // icon will change according to darkmode switch
+    property <EventoIconCollection> icon:{
+        // Product specific
+        evento: switcher(TO_REPLACE,{
+            light: @image-url("./icon/evento.png"),
+            // TODO(resource): no evento_dark provided, use light temporarily
+            dark: @image-url("./icon/evento.svg"),
+        }),
+        sast_link: switcher(TO_REPLACE,{
+            light: @image-url("./icon/sast_link.svg"),
+            // TODO(resource): no sast_link_dark provided, use light temporarily
+            dark: @image-url("./icon/sast_link.svg"),
+        }),
+        // General usage
+        home: switcher(TO_REPLACE,{
+            light: @image-url("./icon/home.svg"),
+            dark: @image-url("./icon/home_dark.svg"),
+        }),
+    };
+    // display used as images bigger than icon
+    // most display image won't change according to darkmode switch
+    property <EventoDisplayCollection> display:{
+        // Product specific
+        evento: switcher(TO_REPLACE,{
+            light: @image-url("./display/evento/evento.png"),
+            dark: @image-url("./display/evento/evento_dark.png"),
+        }),
+        // Other
+        avatar: [
+            @image-url("./display/avatar/avatar_1.svg"),
+            @image-url("./display/avatar/avatar_2.svg"),
+            @image-url("./display/avatar/avatar_3.svg"),
+            @image-url("./display/avatar/avatar_4.svg"),
+            @image-url("./display/avatar/avatar_5.svg"),
+            @image-url("./display/avatar/avatar_6.svg"),
+            @image-url("./display/avatar/avatar_7.svg"),
+            @image-url("./display/avatar/avatar_8.svg"),
+            @image-url("./display/avatar/avatar_9.svg"),
+            @image-url("./display/avatar/avatar_10.svg"),
+            @image-url("./display/avatar/avatar_11.svg"),
+            @image-url("./display/avatar/avatar_12.svg"),
+        ],
+        event: {
+            default: [
+                @image-url("./display/event/default_1.png"),
+                @image-url("./display/event/default_2.png"),
+                @image-url("./display/event/default_3.png"),
+            ],
+            union: [
+                @image-url("./display/event/union_1.png"),
+                @image-url("./display/event/union_2.png"),
+            ],
+            cpp: [
+                @image-url("./display/event/cpp_1.svg"),
+                @image-url("./display/event/cpp_2.png"),
+                @image-url("./display/event/cpp_3.png"),
+            ],
+            csharp: [
+                @image-url("./display/event/csharp_1.png"),
+            ],
+            frontend: [
+                @image-url("./display/event/frontend_1.png"),
+                @image-url("./display/event/frontend_2.png"),
+                @image-url("./display/event/frontend_3.png"),
+            ],
+            backend: [
+                @image-url("./display/event/backend_1.png"),
+            ],
+            game: [
+                @image-url("./display/event/game_1.svg"),
+                @image-url("./display/event/game_2.jpg"),
+                @image-url("./display/event/game_3.jpg"),
+            ],
+            lambda: [
+                @image-url("./display/event/lambda_1.png"),
+                @image-url("./display/event/lambda_2.png"),
+            ],
+            python: [
+                @image-url("./display/event/python_1.png"),
+            ],
+        },
+        no_image: @image-url("./display/no_image.png")
+    };
+}
