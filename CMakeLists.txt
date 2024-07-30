@@ -7,7 +7,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.cmake/)
 include(Version)
 
-cmake_policy(SET CMP0167 OLD)
+if (POLICY CMP0167)
+  cmake_policy(SET CMP0167 OLD)
+endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
