@@ -40,3 +40,4 @@ CMakeUserPresets.json
 # CMake build directory
 /build
 /out
+/.vscode/settings.json

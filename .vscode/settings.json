@@ -1,8 +1,0 @@
-{
-    "slint.libraryPaths": {
-        "surrealism": "ui/modules/surrealism-ui/index.slint"
-    },
-    "slint.lsp-args": [
-        "-Lsurrealism=ui/modules/surrealism-ui/index.slint"
-    ],
-}
