@@ -1,5 +1,6 @@
-import {MainView} from "./index.slint";
+import { MainView } from "./index.slint";
 import { ROOT_GLOBAL, Token } from "./global.slint";
+import { Palette } from "std-widgets.slint";
 
 export component App inherits Window {
     callback loginClicked <=> main-view.startLink;
@@ -7,7 +8,7 @@ export component App inherits Window {
     min-height: ROOT-GLOBAL.window-height;
     min-width: ROOT-GLOBAL.window-width;
     title: "SAST Evento";
-    background: white;
+    background: Palette.color-scheme == ColorScheme.light ? white : black;
     icon: Token.image.icon.evento;
     main-view := MainView {
         y: 120px;

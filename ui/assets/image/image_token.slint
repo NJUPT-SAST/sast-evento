@@ -6,8 +6,10 @@ struct ImgPair {
 }
 
 struct ClickIcon {
-    clicked: image,
-    unclicked: image,
+    // used when normal state
+    default: image,
+    // used when user interacting such as click, hover...
+    interact: image,
 }
 
 struct EventoIconCollection {
@@ -23,7 +25,7 @@ struct EventoIconCollection {
     locate: image,
     logout: image,
     me: ClickIcon,
-    scedule: ClickIcon,
+    schedule: ClickIcon,
     setting: ClickIcon,
     star-border: image,
     star-border-blue: image,
@@ -78,18 +80,18 @@ export global EventoImageToken {
         sast-link: @image-url("./icon/sast_link.svg"),
         // General usage
         arrow-left: {
-            clicked: @image-url("./icon/arrow-circle-left_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/arrow-circle-left.svg"),
                 dark: @image-url("./icon/arrow-circle-left_dark.svg"),
             }),
+            interact: @image-url("./icon/arrow-circle-left_blue.svg"),
         },
         card: {
-            clicked: @image-url("./icon/card_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/card.svg"),
                 dark: @image-url("./icon/card_dark.svg"),
             }),
+            interact: @image-url("./icon/card_blue.svg"),
         },
         category: switcher({
             light: @image-url("./icon/category.svg"),
@@ -100,25 +102,25 @@ export global EventoImageToken {
             dark: @image-url("./icon/department_dark.svg"),
         }),
         history: {
-            clicked: @image-url("./icon/history_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/history.svg"),
                 dark: @image-url("./icon/history_dark.svg"),
             }),
+            interact: @image-url("./icon/history_blue.svg"),
         },
         home: {
-            clicked: @image-url("./icon/home_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/home.svg"),
                 dark: @image-url("./icon/home_dark.svg"),
             }),
+            interact: @image-url("./icon/home_blue.svg"),
         },
         info: {
-            clicked: @image-url("./icon/info_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/info.svg"),
                 dark: @image-url("./icon/info_dark.svg"),
             }),
+            interact: @image-url("./icon/info_blue.svg"),
         },
         locate: switcher({
             light: @image-url("./icon/locate.svg"),
@@ -126,25 +128,25 @@ export global EventoImageToken {
         }),
         logout: @image-url("./icon/logout.svg"),
         me: {
-            clicked: @image-url("./icon/me_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/me.svg"),
                 dark: @image-url("./icon/me_dark.svg"),
             }),
+            interact: @image-url("./icon/me_blue.svg"),
         },
-        scedule: {
-            clicked: @image-url("./icon/schedule_blue.svg"),
-            unclicked: switcher({
+        schedule: {
+            default: switcher({
                 light: @image-url("./icon/schedule.svg"),
                 dark: @image-url("./icon/schedule_dark.svg"),
             }),
+            interact: @image-url("./icon/schedule_blue.svg"),
         },
         setting: {
-            clicked: @image-url("./icon/setting_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/setting.svg"),
                 dark: @image-url("./icon/setting_dark.svg"),
             }),
+            interact: @image-url("./icon/setting_blue.svg"),
         },
         star-border: switcher({
             light: @image-url("./icon/star.svg"),
@@ -165,11 +167,11 @@ export global EventoImageToken {
             dark: @image-url("./icon/topic_dark.svg"),
         }),
         tree-list: {
-            clicked: @image-url("./icon/tree-list_blue.svg"),
-            unclicked: switcher({
+            default: switcher({
                 light: @image-url("./icon/tree-list.svg"),
                 dark: @image-url("./icon/tree-list_dark.svg"),
             }),
+            interact: @image-url("./icon/tree-list_blue.svg"),
         },
     };
     // display used as images bigger than icon
