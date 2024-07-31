@@ -7,7 +7,7 @@ struct ImgPair {
 
 struct ClickIcon {
     // used when normal state
-    default: image,
+    normal: image,
     // used when user interacting such as click, hover...
     interact: image,
 }
@@ -80,14 +80,14 @@ export global EventoImageToken {
         sast-link: @image-url("./icon/sast_link.svg"),
         // General usage
         arrow-left: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/arrow-circle-left.svg"),
                 dark: @image-url("./icon/arrow-circle-left_dark.svg"),
             }),
             interact: @image-url("./icon/arrow-circle-left_blue.svg"),
         },
         card: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/card.svg"),
                 dark: @image-url("./icon/card_dark.svg"),
             }),
@@ -102,21 +102,21 @@ export global EventoImageToken {
             dark: @image-url("./icon/department_dark.svg"),
         }),
         history: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/history.svg"),
                 dark: @image-url("./icon/history_dark.svg"),
             }),
             interact: @image-url("./icon/history_blue.svg"),
         },
         home: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/home.svg"),
                 dark: @image-url("./icon/home_dark.svg"),
             }),
             interact: @image-url("./icon/home_blue.svg"),
         },
         info: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/info.svg"),
                 dark: @image-url("./icon/info_dark.svg"),
             }),
@@ -128,21 +128,21 @@ export global EventoImageToken {
         }),
         logout: @image-url("./icon/logout.svg"),
         me: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/me.svg"),
                 dark: @image-url("./icon/me_dark.svg"),
             }),
             interact: @image-url("./icon/me_blue.svg"),
         },
         schedule: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/schedule.svg"),
                 dark: @image-url("./icon/schedule_dark.svg"),
             }),
             interact: @image-url("./icon/schedule_blue.svg"),
         },
         setting: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/setting.svg"),
                 dark: @image-url("./icon/setting_dark.svg"),
             }),
@@ -167,7 +167,7 @@ export global EventoImageToken {
             dark: @image-url("./icon/topic_dark.svg"),
         }),
         tree-list: {
-            default: switcher({
+            normal: switcher({
                 light: @image-url("./icon/tree-list.svg"),
                 dark: @image-url("./icon/tree-list_dark.svg"),
             }),
