@@ -1,12 +1,37 @@
+import { Palette } from "std-widgets.slint";
+
 struct ImgPair {
     light: image,
     dark: image,
 }
 
+struct ClickIcon {
+    clicked: image,
+    unclicked: image,
+}
+
 struct EventoIconCollection {
     evento: image,
     sast_link: image,
-    home: image,
+    arrow-left: ClickIcon,
+    card: ClickIcon,
+    category: image,
+    department: image,
+    history: ClickIcon,
+    home: ClickIcon,
+    info: ClickIcon,
+    locate: image,
+    logout: image,
+    me: ClickIcon,
+    scedule: ClickIcon,
+    setting: ClickIcon,
+    star-border: image,
+    star-border-blue: image,
+    star-fill: image,
+    tag: image,
+    time: image,
+    topic: image,
+    tree-list: ClickIcon,
 }
 
 struct EventoDisplayCollection {
@@ -15,7 +40,6 @@ struct EventoDisplayCollection {
     event: {
         default: [image],
         union: [image],
-
         cpp: [image],
         csharp: [image],
         frontend: [image],
@@ -37,38 +61,122 @@ export global EventoImageToken {
         icon: icon,
         display: display,
     };
-    //
-    // TODO(theme): link icon change to darkmode with theme system, replace TO_REPLACE
-    pure function switcher(is-light: bool, img: ImgPair) -> image {
-        return is-light ? img.light : img.dark;
+    // FIXME: maybe cannot judge darkmode here
+    property <bool> is-light: Palette.color-scheme == ColorScheme.light;
+    pure function switcher(img: ImgPair) -> image {
+        return self.is-light ? img.light : img.dark;
     }
-    property <bool> TO_REPLACE: true;
     //
     // icon used as small image in button, navbar and so on
     // icon will change according to darkmode switch
     property <EventoIconCollection> icon:{
         // Product specific
-        evento: switcher(TO_REPLACE,{
+        evento: switcher({
             light: @image-url("./icon/evento.png"),
-            // TODO(resource): no evento_dark provided, use light temporarily
-            dark: @image-url("./icon/evento.svg"),
+            dark: @image-url("./icon/evento_dark.png"),
         }),
-        sast_link: switcher(TO_REPLACE,{
-            light: @image-url("./icon/sast_link.svg"),
-            // TODO(resource): no sast_link_dark provided, use light temporarily
-            dark: @image-url("./icon/sast_link.svg"),
-        }),
+        sast-link: @image-url("./icon/sast_link.svg"),
         // General usage
-        home: switcher(TO_REPLACE,{
-            light: @image-url("./icon/home.svg"),
-            dark: @image-url("./icon/home_dark.svg"),
+        arrow-left: {
+            clicked: @image-url("./icon/arrow-circle-left_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/arrow-circle-left.svg"),
+                dark: @image-url("./icon/arrow-circle-left_dark.svg"),
+            }),
+        },
+        card: {
+            clicked: @image-url("./icon/card_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/card.svg"),
+                dark: @image-url("./icon/card_dark.svg"),
+            }),
+        },
+        category: switcher({
+            light: @image-url("./icon/category.svg"),
+            dark: @image-url("./icon/category_dark.svg"),
         }),
+        department: switcher({
+            light: @image-url("./icon/department.svg"),
+            dark: @image-url("./icon/department_dark.svg"),
+        }),
+        history: {
+            clicked: @image-url("./icon/history_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/history.svg"),
+                dark: @image-url("./icon/history_dark.svg"),
+            }),
+        },
+        home: {
+            clicked: @image-url("./icon/home_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/home.svg"),
+                dark: @image-url("./icon/home_dark.svg"),
+            }),
+        },
+        info: {
+            clicked: @image-url("./icon/info_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/info.svg"),
+                dark: @image-url("./icon/info_dark.svg"),
+            }),
+        },
+        locate: switcher({
+            light: @image-url("./icon/locate.svg"),
+            dark: @image-url("./icon/locate_dark.svg"),
+        }),
+        logout: @image-url("./icon/logout.svg"),
+        me: {
+            clicked: @image-url("./icon/me_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/me.svg"),
+                dark: @image-url("./icon/me_dark.svg"),
+            }),
+        },
+        scedule: {
+            clicked: @image-url("./icon/schedule_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/schedule.svg"),
+                dark: @image-url("./icon/schedule_dark.svg"),
+            }),
+        },
+        setting: {
+            clicked: @image-url("./icon/setting_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/setting.svg"),
+                dark: @image-url("./icon/setting_dark.svg"),
+            }),
+        },
+        star-border: switcher({
+            light: @image-url("./icon/star.svg"),
+            dark: @image-url("./icon/star_dark.svg"),
+        }),
+        star-border-blue: @image-url("./icon/star_blue.svg"),
+        star-fill: @image-url("./icon/star_fill.svg"),
+        tag: switcher({
+            light: @image-url("./icon/tag.svg"),
+            dark: @image-url("./icon/tag_dark.svg"),
+        }),
+        time: switcher({
+            light: @image-url("./icon/time.svg"),
+            dark: @image-url("./icon/time_dark.svg"),
+        }),
+        topic: switcher({
+            light: @image-url("./icon/topic.svg"),
+            dark: @image-url("./icon/topic_dark.svg"),
+        }),
+        tree-list: {
+            clicked: @image-url("./icon/tree-list_blue.svg"),
+            unclicked: switcher({
+                light: @image-url("./icon/tree-list.svg"),
+                dark: @image-url("./icon/tree-list_dark.svg"),
+            }),
+        },
     };
     // display used as images bigger than icon
     // most display image won't change according to darkmode switch
     property <EventoDisplayCollection> display:{
         // Product specific
-        evento: switcher(TO_REPLACE,{
+        evento: switcher({
             light: @image-url("./display/evento/evento.png"),
             dark: @image-url("./display/evento/evento_dark.png"),
         }),
