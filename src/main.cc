@@ -7,7 +7,8 @@
 
 int main(int argc, char** argv) {
     Logger logger(Logger::Level::debug,
-                  std::filesystem::temp_directory_path() / "NJUPT-SAST" / "logs" / "evento.log");
+                  (std::filesystem::temp_directory_path() / "NJUPT-SAST" / "logs" / "evento.log")
+                      .string());
     spdlog::info("SAST Evento version: v" VERSION_FULL);
     auto ui = App::create();
     ui->set_version_string("v" VERSION_FULL);
