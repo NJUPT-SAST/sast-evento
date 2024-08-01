@@ -1,4 +1,8 @@
 import { EventoImageToken } from "./assets/index.slint";
+import { EventoStyleToken } from "./logic/index.slint";
+
+import { Palette } from "std-widgets.slint";
+import { Themes } from "./modules/surrealism-ui/use/index.slint";
 
 export global ROOT_GLOBAL {
     in-out property <length> window-height: 760px;
@@ -8,5 +12,15 @@ export global ROOT_GLOBAL {
 }
 
 export global Token {
+    out property is-darkmode <=> EventoStyleToken.is-darkmode;
+    out property <Themes> surrealism-ui-default-theme: is-darkmode ? Dark : Light;
     out property image <=> EventoImageToken.image;
+    out property font <=> EventoStyleToken.font;
+    out property color <=> EventoStyleToken.color;
+    public function set-display-mode(color-scheme: ColorScheme) {
+        Palette.color-scheme = color-scheme;
+    }
+    public function switch-display-mode() {
+        Palette.color-scheme = Palette.color-scheme == ColorScheme.light ? ColorScheme.dark : ColorScheme.light;
+    }
 }

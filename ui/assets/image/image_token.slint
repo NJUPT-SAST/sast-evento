@@ -1,4 +1,5 @@
 import { Palette } from "std-widgets.slint";
+import { EventoStyleToken } from "../../logic/index.slint";
 
 struct ImgPair {
     light: image,
@@ -63,10 +64,8 @@ export global EventoImageToken {
         icon: icon,
         display: display,
     };
-    // FIXME: maybe cannot judge darkmode here
-    property <bool> is-light: Palette.color-scheme == ColorScheme.light;
     pure function switcher(img: ImgPair) -> image {
-        return self.is-light ? img.light : img.dark;
+        return EventoStyleToken.is-darkmode ? img.dark : img.light;
     }
     //
     // icon used as small image in button, navbar and so on

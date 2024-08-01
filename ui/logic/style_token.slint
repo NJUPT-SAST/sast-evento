@@ -1,0 +1,98 @@
+import { Palette, Button } from "std-widgets.slint";
+
+// font
+struct EventoFontData {
+    size: length,
+}
+
+struct EventoFontSize {
+    large: EventoFontData,
+    medium: EventoFontData,
+    small: EventoFontData,
+}
+
+// five types: large, headline, title, body, label
+// more info: https://m3.material.io/styles/typography/applying-type#ab657e7c-cb93-45ff-92c6-686959dc19ae
+struct EventoFontCollection {
+    display: EventoFontSize,
+    headline: EventoFontSize,
+    title: EventoFontSize,
+    body: EventoFontSize,
+    label: EventoFontSize,
+}
+
+// color
+struct ColorPair{
+    foreground: brush,
+    background: brush,
+}
+
+// more info: https://releases.slint.dev/1.7.1/docs/slint/src/language/builtins/globals#properties
+// default rename to normal
+struct EventoColorCollection {
+    normal: ColorPair,
+    alternate: ColorPair,
+    accent: ColorPair,
+    border: color,
+}
+
+export global EventoStyleToken {
+    out property <EventoColorCollection> color:{
+        normal: {
+            foreground: Palette.foreground,
+            background: Palette.background,
+        },
+        alternate: {
+            foreground: Palette.alternate-foreground,
+            background: switcher({ light: Colors.lightgray, dark: Colors.gray }),
+        },
+        accent: {
+            foreground: Palette.accent-foreground,
+            background: switcher({ light: #D4BBFC, dark: #513C74 }),
+        },
+        border: Palette.border,
+    };
+    // source: https://m3.material.io/styles/typography/type-scale-tokens#a734c6ed-634c-4abb-adb2-35daf0aed06a
+    // prefer large, use body.large (16px) for body text
+    out property <EventoFontCollection> font:{
+        display: { large: {
+            size: 57px,
+        }, medium: {
+            size: 45px,
+        }, small: {
+            size: 36px,
+        } },
+        headline: { large: {
+            size: 32px,
+        }, medium: {
+            size: 28px,
+        }, small: {
+            size: 24px,
+        } },
+        title: { large: {
+            size: 22px,
+        }, medium: {
+            size: 16px,
+        }, small: {
+            size: 14px,
+        } },
+        body: { large: {
+            size: 16px,
+        }, medium: {
+            size: 14px,
+        }, small: {
+            size: 12px,
+        } },
+        label: { large: {
+            size: 14px,
+        }, medium: {
+            size: 12px,
+        }, small: {
+            size: 11px,
+        } },
+    };
+    out property <bool> is-darkmode: Palette.color-scheme == ColorScheme.dark;
+    pure function switcher(color: {light:color,dark:color}) -> color {
+        return self.is-darkmode ? color.dark : color.light;
+    }
+}
