@@ -57,6 +57,17 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
+    - name: Cache corrosion
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/build/_deps
+          ${{ github.workspace }}/build/*/cargo/build
+          !${{ github.workspace }}/build/*/cargo/build/**/incremental
+          ${{ github.workspace }}/build/corrosion/**/target
+          !${{ github.workspace }}/build/corrosion/**/target/**/incremental
+        key: corrosion-${{ runner.os }}
+
     - name: Setup CMake
       uses: lukka/get-cmake@latest
 
