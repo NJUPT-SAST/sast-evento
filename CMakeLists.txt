@@ -76,6 +76,11 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<CONFIG:Release>:EVENTO_RELEASE>
 )
 
+if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/sast-link-cxx-sdk/CMakeLists.txt" OR 
+    NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ui/modules/surrealism-ui/index.slint")
+  message(FATAL_ERROR "Git submodule not found. Run `git submodule update --init` from the source tree to fetch the submodule contents.")
+endif()
+
 # source code
 add_subdirectory(src)
 # sast-link-sdk
