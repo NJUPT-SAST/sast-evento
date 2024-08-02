@@ -435,9 +435,16 @@ private:
 #pragma clang diagnostic ignored "-Wenum-constexpr-conversion"
 #endif
 
+#ifdef _MSC_VER
+#define FUNCTION_SIGNATURE __FUNCSIG__
+#endif
+#ifdef __GNUC__
+#define FUNCTION_SIGNATURE __PRETTY_FUNCTION__
+#endif
+
     template<class E, E CrItMaGiC>
     static DEBUG_STRING_VIEW debug_enum_value_name() {
-        DEBUG_STRING_VIEW name = __PRETTY_FUNCTION__;
+        DEBUG_STRING_VIEW name = FUNCTION_SIGNATURE;
         auto critpos = name.find("CrItMaGiC = ") + 12;
         auto endpos = name.find_first_of(";]");
         auto slice = name.substr(critpos, endpos - critpos);
