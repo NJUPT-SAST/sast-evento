@@ -1,4 +1,5 @@
 /* 
+   https://github.com/oktal/result/blob/master/result.h
    Mathieu Stefani, 03 mai 2016
    
    This header provides a Result type that can be used to replace exceptions in code
@@ -10,8 +11,11 @@
 
 #pragma once
 
+#include <Infrastructure/Utils/Error.h>
+#include <concepts>
+#include <cstdio>
+#include <exception>
 #include <functional>
-#include <iostream>
 #include <type_traits>
 
 namespace types {
@@ -691,7 +695,7 @@ struct Result {
         storage_.construct(std::move(err));
     }
 
-    Result(Result&& other) {
+    Result(Result&& other) noexcept {
         if (other.isOk()) {
             details::Constructor<T, E>::move(std::move(other.storage_), storage_, details::ok_tag());
             ok_ = true;
@@ -789,6 +793,16 @@ struct Result {
         std::terminate();
     }
 
+    template<std::same_as<void> U = T>
+    void unwrap() const {
+        if (isOk()) {
+            return;
+        }
+
+        std::fprintf(stderr, "Attempting to unwrap an error Result\n");
+        std::terminate();
+    }
+
     E unwrapErr() const {
         if (isErr()) {
             return storage().template get<E>();
@@ -847,6 +861,8 @@ bool operator==(const Result<T, E>& lhs, types::Err<E> err) {
     return lhs.storage().template get<E>() == err.val;
 }
 
+// !!!NOTE: DO NOT USE!!!
+// This is an extension of GCC and clang, not standard C++
 #define TRY(...) \
     ({ \
         auto res = __VA_ARGS__; \
@@ -857,3 +873,26 @@ bool operator==(const Result<T, E>& lhs, types::Err<E> err) {
         typedef details::ResultOkType<decltype(res)>::type T; \
         res.storage().get<T>(); \
     })
+
+// There is no extensions. Use with ease :)
+#define ASYNC_VOID_TRY(ARG) \
+    { \
+        auto res = co_await (ARG); \
+        if (res.isErr()) { \
+            co_return Err(res.unwrapErr()); \
+        } \
+    }
+
+// There is no extensions. Use with ease :)
+#define VOID_TRY(ARG) \
+    { \
+        auto res = (ARG); \
+        if (res.isErr()) { \
+            return Err(res.unwrapErr()); \
+        } \
+    }
+
+namespace evento {
+template<typename T>
+using Result = Result<T, Error>;
+};
