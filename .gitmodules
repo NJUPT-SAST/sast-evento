@@ -4,3 +4,6 @@
 [submodule "ui/modules/surrealism-ui"]
 	path = ui/modules/surrealism-ui
 	url = https://github.com/Surrealism-All/SurrealismUI.git
+[submodule "3rdpart/keychain"]
+	path = 3rdpart/keychain
+	url = https://github.com/hrantzsch/keychain.git

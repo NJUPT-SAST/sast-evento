@@ -54,30 +54,9 @@ find_package(Boost REQUIRED COMPONENTS system url beast)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-add_executable(${PROJECT_NAME})
-
-# hide cmdline in Release Mode for MSVC
-if (MSVC)
-  set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
-endif()
-
-if (APPLE)
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-  )
-endif()
-
-# definitions for Logger
-target_compile_definitions(${PROJECT_NAME}
-  PUBLIC
-    $<$<CONFIG:Debug>:EVENTO_DEBUG>
-    $<$<CONFIG:Release>:EVENTO_RELEASE>
-)
-
 if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/sast-link-cxx-sdk/CMakeLists.txt" OR 
-    NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ui/modules/surrealism-ui/index.slint")
+    NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/ui/modules/surrealism-ui/index.slint" OR
+    NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/keychain/CMakeLists.txt")
   message(FATAL_ERROR "Git submodule not found. Run `git submodule update --init` from the source tree to fetch the submodule contents.")
 endif()
 
@@ -85,17 +64,8 @@ endif()
 add_subdirectory(src)
 # sast-link-sdk
 add_subdirectory(3rdpart/sast-link-cxx-sdk)
-
-slint_target_sources(${PROJECT_NAME} ui/app.slint
-  LIBRARY_PATHS surrealism=${CMAKE_SOURCE_DIR}/ui/modules/surrealism-ui/index.slint
-)
-
-set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
-
-# On Windows, copy the Slint DLL next to the application binary so that it's found.
-if (WIN32)
-  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
-endif()
+# credential storage
+add_subdirectory(3rdpart/keychain)
 
 # install
 install(TARGETS ${PROJECT_NAME}
