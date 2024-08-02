@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Infrastructure/Network/Response/LoginResEntity.h>
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/awaitable.hpp>
 #include <boost/beast/http.hpp>
@@ -24,6 +25,8 @@ class NetworkClient {
 public:
     NetworkClient(net::ssl::context& ctx);
     ~NetworkClient();
+
+    Task<Result<LoginResEntity>> loginViaSastLink(const std::string& code);
 
 private:
     // evento client help functions

@@ -1,5 +1,6 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/NetworkAccessManager.h>
+#include <Infrastructure/Utils/Debug.h>
 #include <boost/url/params_view.hpp>
 #include <cassert>
 #include <memory>
@@ -19,6 +20,24 @@ NetworkClient::NetworkClient(net::ssl::context& ctx)
 
 NetworkClient::~NetworkClient() = default;
 
+Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& code) {
+    auto result = co_await this->post(endpoint("/login/link"), {{"code", code}, {"type", "0"}});
+
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    LoginResEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    debug(), entity;
+
+    co_return Ok(entity);
+}
+
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
     return urls::url(EVENTO_API_GATEWAY + endpoint.data());
 }
@@ -35,6 +54,7 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     }
 
     nlohmann::basic_json<> res;
+    debug(), res.dump();
     try {
         res = nlohmann::json::parse(beast::buffers_to_string(response.body().data()));
     } catch (const nlohmann::json::parse_error& e) {
