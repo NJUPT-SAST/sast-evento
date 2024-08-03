@@ -1,0 +1,188 @@
+import { SButton } from "../../modules/surrealism-ui/index.slint";
+import { Token } from "../../global.slint";
+import { Overlay, Empty } from "../../components/index.slint";
+
+export global LoginOverlayBridge {
+    in-out property <string> version:"v0.0.0-00000000";
+    callback link-login();
+    callback guest-login();
+}
+
+export component LoginOverlay inherits Overlay {
+    height: 510px;
+    width: 360px;
+    // workaround applied: empty layout and separate elements
+    // for precise layout
+    layout := VerticalLayout {
+        visible: false;
+        x: 0;
+        y: 0;
+        width: 100%;
+        height: 100%;
+        padding: 16px;
+        layout-logo := Rectangle {
+            vertical-stretch: 0.68;
+            border-width: 2px;
+            border-color: red;
+        }
+
+        layout-login-button := Rectangle {
+            vertical-stretch: (1 - layout-logo.vertical-stretch) / 2;
+            border-width: 2px;
+            border-color: red;
+        }
+
+        VerticalLayout {
+            vertical-stretch: (1 - layout-logo.vertical-stretch) / 2;
+            Rectangle {
+                vertical-stretch: 0.25;
+            }
+
+            layout-guest-button := Rectangle {
+                vertical-stretch: 0.4;
+                border-width: 2px;
+                border-color: green;
+            }
+
+            HorizontalLayout {
+                vertical-stretch: 0.35;
+                layout-developer-label := Rectangle {
+                    border-width: 2px;
+                    border-color: red;
+                }
+
+                layout-version-label := Rectangle {
+                    vertical-stretch: 0;
+                    border-width: 2px;
+                    border-color: red;
+                }
+            }
+        }
+    }
+
+    body := Empty {
+        x: 0;
+        y: 0;
+        width: 100%;
+        height: 100%;
+        logo := Rectangle {
+            x: layout-logo.absolute-position.x - root.absolute-position.x;
+            y: layout-logo.absolute-position.y - root.absolute-position.y;
+            width: layout-logo.width;
+            height: layout-logo.height;
+            Image {
+                vertical-stretch: 2;
+                // min-height: 0px;
+                // width: 300px;
+                height: 90px;
+                image-fit: contain;
+                source: Token.image.display.evento;
+            }
+        }
+
+        login-button := Empty {
+            x: layout-login-button.absolute-position.x - root.absolute-position.x;
+            y: layout-login-button.absolute-position.y - root.absolute-position.y;
+            width: layout-login-button.width;
+            height: layout-login-button.height;
+            SButton {
+                width: 280px;
+                height: 70px;
+                // to hide default text
+                text: "";
+                // invert color
+                theme: Token.is-darkmode ? Light : Dark;
+                border-radius: 4px;
+                clicked => {
+                    LoginOverlayBridge.link-login();
+                }
+                HorizontalLayout {
+                    padding: 8px;
+                    spacing: 0;
+                    Rectangle {
+                        horizontal-stretch: 2;
+                        Image {
+                            height: 50px;
+                            source: Token.image.icon.sast-link;
+                        }
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        Text {
+                            text: "使用 Link 登录";
+                            font-weight: 700;
+                            font-size: Token.font.headline.medium.size;
+                            color: Token.color.normal.background;
+                        }
+                    }
+                }
+            }
+        }
+
+        guest-button := Rectangle {
+            x: layout-guest-button.absolute-position.x - root.absolute-position.x;
+            y: layout-guest-button.absolute-position.y - root.absolute-position.y;
+            width: layout-guest-button.width;
+            height: layout-guest-button.height;
+            Rectangle {
+                width: 100px;
+                guest-button-area := TouchArea {
+                    mouse-cursor: MouseCursor.pointer;
+                    clicked => {
+                        LoginOverlayBridge.guest-login();
+                    }
+                }
+
+                HorizontalLayout {
+                    Image {
+                        horizontal-stretch: 1;
+                        height: 30px;
+                        source: Token.image.icon.account-box-outline;
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1;
+                        Text {
+                            text: "访客登录";
+                            font-size: Token.font.body.large.size;
+                            font-weight: 700;
+                        }
+
+                        // underline
+                            Text {
+                            visible: guest-button-area.has-hover;
+                            text: "__________";
+                            font-size: Token.font.body.large.size;
+                            font-weight: 900;
+                        }
+                    }
+                }
+            }
+        }
+
+        developer-label := Rectangle {
+            x: layout-developer-label.absolute-position.x - root.absolute-position.x;
+            y: layout-developer-label.absolute-position.y - root.absolute-position.y;
+            width: layout-developer-label.width;
+            height: layout-developer-label.height;
+            Text {
+                text: "SAST-C++组开发";
+                font-size: Token.font.label.large.size;
+                color: Token.color.normal.foreground;
+            }
+        }
+
+        version-label := Rectangle {
+            x: layout-version-label.absolute-position.x - root.absolute-position.x;
+            y: layout-version-label.absolute-position.y - root.absolute-position.y;
+            width: layout-version-label.width;
+            height: layout-version-label.height;
+            Text {
+                text: LoginOverlayBridge.version;
+                font-size: Token.font.label.large.size;
+                color: Token.color.normal.foreground;
+            }
+        }
+    }
+}

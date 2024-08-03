@@ -1,15 +1,52 @@
-import { MainView } from "./index.slint";
-import { ROOT_GLOBAL, Token } from "./global.slint";
+import { 
+    LoginOverlay,
+    LoginOverlayBridge
+} from "./views/index.slint";
+import { Token } from "./global.slint";
+import { Button } from "std-widgets.slint";
+
+import "./assets/font/MiSans-Regular.ttf";
+
+// export all bridge
+export { 
+    LoginOverlayBridge,
+}
 
 export component App inherits Window {
-    callback loginClicked <=> main-view.startLink;
-    in-out property <string> version-string <=> main-view.version-string;
-    min-height: ROOT-GLOBAL.window-height;
-    min-width: ROOT-GLOBAL.window-width;
     title: "SAST Evento";
+    default-font-family: "MiSans";
+    min-width: 400px;
+    min-height: 400px;
+    preferred-width: 1024px;
+    preferred-height: 634px;
     background: Token.color.normal.background;
     icon: Token.image.icon.evento;
-    main-view := MainView {
-        y: 120px;
+    DEBUG := HorizontalLayout {
+        visible: false;
+        x: 0;
+        y: 0;
+        height: 50px;
+        Button {
+            text: "< Back";
+            clicked => {
+                Token.switch-display-mode();
+            }
+        }
+
+        Button {
+            text: Token.is-darkmode ? "Dark" : "Light";
+            clicked => {
+                Token.switch-display-mode();
+            }
+        }
+    }
+
+    overlay := Rectangle {
+        height: login.height;
+        width: login.width;
+        border-radius: 18px;
+        border-color: Token.color.border;
+        border-width: 4px;
+        login := LoginOverlay { }
     }
 }

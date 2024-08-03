@@ -15,7 +15,7 @@ struct ClickIcon {
 
 struct EventoIconCollection {
     evento: image,
-    sast_link: image,
+    sast-link: image,
     arrow-left: ClickIcon,
     card: ClickIcon,
     category: image,
@@ -35,6 +35,7 @@ struct EventoIconCollection {
     time: image,
     topic: image,
     tree-list: ClickIcon,
+    account-box-outline: image,
 }
 
 struct EventoDisplayCollection {
@@ -76,7 +77,11 @@ export global EventoImageToken {
             light: @image-url("./icon/evento.png"),
             dark: @image-url("./icon/evento_dark.png"),
         }),
-        sast-link: @image-url("./icon/sast_link.svg"),
+        // sast-link is intended to be used in invert color
+        sast-link: switcher({
+            light: @image-url("./icon/sast-link.svg"),
+            dark: @image-url("./icon/sast-link_dark.svg"),
+        }),
         // General usage
         arrow-left: {
             normal: switcher({
@@ -172,6 +177,10 @@ export global EventoImageToken {
             }),
             interact: @image-url("./icon/tree-list_blue.svg"),
         },
+        account-box-outline: switcher({
+            light: @image-url("./icon/account-box-outline.svg"),
+            dark: @image-url("./icon/account-box-outline_dark.svg"),
+        }),
     };
     // display used as images bigger than icon
     // most display image won't change according to darkmode switch
@@ -235,6 +244,6 @@ export global EventoImageToken {
                 @image-url("./display/event/python_1.png"),
             ],
         },
-        no_image: @image-url("./display/no_image.png")
+        no_image: @image-url("./display/no_image.png"),
     };
 }
