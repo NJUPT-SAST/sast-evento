@@ -40,6 +40,7 @@ struct EventoIconCollection {
 
 struct EventoDisplayCollection {
     evento: image,
+    evento-bg: image,
     avatar: [image],
     event: {
         default: [image],
@@ -190,6 +191,7 @@ export global EventoImageToken {
             light: @image-url("./display/evento/evento.png"),
             dark: @image-url("./display/evento/evento_dark.png"),
         }),
+        evento-bg: @image-url("./display/evento/evento_bg.png"),
         // Other
         avatar: [
             @image-url("./display/avatar/avatar_1.svg"),
