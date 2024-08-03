@@ -90,6 +90,15 @@ cmake --preset native
 cmake --build --preset native
 ```
 
+对于Linux平台，本项目使用的第三方依赖 keychain 需要 `libsecret` 库，如果缺失，您可以使用以下命令安装：
+
+```bash
+# For Arch Linux
+sudo pacman -S libsecret
+# For Ubuntu
+sudo apt install libsecret-1-dev
+```
+
 ### 项目依赖
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)
@@ -98,3 +107,4 @@ cmake --build --preset native
 - [Google Test](https://github.com/google/googletest)
 - [nlohmann-json](https://github.com/nlohmann/json)
 - [spdlog](https://github.com/gabime/spdlog)
+- [keychain](https://github.com/hrantzsch/keychain.git)
