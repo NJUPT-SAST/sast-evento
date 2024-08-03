@@ -64,8 +64,11 @@ endif()
 add_subdirectory(src)
 # sast-link-sdk
 add_subdirectory(3rdpart/sast-link-cxx-sdk)
+
 # credential storage
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(3rdpart/keychain)
+set(BUILD_SHARED_LIBS ON)
 
 # install
 install(TARGETS ${PROJECT_NAME}
