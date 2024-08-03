@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Infrastructure/Network/Response/LoginResEntity.h>
+#include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/awaitable.hpp>
 #include <boost/beast/http.hpp>
