@@ -1,7 +1,6 @@
 import { SButton } from "../../modules/surrealism-ui/index.slint";
 import { Token } from "../../global.slint";
 import { Overlay, Empty } from "../../components/index.slint";
-import { ROOT-STYLES } from "../../modules/surrealism-ui/themes/index.slint";
 
 export global LoginOverlayBridge {
     in-out property <string> version:"v0.0.0-00000000";
@@ -106,7 +105,7 @@ export component LoginOverlay inherits Overlay {
                 text: "";
                 // invert color
                 theme: Token.is-darkmode ? Light : Dark;
-                background: ROOT-STYLES.sur-theme-colors.dark.normal;
+                background: Token.color.dark;
                 border-width: 0;
                 border-radius: 4px;
                 clicked => {

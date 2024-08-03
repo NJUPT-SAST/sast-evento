@@ -34,6 +34,8 @@ struct EventoColorCollection {
     alternate: ColorPair,
     accent: ColorPair,
     border: color,
+    dark: color,
+    light: color,
 }
 
 export global EventoStyleToken {
@@ -51,6 +53,8 @@ export global EventoStyleToken {
             background: switcher({ light: #D4BBFC, dark: #513C74 }),
         },
         border: Palette.border,
+        dark: switcher({ light: #3a3a3a, dark: #F5F5F5 }),
+        light: switcher({ light: #F5F5F5, dark: #3a3a3a }),
     };
     // source: https://m3.material.io/styles/typography/type-scale-tokens#a734c6ed-634c-4abb-adb2-35daf0aed06a
     // prefer large, use body.large (16px) for body text
