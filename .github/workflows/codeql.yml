@@ -74,6 +74,9 @@ jobs:
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
         key: corrosion-${{ runner.os }}
 
+    - name: Install libsecret
+      run: sudo apt install libsecret-1-dev
+
     - name: Setup CMake
       uses: lukka/get-cmake@latest
 
