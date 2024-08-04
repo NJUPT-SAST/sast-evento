@@ -34,8 +34,9 @@ public:
 private:
     // evento client help functions
     // url builder
-    static urls::url endpoint(std::string_view endpoint);
-    static urls::url endpoint(std::string_view endpoint, urls::params_view params);
+    static urls::url endpoint(std::string_view endpoint); // url has no query params
+    static urls::url endpoint(std::string_view endpoint,  // url has query params
+                              const std::initializer_list<urls::param_view>& params);
     // response handler
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
     // http verbs
@@ -49,7 +50,7 @@ private:
 
     [[maybe_unused]] Task<JsonResult> patch(urls::url_view url, const nlohmann::json& body);
 
-    Task<JsonResult> deleteResource(urls::url_view url);
+    [[maybe_unused]] Task<JsonResult> deleteResource(urls::url_view url);
 
     // github client help functions
     Task<JsonResult> getFromGithub(urls::url_view url);

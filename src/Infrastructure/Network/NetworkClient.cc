@@ -45,7 +45,8 @@ urls::url NetworkClient::endpoint(std::string_view endpoint) {
     return urls::url(EVENTO_API_GATEWAY + endpoint.data());
 }
 
-urls::url NetworkClient::endpoint(std::string_view endpoint, urls::params_view params) {
+urls::url NetworkClient::endpoint(std::string_view endpoint,
+                                  const std::initializer_list<urls::param_view>& params) {
     auto r = urls::url(EVENTO_API_GATEWAY + endpoint.data());
     r.params().append(params.begin(), params.end());
     return r;
