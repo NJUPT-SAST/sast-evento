@@ -1,26 +1,12 @@
 {
     "name": "sast-evento",
     "dependencies": [
-        {
-            "name": "boost-system"
-        },
-        {
-            "name": "boost-beast"
-        },
-        {
-            "name": "boost-url"
-        },
-        {
-            "name": "openssl"
-        },
-        {
-            "name": "nlohmann-json"
-        },
-        {
-            "name": "spdlog"
-        },
-        {
-            "name": "gtest"
-        }
+        "boost-system",
+        "boost-beast",
+        "boost-url",
+        "openssl",
+        "nlohmann-json",
+        "spdlog",
+        "gtest"
     ]
 }
