@@ -57,10 +57,9 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     }
 
     nlohmann::basic_json<> res;
-    debug(), res.dump();
-
     try {
         res = nlohmann::json::parse(beast::buffers_to_string(response.body().data()));
+        debug(), res.dump();
     } catch (const nlohmann::json::parse_error& e) {
         return Err(Error(Error::JsonDes, e.what()));
     }

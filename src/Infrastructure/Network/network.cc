@@ -46,7 +46,7 @@ void start_sast_link() {
                 std::string const service = "refresh-token";
 
                 keychain::Error err;
-                keychain::setPassword(package, service, entity.user.id, entity.refreshToken, err);
+                keychain::setPassword(package, service, entity.userInfo.id, entity.refreshToken, err);
 
                 if (err.code != 0) {
                     spdlog::error("Failed to save refresh token: {}\n", err.message);
