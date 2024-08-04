@@ -10,9 +10,7 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/verb.hpp>
 #include <boost/beast/ssl.hpp>
-#include <boost/url/params_view.hpp>
 #include <boost/url/url.hpp>
-#include <boost/url/url_view.hpp>
 #include <chrono>
 #include <string>
 
@@ -36,14 +34,14 @@ class NetworkAccessManager {
 public:
     NetworkAccessManager(net::ssl::context& ctx,
                          bool ignoreSslError = false,
-                         std::chrono::seconds timeout = std::chrono::seconds(10))
+                         std::chrono::seconds timeout = std::chrono::seconds(5))
         : _ctx(ctx)
         , ignoreSslError(ignoreSslError)
         , _timeout(timeout) {}
 
     // if tokenBytes is set, it will be added to the request header
     // `req.prepare_payload()` is called in the function
-    Task<ResponseResult> request(std::string_view host, http::request<http::string_body> req);
+    Task<ResponseResult> request(std::string host, http::request<http::string_body> req);
 
     Task<ResponseResult> get(urls::url_view url, std::string_view acceptType);
     Task<ResponseResult> post(urls::url_view url,
@@ -62,10 +60,6 @@ public:
 
     std::optional<std::string> tokenBytes;
     bool ignoreSslError = false;
-
-private:
-    Task<Result<void>> _sslHandshake(beast::ssl_stream<tcp_stream>&& stream, std::string_view host);
-    Task<Result<void>> _sslDisconnect(beast::ssl_stream<tcp_stream>&& stream);
 
 private:
     net::ssl::context& _ctx;

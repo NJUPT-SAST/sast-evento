@@ -6,6 +6,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
+#include <initializer_list>
 #include <nlohmann/json.hpp>
 
 namespace evento {
@@ -28,6 +29,8 @@ public:
 
     Task<Result<LoginResEntity>> loginViaSastLink(const std::string& code);
 
+    [[nodiscard]] std::optional<std::string>& token();
+
 private:
     // evento client help functions
     // url builder
@@ -38,7 +41,7 @@ private:
     // http verbs
     Task<JsonResult> get(urls::url_view url);
 
-    Task<JsonResult> post(urls::url_view url, urls::params_view params);
+    Task<JsonResult> post(urls::url_view url, const std::initializer_list<urls::param_view>& params);
     Task<JsonResult> post(urls::url_view url, const nlohmann::json& body);
 
     Task<JsonResult> put(urls::url_view url);

@@ -1,6 +1,7 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/NetworkAccessManager.h>
 #include <Infrastructure/Utils/Debug.h>
+#include <boost/url/param.hpp>
 #include <boost/url/params_view.hpp>
 #include <cassert>
 #include <memory>
@@ -33,9 +34,11 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& 
         co_return Err(Error(Error::JsonDes, e.what()));
     }
 
-    debug(), entity;
-
     co_return Ok(entity);
+}
+
+std::optional<std::string>& NetworkClient::token() {
+    return _manager->tokenBytes;
 }
 
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
@@ -55,6 +58,7 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
 
     nlohmann::basic_json<> res;
     debug(), res.dump();
+
     try {
         res = nlohmann::json::parse(beast::buffers_to_string(response.body().data()));
     } catch (const nlohmann::json::parse_error& e) {
@@ -93,15 +97,24 @@ Task<JsonResult> NetworkClient::get(urls::url_view url) {
     co_return handleResponse(response);
 }
 
-Task<JsonResult> NetworkClient::post(urls::url_view url, urls::params_view params) {
+Task<JsonResult> NetworkClient::post(urls::url_view url,
+                                     const std::initializer_list<urls::param_view>& params) {
+    std::ostringstream params_stream;
+    for (auto& param : params) {
+        params_stream << param.key << "=" << param.value;
+        if (&param != params.end() - 1) {
+            params_stream << "&";
+        }
+    }
+
     auto result = co_await _manager->post(url,
                                           MIME_JSON,
                                           MIME_FORM_URL_ENCODED,
-                                          params.buffer().data());
+                                          params_stream.str());
 
-    if (result.isErr())
+    if (result.isErr()) {
         co_return result.unwrapErr();
-
+    }
     auto response = result.unwrap();
 
     co_return handleResponse(response);

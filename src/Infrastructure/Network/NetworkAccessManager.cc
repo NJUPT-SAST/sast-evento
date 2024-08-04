@@ -1,30 +1,55 @@
 #include "NetworkAccessManager.h"
-#include "Infrastructure/Utils/Result.h"
+#include <Infrastructure/Utils/Error.h>
+#include <Infrastructure/Utils/Result.h>
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/error.hpp>
 #include <boost/asio/ssl/stream.hpp>
+#include <boost/asio/ssl/stream_base.hpp>
 #include <boost/beast/http/dynamic_body.hpp>
 #include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
+#include <boost/url.hpp>
 
 namespace evento {
 
 constexpr const char USER_AGENT[] = "SAST-Evento-Desktop/1";
 
-Task<ResponseResult> NetworkAccessManager::request(std::string_view host,
+Task<ResponseResult> NetworkAccessManager::request(std::string host,
                                                    http::request<http::string_body> req) {
     auto resolver = net::use_awaitable_t<boost::asio::any_io_executor>::as_default_on(
         tcp::resolver(co_await net::this_coro::executor));
 
     // We construct the ssl stream from the already rebound tcp_stream.
     beast::ssl_stream<tcp_stream>
-        stream{net::use_awaitable_t<boost::asio::any_io_executor>::as_default_on(
+        stream{boost::asio::use_awaitable_t<boost::asio::any_io_executor>::as_default_on(
                    beast::tcp_stream(co_await net::this_coro::executor)),
                _ctx};
 
-    ASYNC_VOID_TRY(_sslHandshake(std::move(stream), host));
+    // Set SNI Hostname (many hosts need this to handshake successfully)
+    if (!SSL_set_tlsext_host_name(stream.native_handle(), host.c_str()))
+        throw boost::system::system_error(static_cast<int>(::ERR_get_error()),
+                                          net::error::get_ssl_category());
+
+    // Look up the domain name
+    auto const results = co_await resolver.async_resolve(host, "443");
+
+    // Set the timeout.
+    beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+
+    // Make the connection on the IP address we get from a lookup
+    co_await beast::get_lowest_layer(stream).async_connect(results);
+
+    // Set the timeout.
+    beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+
+    // Perform the SSL handshake
+    try {
+        co_await stream.async_handshake(ssl::stream_base::client);
+    } catch (const boost::system::system_error& e) {
+        co_return Err(Error(Error::Ssl, e.what()));
+    }
 
     req.set(http::field::host, host);
     req.set(http::field::user_agent, USER_AGENT);
@@ -47,13 +72,15 @@ Task<ResponseResult> NetworkAccessManager::request(std::string_view host,
     // Receive the HTTP response
     co_await http::async_read(stream, _buffer, res);
 
-    auto sslRes = co_await _sslDisconnect(std::move(stream));
+    beast::get_lowest_layer(stream).expires_after(_timeout);
 
-    if (!ignoreSslError && sslRes.isErr()) {
-        co_return sslRes.unwrapErr();
-    }
+    // Gracefully close the stream - do not threat every error as an exception!
+    auto [ec] = co_await stream.async_shutdown(net::as_tuple(net::use_awaitable));
+    if (ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated))
+        // If we get here then the connection is closed gracefully
+        co_return Ok(res);
 
-    co_return res;
+    co_return Err(Error(Error::Network, ec.message()));
 }
 
 Task<ResponseResult> NetworkAccessManager::get(urls::url_view url, std::string_view acceptType) {
@@ -70,6 +97,7 @@ Task<ResponseResult> NetworkAccessManager::post(urls::url_view url,
     req.set(http::field::content_type, contentType);
     req.set(http::field::accept, acceptType);
     req.body() = body;
+
     return request(url.host(), req);
 }
 
@@ -100,46 +128,6 @@ Task<ResponseResult> NetworkAccessManager::deleteResource(urls::url_view url,
     http::request<http::string_body> req{http::verb::delete_, url.path(), 11};
     req.set(http::field::accept, acceptType);
     return request(url.host(), req);
-}
-
-Task<Result<void>> NetworkAccessManager::_sslHandshake(beast::ssl_stream<tcp_stream>&& stream,
-                                                       std::string_view host) {
-    // Set SNI Hostname (many hosts need this to handshake successfully)
-    if (!SSL_set_tlsext_host_name(stream.native_handle(), host.data()))
-        co_return Err(
-            Error(Error::Ssl,
-                  net::error::get_ssl_category().message(static_cast<int>(::ERR_get_error()))));
-
-    // Look up the domain name
-    auto resolver = net::use_awaitable_t<boost::asio::any_io_executor>::as_default_on(
-        tcp::resolver(co_await net::this_coro::executor));
-    auto const results = co_await resolver.async_resolve(host, "https");
-
-    // Set the timeout.
-    beast::get_lowest_layer(stream).expires_after(_timeout);
-
-    // Make the connection on the IP address we get from a lookup
-    co_await beast::get_lowest_layer(stream).async_connect(results);
-
-    // Set the timeout.
-    beast::get_lowest_layer(stream).expires_after(_timeout);
-
-    // Perform the SSL handshake
-    co_await stream.async_handshake(ssl::stream_base::client);
-
-    co_return Ok();
-}
-
-Task<Result<void>> NetworkAccessManager::_sslDisconnect(beast::ssl_stream<tcp_stream>&& stream) {
-    beast::get_lowest_layer(stream).expires_after(_timeout);
-
-    // Gracefully close the stream - do not threat every error as an exception!
-    auto [ec] = co_await stream.async_shutdown(net::as_tuple(net::use_awaitable));
-    if (ec == net::error::eof)
-        // If we get here then the connection is closed gracefully
-        co_return Ok();
-
-    co_return Err(Error(Error::Ssl, ec.message()));
 }
 
 } // namespace evento

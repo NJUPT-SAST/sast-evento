@@ -1,6 +1,6 @@
 #pragma once
 
-#include <string_view>
+#include <string>
 namespace evento {
 
 class Error {
@@ -15,20 +15,20 @@ public:
 
     Error(Kind kind, std::string_view reason)
         : kind(kind)
-        , _reason(reason.data()) {}
+        , _reason(reason) {}
 
     Error(Kind kind)
         : kind(kind)
         , _reason(_reasonMap[kind]) {}
 
-    [[nodiscard]] char const* what() const { return _reason; }
+    [[nodiscard]] std::string what() const { return _reason; }
 
-    operator char const*() const { return what(); }
+    operator std::string() const { return what(); }
 
 private:
-    char const* _reason;
+    std::string _reason;
 
-    inline static char const* _reasonMap[Unknown + 1] = {"SSL error!",
+    inline static std::string _reasonMap[Unknown + 1] = {"SSL error!",
                                                          "Network error!",
                                                          "Json Deserialization error!",
                                                          "Data error",
