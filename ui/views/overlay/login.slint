@@ -11,9 +11,18 @@ export global LoginOverlayBridge {
 export component LoginOverlay inherits Overlay {
     height: 510px;
     width: 360px;
+    background := Image {
+        x: 0;
+        y: layout-logo.absolute-position.y - root.absolute-position.y;
+        width: 100%;
+        height: 96%;
+        z: -1;
+        source: Token.image.display.evento-bg;
+        image-fit: cover;
+    }
+
     // workaround applied: empty layout and separate elements
     // for precise layout
-
     layout := VerticalLayout {
         visible: false;
         x: 0;
@@ -35,7 +44,6 @@ export component LoginOverlay inherits Overlay {
 
         VerticalLayout {
             vertical-stretch: (1 - layout-logo.vertical-stretch) / 2;
-
             layout-guest-button := Rectangle {
                 vertical-stretch: 0.4;
                 border-width: 2px;
@@ -67,18 +75,7 @@ export component LoginOverlay inherits Overlay {
         y: 0;
         width: 100%;
         height: 100%;
-        // background image
-        Image {
-            source: Token.image.display.evento-bg;
-            image-fit: cover;
-            width: 100%;
-            height: 96%;
-            x: 0;
-            y: layout-logo.absolute-position.y - root.absolute-position.y;
-            z: -1;
-        }
-
-        logo := Rectangle {
+        logo := Empty {
             x: layout-logo.absolute-position.x - root.absolute-position.x;
             y: layout-logo.absolute-position.y - root.absolute-position.y;
             width: layout-logo.width;
@@ -105,7 +102,7 @@ export component LoginOverlay inherits Overlay {
                 text: "";
                 // invert color
                 theme: Token.is-darkmode ? Light : Dark;
-                background: Token.color.dark;
+                background: Token.color.inverse-surface;
                 border-width: 0;
                 border-radius: 4px;
                 clicked => {
@@ -127,14 +124,15 @@ export component LoginOverlay inherits Overlay {
                         Text {
                             text: "使用 Link 登录";
                             font-size: Token.font.headline.small.size;
-                            color: Token.color.normal.background;
+                            font-weight: Token.font.headline.small.weight;
+                            color: Token.color.inverse-on-surface;
                         }
                     }
                 }
             }
         }
 
-        guest-button := Rectangle {
+        guest-button := Empty {
             x: layout-guest-button.absolute-position.x - root.absolute-position.x;
             y: layout-guest-button.absolute-position.y - root.absolute-position.y;
             width: layout-guest-button.width;
@@ -167,13 +165,14 @@ export component LoginOverlay inherits Overlay {
                             visible: guest-button-area.has-hover;
                             text: "_________";
                             font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
                         }
                     }
                 }
             }
         }
 
-        developer-label := Rectangle {
+        developer-label := Empty {
             x: layout-developer-label.absolute-position.x - root.absolute-position.x;
             y: layout-developer-label.absolute-position.y - root.absolute-position.y;
             width: layout-developer-label.width;
@@ -181,11 +180,12 @@ export component LoginOverlay inherits Overlay {
             Text {
                 text: "SAST-C++组开发";
                 font-size: Token.font.label.large.size;
-                color: Token.color.normal.foreground;
+                font-weight: Token.font.label.large.weight;
+                color: Token.color.on-surface;
             }
         }
 
-        version-label := Rectangle {
+        version-label := Empty {
             x: layout-version-label.absolute-position.x - root.absolute-position.x;
             y: layout-version-label.absolute-position.y - root.absolute-position.y;
             width: layout-version-label.width;
@@ -193,7 +193,8 @@ export component LoginOverlay inherits Overlay {
             Text {
                 text: LoginOverlayBridge.version;
                 font-size: Token.font.label.large.size;
-                color: Token.color.normal.foreground;
+                font-weight: Token.font.label.large.weight;
+                color: Token.color.on-surface;
             }
         }
     }

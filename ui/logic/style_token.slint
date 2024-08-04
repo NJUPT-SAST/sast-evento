@@ -3,6 +3,7 @@ import { Palette, Button } from "std-widgets.slint";
 // font
 struct EventoFontData {
     size: length,
+    weight: int,
 }
 
 struct EventoFontSize {
@@ -22,78 +23,106 @@ struct EventoFontCollection {
 }
 
 // color
-struct ColorPair{
-    foreground: brush,
-    background: brush,
-}
-
-// more info: https://releases.slint.dev/1.7.1/docs/slint/src/language/builtins/globals#properties
-// default rename to normal
+// more info: https://m3.material.io/styles/color/roles
 struct EventoColorCollection {
-    normal: ColorPair,
-    alternate: ColorPair,
-    accent: ColorPair,
-    border: color,
-    dark: color,
-    light: color,
+    primary-container: color,
+    on-primary-container: color,
+    surface: color,
+    on-surface: color,
+    surface-variant: color,
+    on-surface-variant: color,
+    inverse-surface: color,
+    inverse-on-surface: color,
+    outline: color,
+    outline-variant: color,
 }
 
 export global EventoStyleToken {
     out property <EventoColorCollection> color:{
-        normal: {
-            foreground: Palette.foreground,
-            background: Palette.background,
-        },
-        alternate: {
-            foreground: Palette.alternate-foreground,
-            background: switcher({ light: Colors.lightgray, dark: Colors.gray }),
-        },
-        accent: {
-            foreground: Palette.accent-foreground,
-            background: switcher({ light: #D4BBFC, dark: #513C74 }),
-        },
-        border: Palette.border,
-        dark: switcher({ light: #3a3a3a, dark: #F5F5F5 }),
-        light: switcher({ light: #F5F5F5, dark: #3a3a3a }),
+        primary-container: switcher({ light: #EADDFF, dark: #4F378B }),
+        on-primary-container: switcher({ light: #4F378B, dark: #EADDFF }),
+        surface: switcher({ light: #FEF7FF, dark: #141218 }),
+        on-surface: switcher({ light:#1D1B20, dark:  #E6E0E9 }),
+        surface-variant: switcher({ light: #E7E0EC, dark: #49454F }),
+        on-surface-variant: switcher({ light: #49454F, dark: #CAC4D0 }),
+        inverse-surface: switcher({ light: #322F35, dark: #E6E0E9 }),
+        inverse-on-surface: switcher({ light: #F5EFF7, dark: #322F35 }),
+        outline: switcher({ light: #79747E, dark: #938F99 }),
+        outline-variant: switcher({ light: #CAC4D0, dark: #49454F }),
     };
     // source: https://m3.material.io/styles/typography/type-scale-tokens#a734c6ed-634c-4abb-adb2-35daf0aed06a
     // prefer large, use body.large (16px) for body text
     out property <EventoFontCollection> font:{
-        display: { large: {
-            size: 57px,
-        }, medium: {
-            size: 45px,
-        }, small: {
-            size: 36px,
-        } },
-        headline: { large: {
-            size: 32px,
-        }, medium: {
-            size: 28px,
-        }, small: {
-            size: 24px,
-        } },
-        title: { large: {
-            size: 22px,
-        }, medium: {
-            size: 16px,
-        }, small: {
-            size: 14px,
-        } },
-        body: { large: {
-            size: 16px,
-        }, medium: {
-            size: 14px,
-        }, small: {
-            size: 12px,
-        } },
-        label: { large: {
-            size: 14px,
-        }, medium: {
-            size: 12px,
-        }, small: {
-            size: 11px,
-        } },
+        display: {
+            large: {
+                size: 57px,
+                weight: 400,
+            },
+            medium: {
+                size: 45px,
+                weight:400,
+            },
+            small: {
+                size: 36px,
+                weight:400,
+            }
+        },
+        headline: {
+            large: {
+                size: 32px,
+                weight: 400,
+            },
+            medium: {
+                size: 28px,
+                weight: 400,
+            },
+            small: {
+                size: 24px,
+                weight: 400,
+            }
+        },
+        title: {
+            large: {
+                size: 22px,
+                weight: 400,
+            },
+            medium: {
+                size: 16px,
+                weight: 500,
+            },
+            small: {
+                size: 14px,
+                weight: 500,
+            }
+        },
+        body: {
+            large: {
+                size: 16px,
+                weight: 400,
+            },
+            medium: {
+                size: 14px,
+                weight: 400,
+            },
+            small: {
+                size: 12px,
+                weight:400,
+            }
+        },
+        label: {
+            large: {
+                size: 14px,
+                weight: 500,
+            },
+            medium: {
+                size: 12px,
+                weight: 500,
+            },
+            small: {
+                size: 11px,
+                weight: 500,
+            }
+        },
     };
     out property <bool> is-darkmode: Palette.color-scheme == ColorScheme.dark;
     pure function switcher(color: {light:color,dark:color}) -> color {

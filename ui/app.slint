@@ -1,13 +1,13 @@
+import "./assets/font/MiSans-Regular.ttf";
+import { Token } from "./global.slint";
+import { Button } from "std-widgets.slint";
+
 import { 
     LoginOverlay,
     LoginOverlayBridge
 } from "./views/index.slint";
-import { Token } from "./global.slint";
-import { Button } from "std-widgets.slint";
 
-import "./assets/font/MiSans-Regular.ttf";
-
-// export all bridge
+// export all bridge for C++ interact
 export { 
     LoginOverlayBridge,
 }
@@ -19,17 +19,16 @@ export component App inherits Window {
     min-height: 400px;
     preferred-width: 1024px;
     preferred-height: 634px;
-    background: Token.color.normal.background;
+    background: Token.color.surface;
     icon: Token.image.icon.evento;
     DEBUG := HorizontalLayout {
-        visible: false;
+        // visible: false;
         x: 0;
         y: 0;
         height: 50px;
         Button {
             text: "< Back";
             clicked => {
-                Token.switch-display-mode();
             }
         }
 
@@ -42,11 +41,12 @@ export component App inherits Window {
     }
 
     overlay := Rectangle {
-        height: login.height;
+        clip: true;
         width: login.width;
+        height: login.height;
         border-radius: 18px;
-        border-color: Token.color.border;
         border-width: 4px;
+        border-color: Token.color.outline;
         login := LoginOverlay { }
     }
 }
