@@ -26,39 +26,23 @@ template<typename T>
 using Task = net::awaitable<T>;
 using ResponseResult = Result<http::response<http::dynamic_body>>;
 
-class NetworkAccessManager {
+class HttpsAccessManager {
     using executor_with_default = net::use_awaitable_t<>::executor_with_default<net::any_io_executor>;
     using tcp_stream = typename beast::tcp_stream::rebind_executor<executor_with_default>::other;
     using tcp = boost::asio::ip::tcp;
 
 public:
-    NetworkAccessManager(net::ssl::context& ctx,
-                         bool ignoreSslError = false,
-                         std::chrono::seconds timeout = std::chrono::seconds(5))
+    HttpsAccessManager(net::ssl::context& ctx,
+                       bool ignoreSslError = false,
+                       std::chrono::seconds timeout = std::chrono::seconds(5))
         : _ctx(ctx)
         , ignoreSslError(ignoreSslError)
         , _timeout(timeout) {}
 
     // if tokenBytes is set, it will be added to the request header
     // `req.prepare_payload()` is called in the function
-    Task<ResponseResult> request(std::string host, http::request<http::string_body> req);
+    Task<ResponseResult> makeReply(std::string host, http::request<http::string_body> req);
 
-    Task<ResponseResult> get(urls::url_view url, std::string_view acceptType);
-    Task<ResponseResult> post(urls::url_view url,
-                              std::string_view acceptType,
-                              std::string_view contentType,
-                              const std::string& body);
-    Task<ResponseResult> put(urls::url_view url,
-                             std::string_view acceptType,
-                             std::string_view contentType,
-                             const std::string& body);
-    Task<ResponseResult> patch(urls::url_view url,
-                               std::string_view acceptType,
-                               std::string_view contentType,
-                               const std::string& body);
-    Task<ResponseResult> deleteResource(urls::url_view url, std::string_view acceptType);
-
-    std::optional<std::string> tokenBytes;
     bool ignoreSslError = false;
 
 private:

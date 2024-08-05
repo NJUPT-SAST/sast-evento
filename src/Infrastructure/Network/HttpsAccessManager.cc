@@ -1,4 +1,5 @@
-#include "NetworkAccessManager.h"
+#include "HttpsAccessManager.h"
+#include "Infrastructure/Utils/Debug.h"
 #include <Infrastructure/Utils/Error.h>
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/as_tuple.hpp>
@@ -10,13 +11,15 @@
 #include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
+#include <boost/system/detail/error_code.hpp>
+#include <boost/system/system_error.hpp>
 #include <boost/url.hpp>
 
 namespace evento {
 
 constexpr const char USER_AGENT[] = "SAST-Evento-Desktop/1";
 
-Task<ResponseResult> NetworkAccessManager::request(std::string host,
+Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
                                                    http::request<http::string_body> req) {
     auto resolver = net::use_awaitable_t<boost::asio::any_io_executor>::as_default_on(
         tcp::resolver(co_await net::this_coro::executor));
@@ -51,13 +54,6 @@ Task<ResponseResult> NetworkAccessManager::request(std::string host,
         co_return Err(Error(Error::Ssl, e.what()));
     }
 
-    req.set(http::field::host, host);
-    req.set(http::field::user_agent, USER_AGENT);
-
-    // Set token if exits
-    if (tokenBytes)
-        req.set("TOKEN", *tokenBytes);
-
     req.prepare_payload();
 
     // Set the timeout
@@ -76,58 +72,12 @@ Task<ResponseResult> NetworkAccessManager::request(std::string host,
 
     // Gracefully close the stream - do not threat every error as an exception!
     auto [ec] = co_await stream.async_shutdown(net::as_tuple(net::use_awaitable));
-    if (ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated))
+    if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated))
         // If we get here then the connection is closed gracefully
         co_return Ok(res);
 
+    debug(), ec, ec.message();
     co_return Err(Error(Error::Network, ec.message()));
-}
-
-Task<ResponseResult> NetworkAccessManager::get(urls::url_view url, std::string_view acceptType) {
-    http::request<http::string_body> req{http::verb::get, url.path(), 11};
-    req.set(http::field::accept, acceptType);
-    return request(url.host(), req);
-}
-
-Task<ResponseResult> NetworkAccessManager::post(urls::url_view url,
-                                                std::string_view acceptType,
-                                                std::string_view contentType,
-                                                const std::string& body) {
-    http::request<http::string_body> req{http::verb::post, url.path(), 11};
-    req.set(http::field::content_type, contentType);
-    req.set(http::field::accept, acceptType);
-    req.body() = body;
-
-    return request(url.host(), req);
-}
-
-Task<ResponseResult> NetworkAccessManager::put(urls::url_view url,
-                                               std::string_view acceptType,
-                                               std::string_view contentType,
-                                               const std::string& body) {
-    http::request<http::string_body> req{http::verb::put, url.path(), 11};
-    req.set(http::field::content_type, contentType);
-    req.set(http::field::accept, acceptType);
-    req.body() = body;
-    return request(url.host(), req);
-}
-
-Task<ResponseResult> NetworkAccessManager::patch(urls::url_view url,
-                                                 std::string_view acceptType,
-                                                 std::string_view contentType,
-                                                 const std::string& body) {
-    http::request<http::string_body> req{http::verb::patch, url.path(), 11};
-    req.set(http::field::content_type, contentType);
-    req.set(http::field::accept, acceptType);
-    req.body() = body;
-    return request(url.host(), req);
-}
-
-Task<ResponseResult> NetworkAccessManager::deleteResource(urls::url_view url,
-                                                          std::string_view acceptType) {
-    http::request<http::string_body> req{http::verb::delete_, url.path(), 11};
-    req.set(http::field::accept, acceptType);
-    return request(url.host(), req);
 }
 
 } // namespace evento

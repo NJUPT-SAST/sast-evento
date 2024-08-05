@@ -1,5 +1,5 @@
 #include "NetworkClient.h"
-#include <Infrastructure/Network/NetworkAccessManager.h>
+#include "Infrastructure/Network/Api/Evento.hpp"
 #include <Infrastructure/Utils/Debug.h>
 #include <boost/url/param.hpp>
 #include <boost/url/params_view.hpp>
@@ -17,12 +17,12 @@ constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencode
 
 NetworkClient::NetworkClient(net::ssl::context& ctx)
     : _ctx(ctx)
-    , _manager(std::make_unique<NetworkAccessManager>(_ctx, true)) {}
-
-NetworkClient::~NetworkClient() = default;
+    , _manager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
 
 Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& code) {
-    auto result = co_await this->post(endpoint("/login/link"), {{"code", code}, {"type", "0"}});
+    auto result = co_await this->request<api::Evento>(http::verb::post,
+                                                      endpoint("/login/link"),
+                                                      {{"code", code}, {"type", "0"}});
 
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -37,16 +37,12 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& 
     co_return Ok(entity);
 }
 
-std::optional<std::string>& NetworkClient::token() {
-    return _manager->tokenBytes;
-}
-
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
     return urls::url(EVENTO_API_GATEWAY + endpoint.data());
 }
 
 urls::url NetworkClient::endpoint(std::string_view endpoint,
-                                  const std::initializer_list<urls::param_view>& params) {
+                                  std::initializer_list<urls::param> const& params) {
     auto r = urls::url(EVENTO_API_GATEWAY + endpoint.data());
     r.params().append(params.begin(), params.end());
     return r;
@@ -84,107 +80,6 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     auto data = res.contains("data") ? res["data"] : nlohmann::json::object();
 
     return Ok(data);
-}
-
-Task<JsonResult> NetworkClient::get(urls::url_view url) {
-    auto result = co_await _manager->get(url, MIME_JSON);
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::post(urls::url_view url,
-                                     const std::initializer_list<urls::param_view>& params) {
-    std::ostringstream params_stream;
-    for (auto& param : params) {
-        params_stream << param.key << "=" << param.value;
-        if (&param != params.end() - 1) {
-            params_stream << "&";
-        }
-    }
-
-    auto result = co_await _manager->post(url,
-                                          MIME_JSON,
-                                          MIME_FORM_URL_ENCODED,
-                                          params_stream.str());
-
-    if (result.isErr()) {
-        co_return result.unwrapErr();
-    }
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::post(urls::url_view url, const nlohmann::json& body) {
-    auto result = co_await _manager->post(url, MIME_JSON, MIME_JSON, body.dump());
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::put(urls::url_view url) {
-    auto result = co_await _manager->put(url, MIME_JSON, MIME_JSON, "");
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::put(urls::url_view url, const nlohmann::json& body) {
-    auto result = co_await _manager->put(url, MIME_JSON, MIME_JSON, body.dump());
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::deleteResource(urls::url_view url) {
-    auto result = co_await _manager->deleteResource(url, MIME_JSON);
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::patch(urls::url_view url, const nlohmann::json& body) {
-    auto result = co_await _manager->patch(url, MIME_JSON, MIME_JSON, body.dump());
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    co_return handleResponse(response);
-}
-
-Task<JsonResult> NetworkClient::getFromGithub(urls::url_view url) {
-    auto result = co_await _manager->get(url, "application/vnd.github+json");
-
-    if (result.isErr())
-        co_return result.unwrapErr();
-
-    auto response = result.unwrap();
-
-    // FIXME: handle github response
-    co_return handleResponse(response);
 }
 
 } // namespace evento

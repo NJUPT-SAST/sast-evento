@@ -1,11 +1,17 @@
 #pragma once
 
+#include "Infrastructure/Utils/Debug.h"
+#include <Infrastructure/Network/Api/Evento.hpp>
+#include <Infrastructure/Network/Api/Github.hpp>
+#include <Infrastructure/Network/HttpsAccessManager.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/awaitable.hpp>
 #include <boost/beast/http.hpp>
+#include <boost/beast/http/verb.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
+#include <concepts>
 #include <initializer_list>
 #include <nlohmann/json.hpp>
 
@@ -16,8 +22,6 @@ namespace http = beast::http;   // from <boost/beast/http.hpp>
 namespace net = boost::asio;    // from <boost/asio.hpp>
 namespace urls = boost::urls;   // from <boost/url.hpp>
 
-class NetworkAccessManager;
-
 using JsonResult = Result<nlohmann::basic_json<>>;
 template<typename T>
 using Task = net::awaitable<T>;
@@ -25,39 +29,49 @@ using Task = net::awaitable<T>;
 class NetworkClient {
 public:
     NetworkClient(net::ssl::context& ctx);
-    ~NetworkClient();
 
     Task<Result<LoginResEntity>> loginViaSastLink(const std::string& code);
 
-    [[nodiscard]] std::optional<std::string>& token();
+    std::optional<std::string> tokenBytes;
 
 private:
-    // evento client help functions
+    // http request
+    template<std::same_as<api::Evento> Api>
+    Task<JsonResult> request(http::verb verb,
+                             urls::url_view url,
+                             std::initializer_list<urls::param> const& params = {}) {
+        debug(), url;
+        auto req = Api::makeRequest(verb, url, tokenBytes, params);
+
+        auto reply = co_await _manager->makeReply(url.host(), req);
+
+        if (reply.isErr())
+            co_return reply.unwrapErr();
+
+        co_return handleResponse(reply.unwrap());
+    }
+
+    template<std::same_as<api::Github> Api>
+    Task<JsonResult> request(http::verb verb,
+                             urls::url_view url,
+                             std::initializer_list<urls::param> const& params = {}) {
+        auto req = Api::makeRequest(verb, url, params);
+        auto reply = co_await _manager->makeReply(url.host(), req);
+        if (reply.isErr())
+            co_return reply.unwrapErr();
+        co_return reply.unwrap();
+    }
+
     // url builder
     static urls::url endpoint(std::string_view endpoint); // url has no query params
     static urls::url endpoint(std::string_view endpoint,  // url has query params
-                              const std::initializer_list<urls::param_view>& params);
+                              std::initializer_list<urls::param> const& queryParams);
     // response handler
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
-    // http verbs
-    Task<JsonResult> get(urls::url_view url);
-
-    Task<JsonResult> post(urls::url_view url, const std::initializer_list<urls::param_view>& params);
-    Task<JsonResult> post(urls::url_view url, const nlohmann::json& body);
-
-    Task<JsonResult> put(urls::url_view url);
-    Task<JsonResult> put(urls::url_view url, const nlohmann::json& body);
-
-    [[maybe_unused]] Task<JsonResult> patch(urls::url_view url, const nlohmann::json& body);
-
-    [[maybe_unused]] Task<JsonResult> deleteResource(urls::url_view url);
-
-    // github client help functions
-    Task<JsonResult> getFromGithub(urls::url_view url);
 
 private:
     net::ssl::context& _ctx;
-    std::unique_ptr<NetworkAccessManager> _manager;
+    std::unique_ptr<HttpsAccessManager> _manager;
 };
 
 } // namespace evento

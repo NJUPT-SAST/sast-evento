@@ -40,7 +40,7 @@ void start_sast_link() {
                 }
 
                 auto entity = loginResult.unwrap();
-                client.token() = entity.accessToken;
+                client.tokenBytes = entity.accessToken;
 
                 std::string const package = "org.sast.evento";
                 std::string const service = "refresh-token";
