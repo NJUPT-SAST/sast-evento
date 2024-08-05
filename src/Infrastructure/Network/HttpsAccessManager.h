@@ -39,7 +39,7 @@ public:
         , ignoreSslError(ignoreSslError)
         , _timeout(timeout) {}
 
-    // if tokenBytes is set, it will be added to the request header
+    // async send request to host and return response
     // `req.prepare_payload()` is called in the function
     Task<ResponseResult> makeReply(std::string host, http::request<http::string_body> req);
 

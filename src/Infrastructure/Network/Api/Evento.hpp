@@ -18,6 +18,9 @@ struct Evento {
     Evento() = delete;
     ~Evento() = delete;
 
+    // make http request
+    // @param `token`: optional, if exists, set it in the header
+    // @param `formParams`: default is empty, set it in the body as form url encoded
     static http::request<http::string_body> makeRequest(
         http::verb verb,
         boost::urls::url_view url,
@@ -27,7 +30,7 @@ struct Evento {
 
         req.set(http::field::host, url.host());
         req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
-        if (token) // set token if exits
+        if (token) // set token if exists
             req.set("TOKEN", *token);
 
         if (verb == http::verb::post) {
