@@ -1,4 +1,5 @@
 #include <Infrastructure/Network/network.h>
+#include <Infrastructure/Utils/Config.h>
 #include <Infrastructure/Utils/Logger.h>
 #include <Version.h>
 #include <app.h>
@@ -14,4 +15,5 @@ int main(int argc, char** argv) {
     uiEntry->global<LoginOverlayBridge>().on_link_login(start_sast_link);
     uiEntry->global<LoginOverlayBridge>().set_version("v" VERSION_FULL);
     uiEntry->run();
+    evento::saveConfig();
 }
