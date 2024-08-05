@@ -18,7 +18,9 @@ const std::filesystem::path configDir =
 
 } // namespace details
 
-inline toml::table config = []() {
+inline toml::table config;
+
+inline void initConfig() {
     if (!std::filesystem::exists(details::configDir)) {
         spdlog::info("Config directory does not exist, creating...");
         std::filesystem::create_directories(details::configDir);
@@ -29,12 +31,12 @@ inline toml::table config = []() {
         spdlog::info("Config file does not exist, creating...");
     }
     try {
-        return toml::parse_file(path.u8string());
+        config = toml::parse_file(path.u8string());
     } catch (const toml::parse_error& err) {
         spdlog::error("\"{}\" could not be opened for parsing.", path.string());
-        return toml::parse("");
+        config = toml::parse("");
     }
-}();
+}
 
 inline void saveConfig() {
     auto path = details::configDir / "config.toml";
