@@ -8,6 +8,7 @@
         "nlohmann-json",
         "spdlog",
         "gtest",
-        "tomlplusplus"
+        "tomlplusplus",
+        "pkgconf"
     ]
 }

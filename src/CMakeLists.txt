@@ -41,7 +41,6 @@ target_link_libraries(${PROJECT_NAME}
     OpenSSL::Crypto
     OpenSSL::SSL
     nlohmann_json::nlohmann_json
-    PkgConfig::tomlplusplus
     sast-link
     keychain
     Slint::Slint
