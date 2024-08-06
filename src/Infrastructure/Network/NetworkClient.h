@@ -32,6 +32,8 @@ public:
 
     Task<Result<LoginResEntity>> loginViaSastLink(const std::string& code);
 
+    Task<Result<UserInfoEntity>> getUserInfo(const std::string& userId);
+
     std::optional<std::string> tokenBytes;
 
 private:

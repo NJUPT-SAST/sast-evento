@@ -37,6 +37,22 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& 
     co_return Ok(entity);
 }
 
+Task<Result<UserInfoEntity>> NetworkClient::getUserInfo(const std::string& userId) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/user/info", {{"userId", userId}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    UserInfoEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
     return urls::url(EVENTO_API_GATEWAY + endpoint.data());
 }
