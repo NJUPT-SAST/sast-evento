@@ -46,6 +46,7 @@ target_link_libraries(${PROJECT_NAME}
     keychain
     Slint::Slint
     version::version
+    tray
 )
 
 # On Windows, copy the Slint DLL next to the application binary so that it's found.

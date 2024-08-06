@@ -7,3 +7,6 @@
 [submodule "3rdpart/keychain"]
 	path = 3rdpart/keychain
 	url = https://github.com/hrantzsch/keychain.git
+[submodule "3rdpart/traypp"]
+	path = 3rdpart/traypp
+	url = https://github.com/Soundux/traypp.git

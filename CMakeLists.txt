@@ -66,6 +66,8 @@ endif()
 add_subdirectory(src)
 # sast-link-sdk
 add_subdirectory(3rdpart/sast-link-cxx-sdk)
+# traypp
+add_subdirectory(3rdpart/traypp EXCLUDE_FROM_ALL)
 
 # credential storage
 set(BUILD_SHARED_LIBS OFF)
