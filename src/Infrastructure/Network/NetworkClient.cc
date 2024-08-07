@@ -1,5 +1,6 @@
 #include "NetworkClient.h"
 #include "Infrastructure/Network/Api/Evento.hpp"
+#include "Infrastructure/Utils/Error.h"
 #include <Infrastructure/Utils/Debug.h>
 #include <boost/url/param.hpp>
 #include <boost/url/params_view.hpp>
@@ -37,9 +38,8 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& 
     co_return Ok(entity);
 }
 
-Task<Result<UserInfoEntity>> NetworkClient::getUserInfo(const std::string& userId) {
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/user/info", {{"userId", userId}}));
+Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
+    auto result = co_await this->request<api::Evento>(http::verb::get, endpoint("/v2/user/profile"));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -51,6 +51,78 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo(const std::string& userI
     }
 
     co_return Ok(entity);
+}
+Task<Result<std::string>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getLatestEventList() {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int page, int size) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<FeedbackEntity>> NetworkClient::getUserFeedback(int eventId) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<void>> NetworkClient::addUserFeedback(int eventId,
+                                                  int rating,
+                                                  std::string const& content) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<void>> NetworkClient::checkInEvent(int eventId, std::string const& code) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<void>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<void>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
+                                                      bool subscribe) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent() {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getSubscribedEvent() {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<SlideEntityList>> NetworkClient::getHomeSlide() {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
+}
+
+Task<Result<SlideEntityList>> NetworkClient::getEventSlide(int eventId) {
+    // TODO: implement me!
+    co_return Error(Error::Unknown);
 }
 
 urls::url NetworkClient::endpoint(std::string_view endpoint) {

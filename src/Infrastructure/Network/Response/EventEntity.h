@@ -1,9 +1,9 @@
-// IWYU pragma: private, include "ResponseStructure.h"
+// IWYU pragma: private, include "ResponseStruct.h"
 #pragma once
 
+#include "EventState.h"
 #include <nlohmann/json.hpp>
 #include <string>
-
 namespace evento {
 
 struct EventEntity {
@@ -14,10 +14,9 @@ struct EventEntity {
     std::string end;
     std::string location;
     std::string tag;
-    std::string larkMeetingRoomId;
     std::string larkMeetingRoomName;
-    std::string larkDepartmentId;
     std::string larkDepartmentName;
+    State state;
     bool isSubscribed; // 已订阅
     bool isChecked;    // 已签到
 
@@ -29,10 +28,9 @@ struct EventEntity {
                                    end,
                                    location,
                                    tag,
-                                   larkMeetingRoomId,
                                    larkMeetingRoomName,
-                                   larkDepartmentId,
                                    larkDepartmentName,
+                                   state,
                                    isSubscribed,
                                    isChecked);
 };

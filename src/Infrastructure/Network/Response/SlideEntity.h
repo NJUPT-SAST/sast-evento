@@ -1,6 +1,6 @@
 #pragma once
 
-// IWYU pragma: private, include "ResponseStructure.h"
+// IWYU pragma: private, include "ResponseStruct.h"
 
 #include <nlohmann/json.hpp>
 #include <string>

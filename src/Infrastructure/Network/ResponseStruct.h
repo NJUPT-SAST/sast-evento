@@ -4,7 +4,6 @@
 
 #include "Response/AttachmentEntity.h" // IWYU pragma: export
 #include "Response/EventEntity.h"      // IWYU pragma: export
-#include "Response/EventListEntity.h"  // IWYU pragma: export
 #include "Response/FeedbackEntity.h"   // IWYU pragma: export
 #include "Response/LoginResEntity.h"   // IWYU pragma: export
 #include "Response/SlideEntity.h"      // IWYU pragma: export
