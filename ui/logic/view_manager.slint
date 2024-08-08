@@ -1,0 +1,31 @@
+export enum ViewName{
+    DiscoveryPage,
+    SearchPage,
+    HistoryPage,
+    MyEventPage,
+    DetailPage,
+    AboutPage,
+    SettingPage,
+    LoginOverlay,
+    MenuOverlay,
+}
+
+export global ViewManager {
+    // current-page will be modified by native code, tracking stack.top()
+    pure callback is-show(ViewName) -> bool;
+    in-out property <bool> refresh;
+    // native stack implement
+    callback push(ViewName);
+    callback clean-push(ViewName);
+    callback pop();
+    // public function intended to be used
+    public function navigate-to(new-view: ViewName) {
+        push(new-view);
+    }
+    public function clean-navigate-to(new-view: ViewName) {
+        clean-push(new-view);
+    }
+    public function prior-page() {
+        pop();
+    }
+}

@@ -1,52 +1,263 @@
 import "./assets/font/MiSans-Regular.ttf";
 import { Token } from "./global.slint";
 import { Button } from "std-widgets.slint";
+import { Empty } from "./components/index.slint";
+import { 
+    ViewManager,
+    ViewName
+} from "./logic/index.slint";
 
 import { 
     LoginOverlay,
-    LoginOverlayBridge
-} from "./views/index.slint";
-
-// export all bridge for C++ interact
-export { 
     LoginOverlayBridge,
+    MenuOverlay,
+    MenuOverlayBridge,
+    DiscoveryPage,
+    DiscoveryPageBridge,
+    SearchPage,
+    SearchPageBridge,
+    HistoryPage,
+    HistoryPageBridge,
+    MyEventPage,
+    MyEventPageBridge,
+    DetailPage,
+    DetailPageBridge,
+    AboutPage,
+    AboutPageBridge,
+    SettingPage,
+    SettingPageBridge
+} from "./views/index.slint";
+import { SButton } from "modules/surrealism-ui/index.slint";
+
+// export for C++ interact
+export { 
+    ViewManager,
+    ViewName,
+    LoginOverlayBridge,
+    MenuOverlayBridge,
+    DiscoveryPageBridge,
+    SearchPageBridge,
+    HistoryPageBridge,
+    MyEventPageBridge,
+    DetailPageBridge,
+    AboutPageBridge,
+    SettingPageBridge,
+}
+
+component OverlayRegion inherits Empty {
+    if ViewManager.is-show(ViewName.LoginOverlay): login-overlay := LoginOverlay { }
+    if ViewManager.is-show(ViewName.MenuOverlay): menu-overlay := MenuOverlay { }
+}
+
+component PageRegion inherits Empty {
+    if ViewManager.is-show(ViewName.DiscoveryPage): discovery-page := DiscoveryPage { }
+    if ViewManager.is-show(ViewName.SearchPage): search-page := SearchPage { }
+    if ViewManager.is-show(ViewName.HistoryPage): history-page := HistoryPage { }
+    if ViewManager.is-show(ViewName.MyEventPage): myEvent-page := MyEventPage { }
+    if ViewManager.is-show(ViewName.DetailPage): detail-page := DetailPage { }
+    if ViewManager.is-show(ViewName.AboutPage): about-page := AboutPage { }
+    if ViewManager.is-show(ViewName.SettingPage): setting-page := SettingPage { }
+}
+
+component BackBottom inherits SButton {
+    height: 48px;
+    width: 48px;
+    border-radius: self.width / 2;
+    text: "";
+    background: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
+    border-color: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
+    drop-shadow-color: Token.color.surface;
+    Image {
+        height: 24px;
+        width: 24px;
+        source: Token.image.icon.arrow-left.normal;
+    }
+
+    clicked => {
+        ViewManager.prior-page();
+    }
+}
+
+component NavBarItem inherits Rectangle {
+    in property <image> image;
+    in property <string> content;
+    in property <ViewName> target;
+    property <bool> selected:ViewManager.is-show(target);
+    pure function getBackdround() -> color {
+        if (!selected) {
+            return area.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
+        } else {
+            return Token.color.primary-container;
+        }
+    }
+    preferred-height: 100%;
+    preferred-width: 100%;
+    border-radius: self.height / 2;
+    background: getBackdround();
+    area := TouchArea {
+        clicked => {
+            ViewManager.clean-navigate-to(target);
+        }
+        mouse-cursor: pointer;
+    }
+
+    content := HorizontalLayout {
+        // height: 48px;
+        // width: 120px;
+        spacing: 8px;
+        alignment: center;
+        Rectangle {
+            preferred-height: 24px;
+            preferred-width: 24px;
+            Image {
+                width: 24px;
+                height: self.width;
+                source: root.image;
+            }
+        }
+
+        Text {
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            color: Token.color.on-surface;
+            font-size: Token.font.title.medium.size;
+            font-weight: Token.font.title.medium.weight;
+            text: root.content;
+        }
+    }
+
+    animate background {
+        duration: 200ms;
+        easing: ease-in-out;
+    }
+}
+
+component NavBar inherits Rectangle {
+    in property <[{icon:image, content:string, target:ViewName}]> nav-views:[
+        {
+            icon:Token.image.display.no-image,
+            content:"活动广场",
+            target:ViewName.DiscoveryPage,
+        },
+        {
+            icon:Token.image.display.no-image,
+            content:"活动广场",
+            target:ViewName.DiscoveryPage,
+        },
+        {
+            icon:Token.image.display.no-image,
+            content:"活动广场",
+            target:ViewName.DiscoveryPage,
+        },
+    ];
+    height: 48px;
+    border-radius: self.height / 2;
+    background: Token.color.surface-container;
+    HorizontalLayout {
+        for item in root.nav-views: Rectangle {
+            NavBarItem {
+                image: item.icon;
+                content: item.content;
+                target: item.target;
+            }
+        }
+    }
+}
+
+component ProfileBottom inherits SButton {
+    height: 48px;
+    width: 48px;
+    border-radius: self.width / 2;
+    text: "";
+    background: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
+    border-color: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
+    drop-shadow-color: Token.color.surface;
+    Image {
+        height: 24px;
+        width: 24px;
+        source: Token.image.icon.me.normal;
+    }
+
+    clicked => {
+        ViewManager.navigate-to(ViewName.MenuOverlay);
+    }
+}
+
+component DEBUG_TOOLBAR inherits HorizontalLayout {
+    // visible: false;
+        x: 0;
+    y: - self.height;
+    height: 50px;
+    Button {
+        text: "< Back";
+        clicked => {
+            ViewManager.prior-page();
+        }
+    }
+
+    Button {
+        text: Token.is-darkmode ? "Dark" : "Light";
+        clicked => {
+            Token.switch-display-mode();
+        }
+    }
 }
 
 export component App inherits Window {
     title: "SAST Evento";
     default-font-family: "MiSans";
-    min-width: 400px;
+    min-width: 500px;
     min-height: 400px;
     preferred-width: 1024px;
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
-    DEBUG := HorizontalLayout {
-        // visible: false;
-        x: 0;
-        y: 0;
-        height: 50px;
-        Button {
-            text: "< Back";
-            clicked => {
+    DEBUG := DEBUG_TOOLBAR { }
+
+    VerticalLayout {
+        heading := HorizontalLayout {
+            padding: 8px;
+            height: 64px;
+            spacing: 8px;
+            Rectangle {
+                width: 48px;
+                BackBottom { }
+            }
+
+            NavBar {
+                min-width: 360px;
+                horizontal-stretch: 1;
+                nav-views: [
+                    {
+                        icon:Token.image.icon.home.normal,
+                        content:"活动广场",
+                        target:ViewName.DiscoveryPage,
+                    },
+                    {
+                        icon:Token.image.icon.department,
+                        content:"部门活动",
+                        target:ViewName.SearchPage,
+                    },
+                    {
+                        icon:Token.image.icon.schedule.normal,
+                        content:"活动日程",
+                        target:ViewName.MyEventPage,
+                    },
+                ];
+            }
+
+            Rectangle {
+                width: 48px;
+                ProfileBottom { }
             }
         }
 
-        Button {
-            text: Token.is-darkmode ? "Dark" : "Light";
-            clicked => {
-                Token.switch-display-mode();
-            }
-        }
+        PageRegion { }
     }
 
-    overlay := Rectangle {
-        clip: true;
-        width: login.width;
-        height: login.height;
-        border-radius: 18px;
-        border-width: 4px;
-        border-color: Token.color.outline;
-        login := LoginOverlay { }
+    OverlayRegion {
+        height: 100%;
+        width: 100%;
+        z: 1;
     }
 }

@@ -9,8 +9,13 @@ export global LoginOverlayBridge {
     callback guest-login();
 }
 
-export component LoginOverlay inherits Overlay {
-    height: 510px;
+component LoginContent inherits Rectangle {
+    clip: true;
+    background: Token.color.surface;
+    border-radius: 18px;
+    border-width: 3px;
+    border-color: Token.color.outline;
+    height: 550px;
     width: 360px;
     background := Image {
         x: 0;
@@ -23,8 +28,8 @@ export component LoginOverlay inherits Overlay {
     }
 
     // workaround applied: empty layout and separate elements
-    // for precise layout
-    layout := VerticalLayout {
+        // for precise layout
+        layout := VerticalLayout {
         visible: false;
         x: 0;
         y: 0;
@@ -84,8 +89,8 @@ export component LoginOverlay inherits Overlay {
             Image {
                 vertical-stretch: 2;
                 // min-height: 0px;
-                // width: 300px;
-                height: 90px;
+                    // width: 300px;
+                    height: 90px;
                 image-fit: contain;
                 source: Token.image.display.evento;
             }
@@ -100,9 +105,9 @@ export component LoginOverlay inherits Overlay {
                 width: 240px;
                 height: 55px;
                 // to hide default text
-                text: "";
+                    text: "";
                 // invert color
-                theme: Token.is-darkmode ? Light : Dark;
+                    theme: Token.is-darkmode ? Light : Dark;
                 background: Token.color.inverse-surface;
                 border-width: 0;
                 border-radius: 4px;
@@ -162,7 +167,7 @@ export component LoginOverlay inherits Overlay {
                         }
 
                         // underline
-                        Text {
+                            Text {
                             visible: guest-button-area.has-hover;
                             text: "_________";
                             font-size: Token.font.body.large.size;
@@ -199,4 +204,8 @@ export component LoginOverlay inherits Overlay {
             }
         }
     }
+}
+
+export component LoginOverlay inherits Overlay {
+    content := LoginContent { }
 }
