@@ -119,7 +119,7 @@ void ViewManager::popView() {
     }
 
     if (viewStack.size() <= 1) {
-        spdlog::error("ViewManager: failed to pop page stack when only one page left");
+        spdlog::debug("ViewManager: pop action canceled: only one view left");
         return;
     }
 
