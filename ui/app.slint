@@ -44,6 +44,10 @@ export {
     SettingPageBridge,
 }
 
+global PrivateUtility {
+    in-out property <int> navbar-current-index:0;
+}
+
 component OverlayRegion inherits Empty {
     if ViewManager.is-show(ViewName.LoginOverlay): login-overlay := LoginOverlay { }
     if ViewManager.is-show(ViewName.MenuOverlay): menu-overlay := MenuOverlay { }
@@ -82,6 +86,7 @@ component NavBarItem inherits Rectangle {
     in property <image> image;
     in property <string> content;
     in property <ViewName> target;
+    in property <int> index;
     property <bool> selected:ViewManager.is-show(target);
     pure function getBackdround() -> color {
         if (!selected) {
@@ -96,6 +101,7 @@ component NavBarItem inherits Rectangle {
     background: getBackdround();
     area := TouchArea {
         clicked => {
+            PrivateUtility.navbar-current-index = index;
             ViewManager.clean-navigate-to(target);
         }
         mouse-cursor: pointer;
@@ -154,11 +160,12 @@ component NavBar inherits Rectangle {
     border-radius: self.height / 2;
     background: Token.color.surface-container;
     HorizontalLayout {
-        for item in root.nav-views: Rectangle {
+        for item[index] in root.nav-views: Rectangle {
             NavBarItem {
                 image: item.icon;
                 content: item.content;
                 target: item.target;
+                index: index;
             }
         }
     }
