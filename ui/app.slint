@@ -90,9 +90,9 @@ component NavBarItem inherits Rectangle {
     property <bool> selected:ViewManager.is-show(target);
     pure function getBackdround() -> color {
         if (!selected) {
-            return area.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
+            return area.has-hover ? Token.color.surface-container-high : transparent;
         } else {
-            return Token.color.primary-container;
+            return transparent;
         }
     }
     preferred-height: 100%;
@@ -139,26 +139,23 @@ component NavBarItem inherits Rectangle {
 }
 
 component NavBar inherits Rectangle {
-    in property <[{icon:image, content:string, target:ViewName}]> nav-views:[
-        {
-            icon:Token.image.display.no-image,
-            content:"活动广场",
-            target:ViewName.DiscoveryPage,
-        },
-        {
-            icon:Token.image.display.no-image,
-            content:"活动广场",
-            target:ViewName.DiscoveryPage,
-        },
-        {
-            icon:Token.image.display.no-image,
-            content:"活动广场",
-            target:ViewName.DiscoveryPage,
-        },
-    ];
+    in property <[{icon:image, content:string, target:ViewName}]> nav-views;
     height: 48px;
     border-radius: self.height / 2;
     background: Token.color.surface-container;
+    Rectangle {
+        height: 100%;
+        width: root.width / nav-views.length;
+        z: -1;
+        border-radius: self.height / 2;
+        background: Token.color.primary-container;
+        x: PrivateUtility.navbar-current-index * self.width;
+        animate x {
+            duration: 400ms;
+            easing: ease-in-out;
+        }
+    }
+
     HorizontalLayout {
         for item[index] in root.nav-views: Rectangle {
             NavBarItem {
