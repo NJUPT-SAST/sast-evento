@@ -16,6 +16,7 @@ if (POLICY CMP0167)
 endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
+option(EVENTO_EMBED_RESOURCES "ON to request slint embed resources")
 
 if(APPLE)
   set(MACOSX_BUNDLE_GUI_IDENTIFIER ${IDENTIFIER})
