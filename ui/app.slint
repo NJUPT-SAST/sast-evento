@@ -44,10 +44,6 @@ export {
     SettingPageBridge,
 }
 
-global PrivateUtility {
-    in-out property <int> navbar-current-index:0;
-}
-
 component OverlayRegion inherits Empty {
     if ViewManager.is-show(ViewName.LoginOverlay): login-overlay := LoginOverlay { }
     if ViewManager.is-show(ViewName.MenuOverlay): menu-overlay := MenuOverlay { }
@@ -86,7 +82,6 @@ component NavBarItem inherits Rectangle {
     in property <image> image;
     in property <string> content;
     in property <ViewName> target;
-    in property <int> index;
     property <bool> selected:ViewManager.is-show(target);
     pure function getBackdround() -> color {
         if (!selected) {
@@ -101,7 +96,6 @@ component NavBarItem inherits Rectangle {
     background: getBackdround();
     area := TouchArea {
         clicked => {
-            PrivateUtility.navbar-current-index = index;
             ViewManager.clean-navigate-to(target);
         }
         mouse-cursor: pointer;
@@ -143,13 +137,25 @@ component NavBar inherits Rectangle {
     height: 48px;
     border-radius: self.height / 2;
     background: Token.color.surface-container;
+    pure function get-navbar-current-index() -> int {
+        if (ViewManager.is-show(nav-views[0].target)) {
+            return 0;
+        }
+        if (ViewManager.is-show(nav-views[1].target)) {
+            return 1;
+        }
+        if (ViewManager.is-show(nav-views[2].target)) {
+            return 2;
+        }
+        return -1;
+    }
     Rectangle {
         height: 100%;
         width: root.width / nav-views.length;
         z: -1;
         border-radius: self.height / 2;
         background: Token.color.primary-container;
-        x: PrivateUtility.navbar-current-index * self.width;
+        x: root.get-navbar-current-index() * self.width;
         animate x {
             duration: 400ms;
             easing: ease-in-out;
@@ -157,12 +163,11 @@ component NavBar inherits Rectangle {
     }
 
     HorizontalLayout {
-        for item[index] in root.nav-views: Rectangle {
+        for item in root.nav-views: Rectangle {
             NavBarItem {
                 image: item.icon;
                 content: item.content;
                 target: item.target;
-                index: index;
             }
         }
     }

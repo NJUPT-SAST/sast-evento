@@ -32,7 +32,7 @@ ViewManager::~ViewManager() {
 };
 
 void ViewManager::attach(ViewName name, std::unique_ptr<BasicView> object) {
-    views.emplace(std::make_pair(name, std::move(object)));
+    views.emplace(name, std::move(object));
 }
 
 void ViewManager::show() {
@@ -211,12 +211,12 @@ void ViewManager::call(Action& action) {
     std::for_each(views.begin(),
                   views.end(),
                   [&action](const std::pair<const ViewName, std::unique_ptr<BasicView>>& view) {
-                      action(*view.second.get());
+                      action(*view.second);
                   });
 }
 
 void ViewManager::call(Action& action, ViewName target) {
-    action(*(views.at(target).get()));
+    action(*views.at(target));
 }
 
 EVENTO_UI_END
