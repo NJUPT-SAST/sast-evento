@@ -1,3 +1,4 @@
+#include <Controller/UiBridge.h>
 #include <Infrastructure/Utils/Config.h>
 #include <Infrastructure/Utils/Logger.h>
 #include <Version.h>
@@ -5,7 +6,6 @@
 #include <filesystem>
 #include <slint.h>
 #include <spdlog/spdlog.h>
-#include <ui/UiBridge.h>
 
 int main(int argc, char** argv) {
     Logger logger(Logger::Level::debug,

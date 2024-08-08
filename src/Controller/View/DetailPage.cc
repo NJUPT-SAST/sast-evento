@@ -1,4 +1,4 @@
-#include <ui/View/DetailPage.h>
+#include <Controller/View/DetailPage.h>
 
 EVENTO_UI_START
 

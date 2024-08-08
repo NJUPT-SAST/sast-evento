@@ -1,4 +1,4 @@
-#include <ui/View/HistoryPage.h>
+#include <Controller/View/HistoryPage.h>
 
 EVENTO_UI_START
 

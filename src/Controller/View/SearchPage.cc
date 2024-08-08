@@ -1,4 +1,4 @@
-#include <ui/View/SearchPage.h>
+#include <Controller/View/SearchPage.h>
 
 EVENTO_UI_START
 

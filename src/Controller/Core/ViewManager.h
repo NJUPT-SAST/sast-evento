@@ -1,11 +1,11 @@
 #pragma once
 
+#include <Controller/Core/BasicView.h>
+#include <Controller/Core/GlobalAgent.hpp>
+#include <Controller/Core/UiBase.h>
 #include <set>
 #include <stack>
 #include <string>
-#include <ui/Core/BasicView.h>
-#include <ui/Core/GlobalAgent.hpp>
-#include <ui/Core/UiBase.h>
 
 EVENTO_UI_START
 

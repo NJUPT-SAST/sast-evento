@@ -1,4 +1,4 @@
-#include <ui/View/DiscoveryPage.h>
+#include <Controller/View/DiscoveryPage.h>
 
 EVENTO_UI_START
 

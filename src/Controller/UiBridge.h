@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ui/Core/UiBase.h>
-#include <ui/Core/ViewManager.h>
+#include <Controller/Core/UiBase.h>
+#include <Controller/Core/ViewManager.h>
 
 EVENTO_UI_START
 

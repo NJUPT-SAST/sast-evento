@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ui/Core/GlobalAgent.hpp>
-#include <ui/Core/UiBase.h>
+#include <Controller/Core/GlobalAgent.hpp>
+#include <Controller/Core/UiBase.h>
 
 EVENTO_UI_START
 

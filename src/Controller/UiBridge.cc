@@ -1,14 +1,14 @@
+#include <Controller/UiBridge.h>
+#include <Controller/View/AboutPage.h>
+#include <Controller/View/DetailPage.h>
+#include <Controller/View/DiscoveryPage.h>
+#include <Controller/View/HistoryPage.h>
+#include <Controller/View/LoginOverlay.h>
+#include <Controller/View/MenuOverlay.h>
+#include <Controller/View/MyEventPage.h>
+#include <Controller/View/SearchPage.h>
+#include <Controller/View/SettingPage.h>
 #include <memory>
-#include <ui/UiBridge.h>
-#include <ui/View/AboutPage.h>
-#include <ui/View/DetailPage.h>
-#include <ui/View/DiscoveryPage.h>
-#include <ui/View/HistoryPage.h>
-#include <ui/View/LoginOverlay.h>
-#include <ui/View/MenuOverlay.h>
-#include <ui/View/MyEventPage.h>
-#include <ui/View/SearchPage.h>
-#include <ui/View/SettingPage.h>
 
 EVENTO_UI_START
 
