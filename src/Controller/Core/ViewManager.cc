@@ -16,6 +16,9 @@ ViewManager::ViewManager(slint::ComponentHandle<UiEntryName> uiEntry)
         return self.isViewShow(target);
     });
     self->on_clean_push([this](ViewName newView) {
+        if (viewStack.size() != 0 && newView == viewStack.top()) {
+            return;
+        }
         cleanStack();
         pushView(newView);
     });
@@ -31,7 +34,7 @@ ViewManager::~ViewManager() {
     }
 };
 
-void ViewManager::attach(ViewName name, std::unique_ptr<BasicView> object) {
+void ViewManager::attach(ViewName name, std::shared_ptr<BasicView> object) {
     views.emplace(name, std::move(object));
 }
 
@@ -67,7 +70,7 @@ void ViewManager::exit() {
 }
 
 std::string ViewManager::getViewName(ViewName target) {
-    static std::unordered_map<ViewName, std::string> mapper{
+    static const std::unordered_map<ViewName, std::string> mapper{
         {ViewName::DiscoveryPage, "DiscoveryPage"},
         {ViewName::SearchPage, "SearchPage"},
         {ViewName::HistoryPage, "HistoryPage"},
@@ -82,6 +85,7 @@ std::string ViewManager::getViewName(ViewName target) {
 }
 
 bool ViewManager::isOverlay(ViewName target) {
+    static const std::set<ViewName> overlayList{ViewName::MenuOverlay, ViewName::LoginOverlay};
     return overlayList.find(target) != overlayList.end();
 }
 
@@ -210,7 +214,7 @@ void ViewManager::StylishLog::viewVisibilityChanged(std::string actionName, std:
 void ViewManager::call(Action& action) {
     std::for_each(views.begin(),
                   views.end(),
-                  [&action](const std::pair<const ViewName, std::unique_ptr<BasicView>>& view) {
+                  [&action](const std::pair<const ViewName, std::shared_ptr<BasicView>>& view) {
                       action(*view.second);
                   });
 }

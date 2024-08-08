@@ -3,6 +3,7 @@
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hpp>
 #include <Controller/Core/UiBase.h>
+#include <memory>
 #include <set>
 #include <stack>
 #include <string>
@@ -11,7 +12,7 @@ EVENTO_UI_START
 
 class ViewManager : public GlobalAgent<::ViewManager> {
     slint::ComponentHandle<UiEntryName> uiEntry;
-    std::unordered_map<ViewName, std::unique_ptr<BasicView>> views;
+    std::unordered_map<ViewName, std::shared_ptr<BasicView>> views;
     bool inEventLoop = false;
     std::stack<ViewName> viewStack;
     std::set<ViewName> visibleViews;
@@ -22,7 +23,7 @@ public:
     ~ViewManager();
 
     // register view to manager to auto-call on* functions
-    void attach(ViewName name, std::unique_ptr<BasicView> object);
+    void attach(ViewName name, std::shared_ptr<BasicView> object);
 
     void show();
     void run();
@@ -42,9 +43,6 @@ public:
     void cleanStack();
 
 private:
-    static inline const std::set<ViewName> overlayList{ViewName::MenuOverlay,
-                                                       ViewName::LoginOverlay};
-
     void showView(ViewName target);
     void hideView(ViewName target);
     bool isViewShow(ViewName target);

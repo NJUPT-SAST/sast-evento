@@ -7,7 +7,7 @@ EVENTO_UI_START
 
 class ViewManager;
 
-class BasicView {
+class BasicView : public std::enable_shared_from_this<BasicView> {
     friend class ViewManager;
 
 public:
