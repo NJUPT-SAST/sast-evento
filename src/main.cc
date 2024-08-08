@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <slint.h>
 #include <spdlog/spdlog.h>
+#include <ui/UiBridge.h>
 
 int main(int argc, char** argv) {
     Logger logger(Logger::Level::debug,
@@ -13,9 +14,9 @@ int main(int argc, char** argv) {
                       .string());
     evento::initConfig();
     spdlog::info("SAST Evento version: v" VERSION_FULL);
+
     auto uiEntry = App::create();
-    uiEntry->global<LoginOverlayBridge>().on_link_login(start_sast_link);
-    uiEntry->global<LoginOverlayBridge>().set_version("v" VERSION_FULL);
-    uiEntry->run();
+    evento::UiBridge uiBridge(uiEntry);
+    uiBridge->run();
     evento::saveConfig();
 }
