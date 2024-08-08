@@ -1,4 +1,4 @@
-#include <Infrastructure/Network/Network.h>
+#include <Infrastructure/Network/network.h>
 #include <Version.h>
 #include <ui/View/LoginOverlay.h>
 
