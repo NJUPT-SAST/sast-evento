@@ -9,6 +9,10 @@
         "spdlog",
         "gtest",
         "tomlplusplus",
-        "pkgconf"
+        "pkgconf",
+        {
+            "name": "libsecret",
+            "platform": "!(windows | uwp | osx)"
+        }
     ]
 }
