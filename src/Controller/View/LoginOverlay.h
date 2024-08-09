@@ -8,7 +8,7 @@ EVENTO_UI_START
 
 class LoginOverlay : public BasicView, private GlobalAgent<LoginOverlayBridge> {
 public:
-    LoginOverlay(slint::ComponentHandle<UiEntryName> uiEntry);
+    LoginOverlay(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     LoginOverlay(LoginOverlay&) = delete;
 
 private:

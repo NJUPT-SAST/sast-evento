@@ -14,8 +14,7 @@ int main(int argc, char** argv) {
     evento::initConfig();
     spdlog::info("SAST Evento version: v" VERSION_FULL);
 
-    auto uiEntry = App::create();
-    evento::UiBridge uiBridge(uiEntry);
-    uiBridge->run();
+    evento::UiBridge uiBridge(App::create());
+    uiBridge.run();
     evento::saveConfig();
 }

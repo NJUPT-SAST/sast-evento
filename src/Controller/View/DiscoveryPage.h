@@ -8,7 +8,7 @@ EVENTO_UI_START
 
 class DiscoveryPage : public BasicView, private GlobalAgent<DiscoveryPageBridge> {
 public:
-    DiscoveryPage(slint::ComponentHandle<UiEntryName> uiEntry);
+    DiscoveryPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     DiscoveryPage(DiscoveryPage&) = delete;
 
 private:

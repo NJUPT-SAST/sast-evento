@@ -5,10 +5,13 @@
 
 EVENTO_UI_START
 
-class ViewManager;
-
 class BasicView : public std::enable_shared_from_this<BasicView> {
-    friend class ViewManager;
+    friend class UiBridge;
+
+protected:
+    UiBridge& bridge;
+    BasicView(UiBridge& bridge)
+        : bridge(bridge) {}
 
 public:
     virtual ~BasicView() = default;

@@ -44,6 +44,8 @@ export {
     SettingPageBridge,
 }
 
+export global UiBridge { }
+
 component OverlayRegion inherits Empty {
     if ViewManager.is-show(ViewName.LoginOverlay): login-overlay := LoginOverlay { }
     if ViewManager.is-show(ViewName.MenuOverlay): menu-overlay := MenuOverlay { }
@@ -74,7 +76,7 @@ component BackBottom inherits SButton {
     }
 
     clicked => {
-        ViewManager.prior-page();
+        ViewManager.prior-view();
     }
 }
 
@@ -193,26 +195,6 @@ component ProfileBottom inherits SButton {
     }
 }
 
-component DEBUG_TOOLBAR inherits HorizontalLayout {
-    // visible: false;
-        x: 0;
-    y: - self.height;
-    height: 50px;
-    Button {
-        text: "< Back";
-        clicked => {
-            ViewManager.prior-page();
-        }
-    }
-
-    Button {
-        text: Token.is-darkmode ? "Dark" : "Light";
-        clicked => {
-            Token.switch-display-mode();
-        }
-    }
-}
-
 export component App inherits Window {
     title: "SAST Evento";
     default-font-family: "MiSans";
@@ -222,8 +204,6 @@ export component App inherits Window {
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
-    DEBUG := DEBUG_TOOLBAR { }
-
     VerticalLayout {
         heading := HorizontalLayout {
             padding: 8px;

@@ -8,7 +8,7 @@ EVENTO_UI_START
 
 class HistoryPage : public BasicView, private GlobalAgent<HistoryPageBridge> {
 public:
-    HistoryPage(slint::ComponentHandle<UiEntryName> uiEntry);
+    HistoryPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     HistoryPage(HistoryPage&) = delete;
 
 private:

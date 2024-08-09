@@ -8,7 +8,7 @@ EVENTO_UI_START
 
 class SearchPage : public BasicView, private GlobalAgent<SearchPageBridge> {
 public:
-    SearchPage(slint::ComponentHandle<UiEntryName> uiEntry);
+    SearchPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     SearchPage(SearchPage&) = delete;
 
 private:

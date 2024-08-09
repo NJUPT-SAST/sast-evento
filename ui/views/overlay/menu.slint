@@ -23,7 +23,6 @@ component MenuItem inherits Rectangle {
     content := HorizontalLayout {
         spacing: 8px;
         padding: 8px;
-
         Image {
             horizontal-alignment: center;
             vertical-alignment: center;
@@ -87,7 +86,6 @@ export component MenuOverlay inherits Overlay {
             background: Token.color.surface-container;
             border-top-left-radius: 6px;
             border-bottom-left-radius: 6px;
-
             init => {
                 self.width = 400px;
             }
@@ -95,12 +93,10 @@ export component MenuOverlay inherits Overlay {
                 duration: 400ms;
                 easing: ease-in-out;
             }
-
             VerticalLayout {
                 padding: 10px;
                 padding-top: 30px;
                 spacing: 5px;
-
                 HorizontalLayout {
                     spacing: 10px;
                     padding-bottom: 10px;
@@ -140,7 +136,7 @@ export component MenuOverlay inherits Overlay {
                     icon: Token.image.icon.history.normal;
                     label: "历史活动";
                     clicked => {
-                        ViewManager.clean-push(ViewName.HistoryPage)
+                        ViewManager.replace-navigate-to(ViewName.HistoryPage)
                     }
                 }
 
@@ -158,7 +154,7 @@ export component MenuOverlay inherits Overlay {
                     icon: Token.image.icon.setting.normal;
                     label: "设置";
                     clicked => {
-                        ViewManager.clean-push(ViewName.SettingPage)
+                        ViewManager.replace-navigate-to(ViewName.SettingPage)
                     }
                 }
 
@@ -166,7 +162,7 @@ export component MenuOverlay inherits Overlay {
                     icon: Token.image.icon.info.normal;
                     label: "关于";
                     clicked => {
-                        ViewManager.clean-push(ViewName.AboutPage)
+                        ViewManager.replace-navigate-to(ViewName.AboutPage)
                     }
                 }
 

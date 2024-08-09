@@ -10,4 +10,9 @@ EVENTO_UI_START
 
 using UiEntryName = App;
 
+class UiBridge;
+class ViewManager;
+class AccountManager;
+class NotificationManager;
+
 EVENTO_UI_END

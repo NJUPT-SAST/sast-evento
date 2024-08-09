@@ -2,8 +2,9 @@
 
 EVENTO_UI_START
 
-AboutPage::AboutPage(slint::ComponentHandle<UiEntryName> uiEntry)
-    : GlobalAgent(uiEntry) {}
+AboutPage::AboutPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge)
+    : BasicView(bridge)
+    , GlobalAgent(uiEntry) {}
 
 void AboutPage::onCreate() {
     auto& self = *this;

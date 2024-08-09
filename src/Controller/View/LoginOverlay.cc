@@ -4,8 +4,9 @@
 
 EVENTO_UI_START
 
-LoginOverlay::LoginOverlay(slint::ComponentHandle<UiEntryName> uiEntry)
-    : GlobalAgent(uiEntry) {}
+LoginOverlay::LoginOverlay(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge)
+    : BasicView(bridge)
+    , GlobalAgent(uiEntry) {}
 
 void LoginOverlay::onCreate() {
     auto& self = *this;
