@@ -6,7 +6,7 @@
   SAST Evento
 </h1>
 <p align="center">
-  NJUPT SAST C++组 SoC项目
+  NJUPT SAST C++组 SoC 项目
 </p>
 
 <p align="center">
@@ -29,9 +29,9 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 - 同学们活动没有的反馈不高，活动完的收获没法量化
 - 活动的质量没有比较好的反馈
 
-针对上面的问题，我们决定SoC期间制作一个活动辅助系统帮助部长和讲师们更加顺畅地完成日常活动，减少沟通负担。
+针对上面的问题，我们决定 SoC 期间制作一个活动辅助系统帮助部长和讲师们更加顺畅地完成日常活动，减少沟通负担。
 
-本项目是SAST Evento的跨平台桌面客户端版本。
+本项目是 SAST Evento 的跨平台桌面客户端版本。
 
 ## License
 
@@ -41,7 +41,7 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 ### 先决条件
 
-- 一个支持 C++20 或更高标准的编译器
+- 支持 C++20 或更高标准的编译器
 - CMake 3.15 或更高版本
 - vcpkg 包管理器
 - Rust 工具链
@@ -95,7 +95,7 @@ cmake --build --preset native
 - [Boost.Url](https://github.com/boostorg/url)
 - [OpenSSL](https://github.com/openssl/openssl)
 - [Slint](https://github.com/slint-ui/slint)
-- [Google Test](https://github.com/google/googletest)
+- [toml++](https://github.com/marzer/tomlplusplus)
 - [nlohmann-json](https://github.com/nlohmann/json)
 - [spdlog](https://github.com/gabime/spdlog)
 - [keychain](https://github.com/hrantzsch/keychain.git)

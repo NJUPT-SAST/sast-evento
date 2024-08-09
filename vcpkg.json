@@ -7,7 +7,6 @@
         "openssl",
         "nlohmann-json",
         "spdlog",
-        "gtest",
         "tomlplusplus",
         "pkgconf",
         {
