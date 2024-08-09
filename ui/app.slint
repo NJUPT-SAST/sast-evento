@@ -152,10 +152,11 @@ component NavBar inherits Rectangle {
     Rectangle {
         height: 100%;
         width: root.width / nav-views.length;
-        z: -1;
+        visible: root.get-navbar-current-index() != -1;
         border-radius: self.height / 2;
         background: Token.color.primary-container;
         x: root.get-navbar-current-index() * self.width;
+        z: -1;
         animate x {
             duration: 400ms;
             easing: ease-in-out;

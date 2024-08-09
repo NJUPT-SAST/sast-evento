@@ -83,10 +83,18 @@ export component MenuOverlay inherits Overlay {
         Rectangle {
             x: body.width - self.width;
             height: root.height;
-            width: 400px;
+            width: 0;
             background: Token.color.surface-container;
             border-top-left-radius: 6px;
             border-bottom-left-radius: 6px;
+
+            init => {
+                self.width = 400px;
+            }
+            animate width {
+                duration: 400ms;
+                easing: ease-in-out;
+            }
 
             VerticalLayout {
                 padding: 10px;
@@ -132,7 +140,7 @@ export component MenuOverlay inherits Overlay {
                     icon: Token.image.icon.history.normal;
                     label: "历史活动";
                     clicked => {
-                        ViewManager.push(ViewName.HistoryPage)
+                        ViewManager.clean-push(ViewName.HistoryPage)
                     }
                 }
 
@@ -150,7 +158,7 @@ export component MenuOverlay inherits Overlay {
                     icon: Token.image.icon.setting.normal;
                     label: "设置";
                     clicked => {
-                        ViewManager.push(ViewName.SettingPage)
+                        ViewManager.clean-push(ViewName.SettingPage)
                     }
                 }
 
@@ -158,7 +166,7 @@ export component MenuOverlay inherits Overlay {
                     icon: Token.image.icon.info.normal;
                     label: "关于";
                     clicked => {
-                        ViewManager.push(ViewName.AboutPage)
+                        ViewManager.clean-push(ViewName.AboutPage)
                     }
                 }
 
