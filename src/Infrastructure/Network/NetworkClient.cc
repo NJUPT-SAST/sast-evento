@@ -52,7 +52,7 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
     co_return Ok(entity);
 }
-Task<Result<std::string>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
+Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
     // TODO: implement me!
     co_return Error(Error::Unknown);
 }

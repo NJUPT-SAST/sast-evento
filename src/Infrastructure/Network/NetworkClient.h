@@ -37,7 +37,7 @@ public:
 
     Task<Result<UserInfoEntity>> getUserInfo();
 
-    Task<Result<std::string>> refreshAccessToken(std::string const& refreshToken);
+    Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
     Task<Result<EventEntityList>> getActiveEventList();
 
