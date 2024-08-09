@@ -685,6 +685,11 @@ struct Result {
 
     typedef details::Storage<T, E> storage_type;
 
+    Result()
+        : ok_(true) {
+        storage_.rawConstruct(T());
+    }
+
     Result(types::Ok<T> ok)
         : ok_(true) {
         storage_.construct(std::move(ok));

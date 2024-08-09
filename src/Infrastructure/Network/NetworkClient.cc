@@ -38,6 +38,13 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& 
     co_return Ok(entity);
 }
 
+NetworkClient* NetworkClient::getInstance() {
+    static ssl::context ctx(ssl::context::sslv23);
+    ctx.set_default_verify_paths();
+    static NetworkClient s_instance(ctx);
+    return &s_instance;
+}
+
 Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
     auto result = co_await this->request<api::Evento>(http::verb::get, endpoint("/v2/user/profile"));
     if (result.isErr())
@@ -168,6 +175,10 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     auto data = res.contains("data") ? res["data"] : nlohmann::json::object();
 
     return Ok(data);
+}
+
+NetworkClient* networkClient() {
+    return NetworkClient::getInstance();
 }
 
 } // namespace evento

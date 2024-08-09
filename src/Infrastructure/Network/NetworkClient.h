@@ -31,7 +31,8 @@ using Task = net::awaitable<T>;
 
 class NetworkClient {
 public:
-    NetworkClient(net::ssl::context& ctx);
+    NetworkClient(const NetworkClient&) = delete;
+    NetworkClient& operator==(const NetworkClient&) = delete;
 
     Task<Result<LoginResEntity>> loginViaSastLink(std::string const& code);
 
@@ -70,6 +71,9 @@ public:
     std::optional<std::string> tokenBytes;
 
 private:
+    NetworkClient(net::ssl::context& ctx);
+    static NetworkClient* getInstance();
+
     // - success => return the `data` field from response json
     //            maybe json object or json array
     // - error => return error message
@@ -109,6 +113,10 @@ private:
 private:
     net::ssl::context& _ctx;
     std::unique_ptr<HttpsAccessManager> _manager;
+
+    friend NetworkClient* networkClient();
 };
+
+NetworkClient* networkClient();
 
 } // namespace evento
