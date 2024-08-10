@@ -2,9 +2,23 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    paths:
+    - "src/**"
+    - "ui/**"
+    - "3rdpart/**"
+    - "CMakeLists.txt"
+    - "CMakePresets.json"
+    - "vcpkg*"
+    - ".github/workflows/codeql.yml"
   pull_request:
-    branches: [ "main", "dev" ]
+    paths:
+    - "src/**"
+    - "ui/**"
+    - "3rdpart/**"
+    - "CMakeLists.txt"
+    - "CMakePresets.json"
+    - "vcpkg*"
+    - ".github/workflows/codeql.yml"
   schedule:
     - cron: '38 9 * * 6'
 
