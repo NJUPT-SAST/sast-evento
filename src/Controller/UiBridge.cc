@@ -1,4 +1,5 @@
 #include <Controller/Core/AccountManager.h>
+#include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiUtility.h>
 #include <Controller/Core/ViewManager.h>
 #include <Controller/UiBridge.h>
@@ -20,7 +21,8 @@ UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
     : uiEntry(uiEntry)
     , GlobalAgent(uiEntry)
     , viewManager(std::make_shared<ViewManager>(uiEntry, *this))
-    , accountManager(std::make_shared<AccountManager>(uiEntry, *this)) {
+    , accountManager(std::make_shared<AccountManager>(uiEntry, *this))
+    , messageManager(std::make_shared<MessageManager>(uiEntry, *this)) {
     attachAllViews();
 
     uiEntry->window().on_close_requested([this] {
@@ -45,6 +47,10 @@ ViewManager& UiBridge::getViewManager() {
 
 AccountManager& UiBridge::getAccountManager() {
     return *accountManager;
+}
+
+MessageManager& UiBridge::getMessageManager() {
+    return *messageManager;
 }
 
 slint::ComponentHandle<UiEntryName> UiBridge::getUiEntry() {

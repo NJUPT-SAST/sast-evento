@@ -5,7 +5,9 @@ import { Empty } from "./components/index.slint";
 import { 
     ViewManager,
     ViewName,
-    AccountManager
+    AccountManager,
+    MessageManager,
+    MessageType
 } from "./logic/index.slint";
 
 import { 
@@ -29,12 +31,15 @@ import {
     SettingPageBridge
 } from "./views/index.slint";
 import { SButton } from "modules/surrealism-ui/index.slint";
+import { SAlert } from "modules/surrealism-ui/src/alert/index.slint";
 
 // export for C++ interact
 export { 
     ViewManager,
     ViewName,
     AccountManager,
+    MessageManager,
+    MessageType,
     LoginOverlayBridge,
     MenuOverlayBridge,
     DiscoveryPageBridge,
@@ -63,6 +68,39 @@ component PageRegion inherits Empty {
     if ViewManager.is-show(ViewName.DetailPage): detail-page := DetailPage { }
     if ViewManager.is-show(ViewName.AboutPage): about-page := AboutPage { }
     if ViewManager.is-show(ViewName.SettingPage): setting-page := SettingPage { }
+}
+
+component Toast inherits Rectangle {
+    clip: true;
+    // TODO: bk with type
+    background: Token.color.surface-variant;
+    border-radius: 8px;
+    height: 54px;
+    content := HorizontalLayout {
+        padding: 16px;
+        spacing: 8px;
+        alignment: start;
+        Rectangle {
+            width: 24px;
+            Image {
+                height: 24px;
+                width: 24px;
+                // TODO: find icons
+                source: Token.image.display.no-image;
+            }
+        }
+
+        Text {
+            max-width: self.preferred-width;
+            vertical-alignment: center;
+            horizontal-alignment: left;
+            text: MessageManager.content;
+            // TODO: replace
+            color: Token.color.on-surface-variant;
+            font-size: Token.font.body.large.size;
+            wrap: no-wrap;
+        }
+    }
 }
 
 component BackBottom inherits SButton {
@@ -208,6 +246,33 @@ export component App inherits Window {
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
+    Toast {
+        x: root.width - self.width - 16px;
+        y: root.height + 16px;
+        width: parent.width * (1 - 0.618);
+        states [
+            visible when MessageManager.visible: {
+                y: root.height - self.height - 16px;
+                in {
+                    animate y {
+                        duration: 200ms;
+                        easing: ease-out-quart;
+                    }
+                }
+                out {
+                    animate y {
+                        delay: MessageManager.timeout;
+                        duration: 200ms;
+                        easing: ease-in-quart;
+                    }
+                }
+            }
+            invisible when !MessageManager.visible: {
+                y: root.height + 16px;
+            }
+        ]
+    }
+
     VerticalLayout {
         heading := HorizontalLayout {
             padding: 8px;

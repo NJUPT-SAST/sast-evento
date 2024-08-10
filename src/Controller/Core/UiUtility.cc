@@ -23,8 +23,10 @@ void UiUtility::StylishLog::viewActionTriggered(std::string origin,
 void UiUtility::StylishLog::viewVisibilityChanged(std::string origin,
                                                   std::string actionName,
                                                   std::string viewName) {
-    // TODO: better log
     spdlog::debug("{}: {} visibility changed: {}", origin, viewName, actionName);
+}
+void UiUtility::StylishLog::newMessageShowed(std::string origin, std::string content) {
+    spdlog::debug("{}: new message: {}", origin, content);
 }
 
 EVENTO_UI_END

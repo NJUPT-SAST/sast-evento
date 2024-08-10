@@ -1,0 +1,13 @@
+export enum MessageType{
+    Info,
+    Warning,
+    Error
+}
+
+export global MessageManager {
+    in-out property <string> content: "Test content";
+    in-out property <bool> visible;
+    in-out property <MessageType> type;
+    in-out property <duration> timeout: 3s;
+    callback show-message(string, MessageType);
+}

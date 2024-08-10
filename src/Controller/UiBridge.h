@@ -4,8 +4,6 @@
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
 
-// #include <Controller/Core/ViewManager.h>
-
 EVENTO_UI_START
 
 class UiBridge : GlobalAgent<::UiBridge> {
@@ -21,6 +19,7 @@ class UiBridge : GlobalAgent<::UiBridge> {
     // Managers
     std::shared_ptr<ViewManager> viewManager;
     std::shared_ptr<AccountManager> accountManager;
+    std::shared_ptr<MessageManager> messageManager;
 
     std::string logOrigin = "UiBridge";
 
@@ -34,6 +33,7 @@ public:
     // manager getter
     ViewManager& getViewManager();
     AccountManager& getAccountManager();
+    MessageManager& getMessageManager();
     [[deprecated("will lead to unknown behavior")]] slint::ComponentHandle<UiEntryName> getUiEntry();
 
     // same as Slint show();

@@ -18,6 +18,7 @@ public:
         static void viewVisibilityChanged(std::string origin,
                                           std::string actionName,
                                           std::string viewName);
+        static void newMessageShowed(std::string origin, std::string content);
     };
 
 private:

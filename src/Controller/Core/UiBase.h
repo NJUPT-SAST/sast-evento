@@ -13,6 +13,6 @@ using UiEntryName = App;
 class UiBridge;
 class ViewManager;
 class AccountManager;
-class NotificationManager;
+class MessageManager;
 
 EVENTO_UI_END
