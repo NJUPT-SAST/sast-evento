@@ -13,6 +13,8 @@ public:
 
 private:
     void onCreate() override;
+
+    static void login();
 };
 
 EVENTO_UI_END
