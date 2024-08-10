@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Controller/Core/GlobalAgent.hpp>
+#include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <chrono>

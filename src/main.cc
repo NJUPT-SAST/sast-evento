@@ -1,6 +1,6 @@
 #include <Controller/UiBridge.h>
 #include <Infrastructure/Utils/Config.h>
-#include <Infrastructure/Utils/Logger.h>
+#include <Infrastructure/Utils/Logger.hh>
 #include <Version.h>
 #include <filesystem>
 #include <slint.h>
