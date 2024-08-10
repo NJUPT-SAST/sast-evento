@@ -4,7 +4,8 @@ import { Button } from "std-widgets.slint";
 import { Empty } from "./components/index.slint";
 import { 
     ViewManager,
-    ViewName
+    ViewName,
+    AccountManager
 } from "./logic/index.slint";
 
 import { 
@@ -33,6 +34,7 @@ import { SButton } from "modules/surrealism-ui/index.slint";
 export { 
     ViewManager,
     ViewName,
+    AccountManager,
     LoginOverlayBridge,
     MenuOverlayBridge,
     DiscoveryPageBridge,
@@ -44,7 +46,9 @@ export {
     SettingPageBridge,
 }
 
-export global UiBridge { }
+export global UiBridge {
+    in-out property <int> name;
+}
 
 component OverlayRegion inherits Empty {
     if ViewManager.is-show(ViewName.LoginOverlay): login-overlay := LoginOverlay { }

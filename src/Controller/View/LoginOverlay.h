@@ -1,8 +1,6 @@
 #pragma once
 
-#include <Controller/Core/BasicView.h>
-#include <Controller/Core/GlobalAgent.hpp>
-#include <Controller/Core/UiBase.h>
+#include <Controller/UiBridge.h>
 
 EVENTO_UI_START
 
@@ -13,8 +11,7 @@ public:
 
 private:
     void onCreate() override;
-
-    static void login();
+    void onLogin() override;
 };
 
 EVENTO_UI_END

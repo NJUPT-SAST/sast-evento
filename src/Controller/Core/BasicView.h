@@ -19,10 +19,10 @@ public:
 private:
     virtual void onCreate() {};
     virtual void onStart() {};
-    // virtual void onLogin() {};
+    virtual void onLogin() {};
     virtual void onShow() {};
     virtual void onHide() {};
-    // virtual void onLogout() {};
+    virtual void onLogout() {};
     virtual void onStop() {};
     virtual void onDestroy() {};
 };

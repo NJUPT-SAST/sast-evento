@@ -10,7 +10,7 @@ EVENTO_UI_START
 
 class UiBridge : GlobalAgent<::UiBridge> {
     friend class ViewManager;
-    // friend class AccountManager;
+    friend class AccountManager;
 
     slint::ComponentHandle<UiEntryName> uiEntry;
     bool eventLoopRunning = false;
@@ -20,7 +20,7 @@ class UiBridge : GlobalAgent<::UiBridge> {
 
     // Managers
     std::shared_ptr<ViewManager> viewManager;
-    // AccountManager accountManager;
+    std::shared_ptr<AccountManager> accountManager;
 
     std::string logOrigin = "UiBridge";
 
@@ -33,7 +33,7 @@ public:
 
     // manager getter
     ViewManager& getViewManager();
-    // AccountManager& getAccountManager();
+    AccountManager& getAccountManager();
     [[deprecated("will lead to unknown behavior")]] slint::ComponentHandle<UiEntryName> getUiEntry();
 
     // same as Slint show();
@@ -60,10 +60,10 @@ private:
     static struct actions {
         static inline Action onCreate = [](BasicView& view) { view.onCreate(); };
         static inline Action onStart = [](BasicView& view) { view.onStart(); };
-        // static inline Action onLogin = [](BasicView& view) { view.onLogin(); };
+        static inline Action onLogin = [](BasicView& view) { view.onLogin(); };
         static inline Action onShow = [](BasicView& view) { view.onShow(); };
         static inline Action onHide = [](BasicView& view) { view.onHide(); };
-        // static inline Action onLogout = [](BasicView& view) { view.onLogout(); };
+        static inline Action onLogout = [](BasicView& view) { view.onLogout(); };
         static inline Action onStop = [](BasicView& view) { view.onStop(); };
         static inline Action onDestroy = [](BasicView& view) { view.onDestroy(); };
     } actions;

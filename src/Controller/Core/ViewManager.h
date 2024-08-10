@@ -9,7 +9,7 @@
 
 EVENTO_UI_START
 
-class ViewManager : public GlobalAgent<::ViewManager> {
+class ViewManager : private GlobalAgent<::ViewManager> {
     friend class UiBridge;
     UiBridge& bridge;
     std::string logOrigin = "ViewManager";

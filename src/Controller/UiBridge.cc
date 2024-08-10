@@ -1,4 +1,5 @@
-#include "Core/UiUtility.h"
+#include <Controller/Core/AccountManager.h>
+#include <Controller/Core/UiUtility.h>
 #include <Controller/Core/ViewManager.h>
 #include <Controller/UiBridge.h>
 #include <Controller/View/AboutPage.h>
@@ -18,7 +19,8 @@ EVENTO_UI_START
 UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
     : uiEntry(uiEntry)
     , GlobalAgent(uiEntry)
-    , viewManager(std::make_shared<ViewManager>(uiEntry, *this)) {
+    , viewManager(std::make_shared<ViewManager>(uiEntry, *this))
+    , accountManager(std::make_shared<AccountManager>(uiEntry, *this)) {
     attachAllViews();
 
     uiEntry->window().on_close_requested([this] {
@@ -28,9 +30,9 @@ UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
     slint::invoke_from_event_loop([this] { return onEnterEventLoop(); });
 
     viewManager->initStack(ViewName::DiscoveryPage);
-    // if (!accountManager.isLogin()) { // TODO: wait account manager
-    viewManager->initStack(ViewName::LoginOverlay);
-    // }
+    if (!accountManager->isLogin()) {
+        viewManager->initStack(ViewName::LoginOverlay);
+    }
 }
 
 void UiBridge::attachView(ViewName name, std::shared_ptr<BasicView> object) {
@@ -41,9 +43,9 @@ ViewManager& UiBridge::getViewManager() {
     return *viewManager;
 }
 
-// AccountManager& UiBridge::getAccountManager() { // TODO: wait account manager
-//     return accountManager;
-// }
+AccountManager& UiBridge::getAccountManager() {
+    return *accountManager;
+}
 
 slint::ComponentHandle<UiEntryName> UiBridge::getUiEntry() {
     return uiEntry;
