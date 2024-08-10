@@ -1,5 +1,6 @@
 #pragma once
 
+#include "slint.h"
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -31,52 +32,60 @@ public:
      * @param task:      return value of a coroutine,
      *                   an awaitable object wrapping a T type value
      *
-     * @param callback:  callback function, called when coroutine is done
+     * @param callback:  callback function, called in the main thread when coroutine is done
      *                   parameter: any based on T except T&&   
     */
     template<typename T, BOOST_ASIO_COMPLETION_TOKEN_FOR(void(T&)) CompletionCallback>
     void asyncExecute(Task<T> task, CompletionCallback&& callback) {
-        net::co_spawn(_ioc, std::move(task), [callback](std::exception_ptr e, T value) {
-            if (!e) {
-                callback(value);
-                return;
-            }
-            try {
-                std::rethrow_exception(e);
-            } catch (std::exception& ex) {
-                spdlog::error(ex.what());
-            }
-        });
+        net::co_spawn(_ioc,
+                      std::move(task),
+                      [callback = std::forward<CompletionCallback>(callback)](std::exception_ptr e,
+                                                                              T value) {
+                          if (!e) {
+                              slint::invoke_from_event_loop(
+                                  [callback = std::move(callback), value = std::move(value)]() {
+                                      callback(std::move(value));
+                                  });
+                              return;
+                          }
+                          try {
+                              std::rethrow_exception(e);
+                          } catch (std::exception& ex) {
+                              spdlog::error(ex.what());
+                          }
+                      });
     }
 
     /**
      * @param task:      return value of a coroutine, 
      *                   an awaitable object wrapping a T type value
      *
-     * @param callback:  callback function, called when coroutine is done
+     * @param callback:  callback function, called in the main thread when coroutine is done
      *                   parameter: void
      *
      * Specialization for "void"
     */
     template<BOOST_ASIO_COMPLETION_TOKEN_FOR(void()) CompletionCallback>
     void asyncExecute(Task<void> task, CompletionCallback&& callback) {
-        net::co_spawn(_ioc, std::move(task), [callback](std::exception_ptr e) {
-            if (!e) {
-                callback();
-                return;
-            }
-            try {
-                std::rethrow_exception(e);
-            } catch (std::exception& ex) {
-                spdlog::error(ex.what());
-            }
-        });
+        net::co_spawn(_ioc,
+                      std::move(task),
+                      [callback = std::forward<CompletionCallback>(callback)](std::exception_ptr e) {
+                          if (!e) {
+                              slint::invoke_from_event_loop(callback);
+                              return;
+                          }
+                          try {
+                              std::rethrow_exception(e);
+                          } catch (std::exception& ex) {
+                              spdlog::error(ex.what());
+                          }
+                      });
     }
 
     /**
      * @param func:      coroutine function pointer
      *
-     * @param callback:  callback function, called when coroutine is done periodically
+     * @param callback:  callback function, called in the main thread when coroutine is done periodically
      *                   parameters: (std::exception_ptr, T Type)
      *                   T Type: any based on T(awaitable object wrapped type) except T&&
      *
@@ -96,14 +105,14 @@ public:
 
     ~AsyncExecutor() {
         _ioc.stop();
-        if (_ioc_thread.joinable()) {
-            _ioc_thread.join();
+        if (_iocThread.joinable()) {
+            _iocThread.join();
         }
     }
 
 private:
     AsyncExecutor() {
-        _ioc_thread = std::thread([this] {
+        _iocThread = std::thread([this] {
             net::signal_set signals{_ioc, SIGINT, SIGTERM};
             signals.async_wait([&](auto, auto) { _ioc.stop(); });
             _ioc.run();
@@ -123,26 +132,36 @@ private:
                              CompletionCallback&& callback,
                              std::chrono::steady_clock::duration interval) {
         auto timer = std::make_shared<net::steady_timer>(_ioc, interval);
-        timer->async_wait([=, this](const boost::system::error_code& ec) {
+        asyncExecuteByTimerHelper(std::forward<TaskFunc>(func),
+                                  std::forward<CompletionCallback>(callback),
+                                  _taskId);
+        ++_taskId;
+        _timers.push_back(timer);
+    }
+
+    template<typename TaskFunc,
+             BOOST_ASIO_COMPLETION_TOKEN_FOR(
+                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
+                 CompletionCallback>
+    void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
+        _timers[taskId]->async_wait([=,
+                                     func = std::forward<TaskFunc>(func),
+                                     callback = std::forward<CompletionCallback>(callback),
+                                     this](const boost::system::error_code& ec) {
             if (!ec) {
-                net::co_spawn(_ioc,
-                              std::forward<TaskFunc>(func),
-                              std::forward<CompletionCallback>(callback));
-                timer->expires_after(interval);
-                asyncExecuteByTimer(func,
-                                    std::forward<TaskFunc>(func),
-                                    std::forward<CompletionCallback>(callback));
+                net::co_spawn(_ioc, func, [callback]() { slint::invoke_from_event_loop(callback); });
+                asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
             } else {
                 spdlog::error(ec.what());
             }
         });
-        _timers.push_back(timer);
     }
 
 private:
     net::io_context _ioc;
-    std::thread _ioc_thread;
+    std::thread _iocThread;
     std::vector<std::shared_ptr<net::steady_timer>> _timers;
+    inline static int _taskId = 0;
 
     friend AsyncExecutor* executor();
 };

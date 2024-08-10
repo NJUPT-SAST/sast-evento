@@ -54,7 +54,7 @@ void AccountManager::requestLogin() {
 
             co_return loginResult.unwrap();
         }(),
-        [weak_this = weak_from_this(), &self = *this, this](Result<LoginResEntity>& result) {
+        [weak_this = weak_from_this(), &self = *this, this](Result<LoginResEntity> result) {
             if (auto alive = weak_this.lock()) {
                 if (result.isErr()) {
                     // TODO: onLoginFail();
