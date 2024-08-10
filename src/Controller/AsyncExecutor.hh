@@ -84,7 +84,7 @@ public:
      */
     template<typename TaskFunc,
              BOOST_ASIO_COMPLETION_TOKEN_FOR(
-                 typename net::detail::awaitable_signature<std::result_of_t<TaskFunc()>>::type)
+                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
                  CompletionCallback>
     void asyncExecute(TaskFunc&& func,
                       CompletionCallback&& callback,
@@ -116,7 +116,7 @@ private:
 
     template<typename TaskFunc,
              BOOST_ASIO_COMPLETION_TOKEN_FOR(
-                 typename net::detail::awaitable_signature<std::result_of_t<TaskFunc()>>::type)
+                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
                  CompletionCallback>
     void asyncExecuteByTimer(TaskFunc&& func,
                              CompletionCallback&& callback,
