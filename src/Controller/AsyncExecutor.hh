@@ -95,6 +95,7 @@ public:
     }
 
     ~AsyncExecutor() {
+        _ioc.stop();
         if (_ioc_thread.joinable()) {
             _ioc_thread.join();
         }

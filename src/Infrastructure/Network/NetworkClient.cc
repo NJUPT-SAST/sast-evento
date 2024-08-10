@@ -20,6 +20,13 @@ NetworkClient::NetworkClient(net::ssl::context& ctx)
     : _ctx(ctx)
     , _manager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
 
+NetworkClient* NetworkClient::getInstance() {
+    static ssl::context ctx(ssl::context::sslv23);
+    ctx.set_default_verify_paths();
+    static NetworkClient s_instance(ctx);
+    return &s_instance;
+}
+
 Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& code) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
                                                       endpoint("/login/link"),
@@ -36,13 +43,6 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& 
     }
 
     co_return Ok(entity);
-}
-
-NetworkClient* NetworkClient::getInstance() {
-    static ssl::context ctx(ssl::context::sslv23);
-    ctx.set_default_verify_paths();
-    static NetworkClient s_instance(ctx);
-    return &s_instance;
 }
 
 Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
