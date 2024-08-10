@@ -2,7 +2,6 @@
 #include <Infrastructure/Utils/Config.h>
 #include <Infrastructure/Utils/Logger.h>
 #include <Version.h>
-#include <app.h>
 #include <filesystem>
 #include <slint.h>
 #include <spdlog/spdlog.h>

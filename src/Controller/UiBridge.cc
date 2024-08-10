@@ -81,7 +81,7 @@ void UiBridge::exit() {
     }
 }
 
-bool UiBridge::inEventLoop() {
+bool UiBridge::inEventLoop() const {
     return eventLoopRunning;
 }
 

@@ -45,7 +45,7 @@ public:
     // called from other thread (for tray)
     [[deprecated("no tray in project now")]] void exit();
 
-    bool inEventLoop();
+    bool inEventLoop() const;
 
 private:
     void attachAllViews();
