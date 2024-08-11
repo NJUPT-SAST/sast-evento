@@ -82,6 +82,7 @@ jobs:
       with:
         path: |
           ${{ github.workspace }}/build/_deps
+          ${{ github.workspace }}/build/lib
           ${{ github.workspace }}/build/*/cargo/build
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
