@@ -1,4 +1,3 @@
-#include "app.h"
 #include <Controller/Core/AccountManager.h>
 #include <Controller/Core/ViewManager.h>
 #include <Controller/View/LoginOverlay.h>

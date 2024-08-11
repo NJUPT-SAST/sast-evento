@@ -30,11 +30,16 @@ public:
     // attach view for on* functions and manager access
     void attachView(ViewName name, std::shared_ptr<BasicView> object);
 
-    // manager getter
+    // getter
     ViewManager& getViewManager();
     AccountManager& getAccountManager();
     MessageManager& getMessageManager();
     [[deprecated("will lead to unknown behavior")]] slint::ComponentHandle<UiEntryName> getUiEntry();
+
+    template<typename T>
+    T& getView(ViewName target) {
+        return dynamic_cast<T&>(*views.at(target));
+    }
 
     // same as Slint show();
     void show();
