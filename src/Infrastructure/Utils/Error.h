@@ -1,3 +1,4 @@
+// IWYU pragma: private, include <Infrastructure/Utils/Result.h>
 #pragma once
 
 #include <string>

@@ -3,7 +3,6 @@
 #include <Infrastructure/Utils/Logger.hh>
 #include <Version.h>
 #include <filesystem>
-#include <slint.h>
 #include <spdlog/spdlog.h>
 
 int main(int argc, char** argv) {

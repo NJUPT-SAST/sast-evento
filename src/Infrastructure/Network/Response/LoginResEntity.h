@@ -1,4 +1,4 @@
-// IWYU pragma: private, include "ResponseStruct.h"
+// IWYU pragma: private, include <Infrastructure/Network/ResponseStruct.h>
 #pragma once
 
 #include "UserInfoEntity.h"

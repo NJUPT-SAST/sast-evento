@@ -1,6 +1,5 @@
 #pragma once
 
-#include "slint.h"
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -9,6 +8,7 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/system/detail/error_code.hpp>
 #include <memory>
+#include <slint.h>
 #include <spdlog/spdlog.h>
 #include <thread>
 #include <utility>

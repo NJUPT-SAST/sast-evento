@@ -37,7 +37,7 @@ private:
 
     static const inline std::string package = "org.sast.evento";
     static const inline std::string service = "refresh-token";
-    void setKeychainRefreshToken(std::string refreshToken);
+    void setKeychainRefreshToken(const std::string& refreshToken);
     std::string getKeychainRefreshToken();
 
     void scheduleRenewAccessToken();

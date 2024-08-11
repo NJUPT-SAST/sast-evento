@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <Infrastructure/Utils/Error.h>
+#include <Infrastructure/Utils/Error.h> // IWYU pragma: export
 #include <concepts>
 #include <cstdio>
 #include <exception>

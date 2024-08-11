@@ -1,6 +1,5 @@
 #pragma once
 
-#include "ResponseStruct.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
 #include <Infrastructure/Network/HttpsAccessManager.h>

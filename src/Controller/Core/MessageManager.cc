@@ -1,7 +1,7 @@
-#include "Controller/Core/UiBase.h"
 #include "GlobalAgent.hh"
 #include "UiUtility.h"
 #include <Controller/Core/MessageManager.h>
+#include <Controller/Core/UiBase.h>
 #include <chrono>
 #include <slint.h>
 #include <spdlog/spdlog.h>

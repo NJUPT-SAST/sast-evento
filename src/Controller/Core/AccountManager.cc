@@ -1,5 +1,3 @@
-#include "Infrastructure/Utils/Error.h"
-#include "Infrastructure/Utils/Result.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Core/AccountManager.h>
 #include <Controller/Core/UiUtility.h>
@@ -7,6 +5,7 @@
 #include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Config.h>
+#include <Infrastructure/Utils/Result.h>
 #include <keychain/keychain.h>
 #include <optional>
 #include <sast_link.h>
@@ -88,7 +87,7 @@ void AccountManager::saveConfig() {
     // TODO: save
 }
 
-void AccountManager::setKeychainRefreshToken(std::string refreshToken) {
+void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) {
     keychain::Error err;
     keychain::setPassword(package, service, userInfo.id, refreshToken, err);
 
