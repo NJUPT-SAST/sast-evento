@@ -7,10 +7,12 @@
 #include <boost/asio/signal_set.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/system/detail/error_code.hpp>
+#include <chrono>
 #include <memory>
 #include <slint.h>
 #include <spdlog/spdlog.h>
 #include <thread>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -90,14 +92,11 @@ public:
      *
      * @param interval:  interval between each coroutine call
      */
-    template<typename TaskFunc,
-             BOOST_ASIO_COMPLETION_TOKEN_FOR(
-                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
-                 CompletionCallback>
-        requires std::is_invocable_v<TaskFunc>
+    template<typename TaskFunc, typename CompletionCallback>
     void asyncExecute(TaskFunc&& func,
                       CompletionCallback&& callback,
                       std::chrono::steady_clock::duration interval) {
+        asyncExecute(func(), callback);
         asyncExecuteByTimer(std::forward<TaskFunc>(func),
                             std::forward<CompletionCallback>(callback),
                             interval);
@@ -115,6 +114,7 @@ private:
         _iocThread = std::thread([this] {
             net::signal_set signals{_ioc, SIGINT, SIGTERM};
             signals.async_wait([&](auto, auto) { _ioc.stop(); });
+            net::executor_work_guard<decltype(_ioc.get_executor())> work{_ioc.get_executor()};
             _ioc.run();
         });
     }
@@ -124,25 +124,20 @@ private:
         return &s_instance;
     }
 
-    template<typename TaskFunc,
-             BOOST_ASIO_COMPLETION_TOKEN_FOR(
-                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
-                 CompletionCallback>
+    template<typename TaskFunc, typename CompletionCallback>
     void asyncExecuteByTimer(TaskFunc&& func,
                              CompletionCallback&& callback,
                              std::chrono::steady_clock::duration interval) {
+        _periodicTasks[_taskId] = interval;
         auto timer = std::make_shared<net::steady_timer>(_ioc, interval);
+        _timers.push_back(timer);
         asyncExecuteByTimerHelper(std::forward<TaskFunc>(func),
                                   std::forward<CompletionCallback>(callback),
                                   _taskId);
         ++_taskId;
-        _timers.push_back(timer);
     }
 
-    template<typename TaskFunc,
-             BOOST_ASIO_COMPLETION_TOKEN_FOR(
-                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
-                 CompletionCallback>
+    template<typename TaskFunc, typename CompletionCallback>
         requires std::is_invocable_v<CompletionCallback>
     void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
         _timers[taskId]->async_wait([=,
@@ -161,6 +156,7 @@ private:
                         spdlog::error(ex.what());
                     }
                 });
+                _timers[taskId]->expires_after(_periodicTasks[taskId]);
                 asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
             } else {
                 spdlog::error(ec.what());
@@ -168,10 +164,8 @@ private:
         });
     }
 
-    template<typename TaskFunc,
-             BOOST_ASIO_COMPLETION_TOKEN_FOR(
-                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
-                 CompletionCallback>
+    template<typename TaskFunc, typename CompletionCallback>
+        requires(!std::is_same_v<net::awaitable<void>, std::invoke_result_t<TaskFunc>>)
     void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
         _timers[taskId]->async_wait([=,
                                      func = std::forward<TaskFunc>(func),
@@ -192,6 +186,7 @@ private:
                         spdlog::error(ex.what());
                     }
                 });
+                _timers[taskId]->expires_after(_periodicTasks[taskId]);
                 asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
             } else {
                 spdlog::error(ec.what());
@@ -203,6 +198,7 @@ private:
     net::io_context _ioc;
     std::thread _iocThread;
     std::vector<std::shared_ptr<net::steady_timer>> _timers;
+    std::unordered_map<int, std::chrono::steady_clock::duration> _periodicTasks;
     int _taskId = 0;
 
     friend AsyncExecutor* executor();
