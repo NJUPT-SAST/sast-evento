@@ -143,6 +143,7 @@ private:
              BOOST_ASIO_COMPLETION_TOKEN_FOR(
                  typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
                  CompletionCallback>
+        requires std::is_invocable_v<CompletionCallback>
     void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
         _timers[taskId]->async_wait([=,
                                      func = std::forward<TaskFunc>(func),
@@ -152,6 +153,37 @@ private:
                 net::co_spawn(_ioc, func(), [callback](std::exception_ptr e) {
                     if (!e) {
                         slint::invoke_from_event_loop(callback);
+                        return;
+                    }
+                    try {
+                        std::rethrow_exception(e);
+                    } catch (std::exception& ex) {
+                        spdlog::error(ex.what());
+                    }
+                });
+                asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
+            } else {
+                spdlog::error(ec.what());
+            }
+        });
+    }
+
+    template<typename TaskFunc,
+             BOOST_ASIO_COMPLETION_TOKEN_FOR(
+                 typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
+                 CompletionCallback>
+    void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
+        _timers[taskId]->async_wait([=,
+                                     func = std::forward<TaskFunc>(func),
+                                     callback = std::forward<CompletionCallback>(callback),
+                                     this](const boost::system::error_code& ec) {
+            if (!ec) {
+                net::co_spawn(_ioc, func(), [callback](std::exception_ptr e, auto value) {
+                    if (!e) {
+                        slint::invoke_from_event_loop(
+                            [callback = std::move(callback), value = std::move(value)]() {
+                                callback(std::move(value));
+                            });
                         return;
                     }
                     try {
