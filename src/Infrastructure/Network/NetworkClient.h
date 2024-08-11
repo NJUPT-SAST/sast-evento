@@ -31,7 +31,7 @@ using Task = net::awaitable<T>;
 class NetworkClient {
 public:
     NetworkClient(const NetworkClient&) = delete;
-    NetworkClient& operator==(const NetworkClient&) = delete;
+    NetworkClient& operator=(const NetworkClient&) = delete;
 
     Task<Result<LoginResEntity>> loginViaSastLink(std::string const& code);
 
