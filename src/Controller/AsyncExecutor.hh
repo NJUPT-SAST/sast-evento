@@ -26,7 +26,7 @@ using Task = net::awaitable<T>;
 class AsyncExecutor {
 public:
     AsyncExecutor(const AsyncExecutor&) = delete;
-    AsyncExecutor& operator==(const AsyncExecutor&) = delete;
+    AsyncExecutor& operator=(const AsyncExecutor&) = delete;
 
     /**
      * @param task:      return value of a coroutine,
@@ -86,8 +86,7 @@ public:
      * @param func:      coroutine function pointer
      *
      * @param callback:  callback function, called in the main thread when coroutine is done periodically
-     *                   parameters: (std::exception_ptr, T Type)
-     *                   T Type: any based on T(awaitable object wrapped type) except T&&
+     *                   parameters: any based on T(awaitable object wrapped type) except T&&
      *
      * @param interval:  interval between each coroutine call
      */
@@ -95,6 +94,7 @@ public:
              BOOST_ASIO_COMPLETION_TOKEN_FOR(
                  typename net::detail::awaitable_signature<net::result_of_t<TaskFunc()>>::type)
                  CompletionCallback>
+        requires std::is_invocable_v<TaskFunc>
     void asyncExecute(TaskFunc&& func,
                       CompletionCallback&& callback,
                       std::chrono::steady_clock::duration interval) {
@@ -149,7 +149,17 @@ private:
                                      callback = std::forward<CompletionCallback>(callback),
                                      this](const boost::system::error_code& ec) {
             if (!ec) {
-                net::co_spawn(_ioc, func, [callback]() { slint::invoke_from_event_loop(callback); });
+                net::co_spawn(_ioc, func(), [callback](std::exception_ptr e) {
+                    if (!e) {
+                        slint::invoke_from_event_loop(callback);
+                        return;
+                    }
+                    try {
+                        std::rethrow_exception(e);
+                    } catch (std::exception& ex) {
+                        spdlog::error(ex.what());
+                    }
+                });
                 asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
             } else {
                 spdlog::error(ec.what());
@@ -161,7 +171,7 @@ private:
     net::io_context _ioc;
     std::thread _iocThread;
     std::vector<std::shared_ptr<net::steady_timer>> _timers;
-    inline static int _taskId = 0;
+    int _taskId = 0;
 
     friend AsyncExecutor* executor();
 };
