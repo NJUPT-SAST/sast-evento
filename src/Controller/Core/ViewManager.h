@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
 #include <set>
