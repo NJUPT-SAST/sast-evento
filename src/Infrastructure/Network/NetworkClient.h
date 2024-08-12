@@ -16,6 +16,7 @@
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace evento {
 
@@ -139,10 +140,16 @@ private:
     //response handler for github api
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
 
+    //cache data processing
+    std::string generateCacheKey(
+        http::verb verb,
+        const urls::url_view& url,
+        const std::initializer_list<urls::param>& params); //auxiliary function to generate cache key
+
 private:
     net::ssl::context& _ctx;
     std::unique_ptr<HttpsAccessManager> _manager;
-
+    std::unordered_map<std::string, JsonResult> cache; //cache data(To be defined)
     friend NetworkClient* networkClient();
 };
 
