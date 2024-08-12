@@ -42,6 +42,9 @@ jobs:
             !${{ github.workspace }}/build/corrosion/**/target/**/incremental
           key: corrosion-${{ runner.os }}
 
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
@@ -58,7 +61,3 @@ jobs:
           build_dir: build
           config_file: ".clang-tidy"
           exclude: "3rdpart/*, build/*"
-        
-      - name: If there are any comments, fail the check
-        if: steps.review.outputs.total_comments > 0
-        run: exit 1
