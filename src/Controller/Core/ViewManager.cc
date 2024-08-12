@@ -143,9 +143,8 @@ void ViewManager::hideView(ViewName target) {
     visibleViews.erase(target);
 }
 
-void ViewManager::onEnterEventLoop() {
-    auto stack = viewStack;
-}
+void ViewManager::onEnterEventLoop() {}
+
 void ViewManager::onExitEventLoop() {
     // clean up
     spdlog::debug("ViewManager: --- onExitEventLoop: clean up all pages ---");

@@ -10,7 +10,7 @@ export enum ViewName{
     MenuOverlay,
 }
 
-export global ViewManager {
+export global ViewManagerBridge {
     // nav request
     callback navigate-to(ViewName);
     callback clean-navigate-to(ViewName);
@@ -19,4 +19,24 @@ export global ViewManager {
     // control view visibility
     pure callback is-show(ViewName) -> bool;
     in-out property <bool> refresh;
+}
+
+export global ViewManager {
+    // nav request
+    public function navigate-to(view: ViewName) {
+        ViewManagerBridge.navigate-to(view);
+    }
+    public function clean-navigate-to(view: ViewName) {
+        ViewManagerBridge.clean-navigate-to(view);
+    }
+    public function replace-navigate-to(view: ViewName) {
+        ViewManagerBridge.replace-navigate-to(view);
+    }
+    public function prior-view() {
+        ViewManagerBridge.prior-view();
+    }
+    // control view visibility
+    public pure function is-show(view: ViewName) -> bool {
+        return ViewManagerBridge.is-show(view);
+    }
 }
