@@ -1,5 +1,7 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
+import { STimeLine, STimeLineItem } from "../../modules/surrealism-ui/src/timeline/index.slint";
+import { SCard } from "../../modules/surrealism-ui/src/card/index.slint";
 
 export global MyEventPageBridge { }
 
@@ -9,18 +11,94 @@ export component MyEventPage inherits Page {
     background := Empty { }
 
     layout := VerticalLayout {
-        visible: false;
+        visible: true;
         x: 0;
         y: 0;
         width: 100%;
         height: 100%;
+        padding: 10px;
+        layout-title := Rectangle{
+            vertical-stretch: 0.2;
+            HorizontalLayout {
+                layout-signin-title := Rectangle{
+                    vertical-stretch: 0.5;
+                    border-width: 2px;
+                    border-color: blue;
+                }
+                layout-start-title := Rectangle{
+                    vertical-stretch: 0.5;
+                    border-width: 2px;
+                    border-color: blue;
+                }
+            }
+        }
+        
+        layout-line := Rectangle{
+            vertical-stretch: 0.8;
+            HorizontalLayout {
+                layout-signin-line := Rectangle{
+                    VerticalLayout {
+                        spacing: 5px;
+                        padding: 5px;
+                        layout-event01 := Rectangle {
+                            border-width: 1px;
+                            border-color: blue;
+                        }
+                        layout-event02 := Rectangle {
+                            border-width: 1px;
+                            border-color: blue;
+                        }
+                        layout-event03 := Rectangle {
+                            border-width: 1px;
+                            border-color: blue;
+                        }
+                        layout-event04 := Rectangle {
+                            border-width: 1px;
+                            border-color: blue;
+                        }
+                    }
+                }
+                layout-other-line := Rectangle{
+                    VerticalLayout {
+                        spacing: 100px;
+                        padding: 10px;
+                        layout-start-line := Rectangle{
+                            vertical-stretch: 0.5;
+                            border-width: 1px;
+                            border-color: blue;
+                        }
+                        layout-end := Rectangle{
+                            VerticalLayout {
+                                layout-end-title := Rectangle{
+                                    vertical-stretch: 1;
+                                    border-width: 1px;
+                                    border-color: blue;
+                                }
+                                layout-end-line := Rectangle{
+                                    vertical-stretch: 1.5;
+                                    border-width: 1px;
+                                    border-color: blue;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
     }
 
     body := Empty {
         x: 0;
-        y: 0;
+        y: 100px;
         width: 100%;
         height: 100%;
+        //schedule timeline
+        signin-line := STimeLine { }
+
+        start-line := STimeLine { }
+
+        end-line := STimeLine { }
         placeholder := Rectangle {
             border-width: 4px;
             border-color: red;
@@ -28,5 +106,6 @@ export component MyEventPage inherits Page {
                 text: "活动日程（我的活动）\n  未开始、进行中、已结束";
             }
         }
+        
     }
 }
