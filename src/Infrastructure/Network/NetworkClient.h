@@ -11,6 +11,7 @@
 #include <boost/beast/http/verb.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
+#include <chrono>
 #include <concepts>
 #include <initializer_list>
 #include <nlohmann/json.hpp>
@@ -33,6 +34,11 @@ using ContributorList = std::vector<ContributorEntity>;
 
 template<typename T>
 using Task = net::awaitable<T>;
+
+struct CacheEntry {
+    JsonResult result;
+    std::chrono::steady_clock::time_point insertTime;
+};
 
 class NetworkClient {
 public:
@@ -90,7 +96,17 @@ public:
 private:
     NetworkClient(net::ssl::context& ctx);
     static NetworkClient* getInstance();
+    //cache data processing
+    std::string generateCacheKey(
+        http::verb verb,
+        const urls::url_view& url,
+        const std::initializer_list<urls::param>& params); //auxiliary function to generate cache key
 
+    bool isCacheEntryExpired(const CacheEntry& entry) const {
+        auto now = std::chrono::steady_clock::now();
+        auto duration = std::chrono::duration_cast<std::chrono::hours>(now - entry.insertTime);
+        return duration.count() >= 3;
+    }
     // - success => return the `data` field from response json
     //            maybe json object or json array
     // - error => return error message
@@ -99,11 +115,12 @@ private:
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
         //Generate cache
-        std::stirng cacheKey = generateCacheKey(verb, url, params);
+        std::string cacheKey = generateCacheKey(verb, url, params);
 
         //Check cache
-        if (cache.find(cacheKey) != cache.end()) {
-            co_return cache[cacheKey];
+        auto it = cache.find(cacheKey);
+        if (it != cache.end() && !isCacheEntryExpired(it->second)) {
+            co_return it->second.result;
         }
         debug(), url;
         auto req = Api::makeRequest(verb, url, tokenBytes, params);
@@ -116,9 +133,9 @@ private:
         auto result = handleResponse(reply.unwrap());
 
         // Update cache
-        cache[cacheKey] = result;
+        cache.emplace(cacheKey, CacheEntry{std::move(result), std::chrono::steady_clock::now()});
 
-        co_return result;
+        co_return cache[cacheKey].result;
     }
 
     template<std::same_as<api::Github> Api>
@@ -126,17 +143,18 @@ private:
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
         std::string cacheKey = generateCacheKey(verb, url, params);
-        if (cache.find(cacheKey) != cache.end()) {
-            co_return cache[cacheKey];
+        auto it = cache.find(cacheKey);
+        if (it != cache.end() && !isCacheEntryExpired(it->second)) {
+            co_return it->second.result;
         }
         auto req = Api::makeRequest(verb, url, params);
         auto reply = co_await _manager->makeReply(url.host(), req);
         if (reply.isErr())
             co_return reply.unwrapErr();
         auto result = reply.unwrap();
-        cache[cacheKey] = result;
+        cache.emplace(cacheKey, CacheEntry{std::move(result), std::chrono::steady_clock::now()});
 
-        co_return result;
+        co_return cache[cacheKey].result;
     }
 
     // url builder
@@ -150,16 +168,10 @@ private:
     //response handler for github api
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
 
-    //cache data processing
-    std::string generateCacheKey(
-        http::verb verb,
-        const urls::url_view& url,
-        const std::initializer_list<urls::param>& params); //auxiliary function to generate cache key
-
 private:
     net::ssl::context& _ctx;
     std::unique_ptr<HttpsAccessManager> _manager;
-    std::unordered_map<std::string, JsonResult> cache; //cache data(To be defined)
+    std::unordered_map<std::string, CacheEntry> cache; //cache data(To be defined)
     friend NetworkClient* networkClient();
 };
 
