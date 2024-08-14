@@ -59,6 +59,29 @@
                 "value": "arm64",
                 "strategy": "external"
             }
+        },
+        {
+            "name": "Clang-Default",
+            "hidden": true,
+            "displayName": "Clang 17.0.6 x86_64-pc-linux-gnu",
+            "description": "使用编译器: C = /usr/bin/clang, CXX = /usr/bin/clang++",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "CMAKE_C_COMPILER": "/usr/bin/clang",
+                "CMAKE_CXX_COMPILER": "/usr/bin/clang++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "Unix-Makefiles-Default",
+            "description": "Config with Unix Makefile",
+            "displayName": "Unix-Makefiles-Default",
+            "inherits": [
+                "Clang-Default"
+            ],
+            "generator": "Unix Makefiles",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         }
     ],
     "buildPresets": [
