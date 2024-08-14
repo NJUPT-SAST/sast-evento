@@ -98,6 +98,13 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
+        //Generate cache
+        std::stirng cacheKey = generateCacheKey(verb, url, params);
+
+        //Check cache
+        if (cache.find(cacheKey) != cache.end()) {
+            co_return cache[cacheKey];
+        }
         debug(), url;
         auto req = Api::makeRequest(verb, url, tokenBytes, params);
 
@@ -106,27 +113,30 @@ private:
         if (reply.isErr())
             co_return reply.unwrapErr();
 
-        co_return handleResponse(reply.unwrap());
+        auto result = handleResponse(reply.unwrap());
+
+        // Update cache
+        cache[cacheKey] = result;
+
+        co_return result;
     }
 
     template<std::same_as<api::Github> Api>
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
-        auto req = Api::makeRequest(verb, url, std::nullopt, params);
+        std::string cacheKey = generateCacheKey(verb, url, params);
+        if (cache.find(cacheKey) != cache.end()) {
+            co_return cache[cacheKey];
+        }
+        auto req = Api::makeRequest(verb, url, params);
         auto reply = co_await _manager->makeReply(url.host(), req);
         if (reply.isErr())
             co_return reply.unwrapErr();
+        auto result = reply.unwrap();
+        cache[cacheKey] = result;
 
-        nlohmann::basic_json<> res;
-        try {
-            res = nlohmann::json::parse(beast::buffers_to_string(reply.unwrap().body().data()));
-            debug(), res.dump();
-        } catch (const nlohmann::json::parse_error& e) {
-            co_return Err(Error(Error::JsonDes, e.what()));
-        }
-
-        co_return res;
+        co_return result;
     }
 
     // url builder
