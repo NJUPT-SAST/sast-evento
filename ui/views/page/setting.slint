@@ -1,6 +1,6 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
-import { VerticalBox, Button, Switch } from "std-widgets.slint";
+import { VerticalBox, Button, Switch, ListView, StandardListView } from "std-widgets.slint";
 import { KeyBoard } from "../../modules/surrealism-ui/src/keyboard/keyboard.slint";
 export global SettingPageBridge { }
 export component NewSwitch inherits Switch {
@@ -22,6 +22,7 @@ export component SettingPage inherits Page {
                 y: 1px;
                 border-width: 4px;
                 border-color: red;
+                background: Token.color.surface;
                 Text {
                     text: "设置\n  ";
                     x:67px;
@@ -33,7 +34,7 @@ export component SettingPage inherits Page {
         height: 156px;
         x:40px;
         y:92px;
-        background:Token.color.surface-container-highest;
+        background:Token.color.surface-container-high;
         border-radius:10px;
         Text {
             text: "夜间模式";
@@ -41,58 +42,34 @@ export component SettingPage inherits Page {
             y:5px;
             font-size: 15px;
         }
-        Switch {
-            width: 200px;
-            height: 50px;
-            x:25px;
-            y:33px;
-            text: "深色";
-            
-        }
-        Switch {
-            width: 200px;
-            height: 50px;
-            x:25px;
-            y:66px;
-            text: "跟随系统";
-            checked: true;
-        }
-        Switch {
-            width: 200px;
-            height: 50px;
-            x:25px;
-            y:99px;
-            text: "浅色";
-            
-        }
-    }  
+        
+     StandardListView {
+        width: 150px;
+        height: 150px;
+        x:20px;
+        y:25px;
+        model: [ { text: "深色"}, { text: "浅色" }, { text: "跟随系统" }];
+     } 
+} 
     Rectangle {
         width: 1050px;
         height: 156px;
         x:40px;
         y:300px;
-        background:Token.color.surface-container-highest;
+        background:Token.color.surface-container-high;
         border-radius: 10px;
         Text {
             x:25px;
             y:5px;
             text: "语言";
             font-size: 15px;
-        Switch {
-            width: 200px;
-            height: 50px;
-            text: "中文";
-            x:0px;
-            y:20px;
-        }
-        Switch {
-            width: 200px;
-            height: 50px;
-            text: "English";
-            x:0px;
-            y:70px;
-        }
-        
+            StandardListView {
+                x:-15px;
+                y:20px;
+                width: 150px;
+                height: 150px;
+                model: [ { text: "中文"}, { text: "English" }];
+             } 
       }
     }         
             }
@@ -153,3 +130,41 @@ export component SettingPage inherits Page {
     //                     horizontal-alignment: TextHorizontalAlignment.center;
     //                     vertical-alignment: TextVerticalAlignment.center;
     //                 }
+    // Switch {
+        //     width: 200px;
+        //     height: 50px;
+        //     x:25px;
+        //     y:33px;
+        //     text: "深色";
+            
+        // }
+        // Switch {
+        //     width: 200px;
+        //     height: 50px;
+        //     x:25px;
+        //     y:66px;
+        //     text: "跟随系统";
+        //     checked: true;
+        // }
+        // Switch {
+        //     width: 200px;
+        //     height: 50px;
+        //     x:25px;
+        //     y:99px;
+        //     text: "浅色";
+            
+        // }
+        //Switch {
+            //     width: 200px;
+            //     height: 50px;
+            //     text: "中文";
+            //     x:0px;
+            //     y:20px;
+            // }
+            // Switch {
+            //     width: 200px;
+            //     height: 50px;
+            //     text: "English";
+            //     x:0px;
+            //     y:70px;
+            // }
