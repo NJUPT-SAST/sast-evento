@@ -22,7 +22,7 @@ export component SettingPage inherits Page {
                 y: 1px;
                 border-width: 4px;
                 border-color: red;
-                background: Token.color.surface;
+                background: white;
                 Text {
                     text: "设置\n  ";
                     x:67px;
@@ -33,7 +33,7 @@ export component SettingPage inherits Page {
         width: 1050px;
         height: 156px;
         x:40px;
-        y:92px;
+        y:100px;
         background:Token.color.surface-container-high;
         border-radius:10px;
         Text {
@@ -72,6 +72,36 @@ export component SettingPage inherits Page {
              } 
       }
     }         
+    Rectangle {
+        width: 1050px;
+        height: 34px;
+        background: Token.color.surface-container-high;
+        x:40px;
+        y:500px;
+        border-radius: 10px;
+        Switch {
+            accessible-role: AccessibleRole.none;
+            x: 14px;
+            y: 8px;
+            width: 132px;
+            text: "活动开始提醒";
+        }
+    }
+    Rectangle {
+        width: 1050px;
+        height: 34px;
+        background: Token.color.surface-container-high;
+        x:40px;
+        y:550px;
+        border-radius: 10px;
+        Switch {
+            accessible-role: AccessibleRole.none;
+            x: 14px;
+            y: 8px;
+            width: 132px;
+            text: "活动评价提醒";
+        }
+    }
             }
         }
     }
