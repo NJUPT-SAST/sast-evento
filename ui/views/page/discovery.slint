@@ -4,6 +4,7 @@ import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { EventoStyleToken } from "../../logic/style_token.slint";
 import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
+import { HorizontalBox } from "std-widgets.slint";
 
 export global DiscoveryPageBridge { }
 
@@ -32,7 +33,6 @@ export component DiscoveryPage inherits Page {
             Rectangle {
                 width: 100%;
                 height: 50%;
-                background: #39c5bb;
                 // 这里摆放轮播图
                 //Text {
                 //    text: "轮播图(活动广场)";
@@ -52,18 +52,73 @@ export component DiscoveryPage inherits Page {
                 }
             }
 
+            // 正在进行的活动
             Rectangle {
                 width: 100%;
                 height: 50%;
                 VerticalLayout {
                     Rectangle {
-                        background: #66ccff;
-                        Text {
-                            text: "正在进行的活动";
+                        height: 50%;
+                        Flickable {
+                            in-out property <int> sum_of_blocks: 7;
+
+                            // calculate the number of blocks
+                            // the num of displayed blocks depends on the actual width of the window
+                            property <int> block_num: 0;
+                            // what is the proper k ???
+                            property <int> k: 10;
+                            pure public function calcBlockNum(sum_of_blocks: int) -> int {
+                                if (self.width > k * 100px) {
+                                    return sum_of_blocks > 4 ? 4 : sum_of_blocks;
+                                } else if (self.width > k * 50px) {
+                                    return sum_of_blocks > 3 ? 3 : sum_of_blocks;
+                                } else if (self.width > k * 25px) {
+                                    return sum_of_blocks > 2 ? 2 : sum_of_blocks;
+                                }
+                                return 1;
+                            }
+
+                            property <int> actual_shown_block_num: calcBlockNum(sum_of_blocks);
+
+                            height: 80%;
+                            width: parent.width;
+                            viewport-height: parent.height;
+                            viewport-width: (parent.width / actual_shown_block_num * sum_of_blocks);
+                            HorizontalLayout {
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #919191;
+                                }
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #39c5bb;
+                                }
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #66ccff;
+                                }
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #b30074;
+                                }
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #66ccff;
+                                }
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #39c5bb;
+                                }
+                                Rectangle {
+                                    width: root.width / actual_shown_block_num;
+                                    background: #919191;
+                                }
+                            }    
                         }
                     }
                     Rectangle {
                         background: #1e1e2e;
+                        height: 50%;
                         Text {
                             text: "最新的活动";
                         }
