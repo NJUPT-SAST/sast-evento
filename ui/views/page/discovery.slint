@@ -1,5 +1,10 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
+import { EventCardGroup } from "../../components/event_card.slint";
+import { SCarousel } from "../../modules/surrealism-ui/index.slint";
+import { EventoImageToken } from "../../assets/image/image_token.slint";
+import { EventoStyleToken } from "../../logic/style_token.slint";
+import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
 
 export global DiscoveryPageBridge { }
 
@@ -56,102 +61,49 @@ export component DiscoveryPage inherits Page {
         y: 0;
         width: 100%;
         height: 100%;
-        Rectangle {
-            width: 100%;
-            height: 100%;
+        //Text {
+        //    text: "活动广场（用于发现活动）\n  进行中、未开始\n  （需要跳转到历史活动页面，需要多考虑一下）";
+        //}
+        VerticalLayout {
+            Rectangle {
+                width: 100%;
+                height: 50%;
+                background: #39c5bb;
+                // 这里摆放轮播图
+                //Text {
+                //    text: "轮播图(活动广场)";
+                //}
+                SCarousel {
+                    height: parent.height;
+                    width: parent.width;
+                    fold-height: parent.height;
+                    active: 3;
+                    focus-main: true;
+                    fit: contain;
+                    sources: [
+                        EventoImageToken.image.display.event.cpp[0],
+                        EventoImageToken.image.display.event.cpp[1],
+                        EventoImageToken.image.display.event.cpp[2],
+                    ];
+                }
+            }
 
-            background: #1e1e2e;
-
-            ScrollView {
-                height: parent.height;
-                width: parent.width;
-
+            Rectangle {
+                width: 100%;
+                height: 50%;
                 VerticalLayout {
-                    // calculate actual block size
-
-                    // idx = row * block_col_num + col
-                    //        |                     |
-                    //     y/height              x/width
-                    
-                    SCarousel {
-                        width: 100%;
-                        height: root.height * 0.5;
-                        fold-height: root.height * 0.5;
-                        active: 3;
-                        focus-main: true;
-                        fit: contain;
-                        sources: [
-                            EventoImageToken.image.display.event.cpp[0],
-                            EventoImageToken.image.display.event.cpp[1],
-                            EventoImageToken.image.display.event.cpp[2],
-                        ];
-                    }
-
                     Rectangle {
-                        // 提示词: 正在进行的活动
-                        height: 40px;
-                        width: 100%;
+                        background: #66ccff;
                         Text {
                             text: "正在进行的活动";
                         }
                     }
-                    
-                    in property <int> block_max_w: 400;
-                    in property <int> block_max_h: 200;
-                    in property <int> block_col_num: DiscoveryPageBridge.calc_block_col_num(root.width / 1px, block_max_w);
-                    in property <int> block_row_num: DiscoveryPageBridge.calc_block_row_num(root.height / 1px, block_max_h);
-
-                    in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
-                    in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
-                    
                     Rectangle {
-                        background: #39c5bb;
-                        width: 100%;
-                        height: (DiscoveryPageBridge.div(current_event_num, 3) + 1) * 200 * 1px;
-                        VerticalLayout {
-                            in property <int> i: 0;
-                            in property <int> j: 0;
-
-                            // row_num
-                            for i in DiscoveryPageBridge.div(current_event_num, block_col_num) : HorizontalLayout {
-                                // col_num
-                                for j in block_col_num: Empty {
-                                    if(3 * i + j <= current_event_num): block {
-                                        width: block_width * 1px;
-                                        height:block_height * 1px;
-                                        data: current_event_list[block_col_num * i + j];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
-                    Rectangle {
-                        // 提示词: 最新的活动
-                        height: 40px;
-                        width: 100%;
+                        background: #1e1e2e;
                         Text {
                             text: "最新的活动";
                         }
                     }
-
-                    Rectangle {
-                        background: #66ccff;
-                        height: 200px;
-                        width: 100%;
-                    }
-                    
-                    // for ... block ... : 最新的活动内容
-                    // for itm[idx] in newest_event_list: block {
-                    //     x: 1px * calcBlockX(idx, block_width, block_col_num);
-                    //     y: 1px * calcBlockY(idx, block_height, block_col_num);
-                    //     // x: block_width * (idx - idx / block_col_num) * 1px;
-                    //     // y: block_height * (idx / block_col_num) * 1px;
-                    //     height: block_height * 1px;
-                    //     width: block_width * 1px;
-                    //     data: itm;
-                    // }
-
                 }
             }
         }
