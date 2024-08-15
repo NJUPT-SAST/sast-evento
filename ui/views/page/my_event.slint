@@ -1,112 +1,193 @@
 import { Token } from "../../global.slint";
+import { ScrollView } from "std-widgets.slint";
 import { Page, Empty } from "../../components/index.slint";
 import { STimeLine, STimeLineItem } from "../../modules/surrealism-ui/src/timeline/index.slint";
 import { SCard } from "../../modules/surrealism-ui/src/card/index.slint";
-
+import {SLink} from "../../modules/surrealism-ui/src/link/index.slint";
+import { SDivider } from "../../modules/surrealism-ui/src/divider/index.slint";
+import { SText } from "../../modules/surrealism-ui/src/text/index.slint";
+import { STab } from "../../modules/surrealism-ui/src/tab/index.slint";
+import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
+import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
 export global MyEventPageBridge { }
+
+// button
+export component SignButton inherits SButton{
+    width: 40px;
+    height: 20px;
+    background: Token.color.surface;
+    border-color: Token.color.outline;
+    font-color: Token.color.on-surface;
+    text: "签到";
+    property <bool> active : true;
+    clicked => {active = !active}
+    states [
+        active when  !active : {
+            text : "取消";
+        }
+        inactive when active: {
+            text : "签到";
+        } 
+    ]
+}
+
+// a simple event form
+export component EventForm {
+    Rectangle {
+        preferred-height: 200px;
+        preferred-width: 500px;
+        mes := Rectangle{
+            preferred-height: 200px;
+            preferred-width: 50px;
+            VerticalLayout {
+                alignment: center;
+                data := SText {
+                    color: Token.color.outline;
+                    text: "日期";
+                }
+                place := SText{
+                    color: Token.color.outline;
+                    text: "地点";
+                }
+                time := SText{
+                    color: Token.color.outline;
+                    text: "时间";
+                }
+            }
+        }
+        form := STimeLine{
+            x: mes.x + 80px;
+            width: 20px;
+            height: parent.height;
+            STimeLineItem {
+                width: (parent.width)+100px;
+                height: parent.height;
+                SCard {
+                    x: (parent.x)-10px;
+                    y: -30px;
+                    height: parent.height;
+                    width: 380px;
+                    Icon {
+                        x: parent.x+30px;
+                        height: 50px;
+                        width: 50px;
+                        source: Token.image.icon.evento;
+                    }
+                    info := Rectangle{
+                        x: parent.x+80px;
+                        preferred-height: 200px;
+                        preferred-width: 200px;
+                        VerticalLayout {
+                            alignment: center;
+                            title := SText {
+                                font-size: 15px;
+                                color: Token.color.outline;
+                                text: "标题";
+                            }
+                            introduce := SText{
+                                font-size: 8px;
+                                color: Token.color.outline;
+                                text: "介绍";
+                            }
+                            content := SText{
+                                font-size: 8px;
+                                color: Token.color.outline;
+                                text: "内容";
+                            }
+                        }
+                    }
+                    SignButton {
+                        x: parent.x+320px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// a simple component for schedule
+export component Schedule {
+    preferred-height: 800px;
+    preferred-width: 600px;
+    VerticalLayout {
+        spacing: 5px;
+        //title
+        Text {
+            x: (parent.width)/2-(parent.x)-50px;
+            font-size: 20px;
+            text: "进行中";
+        }
+        //SDvider
+        SDivider {
+            //y: parent.y+40px;
+            width: 500px;
+            height: 2px;
+            }
+        //SText && STimeLine (separate)
+        EventForm { }
+    }
+}
 
 export component MyEventPage inherits Page {
     // TODO: implement MyEvent
     // optional
-    background := Empty { }
+    ScrollView {
+        background := Empty { }
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        padding: 10px;
-        layout-title := Rectangle{
-            vertical-stretch: 0.2;
+        // layout := HorizontalLayout {
+        //     visible: false;
+        //     x: 0;
+        //     y: 0;
+        //     width: 100%;
+        //     height: 100%;
+        //     padding: 10px;
+        //     layout-signin := Schedule{
+        //         //something
+                
+                
+        //     }
+        //     VerticalLayout {
+
+        //         layout-start := Schedule{
+        //             //something
+                    
+        //         }
+        //         layout-end := Schedule{
+        //             //something
+        //         }
+        //     }
+        //     // plan: a link to events which have been canceled
+        //     layout-cancel := Rectangle{
+        //         //something
+        //     }
+        // }
+
+        body := Empty {
+            x: 0;
+            y: 0px;
+            width: 100%;
+            height: 100%;
+            //schedule timeline
             HorizontalLayout {
-                layout-signin-title := Rectangle{
-                    vertical-stretch: 0.5;
-                    border-width: 2px;
-                    border-color: blue;
+                signin-line := Schedule {
+                    width: 50%;
+                    height: 100%;
                 }
-                layout-start-title := Rectangle{
-                    vertical-stretch: 0.5;
-                    border-width: 2px;
-                    border-color: blue;
+                VerticalLayout {
+                    start-line := Schedule { }
+        
+                    end-line := Schedule { }
+                }
+            }
+            
+            placeholder := Rectangle {
+                border-width: 4px;
+                border-color: red;
+                Text {
+                    text: "活动日程（我的活动）\n  未开始、进行中、已结束";
                 }
             }
         }
-        
-        layout-line := Rectangle{
-            vertical-stretch: 0.8;
-            HorizontalLayout {
-                layout-signin-line := Rectangle{
-                    VerticalLayout {
-                        spacing: 5px;
-                        padding: 5px;
-                        layout-event01 := Rectangle {
-                            border-width: 1px;
-                            border-color: blue;
-                        }
-                        layout-event02 := Rectangle {
-                            border-width: 1px;
-                            border-color: blue;
-                        }
-                        layout-event03 := Rectangle {
-                            border-width: 1px;
-                            border-color: blue;
-                        }
-                        layout-event04 := Rectangle {
-                            border-width: 1px;
-                            border-color: blue;
-                        }
-                    }
-                }
-                layout-other-line := Rectangle{
-                    VerticalLayout {
-                        spacing: 100px;
-                        padding: 10px;
-                        layout-start-line := Rectangle{
-                            vertical-stretch: 0.5;
-                            border-width: 1px;
-                            border-color: blue;
-                        }
-                        layout-end := Rectangle{
-                            VerticalLayout {
-                                layout-end-title := Rectangle{
-                                    vertical-stretch: 1;
-                                    border-width: 1px;
-                                    border-color: blue;
-                                }
-                                layout-end-line := Rectangle{
-                                    vertical-stretch: 1.5;
-                                    border-width: 1px;
-                                    border-color: blue;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-    }
-
-    body := Empty {
-        x: 0;
-        y: 0px;
-        width: 100%;
-        height: 100%;
-        //schedule timeline
-        signin-line := STimeLine { }
-
-        start-line := STimeLine { }
-
-        end-line := STimeLine { }
-
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "活动日程（我的活动）\n  未开始、进行中、已结束";
-            }
-        }
-        
     }
 }
+
