@@ -14,7 +14,7 @@ component CommentBlock {
     in-out property <string> comment_text;
     Rectangle {
         border-radius: 20px;
-        background: Token.color.surface-container-highest;
+        background: Token.color.surface-container;
         Text {
             x: 20px;
             y: 10px;
@@ -91,64 +91,37 @@ component IconText {
             width: root.width - parent.spacing - icon.width;
             text: root.text;
             vertical-alignment: TextVerticalAlignment.center;
+            font-size: 16px;
         }
     }
 }
 
 component EventInfoBlock {
-    Text {
+    info-title := Text {
         x: 0px;
         y: 0px;
         text: "活动信息";
         font-size: 28px;
     }
 
+    in property <[{icon: image, text: string}]> model: [
+        { icon: Token.image.icon.home.normal, text: "feipiao,1" },
+        { icon: Token.image.icon.home.normal, text: "feipiao,2" },
+        { icon: Token.image.icon.home.normal, text: "feipiao,3" },
+        { icon: Token.image.icon.home.normal, text: "feipiao,4" },
+        { icon: Token.image.icon.home.normal, text: "feipiao,5" },
+        { icon: Token.image.icon.home.normal, text: "feipiao,6" },
+    ];
     VerticalLayout {
         x: 0px;
-        y: 50px;
-        spacing: 20px;
-        IconText {
+        y: 40px;
+        spacing: 2px;
+        for data in root.model: repeated-icontext := IconText {
             width: parent.width;
-            height: self.width * 10%;
+            height: (parent.height - parent.y - (model.length - 1) * parent.spacing) / model.length;
             visible: true;
             x: 0px;
-            text: "test,test,594";
-            icon: Token.image.icon.home.normal;
-        }
-
-        IconText {
-            width: parent.width;
-            height: self.width * 10%;
-            visible: true;
-            x: 0px;
-            text: "test,test,594";
-            icon: Token.image.icon.home.normal;
-        }
-
-        IconText {
-            width: parent.width;
-            height: self.width * 10%;
-            visible: true;
-            x: 0px;
-            text: "test,test,594";
-            icon: Token.image.icon.home.normal;
-        }
-
-        IconText {
-            width: parent.width;
-            height: self.width * 10%;
-            visible: true;
-            x: 0px;
-            text: "test,test,594";
-            icon: Token.image.icon.home.normal;
-        }
-
-        IconText {
-            width: parent.width;
-            height: self.width * 10%;
-            visible: true;
-            x: 0px;
-            text: "test,test,594";
+            text: data.text;
             icon: Token.image.icon.home.normal;
         }
     }
@@ -173,24 +146,28 @@ export component DetailPage inherits Page {
         width: 100%;
         height: 100%;
         HorizontalBox {
-            padding: 15px;
+            padding: 30px;
             spacing: 10px;
             recleft := Rectangle {
                 width: 50%;
                 VerticalLayout {
                     spacing: 20px;
                     Rectangle {
-                        height: 50%;
+                        height: 55%;
                         EventInfoBlock {
-                            width: parent.width;
-                            height: parent.height;
+                            x: 40px;
+                            y: 0px;
+                            width: parent.width - self.x;
+                            height: parent.height - self.y;
                         }
                     }
 
                     Rectangle {
                         CommentBlock {
-                            width: parent.width;
-                            height: parent.height;
+                            x: 10px;
+                            y: 10px;
+                            width: parent.width - self.x;
+                            height: parent.height - self.y - 10px;
                         }
                     }
                 }
@@ -204,38 +181,38 @@ export component DetailPage inherits Page {
                     source: Token.image.icon.evento;
                     x: 20px;
                     y: 20px;
-                    width: 100px;
-                    height: 100px;
+                    width: min(parent.width - self.x, display-rec.y) - 20px;
+                    height: self.width;
                 }
 
-                Text {
+                display-rec := Rectangle {
                     x: 20px;
-                    y: 140px;
-                    width: 100px;
-                    height: 30px;
-                    text: "状态";
-                    font-size: 28px;
-                }
-
-                Rectangle {
-                    x: 20px;
-                    y: 200px;
-                    width: 100px;
-                    height: 100px;
-                    SButton {
+                    y: parent.height - self.height - 20px;
+                    width: parent.width - self.x;
+                    height: 150px;
+                    Text {
                         x: 0px;
                         y: 0px;
-                        width: parent.width;
-                        height: parent.height * 48%;
-                        text: "测试1";
+                        width: 100px;
+                        height: 30px;
+                        text: "<状态>";
+                        font-size: 28px;
                     }
 
                     SButton {
-                        x: 0px;
-                        y: parent.height * 53%;
-                        width: parent.width;
-                        height: parent.height * 48%;
-                        text: "测试2";
+                        x: 40px;
+                        y: 55px;
+                        width: parent.width - 2 * self.x;
+                        height: 40px;
+                        text: "报名";
+                    }
+
+                    SButton {
+                        x: 40px;
+                        y: 105px;
+                        width: parent.width - 2 * self.x;
+                        height: 40px;
+                        text: "签到";
                     }
                 }
             }
