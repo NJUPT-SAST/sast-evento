@@ -5,6 +5,7 @@
 #include <boost/url/params_view.hpp>
 #include <memory>
 #include <nlohmann/json.hpp>
+#include <string>
 
 namespace evento {
 
@@ -71,7 +72,7 @@ Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshT
         co_return Err(Error(Error::JsonDes, e.what()));
     }
 
-    co_return Ok(entity);
+    co_return Ok();
 }
 
 Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
@@ -109,7 +110,8 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList() {
 Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int page, int size) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/history",
-                                                               {{"page", page}, {"size", size}}));
+                                                               {{"page", std::to_string(page)},
+                                                                {"size", std::to_string(size)}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -160,11 +162,10 @@ Task<Result<FeedbackEntity>> NetworkClient::getUserFeedback(int eventId) {
 Task<Result<void>> NetworkClient::addUserFeedback(int eventId,
                                                   int rating,
                                                   std::string const& content) {
-    auto result = co_await this
-                      ->request<api::Evento>(http::verb::post,
-                                             endpoint(std::format("/v2/client/event/{}/feedback",
-                                                                  eventId),
-                                                      {{"rating", rating}, {"content", content}}));
+    auto result = co_await this->request<api::Evento>(
+        http::verb::post,
+        endpoint(std::format("/v2/client/event/{}/feedback", eventId),
+                 {{"rating", std::to_string(rating)}, {"content", content}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
     FeedbackEntity entity;
@@ -174,7 +175,7 @@ Task<Result<void>> NetworkClient::addUserFeedback(int eventId,
         co_return Err(Error(Error::JsonDes, e.what()));
     }
 
-    co_return Ok(entity);
+    co_return Ok();
 }
 
 Task<Result<void>> NetworkClient::checkInEvent(int eventId, std::string const& code) {
@@ -188,11 +189,12 @@ Task<Result<void>> NetworkClient::checkInEvent(int eventId, std::string const& c
 }
 
 Task<Result<void>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
+    std::string subscribeStr = subscribe ? "true" : "false";
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
                                              endpoint(std::format("/v2/client/event/{}/subscribe",
                                                                   eventId),
-                                                      {{"subscribe", subscribe}}));
+                                                      {{"subscribe", subscribeStr}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -201,11 +203,12 @@ Task<Result<void>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
 
 Task<Result<void>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
                                                       bool subscribe) {
+    std::string subscribeStr = subscribe ? "true" : "false";
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
                                              endpoint(std::format("/v2/client/event/{}/subscribe",
                                                                   larkDepartment),
-                                                      {{"subscribe", subscribe}}));
+                                                      {{"subscribe", subscribeStr}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
