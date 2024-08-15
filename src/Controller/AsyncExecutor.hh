@@ -5,6 +5,7 @@
 #include <boost/asio/experimental/awaitable_operators.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
+#include <boost/asio/static_thread_pool.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/system/detail/error_code.hpp>
 #include <chrono>
@@ -12,9 +13,7 @@
 #include <slint.h>
 #include <spdlog/spdlog.h>
 #include <thread>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 using namespace boost::asio::experimental::awaitable_operators;
 
@@ -25,17 +24,21 @@ namespace net = boost::asio; // from <boost/asio.hpp>
 template<typename T>
 using Task = net::awaitable<T>;
 
+enum class TimerFlag { Once, Periodic };
+
 class AsyncExecutor {
 public:
     AsyncExecutor(const AsyncExecutor&) = delete;
     AsyncExecutor& operator=(const AsyncExecutor&) = delete;
 
     /**
-     * @param task:      return value of a coroutine,
+     * @brief            execute a coroutine and call the callback when it's done
+     *
+     * @param task       return value of a coroutine,
      *                   an awaitable object wrapping a T type value
      *
-     * @param callback:  callback function, called in the main thread when coroutine is done
-     *                   parameter: any based on T except T&&   
+     * @param callback   callback function, called in the main thread when coroutine is done
+     *                   parameter: any based on T(awaitable object wrapped type) except T&&   
     */
     template<typename T, BOOST_ASIO_COMPLETION_TOKEN_FOR(void(T&)) CompletionCallback>
     void asyncExecute(Task<T> task, CompletionCallback&& callback) {
@@ -59,10 +62,12 @@ public:
     }
 
     /**
-     * @param task:      return value of a coroutine, 
+     * @brief            execute a coroutine and call the callback when it's done
+     *
+     * @param task       return value of a coroutine, 
      *                   an awaitable object wrapping a T type value
      *
-     * @param callback:  callback function, called in the main thread when coroutine is done
+     * @param callback   callback function, called in the main thread when coroutine is done
      *                   parameter: void
      *
      * Specialization for "void"
@@ -85,22 +90,29 @@ public:
     }
 
     /**
-     * @param func:      coroutine function pointer
+     * @brief            execute a coroutine and call the callback when it's done at specific intervals using a timer
      *
-     * @param callback:  callback function, called in the main thread when coroutine is done periodically
-     *                   parameters: any based on T(awaitable object wrapped type) except T&&
+     * @param func       coroutine function pointer
      *
-     * @param interval:  interval between each coroutine call
+     * @param callback   callback function, called in the main thread when coroutine is done periodically
+     *                   parameter: any based on T(awaitable object wrapped type) except T&&
+     *
+     * @param interval   interval between each coroutine call
+     * 
+     * @param flag       the flag indicating whether the operation should be performed periodically or simply only once
      */
     template<typename TaskFunc, typename CompletionCallback>
     void asyncExecute(TaskFunc&& func,
                       CompletionCallback&& callback,
-                      std::chrono::steady_clock::duration interval) {
-        asyncExecute(func(), callback);
+                      std::chrono::steady_clock::duration interval,
+                      TimerFlag flag = TimerFlag::Periodic) {
         asyncExecuteByTimer(std::forward<TaskFunc>(func),
                             std::forward<CompletionCallback>(callback),
-                            interval);
+                            interval,
+                            flag);
     }
+
+    net::io_context& getIoContext() { return _ioc; }
 
     ~AsyncExecutor() {
         _ioc.stop();
@@ -125,26 +137,19 @@ private:
     }
 
     template<typename TaskFunc, typename CompletionCallback>
+        requires std::is_invocable_v<CompletionCallback>
     void asyncExecuteByTimer(TaskFunc&& func,
                              CompletionCallback&& callback,
-                             std::chrono::steady_clock::duration interval) {
-        _periodicTasks[_taskId] = interval;
+                             std::chrono::steady_clock::duration interval,
+                             TimerFlag flag) {
         auto timer = std::make_shared<net::steady_timer>(_ioc, interval);
-        _timers.push_back(timer);
-        asyncExecuteByTimerHelper(std::forward<TaskFunc>(func),
-                                  std::forward<CompletionCallback>(callback),
-                                  _taskId);
-        ++_taskId;
-    }
-
-    template<typename TaskFunc, typename CompletionCallback>
-        requires std::is_invocable_v<CompletionCallback>
-    void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
-        _timers[taskId]->async_wait([=,
-                                     func = std::forward<TaskFunc>(func),
-                                     callback = std::forward<CompletionCallback>(callback),
-                                     this](const boost::system::error_code& ec) {
+        timer->async_wait([=,
+                           func = std::forward<TaskFunc>(func),
+                           callback = std::forward<CompletionCallback>(callback),
+                           this](const boost::system::error_code& ec) {
             if (!ec) {
+                // ensure timer is captured
+                timer.get();
                 net::co_spawn(_ioc, func(), [callback](std::exception_ptr e) {
                     if (!e) {
                         slint::invoke_from_event_loop(callback);
@@ -156,8 +161,9 @@ private:
                         spdlog::error(ex.what());
                     }
                 });
-                _timers[taskId]->expires_after(_periodicTasks[taskId]);
-                asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
+                if (flag == TimerFlag::Periodic) {
+                    asyncExecuteByTimer(std::move(func), std::move(callback), interval, flag);
+                }
             } else {
                 spdlog::error(ec.what());
             }
@@ -166,12 +172,18 @@ private:
 
     template<typename TaskFunc, typename CompletionCallback>
         requires(!std::is_same_v<net::awaitable<void>, std::invoke_result_t<TaskFunc>>)
-    void asyncExecuteByTimerHelper(TaskFunc&& func, CompletionCallback&& callback, int taskId) {
-        _timers[taskId]->async_wait([=,
-                                     func = std::forward<TaskFunc>(func),
-                                     callback = std::forward<CompletionCallback>(callback),
-                                     this](const boost::system::error_code& ec) {
+    void asyncExecuteByTimer(TaskFunc&& func,
+                             CompletionCallback&& callback,
+                             std::chrono::steady_clock::duration interval,
+                             TimerFlag flag) {
+        auto timer = std::make_shared<net::steady_timer>(_ioc, interval);
+        timer->async_wait([=,
+                           func = std::forward<TaskFunc>(func),
+                           callback = std::forward<CompletionCallback>(callback),
+                           this](const boost::system::error_code& ec) {
             if (!ec) {
+                // ensure timer is captured
+                timer.get();
                 net::co_spawn(_ioc, func(), [callback](std::exception_ptr e, auto value) {
                     if (!e) {
                         slint::invoke_from_event_loop(
@@ -186,8 +198,9 @@ private:
                         spdlog::error(ex.what());
                     }
                 });
-                _timers[taskId]->expires_after(_periodicTasks[taskId]);
-                asyncExecuteByTimerHelper(std::move(func), std::move(callback), taskId);
+                if (flag == TimerFlag::Periodic) {
+                    asyncExecuteByTimer(std::move(func), std::move(callback), interval, flag);
+                }
             } else {
                 spdlog::error(ec.what());
             }
@@ -197,9 +210,6 @@ private:
 private:
     net::io_context _ioc;
     std::thread _iocThread;
-    std::vector<std::shared_ptr<net::steady_timer>> _timers;
-    std::unordered_map<int, std::chrono::steady_clock::duration> _periodicTasks;
-    int _taskId = 0;
 
     friend AsyncExecutor* executor();
 };
