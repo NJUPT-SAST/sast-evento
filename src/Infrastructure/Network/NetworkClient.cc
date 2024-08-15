@@ -58,76 +58,224 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
     co_return Ok(entity);
 }
 Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::post,
+                                                      endpoint("/refresh-token"),
+                                                      {{"refreshtoken", refreshToken}});
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    UserInfoEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/active"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<EventEntityList>> NetworkClient::getLatestEventList() {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/latest"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int page, int size) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/history",
+                                                               {{"page", page}, {"size", size}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(
+        http::verb::get, endpoint(std::format("api/v2/client/event/{}/attachments", eventId)));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    AttachmentEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<FeedbackEntity>> NetworkClient::getUserFeedback(int eventId) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this
+                      ->request<api::Evento>(http::verb::get,
+                                             endpoint(std::format("/v2/client/event/{}/feedback",
+                                                                  eventId)));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    FeedbackEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<void>> NetworkClient::addUserFeedback(int eventId,
                                                   int rating,
                                                   std::string const& content) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this
+                      ->request<api::Evento>(http::verb::post,
+                                             endpoint(std::format("/v2/client/event/{}/feedback",
+                                                                  eventId),
+                                                      {{"rating", rating}, {"content", content}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+    FeedbackEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<void>> NetworkClient::checkInEvent(int eventId, std::string const& code) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(
+        http::verb::post,
+        endpoint(std::format("/v2/client/event/{}/check-in", eventId), {{"code", code}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    co_return Ok();
 }
 
 Task<Result<void>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this
+                      ->request<api::Evento>(http::verb::post,
+                                             endpoint(std::format("/v2/client/event/{}/subscribe",
+                                                                  eventId),
+                                                      {{"subscribe", subscribe}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    co_return Ok();
 }
 
 Task<Result<void>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
                                                       bool subscribe) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this
+                      ->request<api::Evento>(http::verb::post,
+                                             endpoint(std::format("/v2/client/event/{}/subscribe",
+                                                                  larkDepartment),
+                                                      {{"subscribe", subscribe}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    co_return Ok();
 }
 
 Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent() {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/participated"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<EventEntityList>> NetworkClient::getSubscribedEvent() {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/subscribed"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<SlideEntityList>> NetworkClient::getHomeSlide() {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/slide"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    SlideEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 Task<Result<SlideEntityList>> NetworkClient::getEventSlide(int eventId) {
-    // TODO: implement me!
-    co_return Error(Error::Unknown);
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint(
+                                                          std::format("/v2/client/event/{}/slide",
+                                                                      eventId)));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    SlideEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
 }
 
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
