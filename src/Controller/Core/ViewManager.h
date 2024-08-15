@@ -9,7 +9,7 @@
 
 EVENTO_UI_START
 
-class ViewManager : private GlobalAgent<::ViewManager> {
+class ViewManager : private GlobalAgent<ViewManagerBridge> {
     friend class UiBridge;
     UiBridge& bridge;
     std::string logOrigin = "ViewManager";
@@ -26,12 +26,15 @@ public:
     // view will be added to stack and show on top, overlay won't hide prior view.
     // auto refresh
     void navigateTo(ViewName newView);
+
     // stack will be clean (init view left), and push new view.
     // auto refresh
     void cleanNavigateTo(ViewName newView);
+
     // current page pop and new view pushed.
     // auto refresh
     void replaceNavigateTo(ViewName newView);
+
     // view will be pop from stack, new top will be show if it not.
     // auto refresh
     void priorView();

@@ -8,7 +8,7 @@
 
 EVENTO_UI_START
 
-class MessageManager : GlobalAgent<::MessageManager> {
+class MessageManager : GlobalAgent<MessageManagerBridge> {
     friend class UiBridge;
     UiBridge& bridge;
     std::string logOrigin = "MessageManager";

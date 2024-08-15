@@ -25,11 +25,12 @@ UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
     , messageManager(std::make_shared<MessageManager>(uiEntry, *this)) {
     attachAllViews();
 
+    slint::invoke_from_event_loop([this] { return onEnterEventLoop(); });
+
     uiEntry->window().on_close_requested([this] {
         onExitEventLoop();
         return slint::CloseRequestResponse::HideWindow;
     });
-    slint::invoke_from_event_loop([this] { return onEnterEventLoop(); });
 
     viewManager->initStack(ViewName::DiscoveryPage);
     if (!accountManager->isLogin()) {

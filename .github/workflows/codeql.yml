@@ -10,6 +10,9 @@ on:
     - "CMakePresets.json"
     - "vcpkg*"
     - ".github/workflows/codeql.yml"
+    branches:
+      - main
+      - dev
   pull_request:
     paths:
     - "src/**"
