@@ -37,6 +37,7 @@ export component EventForm {
         preferred-height: 200px;
         preferred-width: 500px;
         mes := Rectangle{
+            x: (parent.x)+5px;
             preferred-height: 200px;
             preferred-width: 50px;
             VerticalLayout {
@@ -67,6 +68,7 @@ export component EventForm {
                     y: -30px;
                     height: parent.height;
                     width: 380px;
+                    background: Token.color.surface-container-lowest;
                     Icon {
                         x: parent.x+30px;
                         height: 50px;
@@ -80,17 +82,17 @@ export component EventForm {
                         VerticalLayout {
                             alignment: center;
                             title := SText {
-                                font-size: 15px;
+                                font-size: Token.font.headline.small.size;
                                 color: Token.color.outline;
                                 text: "标题";
                             }
                             introduce := SText{
-                                font-size: 8px;
+                                font-size: Token.font.label.small.size;
                                 color: Token.color.outline;
                                 text: "介绍";
                             }
                             content := SText{
-                                font-size: 8px;
+                                font-size: Token.font.label.small.size;
                                 color: Token.color.outline;
                                 text: "内容";
                             }
@@ -109,13 +111,16 @@ export component EventForm {
 export component Schedule {
     preferred-height: 800px;
     preferred-width: 600px;
+    in-out property <string> title : "";
     VerticalLayout {
         spacing: 5px;
         //title
-        Text {
+        SText {
             x: (parent.width)/2-(parent.x)-50px;
-            font-size: 20px;
-            text: "进行中";
+            color: Token.color.on-surface;
+            font-size: Token.font.title.large.size;
+            //text: "进行中";
+            text: title;
         }
         //SDvider
         SDivider {
@@ -124,7 +129,7 @@ export component Schedule {
             height: 2px;
             }
         //SText && STimeLine (separate)
-        EventForm { }
+        @children
     }
 }
 
@@ -133,34 +138,6 @@ export component MyEventPage inherits Page {
     // optional
     ScrollView {
         background := Empty { }
-
-        // layout := HorizontalLayout {
-        //     visible: false;
-        //     x: 0;
-        //     y: 0;
-        //     width: 100%;
-        //     height: 100%;
-        //     padding: 10px;
-        //     layout-signin := Schedule{
-        //         //something
-                
-                
-        //     }
-        //     VerticalLayout {
-
-        //         layout-start := Schedule{
-        //             //something
-                    
-        //         }
-        //         layout-end := Schedule{
-        //             //something
-        //         }
-        //     }
-        //     // plan: a link to events which have been canceled
-        //     layout-cancel := Rectangle{
-        //         //something
-        //     }
-        // }
 
         body := Empty {
             x: 0;
@@ -172,20 +149,34 @@ export component MyEventPage inherits Page {
                 signin-line := Schedule {
                     width: 50%;
                     height: 100%;
+                    title: "已报名";
+                    EventForm {}
+                    EventForm {}
+                    EventForm {}
                 }
                 VerticalLayout {
-                    start-line := Schedule { }
-        
-                    end-line := Schedule { }
+                    spacing: 150px;
+                    start-line := Schedule { 
+                        width: 50%;
+                        title: "进行中";
+                        // height: 50%;
+                        EventForm { }
+                    }
+                    end-line := Schedule { 
+                        width: 50%;
+                        // height: 50%;
+                        title: "已结束";
+                        EventForm { }
+                    }
                 }
             }
             
             placeholder := Rectangle {
                 border-width: 4px;
                 border-color: red;
-                Text {
-                    text: "活动日程（我的活动）\n  未开始、进行中、已结束";
-                }
+                // Text {
+                //     text: "活动日程（我的活动）\n  未开始、进行中、已结束";
+                // }
             }
         }
     }
