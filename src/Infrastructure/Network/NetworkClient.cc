@@ -1,5 +1,6 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/Api/Evento.hh>
+#include <Infrastructure/Network/Api/Github.hh>
 #include <Infrastructure/Utils/Debug.h>
 #include <boost/url/param.hpp>
 #include <boost/url/params_view.hpp>
@@ -9,7 +10,7 @@
 namespace evento {
 
 static const std::string EVENTO_API_GATEWAY = "https://evento.sast.fun/api";
-static const std::string GITHUB_API_GATEWAY = "https://api.github.com/repo";
+static const std::string GITHUB_API_GATEWAY = "https://api.github.com/repos";
 
 constexpr const char MIME_JSON[] = "application/json";
 constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencoded";
@@ -137,6 +138,48 @@ urls::url NetworkClient::endpoint(std::string_view endpoint) {
 urls::url NetworkClient::endpoint(std::string_view endpoint,
                                   std::initializer_list<urls::param> const& params) {
     auto r = urls::url(EVENTO_API_GATEWAY + endpoint.data());
+    r.params().append(params.begin(), params.end());
+    return r;
+}
+
+Task<Result<ContributorList>> NetworkClient::getContributors() {
+    auto result = co_await this->request<api::Github>(http::verb::get,
+                                                      githubEndpoint("/NJUPT-SAST/sast-evento/contributors"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    ContributorList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
+Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
+    auto result = co_await this->request<api::Github>(http::verb::get,
+                                                      githubEndpoint("/NJUPT-SAST/sast-evento/releases/latest"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    ReleaseEntity entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+    co_return Ok(entity);
+}
+
+urls::url NetworkClient::githubEndpoint(std::string_view endpoint) {
+    return urls::url(GITHUB_API_GATEWAY + endpoint.data());
+}
+
+urls::url NetworkClient::githubEndpoint(std::string_view endpoint,
+                                        std::initializer_list<urls::param> const& params) {
+    auto r = urls::url(GITHUB_API_GATEWAY + endpoint.data());
     r.params().append(params.begin(), params.end());
     return r;
 }
