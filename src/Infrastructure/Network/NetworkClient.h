@@ -14,6 +14,7 @@
 #include <chrono>
 #include <concepts>
 #include <initializer_list>
+#include <list>
 #include <nlohmann/json.hpp>
 #include <optional>
 #include <string>
@@ -38,6 +39,7 @@ using Task = net::awaitable<T>;
 struct CacheEntry {
     JsonResult result;
     std::chrono::steady_clock::time_point insertTime;
+    std::size_t size; //cache size
 };
 
 class NetworkClient {
@@ -107,6 +109,24 @@ private:
         auto duration = std::chrono::duration_cast<std::chrono::hours>(now - entry.insertTime);
         return duration.count() >= 3;
     }
+    void updateCache(const std::string& key, CacheEntry entry) {
+        auto it = cacheMap.find(key);
+        if (it != cacheMap.end()) {
+            cacheList.erase(it->second);
+            currentCacheSize -= it->second->second.size;
+        }
+        cacheList.push_front({key, std::move(entry)});
+        cacheMap[key] = cacheList.begin();
+        currentCacheSize += cacheList.begin()->second.size;
+
+        while (currentCacheSize > maxCacheSize) {
+            auto last = cacheList.end();
+            --last;
+            currentCacheSize -= last->second.size;
+            cacheMap.erase(last->first);
+            cacheList.pop_back();
+        }
+    }
     // - success => return the `data` field from response json
     //            maybe json object or json array
     // - error => return error message
@@ -118,9 +138,10 @@ private:
         std::string cacheKey = generateCacheKey(verb, url, params);
 
         //Check cache
-        auto it = cache.find(cacheKey);
-        if (it != cache.end() && !isCacheEntryExpired(it->second)) {
-            co_return it->second.result;
+        auto it = cacheMap.find(cacheKey);
+        if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
+            cacheList.splice(cacheList.begin(), cacheList, it->second);
+            co_return it->second->second.result;
         }
         debug(), url;
         auto req = Api::makeRequest(verb, url, tokenBytes, params);
@@ -133,9 +154,11 @@ private:
         auto result = handleResponse(reply.unwrap());
 
         // Update cache
-        cache.emplace(cacheKey, CacheEntry{std::move(result), std::chrono::steady_clock::now()});
+        size_t entrySize = result.unwrap().dump().size();
+        updateCache(cacheKey,
+                    CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
 
-        co_return cache[cacheKey].result;
+        co_return cacheMap[cacheKey]->second.result;
     }
 
     template<std::same_as<api::Github> Api>
@@ -143,18 +166,21 @@ private:
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
         std::string cacheKey = generateCacheKey(verb, url, params);
-        auto it = cache.find(cacheKey);
-        if (it != cache.end() && !isCacheEntryExpired(it->second)) {
-            co_return it->second.result;
+        auto it = cacheMap.find(cacheKey);
+        if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
+            cacheList.splice(cacheList.begin(), cacheList, it->second);
+            co_return it->second->second.result;
         }
         auto req = Api::makeRequest(verb, url, params);
         auto reply = co_await _manager->makeReply(url.host(), req);
         if (reply.isErr())
             co_return reply.unwrapErr();
         auto result = reply.unwrap();
-        cache.emplace(cacheKey, CacheEntry{std::move(result), std::chrono::steady_clock::now()});
+        size_t entrySize = result.dump().size();
+        updateCache(cacheKey,
+                    CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
 
-        co_return cache[cacheKey].result;
+        co_return cacheMap[cacheKey]->second.result;
     }
 
     // url builder
@@ -171,7 +197,10 @@ private:
 private:
     net::ssl::context& _ctx;
     std::unique_ptr<HttpsAccessManager> _manager;
-    std::unordered_map<std::string, CacheEntry> cache; //cache data(To be defined)
+    std::list<std::pair<std::string, CacheEntry>> cacheList;               // LRU 缓存列表
+    std::unordered_map<std::string, decltype(cacheList.begin())> cacheMap; // 缓存映射(changed,TBD)
+    size_t currentCacheSize = 0;                                           // 当前缓存大小
+    const size_t maxCacheSize = 64 * 1024 * 1024;
     friend NetworkClient* networkClient();
 };
 
