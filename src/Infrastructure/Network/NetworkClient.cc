@@ -58,21 +58,17 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
     co_return Ok(entity);
 }
-Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
+Task<Result<std::string>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
                                                       endpoint("/refresh-token"),
                                                       {{"refreshtoken", refreshToken}});
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    UserInfoEntity entity;
-    try {
-        nlohmann::from_json(result.unwrap(), entity);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
+    auto unwarpresult = result.unwrap();
+    std::string token = unwarpresult["data"]["accessToken"].get<std::string>();
 
-    co_return Ok();
+    co_return Ok(token);
 }
 
 Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
@@ -159,7 +155,7 @@ Task<Result<FeedbackEntity>> NetworkClient::getUserFeedback(int eventId) {
     co_return Ok(entity);
 }
 
-Task<Result<void>> NetworkClient::addUserFeedback(int eventId,
+Task<Result<bool>> NetworkClient::addUserFeedback(int eventId,
                                                   int rating,
                                                   std::string const& content) {
     auto result = co_await this->request<api::Evento>(
@@ -168,27 +164,21 @@ Task<Result<void>> NetworkClient::addUserFeedback(int eventId,
                  {{"rating", std::to_string(rating)}, {"content", content}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
-    FeedbackEntity entity;
-    try {
-        nlohmann::from_json(result.unwrap(), entity);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
 
-    co_return Ok();
+    co_return Ok(true);
 }
 
-Task<Result<void>> NetworkClient::checkInEvent(int eventId, std::string const& code) {
+Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string const& code) {
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/check-in", eventId), {{"code", code}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    co_return Ok();
+    co_return Ok(true);
 }
 
-Task<Result<void>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
+Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
@@ -198,10 +188,10 @@ Task<Result<void>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    co_return Ok();
+    co_return Ok(true);
 }
 
-Task<Result<void>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
+Task<Result<bool>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
                                                       bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
     auto result = co_await this
@@ -212,7 +202,7 @@ Task<Result<void>> NetworkClient::subscribeDepartment(std::string const& larkDep
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    co_return Ok();
+    co_return Ok(true);
 }
 
 Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent() {

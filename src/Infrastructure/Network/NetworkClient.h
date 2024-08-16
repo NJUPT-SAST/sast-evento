@@ -37,7 +37,7 @@ public:
 
     Task<Result<UserInfoEntity>> getUserInfo();
 
-    Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
+    Task<Result<std::string>> refreshAccessToken(std::string const& refreshToken);
 
     Task<Result<EventEntityList>> getActiveEventList();
 
@@ -49,13 +49,13 @@ public:
 
     Task<Result<FeedbackEntity>> getUserFeedback(int eventId);
 
-    Task<Result<void>> addUserFeedback(int eventId, int rating, std::string const& content);
+    Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string const& content);
 
-    Task<Result<void>> checkInEvent(int eventId, std::string const& code);
+    Task<Result<bool>> checkInEvent(int eventId, std::string const& code);
 
-    Task<Result<void>> subscribeEvent(int eventId, bool subscribe);
+    Task<Result<bool>> subscribeEvent(int eventId, bool subscribe);
 
-    Task<Result<void>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
+    Task<Result<bool>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
 
     Task<Result<EventEntityList>> getParticipatedEvent();
 
