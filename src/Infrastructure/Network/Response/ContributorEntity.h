@@ -6,17 +6,14 @@
 
 namespace evento {
 
-struct ContributorEntity{
+struct ContributorEntity {
     std::string login;
     std::string avatar_url;
     std::string html_url;
     int contributions;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(ContributorEntity,
-                                                login,
-                                                avatar_url,
-                                                html_url,
-                                                contributions);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(
+        ContributorEntity, login, avatar_url, html_url, contributions);
 };
 
-}// namespace evento
+} // namespace evento

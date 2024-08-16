@@ -69,7 +69,7 @@ public:
 
     Task<Result<ContributorList>> getContributors();
 
-    Task<Result<VersionEntity>> getLatestRelease();
+    Task<Result<ReleaseEntity>> getLatestRelease();
 
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists

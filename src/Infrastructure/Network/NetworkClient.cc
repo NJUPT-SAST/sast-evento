@@ -144,7 +144,8 @@ urls::url NetworkClient::endpoint(std::string_view endpoint,
 
 Task<Result<ContributorList>> NetworkClient::getContributors() {
     auto result = co_await this->request<api::Github>(http::verb::get,
-                                                      githubEndpoint("/NJUPT-SAST/sast-evento/contributors"));
+                                                      githubEndpoint(
+                                                          "/NJUPT-SAST/sast-evento/contributors"));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -159,8 +160,10 @@ Task<Result<ContributorList>> NetworkClient::getContributors() {
 }
 
 Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
-    auto result = co_await this->request<api::Github>(http::verb::get,
-                                                      githubEndpoint("/NJUPT-SAST/sast-evento/releases/latest"));
+    auto result = co_await this
+                      ->request<api::Github>(http::verb::get,
+                                             githubEndpoint(
+                                                 "/NJUPT-SAST/sast-evento/releases/latest"));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
