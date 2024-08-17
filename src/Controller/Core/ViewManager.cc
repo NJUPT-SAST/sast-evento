@@ -3,6 +3,7 @@
 #include <Controller/UiBridge.h>
 #include <algorithm>
 #include <cassert>
+#include <memory>
 #include <set>
 #include <spdlog/spdlog.h>
 
@@ -25,26 +26,27 @@ ViewManager::ViewManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& 
     });
 }
 
-void ViewManager::initStack(ViewName newView) {
-    viewStack.emplace(newView);
+void ViewManager::initStack(ViewName newView, std::shared_ptr<ViewData> data) {
+    assert(!bridge.inEventLoop());
+    pushView(newView, std::move(data));
     // separate operation reduce (possible) flicking when window start up and keeps invoke order
     visibleViews.emplace(newView);
     slint::invoke_from_event_loop([this, newView] { return showView(newView); });
 }
 
-void ViewManager::navigateTo(ViewName newView) {
+void ViewManager::navigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
     auto& self = *this;
     navAssert();
     if (newView == viewStack.top()) {
         return;
     }
 
-    viewStack.push(newView);
+    pushView(newView, std::move(data));
 
     syncViewVisibility();
 }
 
-void ViewManager::cleanNavigateTo(ViewName newView) {
+void ViewManager::cleanNavigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
     auto& self = *this;
     navAssert();
     if (newView == viewStack.top()) {
@@ -52,26 +54,26 @@ void ViewManager::cleanNavigateTo(ViewName newView) {
     }
 
     while (viewStack.size() > 1) {
-        viewStack.pop();
+        popView();
     }
     if (newView == viewStack.top()) {
         syncViewVisibility();
         return;
     }
-    viewStack.push(newView);
+    pushView(newView, std::move(data));
 
     syncViewVisibility();
 }
 
-void ViewManager::replaceNavigateTo(ViewName newView) {
+void ViewManager::replaceNavigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
     auto& self = *this;
     navAssert();
     if (newView == viewStack.top()) {
         return;
     }
 
-    viewStack.pop();
-    viewStack.push(newView);
+    popView();
+    pushView(newView, std::move(data));
 
     syncViewVisibility();
 }
@@ -85,13 +87,23 @@ void ViewManager::priorView() {
         return;
     }
 
-    viewStack.pop();
+    popView();
 
     syncViewVisibility();
 }
 
 bool ViewManager::isVisible(ViewName target) {
     return visibleViews.find(target) != visibleViews.end();
+}
+
+void ViewManager::pushView(ViewName newView, std::shared_ptr<ViewData>&& data) {
+    viewStack.push(newView);
+    viewData.emplace(std::move(data));
+}
+
+void ViewManager::popView() {
+    viewStack.pop();
+    viewData.pop();
 }
 
 void ViewManager::syncViewVisibility() {
