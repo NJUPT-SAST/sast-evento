@@ -28,7 +28,6 @@ using SlideEntityList = std::vector<SlideEntity>;
 using DepartmentInfoEntityList = std::vector<DepartmentInfoEntity>;
 using ContributorList = std::vector<ContributorEntity>;
 
-
 template<typename T>
 using Task = net::awaitable<T>;
 
