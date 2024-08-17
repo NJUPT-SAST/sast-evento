@@ -25,6 +25,8 @@ namespace urls = boost::urls;   // from <boost/url.hpp>
 using JsonResult = Result<nlohmann::basic_json<>>;
 using EventEntityList = std::vector<EventEntity>;
 using SlideEntityList = std::vector<SlideEntity>;
+using ContributorList = std::vector<ContributorEntity>;
+
 template<typename T>
 using Task = net::awaitable<T>;
 
@@ -65,6 +67,10 @@ public:
 
     Task<Result<SlideEntityList>> getEventSlide(int eventId);
 
+    Task<Result<ContributorList>> getContributors();
+
+    Task<Result<ReleaseEntity>> getLatestRelease();
+
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists
     std::optional<std::string> tokenBytes;
@@ -95,11 +101,20 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
-        auto req = Api::makeRequest(verb, url, params);
+        auto req = Api::makeRequest(verb, url, std::nullopt, params);
         auto reply = co_await _manager->makeReply(url.host(), req);
         if (reply.isErr())
             co_return reply.unwrapErr();
-        co_return reply.unwrap();
+
+        nlohmann::basic_json<> res;
+        try {
+            res = nlohmann::json::parse(beast::buffers_to_string(reply.unwrap().body().data()));
+            debug(), res.dump();
+        } catch (const nlohmann::json::parse_error& e) {
+            co_return Err(Error(Error::JsonDes, e.what()));
+        }
+
+        co_return res;
     }
 
     // url builder
@@ -107,6 +122,10 @@ private:
     static urls::url endpoint(std::string_view endpoint,  // url has query params
                               std::initializer_list<urls::param> const& queryParams);
     // response handler for evento backend
+    static urls::url githubEndpoint(std::string_view endpoint);
+    static urls::url githubEndpoint(std::string_view endpoint,
+                                    std::initializer_list<urls::param> const& queryParams);
+    //response handler for github api
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
 
 private:
