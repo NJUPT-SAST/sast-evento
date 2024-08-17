@@ -192,6 +192,22 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(std::string con
     co_return Ok(entity);
 }
 
+Task<Result<EventEntityList>> NetworkClient::getEventList(std::initializer_list<urls::param> params) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/query", params));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
 Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
     auto result = co_await this->request<api::Evento>(
         http::verb::get, endpoint(std::format("api/v2/client/event/{}/attachments", eventId)));

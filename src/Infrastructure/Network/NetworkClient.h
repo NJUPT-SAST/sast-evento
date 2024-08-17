@@ -58,6 +58,8 @@ public:
                                                       int page,
                                                       int size = 10);
 
+    Task<Result<EventEntityList>> getEventList(std::initializer_list<urls::param> params);
+
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
     Task<Result<FeedbackEntity>> getUserFeedback(int eventId);
