@@ -66,7 +66,7 @@ Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshT
         co_return Err(result.unwrapErr());
 
     try {
-        this->tokenBytes = result.unwrap()["data"]["accessToken"].get<std::string>();
+        this->tokenBytes = result.unwrap()["accessToken"].get<std::string>();
     } catch (const nlohmann::json::exception& e) {
         this->tokenBytes = std::nullopt;
         co_return Err(Error(Error::JsonDes, e.what()));
@@ -95,9 +95,9 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList(int& current,
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
-        current = result.unwrap()["data"]["current"].get<int>();
-        total = result.unwrap()["data"]["total"].get<int>();
+        entity = result.unwrap()["elements"].get<EventEntityList>();
+        current = result.unwrap()["current"].get<int>();
+        total = result.unwrap()["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -123,9 +123,9 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList(int& current,
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
-        current = result.unwrap()["data"]["current"].get<int>();
-        total = result.unwrap()["data"]["total"].get<int>();
+        entity = result.unwrap()["elements"].get<EventEntityList>();
+        current = result.unwrap()["current"].get<int>();
+        total = result.unwrap()["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -147,9 +147,9 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int& current,
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
-        current = result.unwrap()["data"]["current"].get<int>();
-        total = result.unwrap()["data"]["total"].get<int>();
+        entity = result.unwrap()["elements"].get<EventEntityList>();
+        current = result.unwrap()["current"].get<int>();
+        total = result.unwrap()["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -171,9 +171,9 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList(
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
-        current = result.unwrap()["data"]["current"].get<int>();
-        total = result.unwrap()["data"]["total"].get<int>();
+        entity = result.unwrap()["elements"].get<EventEntityList>();
+        current = result.unwrap()["current"].get<int>();
+        total = result.unwrap()["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -195,9 +195,9 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList(
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
-        current = result.unwrap()["data"]["current"].get<int>();
-        total = result.unwrap()["data"]["total"].get<int>();
+        entity = result.unwrap()["elements"].get<EventEntityList>();
+        current = result.unwrap()["current"].get<int>();
+        total = result.unwrap()["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -219,9 +219,9 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
-        current = result.unwrap()["data"]["current"].get<int>();
-        total = result.unwrap()["data"]["total"].get<int>();
+        entity = result.unwrap()["elements"].get<EventEntityList>();
+        current = result.unwrap()["current"].get<int>();
+        total = result.unwrap()["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
