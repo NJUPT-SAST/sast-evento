@@ -9,6 +9,8 @@ import { SText } from "../../modules/surrealism-ui/src/text/index.slint";
 import { STab } from "../../modules/surrealism-ui/src/tab/index.slint";
 import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
 import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
+import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
+import { ViewManager } from "../../logic/index.slint";
 export global MyEventPageBridge { }
 
 // button
@@ -31,8 +33,18 @@ component SignButton inherits SButton{
     ]
 }
 
+export component ReviewButton inherits SButton {
+    width: 40px;
+    height: 20px;
+    text: "评价";
+    background: Token.color.surface;
+    border-color: Token.color.outline;
+    font-color: Token.color.on-surface;
+    clicked => {ViewManager.navigate-to(ViewName.HistoryPage) }
+}
+
 // a simple event form
-component EventForm {
+component EventForm01 {
     Rectangle {
         preferred-height: 200px;
         preferred-width: 500px;
@@ -107,6 +119,92 @@ component EventForm {
     }
 }
 
+component EventForm02 {
+    Rectangle {
+        preferred-height: 200px;
+        preferred-width: 500px;
+        mes := Rectangle{
+            x: (parent.x)+5px;
+            preferred-height: 200px;
+            preferred-width: 50px;
+            VerticalLayout {
+                alignment: center;
+                data := SText {
+                    color: Token.color.outline;
+                    text: "日期";
+                }
+                place := SText{
+                    color: Token.color.outline;
+                    text: "地点";
+                }
+                time := SText{
+                    color: Token.color.outline;
+                    text: "时间";
+                }
+            }
+        }
+        form := STimeLine{
+            x: mes.x + 80px;
+            width: 20px;
+            height: parent.height;
+            STimeLineItem {
+                width: (parent.width)+80px;
+                height: parent.height;
+                SCard {
+                    x: (parent.x)-10px;
+                    y: parent.y;
+                    height: (parent.height)-50px;
+                    width: 350px;
+                    background: Token.color.surface-container-lowest;
+                    Icon {
+                        x: parent.x+30px;
+                        height: 50px;
+                        width: 50px;
+                        source: Token.image.icon.evento;
+                    }
+                    info := Rectangle{
+                        x: parent.x+80px;
+                        preferred-height: 200px;
+                        preferred-width: 200px;
+                        VerticalLayout {
+                            alignment: center;
+                            title := SText {
+                                font-size: Token.font.headline.small.size;
+                                color: Token.color.outline;
+                                text: "标题";
+                            }
+                            introduce := SText{
+                                font-size: Token.font.label.small.size;
+                                color: Token.color.outline;
+                                text: "介绍";
+                            }
+                            content := SText{
+                                font-size: Token.font.label.small.size;
+                                color: Token.color.outline;
+                                text: "内容";
+                            }
+                        }
+                    }
+                    ReviewButton {
+                        x: parent.x+300px;
+                    }
+                }
+            }
+        }
+    }
+}
+// component form01 inherits EventForm{
+//     SignButton {
+//         x: parent.x+300px;
+//     }
+// }
+
+// component form02 inherits EventForm{
+//     ReviewButton {
+//         x: parent.x+300px;
+//     }
+// }
+
 // a simple component for schedule
 component Schedule {
     preferred-height: 800px;
@@ -155,23 +253,21 @@ export component MyEventPage inherits Page {
                     width: 50%;
                     height: 100%;
                     title: "已报名";
-                    EventForm { }
-                    EventForm { }
-                    EventForm { }
+                    EventForm01 { }
+                    EventForm01 { }
+                    EventForm01 { }
                 }
                 VerticalLayout {
                     spacing: 150px;
                     start-line := Schedule { 
                         width: 50%;
                         title: "进行中";
-                        // height: 50%;
-                        EventForm { }
+                        EventForm01 { }
                     }
                     end-line := Schedule { 
                         width: 50%;
-                        // height: 50%;
                         title: "已结束";
-                        EventForm { }
+                        EventForm02 { }
                     }
                 }
             }
