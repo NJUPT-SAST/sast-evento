@@ -129,7 +129,7 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(int page, int siz
     co_return Ok(entity);
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(std::string const& department,
+Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(std::string const& larkDepartment,
                                                                   int page,
                                                                   int size) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
@@ -137,7 +137,7 @@ Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(std::string co
                                                                {{"page", std::to_string(page)},
                                                                 {"size", std::to_string(size)},
                                                                 {"larkDepartmentName",
-                                                                 department}}));
+                                                                 larkDepartment}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -183,7 +183,7 @@ Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
     co_return Ok(entity);
 }
 
-Task<Result<FeedbackEntity>> NetworkClient::getUserFeedback(int eventId) {
+Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(int eventId) {
     auto result = co_await this
                       ->request<api::Evento>(http::verb::get,
                                              endpoint(std::format("/v2/client/event/{}/feedback",
@@ -191,9 +191,14 @@ Task<Result<FeedbackEntity>> NetworkClient::getUserFeedback(int eventId) {
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    FeedbackEntity entity;
+    std::optional<FeedbackEntity> entity;
+
+    if (result.unwrap().is_null()) {
+        co_return Ok(entity);
+    }
+
     try {
-        nlohmann::from_json(result.unwrap(), entity);
+        entity = result.unwrap().get<FeedbackEntity>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }

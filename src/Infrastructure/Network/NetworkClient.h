@@ -14,6 +14,7 @@
 #include <concepts>
 #include <initializer_list>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 
 namespace evento {
@@ -49,7 +50,7 @@ public:
 
     Task<Result<EventQueryRes>> getHistoryEventList(int page, int size = 10);
 
-    Task<Result<EventQueryRes>> getDepartmentEventList(std::string const& department,
+    Task<Result<EventQueryRes>> getDepartmentEventList(std::string const& larkDepartment,
                                                        int page,
                                                        int size = 10);
 
@@ -57,7 +58,7 @@ public:
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
-    Task<Result<FeedbackEntity>> getUserFeedback(int eventId);
+    Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(int eventId);
 
     Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string const& content);
 
