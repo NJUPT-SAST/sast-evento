@@ -18,7 +18,7 @@ struct EventEntity {
     std::string larkDepartmentName;
     State state;
     bool isSubscribed; // 已订阅
-    bool isChecked;    // 已签到
+    bool isCheckedIn;  // 已签到
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(EventEntity,
                                    id,
@@ -32,7 +32,15 @@ struct EventEntity {
                                    larkDepartmentName,
                                    state,
                                    isSubscribed,
-                                   isChecked);
+                                   isCheckedIn);
+};
+
+struct EventEntityList {
+    std::vector<EventEntity> elements;
+    int current;
+    int total;
+
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(EventEntityList, elements, current, total);
 };
 
 } // namespace evento

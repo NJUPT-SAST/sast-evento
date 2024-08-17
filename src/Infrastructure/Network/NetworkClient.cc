@@ -75,18 +75,8 @@ Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshT
     co_return Ok();
 }
 
-Task<Result<EventEntityList>> NetworkClient::getActiveEventList(int& current,
-                                                                int& total,
-                                                                int page,
-                                                                int size) {
-    std::initializer_list<urls::param> params;
-    if (page == -1) {
-        params = {{"active", "true"}};
-    } else {
-        params = {{"page", std::to_string(page)},
-                  {"size", std::to_string(size)},
-                  {"active", "true"}};
-    }
+Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
+    std::initializer_list<urls::param> params = {{"active", "true"}};
 
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query", params));
@@ -95,9 +85,7 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList(int& current,
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["elements"].get<EventEntityList>();
-        current = result.unwrap()["current"].get<int>();
-        total = result.unwrap()["total"].get<int>();
+        nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -105,16 +93,8 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList(int& current,
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getLatestEventList(int& current,
-                                                                int& total,
-                                                                int page,
-                                                                int size) {
-    std::initializer_list<urls::param> params;
-    if (page == -1) {
-        params = {{"start", "now"}};
-    } else {
-        params = {{"page", std::to_string(page)}, {"size", std::to_string(size)}, {"start", "now"}};
-    }
+Task<Result<EventEntityList>> NetworkClient::getLatestEventList() {
+    std::initializer_list<urls::param> params = {{"start", "now"}};
 
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query", params));
@@ -123,9 +103,7 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList(int& current,
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["elements"].get<EventEntityList>();
-        current = result.unwrap()["current"].get<int>();
-        total = result.unwrap()["total"].get<int>();
+        nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -133,10 +111,7 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList(int& current,
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int& current,
-                                                                 int& total,
-                                                                 int page,
-                                                                 int size) {
+Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int page, int size) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
@@ -147,9 +122,7 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int& current,
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["elements"].get<EventEntityList>();
-        current = result.unwrap()["current"].get<int>();
-        total = result.unwrap()["total"].get<int>();
+        nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -157,13 +130,10 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int& current,
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getActiveEventList(
-    std::string const& Department, int& current, int& total, int page, int size) {
+Task<Result<EventEntityList>> NetworkClient::getActiveEventList(std::string const& Department) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
-                                                               {{"page", std::to_string(page)},
-                                                                {"size", std::to_string(size)},
-                                                                {"active", "true"},
+                                                               {{"active", "true"},
                                                                 {"larkDepartmentName",
                                                                  Department}}));
     if (result.isErr())
@@ -171,9 +141,7 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList(
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["elements"].get<EventEntityList>();
-        current = result.unwrap()["current"].get<int>();
-        total = result.unwrap()["total"].get<int>();
+        nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -181,13 +149,10 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList(
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getLatestEventList(
-    std::string const& Department, int& current, int& total, int page, int size) {
+Task<Result<EventEntityList>> NetworkClient::getLatestEventList(std::string const& Department) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
-                                                               {{"page", std::to_string(page)},
-                                                                {"size", std::to_string(size)},
-                                                                {"start", "now"},
+                                                               {{"start", "now"},
                                                                 {"larkDepartmentName",
                                                                  Department}}));
     if (result.isErr())
@@ -195,9 +160,7 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList(
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["elements"].get<EventEntityList>();
-        current = result.unwrap()["current"].get<int>();
-        total = result.unwrap()["total"].get<int>();
+        nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -205,8 +168,9 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList(
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(
-    std::string const& Department, int& current, int& total, int page, int size) {
+Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(std::string const& Department,
+                                                                 int page,
+                                                                 int size) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
@@ -219,9 +183,7 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(
 
     EventEntityList entity;
     try {
-        entity = result.unwrap()["elements"].get<EventEntityList>();
-        current = result.unwrap()["current"].get<int>();
-        total = result.unwrap()["total"].get<int>();
+        nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }

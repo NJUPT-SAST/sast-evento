@@ -24,7 +24,6 @@ namespace net = boost::asio;    // from <boost/asio.hpp>
 namespace urls = boost::urls;   // from <boost/url.hpp>
 
 using JsonResult = Result<nlohmann::basic_json<>>;
-using EventEntityList = std::vector<EventEntity>;
 using SlideEntityList = std::vector<SlideEntity>;
 using DepartmentInfoEntityList = std::vector<DepartmentInfoEntity>;
 template<typename T>
@@ -41,34 +40,21 @@ public:
 
     Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
-    Task<Result<EventEntityList>> getActiveEventList(int& current,
-                                                     int& total,
-                                                     int page,
-                                                     int size = 10);
+    Task<Result<EventEntityList>> getActiveEventList();
 
-    Task<Result<EventEntityList>> getLatestEventList(int& current,
-                                                     int& total,
-                                                     int page,
-                                                     int size = 10);
+    Task<Result<EventEntityList>> getLatestEventList();
 
-    Task<Result<EventEntityList>> getHistoryEventList(int& current,
-                                                      int& total,
+    Task<Result<EventEntityList>> getHistoryEventList(int page, int size = 10);
+
+    Task<Result<EventEntityList>> getDepartmentEventList(int page, int size = 10);
+
+    Task<Result<EventEntityList>> getActiveEventList(std::string const& Department);
+
+    Task<Result<EventEntityList>> getLatestEventList(std::string const& Department);
+
+    Task<Result<EventEntityList>> getHistoryEventList(std::string const& Department,
                                                       int page,
                                                       int size = 10);
-
-    Task<Result<EventEntityList>> getDepartmentEventList(int& current,
-                                                         int& total,
-                                                         int page,
-                                                         int size = 10);
-
-    Task<Result<EventEntityList>> getActiveEventList(
-        std::string const& Department, int& current, int& total, int page, int size = 10);
-
-    Task<Result<EventEntityList>> getLatestEventList(
-        std::string const& Department, int& current, int& total, int page, int size = 10);
-
-    Task<Result<EventEntityList>> getHistoryEventList(
-        std::string const& Department, int& current, int& total, int page, int size = 10);
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
