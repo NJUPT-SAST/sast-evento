@@ -39,11 +39,25 @@ public:
 
     Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
-    Task<Result<EventEntityList>> getActiveEventList();
+    Task<Result<EventEntityList>> getActiveEventList(int& current,
+                                                     int& total,
+                                                     int page,
+                                                     int size = 10);
 
-    Task<Result<EventEntityList>> getLatestEventList();
+    Task<Result<EventEntityList>> getLatestEventList(int& current,
+                                                     int& total,
+                                                     int page,
+                                                     int size = 10);
 
-    Task<Result<EventEntityList>> getHistoryEventList(int page, int size = 10);
+    Task<Result<EventEntityList>> getHistoryEventList(int& current,
+                                                      int& total,
+                                                      int page,
+                                                      int size = 10);
+
+    Task<Result<EventEntityList>> getDepartmentEventList(int& current,
+                                                         int& total,
+                                                         int page,
+                                                         int size = 10);
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 

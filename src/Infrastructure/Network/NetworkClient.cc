@@ -75,15 +75,29 @@ Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshT
     co_return Ok();
 }
 
-Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
+Task<Result<EventEntityList>> NetworkClient::getActiveEventList(int& current,
+                                                                int& total,
+                                                                int page,
+                                                                int size) {
+    std::initializer_list<urls::param> params;
+    if (page == -1) {
+        params = {{"active", "true"}};
+    } else {
+        params = {{"page", std::to_string(page)},
+                  {"size", std::to_string(size)},
+                  {"active", "true"}};
+    }
+
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/active"));
+                                                      endpoint("/v2/client/event/query", params));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
     EventEntityList entity;
     try {
-        nlohmann::from_json(result.unwrap(), entity);
+        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
+        current = result.unwrap()["data"]["current"].get<int>();
+        total = result.unwrap()["data"]["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -91,15 +105,27 @@ Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getLatestEventList() {
+Task<Result<EventEntityList>> NetworkClient::getLatestEventList(int& current,
+                                                                int& total,
+                                                                int page,
+                                                                int size) {
+    std::initializer_list<urls::param> params;
+    if (page == -1) {
+        params = {{"start", "now"}};
+    } else {
+        params = {{"page", std::to_string(page)}, {"size", std::to_string(size)}, {"start", "now"}};
+    }
+
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/latest"));
+                                                      endpoint("/v2/client/event/query", params));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
     EventEntityList entity;
     try {
-        nlohmann::from_json(result.unwrap(), entity);
+        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
+        current = result.unwrap()["data"]["current"].get<int>();
+        total = result.unwrap()["data"]["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -107,17 +133,29 @@ Task<Result<EventEntityList>> NetworkClient::getLatestEventList() {
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int page, int size) {
+Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int& current,
+                                                                 int& total,
+                                                                 int page,
+                                                                 int size) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/history",
+                                                      endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
-                                                                {"size", std::to_string(size)}}));
+                                                                {"size", std::to_string(size)},
+                                                                {"end", "now"}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
     EventEntityList entity;
     try {
-        nlohmann::from_json(result.unwrap(), entity);
+        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
+        current = result.unwrap()["data"]["current"].get<int>();
+        total = result.unwrap()["data"]["total"].get<int>();
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
