@@ -58,17 +58,21 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
     co_return Ok(entity);
 }
-Task<Result<std::string>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
+Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
                                                       endpoint("/refresh-token"),
                                                       {{"refreshtoken", refreshToken}});
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    auto unwarpresult = result.unwrap();
-    std::string token = unwarpresult["data"]["accessToken"].get<std::string>();
+    try {
+        this->tokenBytes = result.unwrap()["data"]["accessToken"].get<std::string>();
+    } catch (const nlohmann::json::exception& e) {
+        this->tokenBytes = std::nullopt;
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
 
-    co_return Ok(token);
+    co_return Ok();
 }
 
 Task<Result<EventEntityList>> NetworkClient::getActiveEventList() {
