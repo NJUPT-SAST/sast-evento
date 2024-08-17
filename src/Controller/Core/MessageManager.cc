@@ -1,7 +1,7 @@
-#include "GlobalAgent.hh"
-#include "UiUtility.h"
+#include "Controller/AsyncExecutor.hh"
 #include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiBase.h>
+#include <Controller/Core/UiUtility.h>
 #include <chrono>
 #include <slint.h>
 #include <spdlog/spdlog.h>
@@ -22,22 +22,35 @@ MessageManager::MessageManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBr
 
 void MessageManager::showMessage(std::string content,
                                  MessageType type,
-                                 std::chrono::milliseconds timeout) {
+                                 std::chrono::steady_clock::duration timeout) {
     auto& self = *this;
 
-    UiUtility::StylishLog::newMessageShowed(logOrigin, content);
+    if (isMessageShow) {
+        hideMessage();
+        evento::executor()->asyncExecute(
+            doNothing,
+            [&, this] { showMessage(content, type, timeout); },
+            animationLength,
+            AsyncExecutor::Once | AsyncExecutor::Delay);
+    }
 
+    UiUtility::StylishLog::newMessageShowed(logOrigin, content);
+    isMessageShow = true;
     self->set_type(type);
     self->set_content(std::string_view(content));
-    self->set_timeout(timeout.count());
     self->set_visible(true);
+    evento::executor()->asyncExecute(
+        doNothing,
+        [this] { hideMessage(); },
+        timeout + animationLength,
+        AsyncExecutor::Once | AsyncExecutor::Delay);
+}
 
-    // TODO: find a better way to delay
-    std::thread t([&self] {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        slint::invoke_from_event_loop([&self] { self->set_visible(false); });
-    });
-    t.detach();
+void MessageManager::hideMessage() {
+    auto& self = *this;
+
+    isMessageShow = false;
+    self->set_visible(false);
 }
 
 EVENTO_UI_END

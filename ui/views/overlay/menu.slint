@@ -66,13 +66,13 @@ export component MenuOverlay inherits Overlay {
             in {
                 animate content.x, shadow.background {
                     duration: 400ms;
-                    easing: ease-in-out-sine;
+                    easing: ease-out-quart;
                 }
             }
             out {
                 animate content.x, shadow.background {
                     duration: 200ms;
-                    easing: ease-in-out-sine;
+                    easing: ease-in-quart;
                 }
             }
         }

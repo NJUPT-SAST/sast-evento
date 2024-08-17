@@ -21,11 +21,9 @@ void MenuOverlay::onCreate() {
 void MenuOverlay::onShow() {
     auto& self = *this;
     executor()->asyncExecute([]() -> Task<void> { co_return; },
-                             [&]() {
-                                 slint::invoke_from_event_loop([&] { self->set_is_show(true); });
-                             },
+                             [&]() { self->set_is_show(true); },
                              std::chrono::milliseconds(200),
-                             TimerFlag::Once);
+                             AsyncExecutor::Once | AsyncExecutor::Delay);
 }
 
 void MenuOverlay::onLogin() {
