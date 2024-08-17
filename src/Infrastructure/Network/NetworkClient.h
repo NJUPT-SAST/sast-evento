@@ -25,7 +25,8 @@ namespace urls = boost::urls;   // from <boost/url.hpp>
 
 using JsonResult = Result<nlohmann::basic_json<>>;
 using SlideEntityList = std::vector<SlideEntity>;
-using DepartmentInfoEntityList = std::vector<DepartmentInfoEntity>;
+using EventEntityList = std::vector<EventEntity>;
+using DepartmentEntityList = std::vector<DepartmentEntity>;
 using ContributorList = std::vector<ContributorEntity>;
 
 template<typename T>
@@ -42,23 +43,17 @@ public:
 
     Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
-    Task<Result<EventEntityList>> getActiveEventList();
+    Task<Result<EventQueryRes>> getActiveEventList();
 
-    Task<Result<EventEntityList>> getLatestEventList();
+    Task<Result<EventQueryRes>> getLatestEventList();
 
-    Task<Result<EventEntityList>> getHistoryEventList(int page, int size = 10);
+    Task<Result<EventQueryRes>> getHistoryEventList(int page, int size = 10);
 
-    Task<Result<EventEntityList>> getDepartmentEventList(int page, int size = 10);
+    Task<Result<EventQueryRes>> getDepartmentEventList(std::string const& department,
+                                                       int page,
+                                                       int size = 10);
 
-    Task<Result<EventEntityList>> getActiveEventList(std::string const& Department);
-
-    Task<Result<EventEntityList>> getLatestEventList(std::string const& Department);
-
-    Task<Result<EventEntityList>> getHistoryEventList(std::string const& Department,
-                                                      int page,
-                                                      int size = 10);
-
-    Task<Result<EventEntityList>> getEventList(std::initializer_list<urls::param> params);
+    Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params);
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
@@ -80,7 +75,7 @@ public:
 
     Task<Result<SlideEntityList>> getEventSlide(int eventId);
 
-    Task<Result<DepartmentInfoEntityList>> getDepartmentInfo();
+    Task<Result<DepartmentEntityList>> getDepartmentList();
 
     Task<Result<ContributorList>> getContributors();
 

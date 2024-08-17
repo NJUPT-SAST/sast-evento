@@ -35,12 +35,12 @@ struct EventEntity {
                                    isCheckedIn);
 };
 
-struct EventEntityList {
+struct EventQueryRes {
     std::vector<EventEntity> elements;
     int current;
     int total;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(EventEntityList, elements, current, total);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(EventQueryRes, elements, current, total);
 };
 
 } // namespace evento
