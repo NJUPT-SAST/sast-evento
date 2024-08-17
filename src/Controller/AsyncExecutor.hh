@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bitset>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/experimental/awaitable_operators.hpp>
@@ -104,13 +105,22 @@ public:
      *
      * @param interval   interval between each coroutine call
      * 
-     * @param flag       the flag indicating whether the operation should be performed periodically or simply only once
+     * @param flag       the strategy of the timer, MUST use `|` to combine two enum values below:
+     *                   * Immediate: execute the coroutine immediately
+     *                   * Delay: execute the coroutine after the interval
+     *                   * Once: execute the coroutine once
+     *                   * Periodic: execute the coroutine every interval periodically
+     *
+     *                   FORBIDDEN combinations:
+     *                   * Immediate and Delay
+     *                   * Periodic and Once
      */
     template<typename TaskFunc, typename CompletionCallback>
     void asyncExecute(TaskFunc&& func,
                       CompletionCallback&& callback,
                       std::chrono::steady_clock::duration interval,
                       int flag = TimerFlag::Periodic | TimerFlag::Immediate) {
+        assert(std::bitset<32>(flag).count() == 2);
         assert(!(flag & TimerFlag::Immediate && flag & TimerFlag::Delay));
         assert(!(flag & TimerFlag::Periodic && flag & TimerFlag::Once));
 
