@@ -179,7 +179,10 @@ Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string const& c
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    co_return Ok(true);
+    if (result.unwrap().is_boolean())
+        co_return Ok(result.unwrap().get<bool>());
+
+    co_return Err(Error(Error::Data, "response data type error"));
 }
 
 Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
@@ -192,7 +195,10 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    co_return Ok(true);
+    if (result.unwrap().is_boolean())
+        co_return Ok(result.unwrap().get<bool>());
+
+    co_return Err(Error(Error::Data, "response data type error"));
 }
 
 Task<Result<bool>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
@@ -206,7 +212,10 @@ Task<Result<bool>> NetworkClient::subscribeDepartment(std::string const& larkDep
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    co_return Ok(true);
+    if (result.unwrap().is_boolean())
+        co_return Ok(result.unwrap().get<bool>());
+
+    co_return Err(Error(Error::Data, "response data type error"));
 }
 
 Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent() {
