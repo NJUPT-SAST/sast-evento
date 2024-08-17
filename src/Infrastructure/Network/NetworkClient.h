@@ -14,6 +14,8 @@
 #include <concepts>
 #include <initializer_list>
 #include <nlohmann/json.hpp>
+#include <optional>
+#include <string>
 
 namespace evento {
 
@@ -23,8 +25,9 @@ namespace net = boost::asio;    // from <boost/asio.hpp>
 namespace urls = boost::urls;   // from <boost/url.hpp>
 
 using JsonResult = Result<nlohmann::basic_json<>>;
-using EventEntityList = std::vector<EventEntity>;
 using SlideEntityList = std::vector<SlideEntity>;
+using EventEntityList = std::vector<EventEntity>;
+using DepartmentEntityList = std::vector<DepartmentEntity>;
 using ContributorList = std::vector<ContributorEntity>;
 
 template<typename T>
@@ -41,23 +44,29 @@ public:
 
     Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
-    Task<Result<EventEntityList>> getActiveEventList();
+    Task<Result<EventQueryRes>> getActiveEventList();
 
-    Task<Result<EventEntityList>> getLatestEventList();
+    Task<Result<EventQueryRes>> getLatestEventList();
 
-    Task<Result<EventEntityList>> getHistoryEventList(int page, int size = 10);
+    Task<Result<EventQueryRes>> getHistoryEventList(int page, int size = 10);
+
+    Task<Result<EventQueryRes>> getDepartmentEventList(std::string const& larkDepartment,
+                                                       int page,
+                                                       int size = 10);
+
+    Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params);
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
-    Task<Result<FeedbackEntity>> getUserFeedback(int eventId);
+    Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(int eventId);
 
-    Task<Result<void>> addUserFeedback(int eventId, int rating, std::string const& content);
+    Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string const& content);
 
-    Task<Result<void>> checkInEvent(int eventId, std::string const& code);
+    Task<Result<bool>> checkInEvent(int eventId, std::string const& code);
 
-    Task<Result<void>> subscribeEvent(int eventId, bool subscribe);
+    Task<Result<bool>> subscribeEvent(int eventId, bool subscribe);
 
-    Task<Result<void>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
+    Task<Result<bool>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
 
     Task<Result<EventEntityList>> getParticipatedEvent();
 
@@ -66,6 +75,8 @@ public:
     Task<Result<SlideEntityList>> getHomeSlide();
 
     Task<Result<SlideEntityList>> getEventSlide(int eventId);
+
+    Task<Result<DepartmentEntityList>> getDepartmentList();
 
     Task<Result<ContributorList>> getContributors();
 
