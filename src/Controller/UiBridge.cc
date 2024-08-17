@@ -95,6 +95,7 @@ bool UiBridge::inEventLoop() const {
 }
 
 void UiBridge::call(Action& action) {
+    slint::private_api::assert_main_thread();
     std::for_each(views.begin(),
                   views.end(),
                   [&action](const std::pair<const ViewName, std::shared_ptr<BasicView>>& view) {
@@ -103,6 +104,7 @@ void UiBridge::call(Action& action) {
 }
 
 void UiBridge::call(Action& action, ViewName target) {
+    slint::private_api::assert_main_thread();
     action(*views.at(target));
 }
 
