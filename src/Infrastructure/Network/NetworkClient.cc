@@ -191,7 +191,7 @@ Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(int e
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    std::optional<FeedbackEntity> entity;
+    std::optional<FeedbackEntity> entity = std::nullopt;
 
     if (result.unwrap().is_null()) {
         co_return Ok(entity);
