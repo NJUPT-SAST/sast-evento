@@ -156,6 +156,72 @@ Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(int& current,
 
     co_return Ok(entity);
 }
+
+Task<Result<EventEntityList>> NetworkClient::getActiveEventList(
+    std::string const& Department, int& current, int& total, int page, int size) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"page", std::to_string(page)},
+                                                                {"size", std::to_string(size)},
+                                                                {"active", "true"},
+                                                                {"larkDepartmentName",
+                                                                 Department}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
+        current = result.unwrap()["data"]["current"].get<int>();
+        total = result.unwrap()["data"]["total"].get<int>();
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getLatestEventList(
+    std::string const& Department, int& current, int& total, int page, int size) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"page", std::to_string(page)},
+                                                                {"size", std::to_string(size)},
+                                                                {"start", "now"},
+                                                                {"larkDepartmentName",
+                                                                 Department}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
+        current = result.unwrap()["data"]["current"].get<int>();
+        total = result.unwrap()["data"]["total"].get<int>();
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
+Task<Result<EventEntityList>> NetworkClient::getHistoryEventList(
+    std::string const& Department, int& current, int& total, int page, int size) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"page", std::to_string(page)},
+                                                                {"size", std::to_string(size)},
+                                                                {"end", "now"},
+                                                                {"larkDepartmentName",
+                                                                 Department}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventEntityList entity;
+    try {
+        entity = result.unwrap()["data"]["elements"].get<EventEntityList>();
+        current = result.unwrap()["data"]["current"].get<int>();
+        total = result.unwrap()["data"]["total"].get<int>();
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
@@ -313,6 +379,22 @@ Task<Result<SlideEntityList>> NetworkClient::getEventSlide(int eventId) {
         co_return Err(result.unwrapErr());
 
     SlideEntityList entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
+Task<Result<DepartmentInfoEntityList>> NetworkClient::getDepartmentInfo() {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("v2/client/lark/department"));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    DepartmentInfoEntityList entity;
     try {
         nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {

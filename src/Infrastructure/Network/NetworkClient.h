@@ -14,6 +14,7 @@
 #include <concepts>
 #include <initializer_list>
 #include <nlohmann/json.hpp>
+#include <string>
 
 namespace evento {
 
@@ -25,6 +26,7 @@ namespace urls = boost::urls;   // from <boost/url.hpp>
 using JsonResult = Result<nlohmann::basic_json<>>;
 using EventEntityList = std::vector<EventEntity>;
 using SlideEntityList = std::vector<SlideEntity>;
+using DepartmentInfoEntityList = std::vector<DepartmentInfoEntity>;
 template<typename T>
 using Task = net::awaitable<T>;
 
@@ -59,6 +61,15 @@ public:
                                                          int page,
                                                          int size = 10);
 
+    Task<Result<EventEntityList>> getActiveEventList(
+        std::string const& Department, int& current, int& total, int page, int size = 10);
+
+    Task<Result<EventEntityList>> getLatestEventList(
+        std::string const& Department, int& current, int& total, int page, int size = 10);
+
+    Task<Result<EventEntityList>> getHistoryEventList(
+        std::string const& Department, int& current, int& total, int page, int size = 10);
+
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
     Task<Result<FeedbackEntity>> getUserFeedback(int eventId);
@@ -78,6 +89,8 @@ public:
     Task<Result<SlideEntityList>> getHomeSlide();
 
     Task<Result<SlideEntityList>> getEventSlide(int eventId);
+
+    Task<Result<DepartmentInfoEntityList>> getDepartmentInfo();
 
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists
