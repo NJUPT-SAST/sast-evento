@@ -24,12 +24,17 @@ namespace net = boost::asio; // from <boost/asio.hpp>
 template<typename T>
 using Task = net::awaitable<T>;
 
-enum class TimerFlag { Once, Periodic };
-
 class AsyncExecutor {
 public:
     AsyncExecutor(const AsyncExecutor&) = delete;
     AsyncExecutor& operator=(const AsyncExecutor&) = delete;
+
+    enum TimerFlag {
+        Immediate = 1,
+        Delay = 1 << 1,
+        Once = 1 << 2,
+        Periodic = 1 << 3,
+    };
 
     /**
      * @brief            execute a coroutine and call the callback when it's done
@@ -105,11 +110,18 @@ public:
     void asyncExecute(TaskFunc&& func,
                       CompletionCallback&& callback,
                       std::chrono::steady_clock::duration interval,
-                      TimerFlag flag = TimerFlag::Periodic) {
-        asyncExecuteByTimer(std::forward<TaskFunc>(func),
-                            std::forward<CompletionCallback>(callback),
-                            interval,
-                            flag);
+                      int flag = TimerFlag::Periodic | TimerFlag::Immediate) {
+        assert(!(flag & TimerFlag::Immediate && flag & TimerFlag::Delay));
+        assert(!(flag & TimerFlag::Periodic && flag & TimerFlag::Once));
+
+        if (flag & TimerFlag::Immediate)
+            asyncExecute(func(), callback);
+
+        if (flag & TimerFlag::Periodic || flag & TimerFlag::Delay)
+            asyncExecuteByTimer(std::forward<TaskFunc>(func),
+                                std::forward<CompletionCallback>(callback),
+                                interval,
+                                flag);
     }
 
     net::io_context& getIoContext() { return _ioc; }
@@ -141,7 +153,7 @@ private:
     void asyncExecuteByTimer(TaskFunc&& func,
                              CompletionCallback&& callback,
                              std::chrono::steady_clock::duration interval,
-                             TimerFlag flag) {
+                             int flag) {
         auto timer = std::make_shared<net::steady_timer>(_ioc, interval);
         timer->async_wait([=,
                            func = std::forward<TaskFunc>(func),
@@ -161,7 +173,7 @@ private:
                         spdlog::error(ex.what());
                     }
                 });
-                if (flag == TimerFlag::Periodic) {
+                if (flag & TimerFlag::Periodic) {
                     asyncExecuteByTimer(std::move(func), std::move(callback), interval, flag);
                 }
             } else {
@@ -175,7 +187,7 @@ private:
     void asyncExecuteByTimer(TaskFunc&& func,
                              CompletionCallback&& callback,
                              std::chrono::steady_clock::duration interval,
-                             TimerFlag flag) {
+                             int flag) {
         auto timer = std::make_shared<net::steady_timer>(_ioc, interval);
         timer->async_wait([=,
                            func = std::forward<TaskFunc>(func),
@@ -198,7 +210,7 @@ private:
                         spdlog::error(ex.what());
                     }
                 });
-                if (flag == TimerFlag::Periodic) {
+                if (flag & TimerFlag::Periodic) {
                     asyncExecuteByTimer(std::move(func), std::move(callback), interval, flag);
                 }
             } else {
