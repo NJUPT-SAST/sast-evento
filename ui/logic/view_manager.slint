@@ -1,0 +1,22 @@
+export enum ViewName{
+    DiscoveryPage,
+    SearchPage,
+    HistoryPage,
+    MyEventPage,
+    DetailPage,
+    AboutPage,
+    SettingPage,
+    LoginOverlay,
+    MenuOverlay,
+}
+
+export global ViewManager {
+    // nav request
+    callback navigate-to(ViewName);
+    callback clean-navigate-to(ViewName);
+    callback replace-navigate-to(ViewName);
+    callback prior-view();
+    // control view visibility
+    pure callback is-show(ViewName) -> bool;
+    in-out property <bool> refresh;
+}

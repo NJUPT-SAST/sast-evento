@@ -1,0 +1,251 @@
+import { Palette } from "std-widgets.slint";
+import { EventoStyleToken } from "../../logic/index.slint";
+
+struct ImgPair {
+    light: image,
+    dark: image,
+}
+
+struct ClickIcon {
+    // used when normal state
+    normal: image,
+    // used when user interacting such as click, hover...
+    interact: image,
+}
+
+struct EventoIconCollection {
+    evento: image,
+    sast-link: image,
+    arrow-left: ClickIcon,
+    card: ClickIcon,
+    category: image,
+    department: image,
+    history: ClickIcon,
+    home: ClickIcon,
+    info: ClickIcon,
+    locate: image,
+    logout: image,
+    me: ClickIcon,
+    schedule: ClickIcon,
+    setting: ClickIcon,
+    star-border: image,
+    star-border-blue: image,
+    star-fill: image,
+    tag: image,
+    time: image,
+    topic: image,
+    tree-list: ClickIcon,
+    account-box-outline: image,
+}
+
+struct EventoDisplayCollection {
+    evento: image,
+    evento-bg: image,
+    avatar: [image],
+    event: {
+        default: [image],
+        union: [image],
+        cpp: [image],
+        csharp: [image],
+        frontend: [image],
+        backend: [image],
+        game: [image],
+        lambda: [image],
+        python: [image],
+    },
+    no_image: image,
+}
+
+struct EventoImageCollection {
+    icon: EventoIconCollection,
+    display: EventoDisplayCollection,
+}
+
+export global EventoImageToken {
+    out property <EventoImageCollection> image:{
+        icon: icon,
+        display: display,
+    };
+    pure function switcher(img: ImgPair) -> image {
+        return EventoStyleToken.is-darkmode ? img.dark : img.light;
+    }
+    //
+    // icon used as small image in button, navbar and so on
+    // icon will change according to darkmode switch
+    property <EventoIconCollection> icon:{
+        // Product specific
+        evento: switcher({
+            light: @image-url("./icon/evento.png"),
+            dark: @image-url("./icon/evento_dark.png"),
+        }),
+        // sast-link is intended to be used in invert color
+        sast-link: switcher({
+            light: @image-url("./icon/sast-link.svg"),
+            dark: @image-url("./icon/sast-link_dark.svg"),
+        }),
+        // General usage
+        arrow-left: {
+            normal: switcher({
+                light: @image-url("./icon/arrow-left.svg"),
+                dark: @image-url("./icon/arrow-left_dark.svg"),
+            }),
+            interact: @image-url("./icon/arrow-left_blue.svg"),
+        },
+        card: {
+            normal: switcher({
+                light: @image-url("./icon/card.svg"),
+                dark: @image-url("./icon/card_dark.svg"),
+            }),
+            interact: @image-url("./icon/card_blue.svg"),
+        },
+        category: switcher({
+            light: @image-url("./icon/category.svg"),
+            dark: @image-url("./icon/category_dark.svg"),
+        }),
+        department: switcher({
+            light: @image-url("./icon/department.svg"),
+            dark: @image-url("./icon/department_dark.svg"),
+        }),
+        history: {
+            normal: switcher({
+                light: @image-url("./icon/history.svg"),
+                dark: @image-url("./icon/history_dark.svg"),
+            }),
+            interact: @image-url("./icon/history_blue.svg"),
+        },
+        home: {
+            normal: switcher({
+                light: @image-url("./icon/home.svg"),
+                dark: @image-url("./icon/home_dark.svg"),
+            }),
+            interact: @image-url("./icon/home_blue.svg"),
+        },
+        info: {
+            normal: switcher({
+                light: @image-url("./icon/info.svg"),
+                dark: @image-url("./icon/info_dark.svg"),
+            }),
+            interact: @image-url("./icon/info_blue.svg"),
+        },
+        locate: switcher({
+            light: @image-url("./icon/locate.svg"),
+            dark: @image-url("./icon/locate_dark.svg"),
+        }),
+        logout: @image-url("./icon/logout.svg"),
+        me: {
+            normal: switcher({
+                light: @image-url("./icon/me.svg"),
+                dark: @image-url("./icon/me_dark.svg"),
+            }),
+            interact: @image-url("./icon/me_blue.svg"),
+        },
+        schedule: {
+            normal: switcher({
+                light: @image-url("./icon/schedule.svg"),
+                dark: @image-url("./icon/schedule_dark.svg"),
+            }),
+            interact: @image-url("./icon/schedule_blue.svg"),
+        },
+        setting: {
+            normal: switcher({
+                light: @image-url("./icon/setting.svg"),
+                dark: @image-url("./icon/setting_dark.svg"),
+            }),
+            interact: @image-url("./icon/setting_blue.svg"),
+        },
+        star-border: switcher({
+            light: @image-url("./icon/star.svg"),
+            dark: @image-url("./icon/star_dark.svg"),
+        }),
+        star-border-blue: @image-url("./icon/star_blue.svg"),
+        star-fill: @image-url("./icon/star_fill.svg"),
+        tag: switcher({
+            light: @image-url("./icon/tag.svg"),
+            dark: @image-url("./icon/tag_dark.svg"),
+        }),
+        time: switcher({
+            light: @image-url("./icon/time.svg"),
+            dark: @image-url("./icon/time_dark.svg"),
+        }),
+        topic: switcher({
+            light: @image-url("./icon/topic.svg"),
+            dark: @image-url("./icon/topic_dark.svg"),
+        }),
+        tree-list: {
+            normal: switcher({
+                light: @image-url("./icon/tree-list.svg"),
+                dark: @image-url("./icon/tree-list_dark.svg"),
+            }),
+            interact: @image-url("./icon/tree-list_blue.svg"),
+        },
+        account-box-outline: switcher({
+            light: @image-url("./icon/account-box-outline.svg"),
+            dark: @image-url("./icon/account-box-outline_dark.svg"),
+        }),
+    };
+    // display used as images bigger than icon
+    // most display image won't change according to darkmode switch
+    property <EventoDisplayCollection> display:{
+        // Product specific
+        evento: switcher({
+            light: @image-url("./display/evento/evento.png"),
+            dark: @image-url("./display/evento/evento_dark.png"),
+        }),
+        evento-bg: @image-url("./display/evento/evento_bg.png"),
+        // Other
+        avatar: [
+            @image-url("./display/avatar/avatar_1.svg"),
+            @image-url("./display/avatar/avatar_2.svg"),
+            @image-url("./display/avatar/avatar_3.svg"),
+            @image-url("./display/avatar/avatar_4.svg"),
+            @image-url("./display/avatar/avatar_5.svg"),
+            @image-url("./display/avatar/avatar_6.svg"),
+            @image-url("./display/avatar/avatar_7.svg"),
+            @image-url("./display/avatar/avatar_8.svg"),
+            @image-url("./display/avatar/avatar_9.svg"),
+            @image-url("./display/avatar/avatar_10.svg"),
+            @image-url("./display/avatar/avatar_11.svg"),
+            @image-url("./display/avatar/avatar_12.svg"),
+        ],
+        event: {
+            default: [
+                @image-url("./display/event/default_1.png"),
+                @image-url("./display/event/default_2.png"),
+                @image-url("./display/event/default_3.png"),
+            ],
+            union: [
+                @image-url("./display/event/union_1.png"),
+                @image-url("./display/event/union_2.png"),
+            ],
+            cpp: [
+                @image-url("./display/event/cpp_1.svg"),
+                @image-url("./display/event/cpp_2.png"),
+                @image-url("./display/event/cpp_3.png"),
+            ],
+            csharp: [
+                @image-url("./display/event/csharp_1.png"),
+            ],
+            frontend: [
+                @image-url("./display/event/frontend_1.png"),
+                @image-url("./display/event/frontend_2.png"),
+                @image-url("./display/event/frontend_3.png"),
+            ],
+            backend: [
+                @image-url("./display/event/backend_1.png"),
+            ],
+            game: [
+                @image-url("./display/event/game_1.svg"),
+                @image-url("./display/event/game_2.jpg"),
+                @image-url("./display/event/game_3.jpg"),
+            ],
+            lambda: [
+                @image-url("./display/event/lambda_1.png"),
+                @image-url("./display/event/lambda_2.png"),
+            ],
+            python: [
+                @image-url("./display/event/python_1.png"),
+            ],
+        },
+        no_image: @image-url("./display/no_image.png"),
+    };
+}

@@ -1,0 +1,64 @@
+name: Build
+# Complete packaging in the future
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  job:
+    name: ${{ matrix.os }}
+    # The CMake configure and build commands are platform agnostic and should work equally
+    # well on Windows or Mac.  You can convert this to a matrix build if you need
+    # cross-platform coverage.
+    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+        # how to use macos ???
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: recursive
+
+    - name: Set up GCC
+      if: matrix.os == 'ubuntu-24.04'
+      uses: egor-tensin/setup-gcc@v1
+      with:
+        version: 14
+        platform: x64
+
+    - name: Setup Rust toolchain
+      uses: moonrepo/setup-rust@v1
+      with:
+        channel: stable
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Cache corrosion
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/build/_deps
+          ${{ github.workspace }}/build/*/cargo/build
+          !${{ github.workspace }}/build/*/cargo/build/**/incremental
+          ${{ github.workspace }}/build/corrosion/**/target
+          !${{ github.workspace }}/build/corrosion/**/target/**/incremental
+        key: corrosion-${{ runner.os }}
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
+        vcpkgJsonGlob: 'vcpkg.json'
+
+    - name: Build with CMake
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'native'
+        buildPreset: 'native-release'

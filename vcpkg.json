@@ -1,0 +1,17 @@
+{
+    "name": "sast-evento",
+    "dependencies": [
+        "boost-system",
+        "boost-beast",
+        "boost-url",
+        "openssl",
+        "nlohmann-json",
+        "spdlog",
+        "tomlplusplus",
+        "pkgconf",
+        {
+            "name": "libsecret",
+            "platform": "!(windows | uwp | osx)"
+        }
+    ]
+}

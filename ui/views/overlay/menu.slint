@@ -1,0 +1,185 @@
+import { Overlay, Empty } from "../../components/index.slint";
+import { ViewManager,ViewName } from "../../logic/index.slint";
+import { Token } from "../../global.slint";
+import { SAvatar } from "../../modules/surrealism-ui/src/avatar/index.slint";
+import { ROOT-STYLES } from "../../modules/surrealism-ui/themes/index.slint";
+
+export global MenuOverlayBridge { }
+
+component MenuItem inherits Rectangle {
+    in property <image> icon;
+    in property <string> label;
+    in property <color> label-color: Token.color.on-surface;
+    callback clicked <=> area.clicked;
+    height: 36px;
+    preferred-width: 100%;
+    padding: 5px;
+    border-radius: self.height / 2;
+    background: area.has-hover ? Token.color.primary-container : transparent;
+    area := TouchArea {
+        mouse-cursor: pointer;
+    }
+
+    content := HorizontalLayout {
+        spacing: 8px;
+        padding: 8px;
+        Image {
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            width: 20px;
+            height: self.width;
+            source: root.icon;
+        }
+
+        Text {
+            horizontal-alignment: left;
+            vertical-alignment: center;
+            color: root.label-color;
+            font-size: Token.font.title.medium.size;
+            text: root.label;
+        }
+    }
+
+    animate background {
+        duration: 100ms;
+        easing: ease-in-out;
+    }
+}
+
+component Divider inherits Rectangle {
+    width: 90%;
+    height: 2px;
+    background: Token.color.outline;
+}
+
+export component MenuOverlay inherits Overlay {
+    // TODO: implement Menu
+    // optional
+    background := Empty { }
+
+    layout := VerticalLayout {
+        visible: false;
+        x: 0;
+        y: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    body := Empty {
+        x: 0;
+        y: 0;
+        width: 100%;
+        height: 100%;
+        placeholder := Rectangle {
+            background: transparent;
+            init => {
+                self.background = Colors.rgba(0,0,0,0.5)
+            }
+
+            animate background {
+                duration: 400ms;
+                easing: ease-in-out;
+            }
+        }
+
+        Rectangle {
+            x: body.width - self.width;
+            height: root.height;
+            width: 0;
+            background: Token.color.surface-container;
+            border-top-left-radius: 6px;
+            border-bottom-left-radius: 6px;
+            init => {
+                self.width = 400px;
+            }
+            animate width {
+                duration: 400ms;
+                easing: ease-in-out;
+            }
+            VerticalLayout {
+                padding: 10px;
+                padding-top: 30px;
+                spacing: 5px;
+                HorizontalLayout {
+                    spacing: 10px;
+                    padding-bottom: 10px;
+                    SAvatar {
+                        avatar-size: 64px;
+                        avatar: Token.image.display.avatar[0];
+                    }
+
+                    VerticalLayout {
+                        spacing: 5px;
+                        padding-top: 5px;
+                        Text {
+                            text: "用户名";
+                            font-size: Token.font.title.large.size;
+                            color: Token.color.on-surface;
+                        }
+
+                        Text {
+                            text: "个性签名";
+                            font-size: Token.font.title.small.size;
+                            color: Token.color.outline;
+                        }
+                    }
+                }
+
+                Divider { }
+
+                MenuItem {
+                    icon: Token.image.icon.me.normal;
+                    label: "个人资料";
+                    clicked => {
+                        // TODO: implement
+                    }
+                }
+
+                MenuItem {
+                    icon: Token.image.icon.history.normal;
+                    label: "历史活动";
+                    clicked => {
+                        ViewManager.replace-navigate-to(ViewName.HistoryPage)
+                    }
+                }
+
+                MenuItem {
+                    icon: Token.image.icon.card.normal;
+                    label: "纪念卡";
+                    clicked => {
+                        // NOTE: Unsupported
+                    }
+                }
+
+                Divider { }
+
+                MenuItem {
+                    icon: Token.image.icon.setting.normal;
+                    label: "设置";
+                    clicked => {
+                        ViewManager.replace-navigate-to(ViewName.SettingPage)
+                    }
+                }
+
+                MenuItem {
+                    icon: Token.image.icon.info.normal;
+                    label: "关于";
+                    clicked => {
+                        ViewManager.replace-navigate-to(ViewName.AboutPage)
+                    }
+                }
+
+                Divider { }
+
+                MenuItem {
+                    icon: Token.image.icon.logout;
+                    label: "退出登录";
+                    label-color: ROOT-STYLES.sur-theme-colors.error.normal;
+                    clicked => {
+                        // TODO: implement
+                    }
+                }
+            }
+        }
+    }
+}

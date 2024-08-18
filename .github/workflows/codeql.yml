@@ -1,0 +1,156 @@
+name: "CodeQL"
+
+on:
+  push:
+    paths:
+    - "src/**"
+    - "ui/**"
+    - "3rdpart/**"
+    - "CMakeLists.txt"
+    - "CMakePresets.json"
+    - "vcpkg*"
+    - ".github/workflows/codeql.yml"
+  pull_request:
+    paths:
+    - "src/**"
+    - "ui/**"
+    - "3rdpart/**"
+    - "CMakeLists.txt"
+    - "CMakePresets.json"
+    - "vcpkg*"
+    - ".github/workflows/codeql.yml"
+  schedule:
+    - cron: '38 9 * * 6'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    # Runner size impacts CodeQL analysis time. To learn more, please see:
+    #   - https://gh.io/recommended-hardware-resources-for-running-codeql
+    #   - https://gh.io/supported-runners-and-hardware-resources
+    #   - https://gh.io/using-larger-runners (GitHub.com only)
+    # Consider using larger runners or machines with greater resources for possible analysis time improvements.
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-24.04' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: c-cpp
+          build-mode: 'manual'
+        # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
+        # Use `c-cpp` to analyze code written in C, C++ or both
+        # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
+        # Use 'javascript-typescript' to analyze code written in JavaScript, TypeScript or both
+        # To learn more about changing the languages that are analyzed or customizing the build mode for your analysis,
+        # see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning.
+        # If you are analyzing a compiled language, you can modify the 'build-mode' for that language to customize how
+        # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
+       
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: recursive
+
+    - name: Set up GCC
+      uses: egor-tensin/setup-gcc@v1
+      with:
+        version: 14
+        platform: x64
+
+    - name: Setup Rust toolchain
+      uses: moonrepo/setup-rust@v1
+      with:
+        channel: stable
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+    - name: Cache corrosion
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ github.workspace }}/build/_deps
+          ${{ github.workspace }}/build/lib
+          ${{ github.workspace }}/build/*/cargo/build
+          !${{ github.workspace }}/build/*/cargo/build/**/incremental
+          ${{ github.workspace }}/build/corrosion/**/target
+          !${{ github.workspace }}/build/corrosion/**/target/**/incremental
+        key: corrosion-${{ runner.os }}
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
+        vcpkgJsonGlob: 'vcpkg.json'
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    - if: matrix.build-mode == 'manual'
+      name: Build with CMake
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'native'
+        buildPreset: 'native'
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
+        output: sarif-results
+        upload: failure-only
+    
+    - name: Filter CodeQL Analysis Results
+      uses: advanced-security/filter-sarif@v1
+      with:
+        patterns: |
+          -**/*
+          +src/**/*
+        input: sarif-results/cpp.sarif
+        output: sarif-results/cpp.sarif
+    
+    - name: Upload CodeQL Analysis Results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: sarif-results/cpp.sarif
+    
+    - name: Send message to feishu
+      if: ${{ failure() }}
+      uses: foxundermoon/feishu-action@v2
+      with:
+        url: ${{ secrets.WEBHOOK_URL }}
+        msg_type: post
+        content: |
+          post:
+            zh_cn:
+              title: sast-evento repo CodeQL analysis
+              content:
+              - - tag: text
+                  text: "repository: ${{ github.repository }}"
+              - - tag: text
+                  text: "committer: ${{ github.actor }}"
+              - - tag: text
+                  text: 'compare: '
+                - tag: a
+                  text: "${{ github.event.compare }}"
+                  href: ${{ github.event.compare }}
+              - - tag: text
+                  text: "job status: ${{ job.status }}"

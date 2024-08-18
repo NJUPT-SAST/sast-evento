@@ -1,0 +1,59 @@
+name: clang-tidy-review
+
+on:
+  pull_request:
+    paths:
+      - 'src/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    runs-on: 'ubuntu-24.04'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+        
+      - name: Set up GCC
+        uses: egor-tensin/setup-gcc@v1
+        with:
+          version: 14
+          platform: x64
+
+      - name: Setup Rust toolchain
+        uses: moonrepo/setup-rust@v1
+        with:
+          channel: stable
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Cache corrosion
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ github.workspace }}/build/_deps
+            ${{ github.workspace }}/build/*/cargo/build
+            !${{ github.workspace }}/build/*/cargo/build/**/incremental
+            ${{ github.workspace }}/build/corrosion/**/target
+            !${{ github.workspace }}/build/corrosion/**/target/**/incremental
+          key: corrosion-${{ runner.os }}
+
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
+          vcpkgJsonGlob: 'vcpkg.json'
+
+      - name: Run clang-tidy
+        uses: ZedThree/clang-tidy-review@v0.19.0
+        id: review
+        with:
+          build_dir: build
+          config_file: ".clang-tidy"
+          exclude: "3rdpart/*, build/*"
+          cmake_command: |
+            cmake --preset native -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
