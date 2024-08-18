@@ -3,10 +3,13 @@ import { Token } from "./global.slint";
 import { Button } from "std-widgets.slint";
 import { Empty } from "./components/index.slint";
 import { 
+    ViewManagerBridge,
+    AccountManagerBridge,
+    MessageManagerBridge,
     ViewManager,
-    ViewName,
     AccountManager,
     MessageManager,
+    ViewName,
     MessageType
 } from "./logic/index.slint";
 
@@ -35,10 +38,13 @@ import { SAlert } from "modules/surrealism-ui/src/alert/index.slint";
 
 // export for C++ interact
 export { 
+    ViewManagerBridge,
+    AccountManagerBridge,
+    MessageManagerBridge,
     ViewManager,
-    ViewName,
     AccountManager,
     MessageManager,
+    ViewName,
     MessageType,
     LoginOverlayBridge,
     MenuOverlayBridge,

@@ -1,5 +1,15 @@
-export global AccountManager {
+export global AccountManagerBridge {
     in-out property <bool> is-login;
     callback request-login();
     callback request-logout();
+}
+
+export global AccountManager {
+    out property <bool> is-login <=> AccountManagerBridge.is-login;
+    public function request-login() {
+        AccountManagerBridge.request-login();
+    }
+    public function request-logout() {
+        AccountManagerBridge.request-logout();
+    }
 }

@@ -4,10 +4,20 @@ export enum MessageType{
     Error
 }
 
-export global MessageManager {
+export global MessageManagerBridge {
     in-out property <string> content: "Test content";
     in-out property <bool> visible;
     in-out property <MessageType> type;
     in-out property <duration> timeout: 3s;
     callback show-message(string, MessageType);
+}
+
+export global MessageManager {
+    out property <string> content <=> MessageManagerBridge.content;
+    out property <bool> visible <=> MessageManagerBridge.visible;
+    out property <MessageType> type <=> MessageManagerBridge.type;
+    out property <duration> timeout <=> MessageManagerBridge.timeout;
+    public function show-message(content: string, type: MessageType) {
+        MessageManagerBridge.show-message(content, type);
+    }
 }
