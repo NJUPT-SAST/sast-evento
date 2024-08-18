@@ -5,8 +5,57 @@ import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { EventoStyleToken } from "../../logic/style_token.slint";
 import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
+import { HorizontalBox, ScrollView } from "std-widgets.slint";
 
 export global DiscoveryPageBridge { }
+
+struct block_data {
+    img:   image,
+    title: string,
+    date:  string,
+    time:  string,
+    info:  string
+}
+
+// infomation of events
+component block {
+    preferred-height: 200px;
+    preferred-width: 400px;
+    in property <block_data> data;
+    Rectangle {
+        background: #ffffff;
+        HorizontalLayout {
+            preview := Image{
+                height: 100%;
+                width: 50%;
+                image-fit: contain;
+                source: data.img;
+            }
+            VerticalLayout {
+                title := Text { 
+                    text: data.title; 
+                    font-size: EventoStyleToken.font.title.medium.size;   
+                    font-weight: EventoStyleToken.font.title.medium.weight;  
+                }
+                date  := Text { 
+                    text: data.date; 
+                    font-size: EventoStyleToken.font.display.medium.size; 
+                    font-weight: EventoStyleToken.font.display.medium.weight;
+                }
+                time  := Text { 
+                    text: data.time; 
+                    font-size: EventoStyleToken.font.display.medium.size; 
+                    font-weight: EventoStyleToken.font.display.medium.weight;
+                }
+                info  := Text { 
+                    text: data.info; 
+                    font-size: EventoStyleToken.font.display.medium.size; 
+                    font-weight: EventoStyleToken.font.display.medium.weight;
+                }
+            }
+        }
+    }
+}
 
 export component DiscoveryPage inherits Page {
     /*  demo code for generating corresponding C++ code correctly
@@ -91,21 +140,169 @@ export component DiscoveryPage inherits Page {
             Rectangle {
                 width: 100%;
                 height: 50%;
-                VerticalLayout {
-                    Rectangle {
-                        background: #66ccff;
-                        Text {
-                            text: "正在进行的活动";
+
+                background: #39c5bb;
+                // in property <int> block_num: current_event_num + newest_event_num;
+                // in property <int> block_max_h: 120;
+                // in property <int> block_max_w: 150;
+
+                // // functions to calculate actual row and col num
+                // pure callback getBlockRowNum(int, int) -> int;
+                // pure callback getBlockColNum(int, int) -> int;
+
+                // in property <int> block_row_num: getBlockRowNum(root.height / 1px, block_max_h); // 实际显示的行数
+                // in property <int> block_col_num: getBlockColNum(root.width  / 1px, block_max_w); // 实际显示的列数
+
+
+                // pure callback calcBlockX(int, int, int)->int;
+                // pure callback calcBlockY(int, int, int)->int;
+
+                ScrollView {
+                    // in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
+                    // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
+                    viewport-width: parent.width;
+                    viewport-height: 480px;
+                    // width: parent.width;
+                    // height: 1px * block_height * block_row_num;
+                    height: parent.height;
+                    width: parent.width;
+
+                    VerticalLayout {
+                        // calculate actual block size
+
+                        // idx = row * block_col_num + col
+                        //        |                     |
+                        //     y/height              x/width
+                        
+                        Rectangle {
+                            // 提示词: 正在进行的活动
+                            height: 40px;
+                            width: 100%;
+                            Text {
+                                text: "正在进行的活动";
+                            }
                         }
-                    }
-                    Rectangle {
-                        background: #1e1e2e;
-                        Text {
-                            text: "最新的活动";
+                        
+                        Rectangle {
+                            background: #39c5bb;
+                            height: 200px;
+                            width: 100%;
                         }
+
+                        // for itm[idx] in current_event_list: block {
+                        //     x: 1px * calcBlockX(idx, block_width, block_col_num);
+                        //     y: 1px * calcBlockY(idx, block_height, block_col_num);
+                        //     // x: block_width * (idx - idx / block_col_num) * 1px;
+                        //     // y: block_height * (idx / block_col_num) * 1px;
+                        //     height: block_height * 1px;
+                        //     width: block_width * 1px;
+                        //     data: itm;
+                        // }
+                        
+                        Rectangle {
+                            // 提示词: 最新的活动
+                            height: 40px;
+                            width: 100%;
+                            Text {
+                                text: "正在进行的活动";
+                            }
+                        }
+
+                        Rectangle {
+                            background: #66ccff;
+                            height: 200px;
+                            width: 100%;
+                        }
+                        
+                        // for ... block ... : 最新的活动内容
+                        // for itm[idx] in newest_event_list: block {
+                        //     x: 1px * calcBlockX(idx, block_width, block_col_num);
+                        //     y: 1px * calcBlockY(idx, block_height, block_col_num);
+                        //     // x: block_width * (idx - idx / block_col_num) * 1px;
+                        //     // y: block_height * (idx / block_col_num) * 1px;
+                        //     height: block_height * 1px;
+                        //     width: block_width * 1px;
+                        //     data: itm;
+                        // }
+
                     }
+
                 }
             }
+
+            // 正在进行的活动
+            // Rectangle {
+            //     width: 100%;
+            //     height: 50%;
+            //     VerticalLayout {
+            //         Rectangle {
+            //             height: 50%;
+            //             Flickable {
+            //                 in-out property <int> sum_of_blocks: 7;
+
+            //                 // calculate the number of blocks
+            //                 // the num of displayed blocks depends on the actual width of the window
+            //                 property <int> block_num: 0;
+            //                 // what is the proper k ???
+            //                 property <int> k: 10;
+            //                 pure public function calcBlockNum(sum_of_blocks: int) -> int {
+            //                     if (self.width > k * 100px) {
+            //                         return sum_of_blocks > 4 ? 4 : sum_of_blocks;
+            //                     } else if (self.width > k * 50px) {
+            //                         return sum_of_blocks > 3 ? 3 : sum_of_blocks;
+            //                     } else if (self.width > k * 25px) {
+            //                         return sum_of_blocks > 2 ? 2 : sum_of_blocks;
+            //                     }
+            //                     return 1;
+            //                 }
+
+            //                 property <int> actual_shown_block_num: calcBlockNum(sum_of_blocks);
+
+            //                 height: 80%;
+            //                 width: parent.width;
+            //                 viewport-height: parent.height;
+            //                 viewport-width: (parent.width / actual_shown_block_num * sum_of_blocks);
+            //                 HorizontalLayout {
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #919191;
+            //                     }
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #39c5bb;
+            //                     }
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #66ccff;
+            //                     }
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #b30074;
+            //                     }
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #66ccff;
+            //                     }
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #39c5bb;
+            //                     }
+            //                     Rectangle {
+            //                         width: root.width / actual_shown_block_num;
+            //                         background: #919191;
+            //                     }
+            //                 }    
+            //             }
+            //         }
+            //         Rectangle {
+            //             background: #1e1e2e;
+            //             height: 50%;
+            //             Text {
+            //                 text: "最新的活动";
+            //             }
+            //         }
+            //     }
+            // }
         }
     }
 }
