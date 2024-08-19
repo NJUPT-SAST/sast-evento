@@ -7,7 +7,7 @@ AboutPage::AboutPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& brid
     : BasicView(bridge)
     , GlobalAgent(uiEntry) {}
 
-callback checkUpdate()->bool;
+// callback checkUpdate()->bool;
 
 void AboutPage::onCreate() {
     auto& self = *this;
