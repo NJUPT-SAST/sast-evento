@@ -3,13 +3,11 @@ import { Page, Empty } from "../../components/index.slint";
 import { VerticalBox, Button, Switch, ListView, StandardListView } from "std-widgets.slint";
 import { KeyBoard } from "../../modules/surrealism-ui/src/keyboard/keyboard.slint";
 export global SettingPageBridge { }
-export component NewSwitch inherits Switch {
-    in-out property <bool> state:false;
-    callback state-check();
-}
 export component SettingPage inherits Page {
     // TODO: implement Setting
     //day and night change
+    callback timestage();
+    callback languagestage();
     VerticalBox {
         //alignment: LayoutAlignment.center;
         body := Empty {
@@ -30,7 +28,7 @@ export component SettingPage inherits Page {
                     font-size: 20px;
                 }               
     Rectangle {
-        width: 1050px;
+        width: 90%;
         height: 156px;
         x:40px;
         y:100px;
@@ -45,14 +43,17 @@ export component SettingPage inherits Page {
         
      StandardListView {
         width: 150px;
-        height: 150px;
+        height: 156px;
         x:20px;
         y:25px;
-        model: [ { text: "深色"}, { text: "浅色" }, { text: "跟随系统" }];
+        model: [ { text: "深色",}, { text: "浅色" }, { text: "跟随系统" }];
+       current-item-changed => {
+        root.timestage();
+       }
      } 
 } 
     Rectangle {
-        width: 1050px;
+        width: 90%;
         height: 156px;
         x:40px;
         y:300px;
@@ -69,12 +70,15 @@ export component SettingPage inherits Page {
                 width: 150px;
                 height: 150px;
                 model: [ { text: "中文"}, { text: "English" }];
+                current-item-changed => {
+                    root.languagestage();
+                }
              } 
       }
     }         
     Rectangle {
-        width: 1050px;
-        height: 34px;
+        width: 90%;
+        height: 4%;
         background: Token.color.surface-container-high;
         x:40px;
         y:500px;
@@ -88,8 +92,8 @@ export component SettingPage inherits Page {
         }
     }
     Rectangle {
-        width: 1050px;
-        height: 34px;
+        width: 90%;
+        height: 4%;
         background: Token.color.surface-container-high;
         x:40px;
         y:550px;

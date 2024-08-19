@@ -10,6 +10,8 @@ class SettingPage : public BasicView, private GlobalAgent<SettingPageBridge> {
 public:
     SettingPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     SettingPage(SettingPage&) = delete;
+    int getstage();
+    int language();
 
 private:
     void onCreate() override;
