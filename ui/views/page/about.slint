@@ -4,16 +4,28 @@ import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { EventoStyleToken } from "../../logic/style_token.slint";
 import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
-import { AboutSlint } from "std-widgets.slint";
+import { AboutSlint, Button, VerticalBox, HorizontalBox, ListView, StandardListView, Switch, ScrollView } from "std-widgets.slint";
+
+import { SButton } from "../../modules/surrealism-ui/index.slint";
+import { Radio } from "../../modules/surrealism-ui/src/radio/radio.slint";
 
 // Made with Slint badge
-export component AboutSlint inherits Window {
-    height: 175px;
+export component AboutSlint inherits Rectangle {
     AboutSlint { }
 }
 
-export component AboutWebLink inherits Page {
-    background := Empty { }
+export global AboutPageBridge {
+    in-out property <string> version:"v0.0.0-00000000";
+    callback checkUpdate();
+    in-out property <string> updateMessage: "";
+}
+
+component AboutPageContent inherits Rectangle {
+
+    preferred-height: 50px;
+
+    background: Token.color.surface;
+    border-color: Token.color.outline;
 
     layout := VerticalLayout {
         visible: false;
@@ -21,6 +33,31 @@ export component AboutWebLink inherits Page {
         y: 0;
         width: 100%;
         height: 100%;
+        padding: 16px;
+        spacing: 16px;
+        layout-logo := Rectangle {
+            vertical-stretch: 0.4;
+            border-width: 2px;
+            border-color: red;
+        }
+
+        layout-basic-info := Rectangle {
+            vertical-stretch: (1 - layout-logo.vertical-stretch) * 0.6;
+            border-width: 2px;
+            border-color: red;
+        }
+
+        layout-developer-label := Rectangle {
+            vertical-stretch: (1 - layout-logo.vertical-stretch) * 0.3;
+            border-width: 2px;
+            border-color: red;
+        }
+
+        layout-about-slint := Rectangle {
+            vertical-stretch: (1 - layout-logo.vertical-stretch) * 0.1;
+            border-width: 2px;
+            border-color: red;
+        }
     }
 
     body := Empty {
@@ -28,45 +65,184 @@ export component AboutWebLink inherits Page {
         y: 0;
         width: 100%;
         height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "网页版链接：evento.sast.fun\nGitHub 仓库：github.com/NJUPT-SAST/sast-evento/\n";
+        logo := Empty {
+            x: layout-logo.absolute-position.x - root.absolute-position.x;
+            y: layout-logo.absolute-position.y - root.absolute-position.y;
+            width: layout-logo.width;
+            height: layout-logo.height;
+            Image {
+                vertical-stretch: 1.5;
+                height: root.preferred-height * self.vertical-stretch;
+                image-fit: contain;
+                source: Token.image.display.evento;
+            }
+        }
+
+        basic-info := Empty {
+            x: layout-basic-info.absolute-position.x - root.absolute-position.x;
+            y: logo.y + layout.padding + logo.height;
+            width: layout-basic-info.width;
+            height: root.preferred-height * 4;
+            Rectangle {
+                border-radius: root.preferred-height / 8;
+                border-width: 1px;
+                border-color: Token.color.outline;
+                background: Token.color.surface;
+                VerticalLayout {
+                    Rectangle {
+                        height: root.preferred-height;
+                        HorizontalLayout {
+                            padding: layout.padding;
+                            Rectangle {
+                                width: parent.width * 80%;
+                                Text {
+                                    height: self.preferred-height;
+                                    width: 100%;
+                                    text: "版本信息：" + AboutPageBridge.version;
+                                    font-size: Token.font.label.large.size;
+                                    font-weight: Token.font.label.large.weight;
+                                    color: Token.color.on-surface;
+                                }
+                            }
+
+                            Rectangle {
+                                width: parent.width * 20%;
+                                padding: layout.padding;
+                                Button {
+                                    x: parent.width - self.width - layout.padding * 2;
+                                    width: 80px;
+                                    text: "检查更新";
+                                    clicked => {
+                                        AboutPageBridge.checkUpdate();
+                                        self.text = AboutPageBridge.updateMessage;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        x: layout.padding;
+                        height: 1px;
+                        width: parent.width - layout.padding * 2;
+                        background: Token.color.outline;
+                    }
+
+                    Rectangle {
+                        Text {
+                            x: layout.padding;
+                            height: self.preferred-height;
+                            width: 100%;
+                            text: "GitHub 仓库：github.com/NJUPT-SAST/sast-evento/    网页版：evento.sast.fun";
+                            font-size: Token.font.label.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            color: Token.color.on-surface;
+                        }
+                    }
+
+                    Rectangle {
+                        x: layout.padding;
+                        height: 1px;
+                        width: parent.width - layout.padding * 2;
+                        background: Token.color.outline;
+                    }
+
+                    Rectangle {
+                        Text {
+                            x: layout.padding;
+                            height: self.preferred-height;
+                            width: 100%;
+                            text: "开发使用框架 / 组件库：Boost.Beast, Boost.Url, OpenSSL, Slint, toml++, nlohmann-json, spdlog, keychain";
+                            font-size: Token.font.label.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            color: Token.color.on-surface;
+                        }
+                    }
+
+                    Rectangle {
+                        x: layout.padding;
+                        height: 1px;
+                        width: parent.width - layout.padding * 2;
+                        background: Token.color.outline;
+                    }
+
+                    Rectangle {
+                        Text {
+                            x: layout.padding;
+                            height: self.preferred-height;
+                            width: 100%;
+                            text: "This software is released under the MIT License.";
+                            font-size: Token.font.label.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            color: Token.color.on-surface;
+                        }
+                    }
+                }
+            }
+        }
+
+        developer-label := Empty {
+            x: layout-developer-label.absolute-position.x - root.absolute-position.x;
+            y: basic-info.y + layout.padding + basic-info.height;
+            width: layout-developer-label.width;
+            height: root.preferred-height * 2;
+            Rectangle {
+                border-radius: root.preferred-height / 8;
+                border-width: 1px;
+                border-color: Token.color.outline;
+                background: Token.color.surface;
+                VerticalLayout {
+                    Rectangle {
+                        Text {
+                            x: layout.padding;
+                            width: 100%;
+                            text: "《开发者名单》";
+                            font-size: Token.font.label.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            color: Token.color.on-surface;
+                        }
+                    }
+
+                    Rectangle {
+                        Text {
+                            x: layout.padding;
+                            width: 100%;
+                            text: "123";
+                            font-size: Token.font.label.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            color: Token.color.on-surface;
+                        }
+                    }
+                }
+            }
+        }
+
+        about-slint := Empty {
+            x: layout-about-slint.absolute-position.x - root.absolute-position.x;
+            y: developer-label.y + layout.padding + developer-label.height;
+            width: layout-about-slint.width;
+            height: root.preferred-height * 2 / 3;
+            Rectangle {
+                border-radius: root.preferred-height / 8;
+                border-width: 0px;
+                border-color: Token.color.outline;
+                background: Token.color.surface;
+                VerticalLayout {
+                    Rectangle {
+                        x: 0;
+                        content := AboutSlint { }
+                    }
+                }
             }
         }
     }
 }
 
-export global AboutPageBridge { }
-
 export component AboutPage inherits Page {
-    // // TODO: implement About
-    // // optional
-    // background := Empty { }
-
-    // layout := VerticalLayout {
-    //     visible: false;
-    //     x: 0;
-    //     y: 0;
-    //     width: 100%;
-    //     height: 100%;
-    // }
-
-    // body := Empty {
-    //     x: 0;
-    //     y: 0;
-    //     width: 100%;
-    //     height: 100%;
-    //     placeholder := Rectangle {
-    //         border-width: 4px;
-    //         border-color: red;
-    //         Text {
-    //             text: "关于页面\n  ";
-    //         }
-    //     }
-    // }
-
-    AboutSlint {}
-    AboutWebLink {}
+    ScrollView {
+        width: 100%;
+        height: 100%;
+        viewport-height: 800px;
+        content := AboutPageContent { }
+    }
 }
