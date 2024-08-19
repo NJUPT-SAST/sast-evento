@@ -11,9 +11,8 @@ import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
 import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
 import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
 import { ViewManager } from "../../logic/index.slint";
+
 export global MyEventPageBridge { }
-
-
 
 
 // 签到按钮
@@ -35,6 +34,7 @@ component SignButton inherits SButton{
         } 
     ]
 }
+
 // 评价按钮
 component ReviewButton inherits SButton {
     width: 40px;
@@ -46,6 +46,7 @@ component ReviewButton inherits SButton {
     font-color: Token.color.on-surface;
     clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
 }
+
 // 信息卡片部分
 component Card inherits SCard{
     background: Token.color.surface-container-lowest;
@@ -84,59 +85,60 @@ component Card inherits SCard{
 }
 export component SignCard inherits Card{
     SignButton {
-        x: parent.x+300px;
+        x: (parent.width)*0.75 + parent.x;
     }
 }
 
 export component ReviewCard inherits Card{
     ReviewButton {
-        x: parent.x+300px;
+        x: (parent.width)*0.75 + parent.x;
     }
 }
 
 export component SignLine inherits STimeLine{
     STimeLineItem {
         width: (parent.width)+80px;
-        height: parent.height;
+        height: (parent.height)-30px;
         SignCard {
             x: (parent.x)-10px;
-            y: parent.y;
-            height: (parent.height)-50px;
-            width: 350px;
+            y: (parent.y)+5px;
+            height: (parent.height)-30px;
+            width: 650%;
         }
     }
 }
 export component StartLine inherits STimeLine{
     STimeLineItem {
         width: (parent.width)+80px;
-        height: parent.height;
+        height: (parent.height)-30px;
         Card {
             x: (parent.x)-10px;
-            y: parent.y;
-            height: (parent.height)-50px;
-            width: 350px;
+            y: (parent.y)+5px;
+            height: (parent.height)-30px;
+            width: 650%;
         }
     }
 }
 export component EndLine inherits STimeLine{
     STimeLineItem {
         width: (parent.width)+80px;
-        height: parent.height;
+        height: (parent.height)-30px;
         ReviewCard {
             x: (parent.x)-10px;
-            y: parent.y;
-            height: (parent.height)-50px;
-            width: 350px;
+            y: (parent.y)+5px;
+            height: (parent.height)-30px;
+            width: 650%;
         }
     }
 }
-// a simple event form
+// 报名活动完整卡片
 component SignForm {
     Rectangle {
         preferred-height: 200px;
         preferred-width: 500px;
         mes := Rectangle{
-            x: (parent.x)+5px;
+            x: (parent.x)+30px;
+            y: (parent.y)-20px;
             preferred-height: 200px;
             preferred-width: 50px;
             property <string> data : "日期";
@@ -159,19 +161,21 @@ component SignForm {
             }
         }
         SignLine {
-            x: mes.x + 80px;
-            width: 20px;
+            x: mes.x + 50px;
+            y: mes.y + 20px;
+            width: 5%;
             height: parent.height;
         }
     }
 }
-
+// 进行活动完整卡片
 component StartForm {
     Rectangle {
         preferred-height: 200px;
         preferred-width: 500px;
         mes := Rectangle{
-            x: (parent.x)+5px;
+            x: (parent.x)+30px;
+            y: (parent.y)-20px;
             preferred-height: 200px;
             preferred-width: 50px;
             property <string> data : "日期";
@@ -194,19 +198,21 @@ component StartForm {
             }
         }
         StartLine {
-            x: mes.x + 80px;
-            width: 20px;
+            x: mes.x + 40px;
+            y: mes.y + 20px;
+            width: 5%;
             height: parent.height;
         }
     }
 }
-
+// 结束活动完整卡片
 component EndForm {
     Rectangle {
         preferred-height: 200px;
         preferred-width: 500px;
         mes := Rectangle{
-            x: (parent.x)+5px;
+            x: (parent.x)+30px;
+            y: (parent.y)-20px;
             preferred-height: 200px;
             preferred-width: 50px;
             property <string> data : "日期";
@@ -229,8 +235,9 @@ component EndForm {
             }
         }
         EndLine {
-            x: mes.x + 80px;
-            width: 20px;
+            x: mes.x + 40px;
+            y: mes.y + 20px;
+            width: 5%;
             height: parent.height;
         }
     }
@@ -238,14 +245,12 @@ component EndForm {
 
 // a simple component for schedule
 component Schedule {
-    preferred-height: 800px;
-    preferred-width: 600px;
     in-out property <string> title : "";
     VerticalLayout {
         spacing: 5px;
         //title
         SText {
-            x: (parent.width)/2-(parent.x)-50px;
+            x: (parent.width)/2-(parent.x);
             color: Token.color.on-surface;
             font-size: Token.font.title.large.size;
             text: title;
@@ -253,7 +258,7 @@ component Schedule {
         //SDvider
         SDivider {
             //y: parent.y+40px;
-            width: 500px;
+            width: 40%;
             height: 2px;
             }
         //SText && STimeLine (separate)
@@ -271,13 +276,14 @@ export component MyEventPage inherits Page {
 
         body := Empty {
             x: 0;
-            y: 0px;
+            y: 0;
             width: 100%;
             height: 100%;
             //schedule timeline
             HorizontalLayout {
+                spacing: 50px;
                 signin-line := Schedule {
-                    width: 50%;
+                    width: 48%;
                     height: 100%;
                     title: "已报名";
                     SignForm { }
@@ -285,27 +291,27 @@ export component MyEventPage inherits Page {
                     SignForm { }
                 }
                 VerticalLayout {
-                    spacing: 150px;
+                    spacing: (root.height)*0.25;
                     start-line := Schedule { 
-                        width: 50%;
+                        width: 48%;
                         title: "进行中";
                         StartForm { }
                     }
                     end-line := Schedule { 
-                        width: 50%;
+                        width: 48%;
                         title: "已结束";
                         EndForm { }
                     }
                 }
             }
             
-            placeholder := Rectangle {
-                border-width: 4px;
-                border-color: red;
-                // Text {
-                //     text: "活动日程（我的活动）\n  未开始、进行中、已结束";
-                // }
-            }
+            // placeholder := Rectangle {
+            //     border-width: 4px;
+            //     border-color: red;
+            //     // Text {
+            //     //     text: "活动日程（我的活动）\n  未开始、进行中、已结束";
+            //     // }
+            // }
         }
     //}
 }
