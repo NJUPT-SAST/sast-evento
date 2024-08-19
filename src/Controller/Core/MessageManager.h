@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
 #include <chrono>
@@ -8,7 +7,7 @@
 
 EVENTO_UI_START
 
-class MessageManager : GlobalAgent<::MessageManager> {
+class MessageManager : private GlobalAgent<MessageManagerBridge> {
     friend class UiBridge;
     UiBridge& bridge;
     std::string logOrigin = "MessageManager";

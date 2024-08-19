@@ -8,7 +8,7 @@
 
 EVENTO_UI_START
 
-class AccountManager : private GlobalAgent<::AccountManager>,
+class AccountManager : private GlobalAgent<AccountManagerBridge>,
                        std::enable_shared_from_this<AccountManager> {
     friend class UiBridge;
     UiBridge& bridge;

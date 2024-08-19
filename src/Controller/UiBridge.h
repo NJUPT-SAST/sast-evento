@@ -9,6 +9,7 @@ EVENTO_UI_START
 class UiBridge : GlobalAgent<::UiBridge> {
     friend class ViewManager;
     friend class AccountManager;
+    friend class MessageManager;
 
     slint::ComponentHandle<UiEntryName> uiEntry;
     bool eventLoopRunning = false;
