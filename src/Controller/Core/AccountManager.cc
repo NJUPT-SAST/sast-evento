@@ -78,6 +78,10 @@ void AccountManager::requestLogout() {
     // TODO: net logout
 }
 
+UserInfoEntity AccountManager::getUserInfo() {
+    return userInfo;
+}
+
 void AccountManager::loadConfig() {
     setLoginState(false);
     // TODO: load last time

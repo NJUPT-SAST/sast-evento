@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Controller/AsyncExecutor.hh>
 #include <Controller/Core/UiBase.h>
 
 EVENTO_UI_START
