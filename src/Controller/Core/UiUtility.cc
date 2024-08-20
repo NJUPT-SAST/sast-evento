@@ -10,7 +10,11 @@ std::string UiUtility::getViewName(ViewName target) {
 }
 
 bool UiUtility::isTransparent(ViewName target) {
-    static const std::set<ViewName> overlayList{ViewName::MenuOverlay, ViewName::LoginOverlay};
+    static const std::set<ViewName> overlayList{
+        ViewName::MenuOverlay,
+        // no longer transparent (no guest login)
+        // ViewName::LoginOverlay,
+    };
     return overlayList.find(target) != overlayList.end();
 }
 
