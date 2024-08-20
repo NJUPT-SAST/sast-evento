@@ -1,26 +1,100 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
+import { Button, VerticalBox,GroupBox,LineEdit} from "std-widgets.slint";
 
 export global SearchPageBridge { }
 
+component FilterButton inherits Button{
+    width: 100%;
+    height: 40%;
+    text: "Filter";  
+}
 export component SearchPage inherits Page {
+    
     // TODO: implement Search
     // optional
+    
     background := Empty { }
+    layout := VerticalLayout {  
+        visible: true;  
+        x: 0;  
+        y: 0;  
+        width: 100%;  
+        height: 100%;  
+        
+        Rectangle {
+            height: 20%;
+          //  background: #a5cddb;
+            background: Token.color.surface;
+        }
+        
+        Rectangle {  
+            preferred-width: 512px;  
+            preferred-height: 200px;  
+            background: Token.color.surface;  
+            border-color: Token.color.outline;  
+            border-radius: 4px;  
+            border-width: 2px;  
+  
+            HorizontalLayout {  // 使用水平布局分隔搜索和过滤器  
+                Rectangle {
+                    width:10%;
+                   //background: #a5cddb;
+                   background: Token.color.surface;
+                }
+                Rectangle {//search Box
+                    GroupBox{
+                        title:"Search Box";
+                        height: parent.height;    
+                        width: parent.width;        
+                        LineEdit {
+                            placeholder-text: "enter text";
+                        }
+                    }
+                    width: 70%;  
+                }  
+                Rectangle {
+                    width:7%;
+                  //  background: #a5cddb;
+                  background: Token.color.surface;
+                }
+                Rectangle {  // 过滤器区域  
+                    width: 10%; // 假设过滤器占据剩余空间  
+                    FilterButton {}    
+                }  
+                Rectangle {
+                    width:3%;
+                    //background: #a5cddb;
+                    background: Token.color.surface;
+                }
+            }  
+            
+        // 其他元素，如说明文本等  
+       
+    }  
+    
+    Rectangle {
+        height: 90%;
+        //background: #a5cddb;
+        background: Token.color.surface;
+    }
 
-    layout := VerticalLayout {
-        visible: false;
+}
+}
+ /*  layout := VerticalLayout {
+        visible: true;
         x: 0;
         y: 0;
         width: 100%;
         height: 100%;
-    }
-
+        padding: 10px;
+        
     body := Empty {
         x: 0;
         y: 0;
         width: 100%;
         height: 100%;
+       
         placeholder := Rectangle {
             border-width: 4px;
             border-color: red;
@@ -28,5 +102,8 @@ export component SearchPage inherits Page {
                 text: "搜索(部门活动)\n  按组筛选、按照自己参加筛选\n  对组添加订阅";
             }
         }
+        
     }
-}
+}*/
+
+
