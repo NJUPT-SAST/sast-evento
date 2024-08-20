@@ -1,10 +1,15 @@
-import { Overlay, Empty } from "../../components/index.slint";
-import { ViewManager,ViewName } from "../../logic/index.slint";
+import { Overlay, Empty, StateLayer } from "../../components/index.slint";
+import { ViewManager, ViewName, AccountManager, MessageType, MessageManager } from "../../logic/index.slint";
 import { Token } from "../../global.slint";
 import { SAvatar } from "../../modules/surrealism-ui/src/avatar/index.slint";
 import { ROOT-STYLES } from "../../modules/surrealism-ui/themes/index.slint";
 
-export global MenuOverlayBridge { }
+export global MenuOverlayBridge {
+    in-out property <bool> is-show;
+    in-out property <string> user-name;
+    in-out property <string> user-signature;
+    callback open-link-web();
+}
 
 component MenuItem inherits Rectangle {
     in property <image> icon;
@@ -15,9 +20,15 @@ component MenuItem inherits Rectangle {
     preferred-width: 100%;
     padding: 5px;
     border-radius: self.height / 2;
-    background: area.has-hover ? Token.color.primary-container : transparent;
+    clip: true;
     area := TouchArea {
         mouse-cursor: pointer;
+    }
+
+    StateLayer {
+        is-hover: area.has-hover;
+        is-press: area.pressed;
+        background: Token.color.on-surface;
     }
 
     content := HorizontalLayout {
@@ -39,11 +50,6 @@ component MenuItem inherits Rectangle {
             text: root.label;
         }
     }
-
-    animate background {
-        duration: 100ms;
-        easing: ease-in-out;
-    }
 }
 
 component Divider inherits Rectangle {
@@ -53,53 +59,50 @@ component Divider inherits Rectangle {
 }
 
 export component MenuOverlay inherits Overlay {
-    // TODO: implement Menu
-    // optional
-    background := Empty { }
-
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            background: transparent;
-            init => {
-                self.background = Colors.rgba(0,0,0,0.5)
+    states [
+        is-show when MenuOverlayBridge.is-show: {
+            shadow.background: Colors.rgba(0,0,0,0.5);
+            content.x: root.width - content.width;
+            in {
+                animate content.x, shadow.background {
+                    duration: 400ms;
+                    easing: ease-out-quart;
+                }
             }
-
-            animate background {
-                duration: 400ms;
-                easing: ease-in-out;
+            out {
+                animate content.x, shadow.background {
+                    duration: 200ms;
+                    easing: ease-in-quart;
+                }
             }
         }
+        not-show when !MenuOverlayBridge.is-show: {
+            shadow.background: Colors.rgba(0,0,0,0);
+            content.x: root.width;
+        }
+    ]
+    shadow := Rectangle {
+        background: transparent;
+        shadow-area := TouchArea {
+            clicked => {
+                MenuOverlayBridge.is-show = false;
+                ViewManager.prior-view();
+            }
+        }
+    }
 
-        Rectangle {
-            x: body.width - self.width;
-            height: root.height;
-            width: 0;
-            background: Token.color.surface-container;
-            border-top-left-radius: 6px;
-            border-bottom-left-radius: 6px;
-            init => {
-                self.width = 400px;
-            }
-            animate width {
-                duration: 400ms;
-                easing: ease-in-out;
-            }
-            VerticalLayout {
-                padding: 10px;
-                padding-top: 30px;
-                spacing: 5px;
+    content := Rectangle {
+        x: root.width;
+        height: root.height;
+        width: 250px;
+        background: Token.color.surface-container;
+        border-top-left-radius: 16px;
+        border-bottom-left-radius: self.border-top-left-radius;
+        VerticalLayout {
+            padding: 10px;
+            padding-top: 30px;
+            spacing: 5px;
+            Rectangle {
                 HorizontalLayout {
                     spacing: 10px;
                     padding-bottom: 10px;
@@ -112,72 +115,89 @@ export component MenuOverlay inherits Overlay {
                         spacing: 5px;
                         padding-top: 5px;
                         Text {
-                            text: "用户名";
+                            text: AccountManager.is-login ? MenuOverlayBridge.user-name : "请登录";
                             font-size: Token.font.title.large.size;
+                            font-weight: Token.font.title.large.weight;
                             color: Token.color.on-surface;
                         }
 
                         Text {
-                            text: "个性签名";
+                            text: AccountManager.is-login ? MenuOverlayBridge.user-signature : "个性签名";
                             font-size: Token.font.title.small.size;
-                            color: Token.color.outline;
+                            font-weight: Token.font.title.small.weight;
+                            color: Token.color.on-surface-variant;
                         }
                     }
                 }
 
-                Divider { }
-
-                MenuItem {
-                    icon: Token.image.icon.me.normal;
-                    label: "个人资料";
+                profile-area := TouchArea {
+                    mouse-cursor: pointer;
                     clicked => {
-                        // TODO: implement
+                        if (AccountManager.is-login) {
+                            MenuOverlayBridge.open-link-web();
+                        } else {
+                            ViewManager.clean-navigate-to(ViewName.LoginOverlay);
+                        }
                     }
                 }
+            }
 
-                MenuItem {
-                    icon: Token.image.icon.history.normal;
-                    label: "历史活动";
-                    clicked => {
-                        ViewManager.replace-navigate-to(ViewName.HistoryPage)
-                    }
+            Divider { }
+
+            MenuItem {
+                icon: Token.image.icon.me.normal;
+                label: "个人资料";
+                clicked => {
+                    // TODO: implement
+                    ViewManager.prior-view();
+                    MessageManager.show-message("个人资料页面尚未完成", MessageType.Info);
                 }
+            }
 
-                MenuItem {
-                    icon: Token.image.icon.card.normal;
-                    label: "纪念卡";
-                    clicked => {
-                        // NOTE: Unsupported
-                    }
+            MenuItem {
+                icon: Token.image.icon.history.normal;
+                label: "历史活动";
+                clicked => {
+                    ViewManager.replace-navigate-to(ViewName.HistoryPage)
                 }
+            }
 
-                Divider { }
-
-                MenuItem {
-                    icon: Token.image.icon.setting.normal;
-                    label: "设置";
-                    clicked => {
-                        ViewManager.replace-navigate-to(ViewName.SettingPage)
-                    }
+            MenuItem {
+                icon: Token.image.icon.card.normal;
+                label: "纪念卡";
+                clicked => {
+                    // NOTE: Unsupport
+                    ViewManager.prior-view();
+                    MessageManager.show-message("纪念卡功能尚未完成", MessageType.Info);
                 }
+            }
 
-                MenuItem {
-                    icon: Token.image.icon.info.normal;
-                    label: "关于";
-                    clicked => {
-                        ViewManager.replace-navigate-to(ViewName.AboutPage)
-                    }
+            Divider { }
+
+            MenuItem {
+                icon: Token.image.icon.setting.normal;
+                label: "设置";
+                clicked => {
+                    ViewManager.replace-navigate-to(ViewName.SettingPage)
                 }
+            }
 
-                Divider { }
+            MenuItem {
+                icon: Token.image.icon.info.normal;
+                label: "关于";
+                clicked => {
+                    ViewManager.replace-navigate-to(ViewName.AboutPage)
+                }
+            }
 
-                MenuItem {
-                    icon: Token.image.icon.logout;
-                    label: "退出登录";
-                    label-color: ROOT-STYLES.sur-theme-colors.error.normal;
-                    clicked => {
-                        // TODO: implement
-                    }
+            Divider { }
+
+            MenuItem {
+                icon: Token.image.icon.logout;
+                label: "退出登录";
+                label-color: ROOT-STYLES.sur-theme-colors.error.normal;
+                clicked => {
+                    AccountManager.request-logout();
                 }
             }
         }

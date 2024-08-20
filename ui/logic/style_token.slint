@@ -40,6 +40,8 @@ struct EventoColorCollection {
     inverse-on-surface: color,
     outline: color,
     outline-variant: color,
+    error: color,
+    on-error: color,
 }
 
 export global EventoStyleToken {
@@ -59,6 +61,8 @@ export global EventoStyleToken {
         inverse-on-surface: switcher({ light: #F5EFF7, dark: #322F35 }),
         outline: switcher({ light: #79747E, dark: #938F99 }),
         outline-variant: switcher({ light: #CAC4D0, dark: #49454F }),
+        error: switcher({ light: #B3261E, dark: #F2B8B5 }),
+        on-error: switcher({ light: #FFFFFF, dark: #601410 }),
     };
     // source: https://m3.material.io/styles/typography/type-scale-tokens#a734c6ed-634c-4abb-adb2-35daf0aed06a
     // prefer large, use body.large (16px) for body text
