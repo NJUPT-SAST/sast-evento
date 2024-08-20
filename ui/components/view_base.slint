@@ -1,20 +1,8 @@
-import { Token } from "../global.slint";
-import { ViewManager } from "../logic/index.slint";
 export component Page inherits Rectangle {
     @children
 }
 
 export component Overlay inherits Rectangle {
-    shadow := Rectangle {
-        background: Token.color.surface;
-        opacity: 0.75;
-        TouchArea {
-            clicked => {
-                ViewManager.prior-view();
-            }
-        }
-    }
-
     @children
 }
 

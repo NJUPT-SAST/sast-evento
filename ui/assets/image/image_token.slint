@@ -23,6 +23,8 @@ struct EventoIconCollection {
     history: ClickIcon,
     home: ClickIcon,
     info: ClickIcon,
+    error_on-surface-variant: image,
+    error_on-error: image,
     locate: image,
     logout: image,
     me: ClickIcon,
@@ -127,6 +129,14 @@ export global EventoImageToken {
             }),
             interact: @image-url("./icon/info_blue.svg"),
         },
+        error_on-surface-variant:switcher({
+            light: @image-url("./icon/error_on-surface-variant.svg"),
+            dark: @image-url("./icon/error_on-surface-variant_dark.svg"),
+        }),
+        error_on-error:switcher({
+            light: @image-url("./icon/error_on-error.svg"),
+            dark: @image-url("./icon/error_on-error_dark.svg"),
+        }),
         locate: switcher({
             light: @image-url("./icon/locate.svg"),
             dark: @image-url("./icon/locate_dark.svg"),
