@@ -3,9 +3,9 @@
 #include <Controller/UiBridge.h>
 #include <Controller/View/MenuOverlay.h>
 #include <Infrastructure/Network/ResponseStruct.h>
+#include <Infrastructure/Utils/Tools.h>
 #include <chrono>
-#include <string_view>
-#include <thread>
+#include <slint.h>
 
 EVENTO_UI_START
 
@@ -15,7 +15,7 @@ MenuOverlay::MenuOverlay(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& 
 
 void MenuOverlay::onCreate() {
     auto& self = *this;
-    self->on_open_link_web([this] { return openLinkWeb(); });
+    self->on_open_link_web([this] { openBrowser("https://link.sast.fun/home"); });
 }
 
 void MenuOverlay::onShow() {
@@ -29,25 +29,11 @@ void MenuOverlay::onShow() {
 void MenuOverlay::onLogin() {
     auto& self = *this;
     auto userInfo = bridge.getAccountManager().getUserInfo();
-    self->set_user_name(std::string_view(userInfo.nickname));
-    // ?? no signature
-}
-
-void MenuOverlay::openLinkWeb() {
-    // TODO: call to system and open web here
-    return;
-
-    using namespace std::string_literals;
-    std::string url = "";
-#if defined(_WIN32) || defined(_WIN64) || defined(__WIN32__)
-    system(("start " + url).c_str());
-#elif defined(__linux__)
-    system(("xdg-open "s + url).c_str());
-#elif defined(__APPLE__)
-    system(("open "s + url).c_str());
-#else
-    spdlog::error("unable to open sast link website: unsupported os");
-#endif
+    self->set_user_name(slint::SharedString(userInfo.nickname));
+    self->set_user_signature(
+        slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下")));
+    if (userInfo.avatar.has_value())
+        self->set_user_avatar(slint::Image::load_from_path(slint::SharedString(*userInfo.avatar)));
 }
 
 EVENTO_UI_END

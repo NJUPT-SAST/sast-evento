@@ -28,7 +28,7 @@ AccountManager::~AccountManager() {
     saveConfig();
 }
 
-bool AccountManager::isLogin() {
+bool AccountManager::isLogin() const {
     return loginState;
 }
 
@@ -91,7 +91,7 @@ void AccountManager::saveConfig() {
     // TODO: save
 }
 
-void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) {
+void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) const {
     keychain::Error err;
     keychain::setPassword(package, service, userInfo.id, refreshToken, err);
 
@@ -100,7 +100,7 @@ void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) {
     }
 }
 
-std::string AccountManager::getKeychainRefreshToken() {
+std::string AccountManager::getKeychainRefreshToken() const {
     keychain::Error err;
     auto refreshToken = keychain::getPassword(package, service, userInfo.id, err);
 
