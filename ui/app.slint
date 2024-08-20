@@ -37,6 +37,7 @@ import {
     SettingPageBridge
 } from "./views/index.slint";
 import { StateLayer } from "./components/index.slint";
+import { GlobalProps } from "modules/surrealism-ui/themes/src/index.slint";
 
 // export for C++ interact
 export { 
@@ -199,6 +200,11 @@ export component App inherits Window {
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
+
+    init => {
+        GlobalProps.theme = Token.surrealism-ui-default-theme;
+    }
+
     VerticalLayout {
         heading := HorizontalLayout {
             padding: 8px;
