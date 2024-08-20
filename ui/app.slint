@@ -158,9 +158,9 @@ component NavBar inherits Rectangle {
         height: 100%;
         width: root.width / nav-views.length;
         border-radius: self.height / 2;
-        opacity: root.get-navbar-current-index() == -1 ? 0 : 1;
+        visible: root.get-navbar-current-index() != -1;
         background: Token.color.primary-container;
-        animate x, opacity {
+        animate x {
             duration: 300ms;
             easing: ease-out-quart;
         }
@@ -199,32 +199,6 @@ export component App inherits Window {
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
-    Toast {
-        x: root.width - self.width - 16px;
-        y: root.height + 16px;
-        width: self.min-width > (parent.width * (1 - 0.618) / 2) ? self.preferred-width : parent.width * (1 - 0.618) / 2;
-        states [
-            visible when MessageManager.visible: {
-                y: root.height - self.height - 16px;
-                in {
-                    animate y {
-                        duration: 200ms;
-                        easing: ease-out-quart;
-                    }
-                }
-                out {
-                    animate y {
-                        duration: 200ms;
-                        easing: ease-in-quart;
-                    }
-                }
-            }
-            invisible when !MessageManager.visible: {
-                y: root.height + 16px;
-            }
-        ]
-    }
-
     VerticalLayout {
         heading := HorizontalLayout {
             padding: 8px;
@@ -273,6 +247,31 @@ export component App inherits Window {
     OverlayRegion {
         height: 100%;
         width: 100%;
-        z: 1;
+    }
+
+    Toast {
+        x: root.width - self.width - 16px;
+        y: root.height + 16px;
+        width: self.min-width > (parent.width * (1 - 0.618) / 2) ? self.preferred-width : parent.width * (1 - 0.618) / 2;
+        states [
+            visible when MessageManager.visible: {
+                y: root.height - self.height - 16px;
+                in {
+                    animate y {
+                        duration: 200ms;
+                        easing: ease-out-quart;
+                    }
+                }
+                out {
+                    animate y {
+                        duration: 200ms;
+                        easing: ease-in-quart;
+                    }
+                }
+            }
+            invisible when !MessageManager.visible: {
+                y: root.height + 16px;
+            }
+        ]
     }
 }
