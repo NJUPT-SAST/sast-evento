@@ -213,7 +213,8 @@ component LoginContent inherits Rectangle {
 export component LoginOverlay inherits Overlay {
     shadow := Rectangle {
         background: Token.color.surface;
-        opacity: 0.75;
+        // hide other view because no guest login, remember to change isTransparent()
+        // opacity: 0.75;
         shadow-area := TouchArea {
             clicked => {
                 // TODO: support guest login
