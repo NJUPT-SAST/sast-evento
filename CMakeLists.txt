@@ -17,7 +17,8 @@ endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
-option(EVENTO_EMBED_RESOURCES "ON to request slint embed resources")
+option(EVENTO_EMBED_RESOURCES OFF "Request slint embed resources")
+option(SLINT_ENABLE_EXPERIMENTAL_FEATURES ON "Enable experimental features in Slint")
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
 
 if(APPLE)
