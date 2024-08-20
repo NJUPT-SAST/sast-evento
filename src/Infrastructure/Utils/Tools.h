@@ -14,7 +14,7 @@ void openBrowser(urls::url_view url) {
     system(("xdg-open "s + url_str).c_str());
 #elif defined(_WIN32) || defined(_WIN64)
     system(("start \"\" "s + url_str).c_str());
-#elif defined(_APPLE__)
+#elif defined(__APPLE__)
     system(("open "s + url_str).c_str());
 #else
     spdlog::error("unsupported os");
