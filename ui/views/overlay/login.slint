@@ -1,6 +1,6 @@
 import { Token } from "../../global.slint";
 import { Overlay, Empty } from "../../components/index.slint";
-import { ViewManager, MessageManager, MessageType } from "../../logic/index.slint";
+import { ViewManager, MessageManager, MessageType, AccountManagerBridge } from "../../logic/index.slint";
 
 import { SButton } from "../../modules/surrealism-ui/index.slint";
 
@@ -225,6 +225,7 @@ export component LoginOverlay inherits Overlay {
                 // developer shortcut
                 if (e.modifiers.shift && e.modifiers.control && e.button == PointerEventButton.right && e.kind == PointerEventKind.up) {
                     debug("Warning: you are using developer shortcut, skip LoginView");
+                    AccountManagerBridge.is-login = true;
                     ViewManager.prior-view();
                 }
             }

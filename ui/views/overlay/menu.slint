@@ -6,8 +6,9 @@ import { ROOT-STYLES } from "../../modules/surrealism-ui/themes/index.slint";
 
 export global MenuOverlayBridge {
     in-out property <bool> is-show;
-    in-out property <string> user-name;
-    in-out property <string> user-signature;
+    in-out property <string> user-name:"用户名";
+    in-out property <string> user-signature: "个性签名";
+    in-out property <image> user-avatar: Token.image.display.avatar[0];
     callback open-link-web();
 }
 
@@ -94,7 +95,7 @@ export component MenuOverlay inherits Overlay {
     content := Rectangle {
         x: root.width;
         height: root.height;
-        width: 250px;
+        width: 350px;
         background: Token.color.surface-container;
         border-top-left-radius: 16px;
         border-bottom-left-radius: self.border-top-left-radius;
@@ -108,24 +109,35 @@ export component MenuOverlay inherits Overlay {
                     padding-bottom: 10px;
                     SAvatar {
                         avatar-size: 64px;
-                        avatar: Token.image.display.avatar[0];
+                        avatar: AccountManager.is-login ? MenuOverlayBridge.user-avatar : Token.image.icon.me.normal;
                     }
 
                     VerticalLayout {
                         spacing: 5px;
                         padding-top: 5px;
-                        Text {
-                            text: AccountManager.is-login ? MenuOverlayBridge.user-name : "请登录";
+                        if !AccountManager.is-login:Text {
+                            text: "请登录";
+                            font-size: 40px;
+                            font-weight: Token.font.title.large.weight;
+                            color: Token.color.on-surface;
+                        }
+
+                        if AccountManager.is-login:Text {
+                            text: MenuOverlayBridge.user-name;
                             font-size: Token.font.title.large.size;
                             font-weight: Token.font.title.large.weight;
                             color: Token.color.on-surface;
                         }
 
-                        Text {
-                            text: AccountManager.is-login ? MenuOverlayBridge.user-signature : "个性签名";
+                        if AccountManager.is-login:Text {
+                            text: MenuOverlayBridge.user-signature;
                             font-size: Token.font.title.small.size;
                             font-weight: Token.font.title.small.weight;
-                            color: Token.color.on-surface-variant;
+                            color: Token.color.outline;
+                            overflow: TextOverflow.elide;
+                            wrap: TextWrap.no-wrap;
+                            height: self.preferred-height;
+                            width: 260px;
                         }
                     }
                 }
@@ -144,17 +156,17 @@ export component MenuOverlay inherits Overlay {
 
             Divider { }
 
-            MenuItem {
+            if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.me.normal;
                 label: "个人资料";
                 clicked => {
                     // TODO: implement
                     ViewManager.prior-view();
-                    MessageManager.show-message("个人资料页面尚未完成", MessageType.Info);
+                    MenuOverlayBridge.open-link-web();
                 }
             }
 
-            MenuItem {
+            if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.history.normal;
                 label: "历史活动";
                 clicked => {
@@ -162,17 +174,17 @@ export component MenuOverlay inherits Overlay {
                 }
             }
 
-            MenuItem {
+            if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.card.normal;
                 label: "纪念卡";
                 clicked => {
                     // NOTE: Unsupport
                     ViewManager.prior-view();
-                    MessageManager.show-message("纪念卡功能尚未完成", MessageType.Info);
+                    MessageManager.show-message("功能还在开发中，咕咕咕 😣", MessageType.Info);
                 }
             }
 
-            Divider { }
+            if AccountManager.is-login:Divider { }
 
             MenuItem {
                 icon: Token.image.icon.setting.normal;
@@ -190,9 +202,9 @@ export component MenuOverlay inherits Overlay {
                 }
             }
 
-            Divider { }
+            if AccountManager.is-login:Divider { }
 
-            MenuItem {
+            if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.logout;
                 label: "退出登录";
                 label-color: ROOT-STYLES.sur-theme-colors.error.normal;
