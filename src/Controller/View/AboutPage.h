@@ -13,6 +13,7 @@ public:
 
 private:
     void onCreate() override;
+    void onCheck();
 };
 
 EVENTO_UI_END
