@@ -6,8 +6,14 @@ export global SettingPageBridge { }
 export component SettingPage inherits Page {
     // TODO: implement Setting
     //day and night change
-    callback timestage();
-    callback languagestage();
+    in-out property <int> time: 0;
+    in-out property <int> language: 0;
+    in-out property <int> actionbegin:0;
+    in-out property <int> actioneval:0 ;
+    callback timestate(int);
+    callback languagestate(int);
+    callback actionbeginstate(bool);
+    callback actionevalstate(bool);
     VerticalBox {
         //alignment: LayoutAlignment.center;
         body := Empty {
@@ -41,14 +47,14 @@ export component SettingPage inherits Page {
             font-size: 15px;
         }
         
-     StandardListView {
+     time :=StandardListView {
         width: 150px;
         height: 156px;
         x:20px;
         y:25px;
         model: [ { text: "深色",}, { text: "浅色" }, { text: "跟随系统" }];
-       current-item-changed => {
-        root.timestage();
+        current-item-changed => {
+            root.timestate(time.current-item);
        }
      } 
 } 
@@ -64,14 +70,14 @@ export component SettingPage inherits Page {
             y:5px;
             text: "语言";
             font-size: 15px;
-            StandardListView {
+            language:=StandardListView {
                 x:-15px;
                 y:20px;
                 width: 150px;
                 height: 150px;
                 model: [ { text: "中文"}, { text: "English" }];
                 current-item-changed => {
-                    root.languagestage();
+                    root.languagestate(language.current-item);
                 }
              } 
       }
@@ -83,12 +89,15 @@ export component SettingPage inherits Page {
         x:40px;
         y:500px;
         border-radius: 10px;
-        Switch {
+        begin:=Switch {
             accessible-role: AccessibleRole.none;
             x: 14px;
             y: 8px;
             width: 132px;
             text: "活动开始提醒";
+            toggled => {
+                root.actionbeginstate(begin.checked);
+            }
         }
     }
     Rectangle {
@@ -98,12 +107,15 @@ export component SettingPage inherits Page {
         x:40px;
         y:550px;
         border-radius: 10px;
-        Switch {
+        eval:=Switch {
             accessible-role: AccessibleRole.none;
             x: 14px;
             y: 8px;
             width: 132px;
             text: "活动评价提醒";
+            toggled => {
+                root.actionevalstate(eval.checked);
+            }
         }
     }
             }
