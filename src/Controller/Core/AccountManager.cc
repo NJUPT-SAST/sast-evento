@@ -76,6 +76,10 @@ void AccountManager::requestLogin() {
 
 void AccountManager::requestLogout() {
     // TODO: net logout
+    auto& self = *this;
+    // if (logoutSuccess) {
+    self->set_is_login(false);
+    // }
 }
 
 UserInfoEntity AccountManager::getUserInfo() {

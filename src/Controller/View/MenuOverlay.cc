@@ -15,7 +15,7 @@ MenuOverlay::MenuOverlay(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& 
 
 void MenuOverlay::onCreate() {
     auto& self = *this;
-    self->on_open_link_web([this] { openBrowser("https://link.sast.fun/home"); });
+    self->on_open_link_web([] { openBrowser("https://link.sast.fun/home"); });
 }
 
 void MenuOverlay::onShow() {

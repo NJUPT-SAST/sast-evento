@@ -210,6 +210,7 @@ export component MenuOverlay inherits Overlay {
                 label-color: ROOT-STYLES.sur-theme-colors.error.normal;
                 clicked => {
                     AccountManager.request-logout();
+                    ViewManager.clean-navigate-to(ViewName.LoginOverlay);
                 }
             }
         }

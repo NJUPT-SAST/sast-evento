@@ -15,8 +15,6 @@ private:
     void onCreate() override;
     void onShow() override;
     void onLogin() override;
-
-    void openLinkWeb();
 };
 
 EVENTO_UI_END
