@@ -5,7 +5,7 @@ export global AccountManagerBridge {
 }
 
 export global AccountManager {
-    out property <bool> is-login <=> AccountManagerBridge.is-login;
+    out property <bool> is-login: AccountManagerBridge.is-login;
     public function request-login() {
         AccountManagerBridge.request-login();
     }
