@@ -107,124 +107,109 @@ export component DiscoveryPage inherits Page {
         y: 0;
         width: 100%;
         height: 100%;
-        //Text {
-        //    text: "活动广场（用于发现活动）\n  进行中、未开始\n  （需要跳转到历史活动页面，需要多考虑一下）";
-        //}
-        VerticalLayout {
-            Rectangle {
-                width: 100%;
-                height: 50%;
-                // 这里摆放轮播图
-                //Text {
-                //    text: "轮播图(活动广场)";
-                //}
-                SCarousel {
-                    height: parent.height;
-                    width: parent.width;
-                    fold-height: parent.height;
-                    active: 3;
-                    focus-main: true;
-                    fit: contain;
-                    sources: [
-                        EventoImageToken.image.display.event.cpp[0],
-                        EventoImageToken.image.display.event.cpp[1],
-                        EventoImageToken.image.display.event.cpp[2],
-                    ];
-                }
-            }
+        Rectangle {
+             width: 100%;
+             height: 100%;
 
-            Rectangle {
-                width: 100%;
-                height: 50%;
+             background: #1e1e2e;
+            // in property <int> block_num: current_event_num + newest_event_num;
+            // in property <int> block_max_h: 120;
+            // in property <int> block_max_w: 150;
 
-                background: #39c5bb;
-                // in property <int> block_num: current_event_num + newest_event_num;
-                // in property <int> block_max_h: 120;
-                // in property <int> block_max_w: 150;
+            // // functions to calculate actual row and col num
+            // pure callback getBlockRowNum(int, int) -> int;
+            // pure callback getBlockColNum(int, int) -> int;
 
-                // // functions to calculate actual row and col num
-                // pure callback getBlockRowNum(int, int) -> int;
-                // pure callback getBlockColNum(int, int) -> int;
-
-                // in property <int> block_row_num: getBlockRowNum(root.height / 1px, block_max_h); // 实际显示的行数
-                // in property <int> block_col_num: getBlockColNum(root.width  / 1px, block_max_w); // 实际显示的列数
+            // in property <int> block_row_num: getBlockRowNum(root.height / 1px, block_max_h); // 实际显示的行数
+            // in property <int> block_col_num: getBlockColNum(root.width  / 1px, block_max_w); // 实际显示的列数
 
 
-                // pure callback calcBlockX(int, int, int)->int;
-                // pure callback calcBlockY(int, int, int)->int;
+            // pure callback calcBlockX(int, int, int)->int;
+            // pure callback calcBlockY(int, int, int)->int;
 
-                ScrollView {
-                    // in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
-                    // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
-                    viewport-width: parent.width;
-                    viewport-height: 480px;
-                    // width: parent.width;
-                    // height: 1px * block_height * block_row_num;
-                    height: parent.height;
-                    width: parent.width;
+            ScrollView {
+                // in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
+                // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
+                // width: parent.width;
+                // height: 1px * block_height * block_row_num;
+                height: parent.height;
+                width: parent.width;
 
-                    VerticalLayout {
-                        // calculate actual block size
+                VerticalLayout {
+                    // calculate actual block size
 
-                        // idx = row * block_col_num + col
-                        //        |                     |
-                        //     y/height              x/width
-                        
-                        Rectangle {
-                            // 提示词: 正在进行的活动
-                            height: 40px;
-                            width: 100%;
-                            Text {
-                                text: "正在进行的活动";
-                            }
-                        }
-                        
-                        Rectangle {
-                            background: #39c5bb;
-                            height: 200px;
-                            width: 100%;
-                        }
-
-                        // for itm[idx] in current_event_list: block {
-                        //     x: 1px * calcBlockX(idx, block_width, block_col_num);
-                        //     y: 1px * calcBlockY(idx, block_height, block_col_num);
-                        //     // x: block_width * (idx - idx / block_col_num) * 1px;
-                        //     // y: block_height * (idx / block_col_num) * 1px;
-                        //     height: block_height * 1px;
-                        //     width: block_width * 1px;
-                        //     data: itm;
-                        // }
-                        
-                        Rectangle {
-                            // 提示词: 最新的活动
-                            height: 40px;
-                            width: 100%;
-                            Text {
-                                text: "正在进行的活动";
-                            }
-                        }
-
-                        Rectangle {
-                            background: #66ccff;
-                            height: 200px;
-                            width: 100%;
-                        }
-                        
-                        // for ... block ... : 最新的活动内容
-                        // for itm[idx] in newest_event_list: block {
-                        //     x: 1px * calcBlockX(idx, block_width, block_col_num);
-                        //     y: 1px * calcBlockY(idx, block_height, block_col_num);
-                        //     // x: block_width * (idx - idx / block_col_num) * 1px;
-                        //     // y: block_height * (idx / block_col_num) * 1px;
-                        //     height: block_height * 1px;
-                        //     width: block_width * 1px;
-                        //     data: itm;
-                        // }
-
+                    // idx = row * block_col_num + col
+                    //        |                     |
+                    //     y/height              x/width
+                    
+                    SCarousel {
+                        width: 100%;
+                        height: root.height * 0.5;
+                        fold-height: root.height * 0.5;
+                        active: 3;
+                        focus-main: true;
+                        fit: contain;
+                        sources: [
+                            EventoImageToken.image.display.event.cpp[0],
+                            EventoImageToken.image.display.event.cpp[1],
+                            EventoImageToken.image.display.event.cpp[2],
+                        ];
                     }
 
+                    Rectangle {
+                        // 提示词: 正在进行的活动
+                        height: 40px;
+                        width: 100%;
+                        Text {
+                            text: "正在进行的活动";
+                        }
+                    }
+                    
+                    Rectangle {
+                        background: #39c5bb;
+                        height: 200px;
+                        width: 100%;
+                    }
+
+                    // for itm[idx] in current_event_list: block {
+                    //     x: 1px * calcBlockX(idx, block_width, block_col_num);
+                    //     y: 1px * calcBlockY(idx, block_height, block_col_num);
+                    //     // x: block_width * (idx - idx / block_col_num) * 1px;
+                    //     // y: block_height * (idx / block_col_num) * 1px;
+                    //     height: block_height * 1px;
+                    //     width: block_width * 1px;
+                    //     data: itm;
+                    // }
+                    
+                    Rectangle {
+                        // 提示词: 最新的活动
+                        height: 40px;
+                        width: 100%;
+                        Text {
+                            text: "正在进行的活动";
+                        }
+                    }
+
+                    Rectangle {
+                        background: #66ccff;
+                        height: 200px;
+                        width: 100%;
+                    }
+                    
+                    // for ... block ... : 最新的活动内容
+                    // for itm[idx] in newest_event_list: block {
+                    //     x: 1px * calcBlockX(idx, block_width, block_col_num);
+                    //     y: 1px * calcBlockY(idx, block_height, block_col_num);
+                    //     // x: block_width * (idx - idx / block_col_num) * 1px;
+                    //     // y: block_height * (idx / block_col_num) * 1px;
+                    //     height: block_height * 1px;
+                    //     width: block_width * 1px;
+                    //     data: itm;
+                    // }
+
                 }
             }
+        }
 
             // 正在进行的活动
             // Rectangle {
@@ -299,6 +284,5 @@ export component DiscoveryPage inherits Page {
             //         }
             //     }
             // }
-        }
     }
 }
