@@ -5,7 +5,7 @@ import { SAvatar } from "../../modules/surrealism-ui/src/avatar/index.slint";
 import { ROOT-STYLES } from "../../modules/surrealism-ui/themes/index.slint";
 
 export global MenuOverlayBridge {
-    in-out property <bool> is-show;
+    in-out property <bool> is-show: false;
     in-out property <string> user-name:"用户名";
     in-out property <string> user-signature: "个性签名";
     in-out property <image> user-avatar: Token.image.display.avatar[0];
@@ -99,6 +99,7 @@ export component MenuOverlay inherits Overlay {
         background: Token.color.surface-container;
         border-top-left-radius: 16px;
         border-bottom-left-radius: self.border-top-left-radius;
+
         VerticalLayout {
             padding: 10px;
             padding-top: 30px;
@@ -148,6 +149,7 @@ export component MenuOverlay inherits Overlay {
                         if (AccountManager.is-login) {
                             MenuOverlayBridge.open-link-web();
                         } else {
+                            MenuOverlayBridge.is-show = false;
                             ViewManager.clean-navigate-to(ViewName.LoginOverlay);
                         }
                     }
@@ -160,8 +162,6 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.me.normal;
                 label: "个人资料";
                 clicked => {
-                    // TODO: implement
-                    ViewManager.prior-view();
                     MenuOverlayBridge.open-link-web();
                 }
             }
@@ -170,6 +170,7 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.history.normal;
                 label: "历史活动";
                 clicked => {
+                    MenuOverlayBridge.is-show = false;
                     ViewManager.replace-navigate-to(ViewName.HistoryPage)
                 }
             }
@@ -179,7 +180,6 @@ export component MenuOverlay inherits Overlay {
                 label: "纪念卡";
                 clicked => {
                     // NOTE: Unsupport
-                    ViewManager.prior-view();
                     MessageManager.show-message("功能还在开发中，咕咕咕 😣", MessageType.Info);
                 }
             }
@@ -190,6 +190,7 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.setting.normal;
                 label: "设置";
                 clicked => {
+                    MenuOverlayBridge.is-show = false;
                     ViewManager.replace-navigate-to(ViewName.SettingPage)
                 }
             }
@@ -198,6 +199,7 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.info.normal;
                 label: "关于";
                 clicked => {
+                    MenuOverlayBridge.is-show = false;
                     ViewManager.replace-navigate-to(ViewName.AboutPage)
                 }
             }
@@ -209,6 +211,7 @@ export component MenuOverlay inherits Overlay {
                 label: "退出登录";
                 label-color: ROOT-STYLES.sur-theme-colors.error.normal;
                 clicked => {
+                    MenuOverlayBridge.is-show = false;
                     AccountManager.request-logout();
                     ViewManager.clean-navigate-to(ViewName.LoginOverlay);
                 }
