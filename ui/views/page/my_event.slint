@@ -11,10 +11,28 @@ import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
 import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
 import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
 import { ViewManager } from "../../logic/index.slint";
-
+import { SDialog } from "../../modules/surrealism-ui/src/dialog/index.slint";
+import { LineEdit } from "std-widgets.slint";
 export global MyEventPageBridge { }
 
-
+// export component CodeGet inherits Window {
+//     width: 200px;
+//     height: 80px;
+//     property <bool> is_show : false;
+//     visible: is_show;
+//     LineEdit {
+//         width: 180px;
+//         height: 45px;
+//         placeholder-text: "Enter code here";
+//         font-size: 14px;
+//     }
+//     public function open() {
+//         self.is_show = true;
+//     }
+//     public function close() {
+//         self.is_show = false;
+//     }
+// }
 // 签到按钮
 component SignButton inherits SButton{
     width: 40px;
@@ -44,7 +62,7 @@ component ReviewButton inherits SButton {
     background: Token.color.surface;
     border-color: Token.color.outline;
     font-color: Token.color.on-surface;
-    clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
+    clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
 }
 
 // 信息卡片部分
@@ -84,8 +102,14 @@ component Card inherits SCard{
     }
 }
 export component SignCard inherits Card{
+    // get := CodeGet{ 
+    //     x: (parent.x)+80px;
+    // }
     SignButton {
         x: (parent.width)*0.75 + parent.x;
+        // clicked => {
+        //     get.open();
+        // }
     }
 }
 
