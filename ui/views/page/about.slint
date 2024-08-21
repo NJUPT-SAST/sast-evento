@@ -16,8 +16,9 @@ export component AboutSlint inherits Rectangle {
 export global AboutPageBridge {
     in-out property <string> version:"v0.0.0-00000000";
     in-out property <string> updateMessage: "";
-    callback checkUpdate()->bool;
-    callback openURL(string);
+    in-out property <bool> is_lastest: false;
+    callback checkUpdate() -> bool;
+    callback open-web(string);
 }
 
 component Dependence inherits Rectangle {
@@ -60,25 +61,31 @@ component AboutPageContent inherits Rectangle {
         }
 
         layout-version-info := Rectangle {
-            vertical-stretch: (1 - layout-logo.vertical-stretch) / 16 * 1;
+            vertical-stretch: (1 - layout-logo.vertical-stretch) / 12 * 1;
             border-width: 2px;
             border-color: red;
         }
 
+        // layout-dialog := Rectangle {
+        //     vertical-stretch: (1 - layout-logo.vertical-stretch) / 12 * 1;
+        //     border-width: 2px;
+        //     border-color: red;
+        // }
+
         layout-basic-info := Rectangle {
-            vertical-stretch: (1 - layout-logo.vertical-stretch) / 16 * 11;
+            vertical-stretch: (1 - layout-logo.vertical-stretch) / 12 * 6;
             border-width: 2px;
             border-color: red;
         }
 
         layout-developer-label := Rectangle {
-            vertical-stretch: (1 - layout-logo.vertical-stretch) / 16 * 3;
+            vertical-stretch: (1 - layout-logo.vertical-stretch) / 12 * 3;
             border-width: 2px;
             border-color: red;
         }
 
         layout-about-slint := Rectangle {
-            vertical-stretch: (1 - layout-logo.vertical-stretch) / 16 * 1;
+            vertical-stretch: (1 - layout-logo.vertical-stretch) / 12 * 1;
             border-width: 2px;
             border-color: red;
         }
@@ -89,13 +96,73 @@ component AboutPageContent inherits Rectangle {
         y: 0;
         width: 100%;
         height: 100%;
+        // dialog := Empty {
+        //     x: layout-dialog.absolute-position.x - root.absolute-position.x;
+        //     y: layout-dialog.absolute-position.y - root.absolute-position.y;
+        //     Dialog {
+        //         visible: true;
+                
+        //         Text {
+        //             text: "更新日志";
+        //             font-size: Token.font.title.large.size;
+        //             font-weight: Token.font.title.large.weight;
+        //             color: Token.color.on-surface;
+        //         }
+        //     }
+        // }
+
+        popup := PopupWindow {
+            close-on-click: true;
+            x: root.width / 4;
+            y: 0;
+            width: root.width / 2;
+            Rectangle {
+                border-radius: root.preferred-height / 8;
+                border-width: 1px;
+                border-color: Token.color.outline;
+                padding: layout.padding;
+                VerticalLayout {
+                    padding: layout.padding;
+                    Rectangle {
+                        Text {
+                            text: "更新日志";
+                        }
+                    }
+
+                    Rectangle {
+                        Text {
+                            text: "更新内容";
+                        }
+                    }
+
+                    HorizontalLayout {
+                        padding: layout.padding;
+                        spacing: layout.spacing;
+                        Button {
+                            text: "点击前往更新";
+                            clicked => {
+                                AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/releases");
+                            }
+                        }
+
+                        Button {
+                            text: "关闭";
+                            clicked => {
+                                popup.close();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         logo := Empty {
             x: layout-logo.absolute-position.x - root.absolute-position.x;
             y: layout-logo.absolute-position.y - root.absolute-position.y;
             width: layout-logo.width;
             height: layout-logo.height;
             Image {
-                vertical-stretch: 1.5;
+                vertical-stretch: 2;
                 height: root.preferred-height * self.vertical-stretch;
                 image-fit: contain;
                 source: Token.image.display.evento;
@@ -126,6 +193,7 @@ component AboutPageContent inherits Rectangle {
                                     font-size: Token.font.label.large.size;
                                     font-weight: Token.font.label.large.weight;
                                     color: Token.color.on-surface;
+                                    wrap: TextWrap.word-wrap;
                                 }
                             }
 
@@ -136,8 +204,11 @@ component AboutPageContent inherits Rectangle {
                                     x: parent.width - self.width - layout.padding * 2;
                                     text: "检查更新";
                                     clicked => {
-                                        AboutPageBridge.checkUpdate();
-                                        self.text = AboutPageBridge.updateMessage;
+                                        if (true) {
+                                            popup.show()
+                                        } else {
+                                            self.text = AboutPageBridge.updateMessage;
+                                        }
                                     }
                                 }
                             }
@@ -151,7 +222,7 @@ component AboutPageContent inherits Rectangle {
             x: layout-basic-info.absolute-position.x - root.absolute-position.x;
             y: version-info.y + layout.padding + version-info.height;
             width: layout-basic-info.width;
-            height: root.preferred-height * 5;
+            height: root.preferred-height * 6;
             Rectangle {
                 border-radius: root.preferred-height / 8;
                 border-width: 1px;
@@ -171,6 +242,7 @@ component AboutPageContent inherits Rectangle {
                                     font-size: Token.font.label.large.size;
                                     font-weight: Token.font.label.large.weight;
                                     color: Token.color.on-surface;
+                                    wrap: TextWrap.word-wrap;
                                 }
                             }
 
@@ -185,7 +257,7 @@ component AboutPageContent inherits Rectangle {
                                     font-weight: Token.font.label.large.weight;
                                     theme: Token.surrealism-ui-default-theme;
                                     clicked => {
-                                        AboutPageBridge.openURL("https://evento.sast.fun");
+                                        AboutPageBridge.open-web("https://evento.sast.fun");
                                     }
                                 }
                             }
@@ -196,10 +268,11 @@ component AboutPageContent inherits Rectangle {
                         x: layout.padding;
                         height: 1px;
                         width: parent.width - layout.padding * 2;
-                        background: Token.color.outline;
+                        background: Token.color.outline-variant;
                     }
 
                     Rectangle {
+                        height: root.preferred-height * 2;
                         HorizontalLayout {
                             padding: layout.padding;
                             Rectangle {
@@ -214,16 +287,33 @@ component AboutPageContent inherits Rectangle {
                                 }
                             }
 
-                            Rectangle {
-                                width: parent.width * 50%;
-                                padding: layout.padding;
-                                SLink {
-                                    x: parent.width - self.width - layout.padding * 2;
-                                    height: self.preferred-height;
-                                    text: "https://github.com/NJUPT-SAST/sast-evento/";
-                                    font-size: Token.font.label.large.size;
-                                    font-weight: Token.font.label.large.weight;
-                                    theme: Token.surrealism-ui-default-theme;
+                            VerticalLayout {
+                                Rectangle {
+                                    width: 50%;
+                                    padding: layout.padding;
+                                    SLink {
+                                        x: parent.width - self.width - layout.padding * 2;
+                                        height: self.preferred-height;
+                                        text: "https://github.com/NJUPT-SAST/sast-evento";
+                                        font-size: Token.font.label.large.size;
+                                        font-weight: Token.font.label.large.weight;
+                                        theme: Token.surrealism-ui-default-theme;
+                                        clicked => {
+                                            AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento");
+                                        }
+                                    }
+                                }
+
+                                Rectangle {
+                                    width: 50%;
+                                    padding: layout.padding;
+                                    Button {
+                                        x: parent.width - self.width - layout.padding * 2;
+                                        text: "功能建议 / 漏洞报告";
+                                        clicked => {
+                                            AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/issues");
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -233,104 +323,70 @@ component AboutPageContent inherits Rectangle {
                         x: layout.padding;
                         height: 1px;
                         width: parent.width - layout.padding * 2;
-                        background: Token.color.outline;
+                        background: Token.color.outline-variant;
                     }
 
                     Rectangle {
                         height: root.preferred-height * 2;
                         VerticalLayout {
-                            padding: layout.padding;
+                            padding-left: layout.padding;
                             Rectangle {
-                                height: 0;
+                                height: layout.padding;
                             }
-
-                            Text {
-                                height: 18px;
-                                text: "项目依赖";
-                                font-size: Token.font.label.large.size;
-                                font-weight: Token.font.label.large.weight;
-                                color: Token.color.on-surface;
-                            }
-
-                            if (root.width > 700px):
-                                HorizontalLayout {
-                                padding: 2 * layout.padding;
-                                spacing: 12px;
-                                height: self.preferred-height;
-                                Dependence {
-                                    content: "Boost.Beast";
-                                }
-
-                                Dependence {
-                                    content: "Boost.Url";
-                                }
-
-                                Dependence {
-                                    content: "OpenSSL";
-                                }
-
-                                Dependence {
-                                    content: "Slint";
-                                }
-
-                                Dependence {
-                                    content: "toml++";
-                                }
-
-                                Dependence {
-                                    content: "nlohmann-json";
-                                }
-
-                                Dependence {
-                                    content: "spdlog";
-                                }
-
-                                Dependence {
-                                    content: "keychain";
+                            Rectangle {
+                                width: parent.width * 50%;
+                                height: Token.font.label.large.size;
+                                Text {
+                                    height: self.preferred-height;
+                                    width: 100%;
+                                    text: "项目依赖";
+                                    font-size: Token.font.label.large.size;
+                                    font-weight: Token.font.label.large.weight;
+                                    color: Token.color.on-surface;
                                 }
                             }
 
-                            if (root.width <= 700px):
-                            VerticalLayout {
-                                HorizontalLayout {
-                                    padding: layout.padding;
-                                    spacing: 12px;
-                                    height: self.preferred-height / 2;
-                                    Dependence {
-                                        content: "Boost.Beast";
-                                    }
+                            Rectangle {
+                                clip: false;
+                                height: root.preferred-height + layout.padding;
+                                ScrollView {
+                                    enabled: false;
+                                    height: 100%;
+                                    viewport-height: root.preferred-height;
+                                    HorizontalLayout {
+                                        padding: 2 * layout.padding;
+                                        spacing: 12px;
+                                        Dependence {
+                                            content: "Boost.Beast";
+                                        }
 
-                                    Dependence {
-                                        content: "Boost.Url";
-                                    }
+                                        Dependence {
+                                            content: "Boost.Url";
+                                        }
 
-                                    Dependence {
-                                        content: "OpenSSL";
-                                    }
+                                        Dependence {
+                                            content: "OpenSSL";
+                                        }
 
-                                    Dependence {
-                                        content: "Slint";
-                                    }
-                                }
+                                        Dependence {
+                                            content: "Slint";
+                                        }
 
-                                HorizontalLayout {
-                                    padding: layout.padding;
-                                    spacing: 12px;
-                                    height: self.preferred-height / 2;
-                                    Dependence {
-                                        content: "toml++";
-                                    }
+                                        Dependence {
+                                            content: "toml++";
+                                        }
 
-                                    Dependence {
-                                        content: "nlohmann-json";
-                                    }
+                                        Dependence {
+                                            content: "nlohmann-json";
+                                        }
 
-                                    Dependence {
-                                        content: "spdlog";
-                                    }
+                                        Dependence {
+                                            content: "spdlog";
+                                        }
 
-                                    Dependence {
-                                        content: "keychain";
+                                        Dependence {
+                                            content: "keychain";
+                                        }
                                     }
                                 }
                             }
@@ -341,7 +397,7 @@ component AboutPageContent inherits Rectangle {
                         x: layout.padding;
                         height: 1px;
                         width: parent.width - layout.padding * 2;
-                        background: Token.color.outline;
+                        background: Token.color.outline-variant;
                     }
 
                     Rectangle {
@@ -439,7 +495,7 @@ export component AboutPage inherits Page {
     ScrollView {
         width: 100%;
         height: 100%;
-        viewport-height: 1600px;
+        viewport-height: 1200px;
         content := AboutPageContent { }
     }
 }

@@ -1,10 +1,11 @@
 #include <Controller/View/AboutPage.h>
 #include <Infrastructure/Network/NetworkClient.h>
+#include <Infrastructure/Utils/Tools.h>
 #include <Version.h>
+#include <chrono>
+#include <slint.h>
 #include <string>
 #include <type_traits>
-#include <iostream>
-#include <cstdlib>
 
 EVENTO_UI_START
 
@@ -12,22 +13,17 @@ AboutPage::AboutPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& brid
     : BasicView(bridge)
     , GlobalAgent(uiEntry) {}
 
-
 void AboutPage::onCreate() {
     auto& self = *this;
 
     self->set_version("v" VERSION_FULL);
+    self->on_open_web([this](slint::SharedString url) { openBrowser(std::string(url)); });
 }
 
-void AboutPage::onCheck() {
-    auto& self = *this;
+// void AboutPage::onClick() {
+//     auto& self = *this;
 
-    // self->on_open_web_site([site] {
-    //     // Macos
-    //     std::string cmd = "open " + site;
-    //     system(cmd.c_str());
-    // });
+//     // self->on_open_URL([this] { openBrowser("https://baidu.com"); });
+// }
 
-}
-
-    EVENTO_UI_END
+EVENTO_UI_END

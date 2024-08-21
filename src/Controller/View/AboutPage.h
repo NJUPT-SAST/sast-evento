@@ -3,6 +3,7 @@
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
+#include <string>
 
 EVENTO_UI_START
 
@@ -13,7 +14,8 @@ public:
 
 private:
     void onCreate() override;
-    void onCheck();
+    // void onClick() override;
+    void openWeb(const std::string url);
 };
 
 EVENTO_UI_END
