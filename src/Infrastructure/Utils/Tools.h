@@ -7,7 +7,7 @@ namespace evento {
 
 namespace urls = boost::urls;
 
-void openBrowser(urls::url_view url) {
+inline void openBrowser(urls::url_view url) {
     using namespace std::string_literals;
     std::string url_str = "\""s + url.data() + "\"";
 #ifdef __linux__
