@@ -6,7 +6,6 @@
 #include <slint.h>
 #include <spdlog/spdlog.h>
 #include <string_view>
-#include <thread>
 
 EVENTO_UI_START
 
@@ -29,9 +28,10 @@ void MessageManager::showMessage(std::string content,
         hideMessage();
         evento::executor()->asyncExecute(
             doNothing,
-            [&, this] { showMessage(content, type, timeout); },
+            [=, this] { showMessage(content, type, timeout); },
             animationLength,
             AsyncExecutor::Once | AsyncExecutor::Delay);
+        return;
     }
 
     UiUtility::StylishLog::newMessageShowed(logOrigin, content);
