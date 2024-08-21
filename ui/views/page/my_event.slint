@@ -15,24 +15,24 @@ import { SDialog } from "../../modules/surrealism-ui/src/dialog/index.slint";
 import { LineEdit } from "std-widgets.slint";
 export global MyEventPageBridge { }
 
-// export component CodeGet inherits Window {
-//     width: 200px;
-//     height: 80px;
-//     property <bool> is_show : false;
-//     visible: is_show;
-//     LineEdit {
-//         width: 180px;
-//         height: 45px;
-//         placeholder-text: "Enter code here";
-//         font-size: 14px;
-//     }
-//     public function open() {
-//         self.is_show = true;
-//     }
-//     public function close() {
-//         self.is_show = false;
-//     }
-// }
+export component CodeGet inherits Window {
+    width: 200px;
+    height: 80px;
+    property <bool> is_show : false;
+    visible: is_show;
+    LineEdit {
+        width: 180px;
+        height: 45px;
+        placeholder-text: "Enter code here";
+        font-size: 14px;
+    }
+    public function open() {
+        self.is_show = true;
+    }
+    public function close() {
+        self.is_show = false;
+    }
+}
 // 签到按钮
 component SignButton inherits SButton{
     width: 40px;
@@ -102,14 +102,14 @@ component Card inherits SCard{
     }
 }
 export component SignCard inherits Card{
-    // get := CodeGet{ 
-    //     x: (parent.x)+80px;
-    // }
+    get := CodeGet{ 
+        x: (parent.x)+80px;
+    }
     SignButton {
         x: (parent.width)*0.75 + parent.x;
-        // clicked => {
-        //     get.open();
-        // }
+        clicked => {
+            get.open();
+        }
     }
 }
 
