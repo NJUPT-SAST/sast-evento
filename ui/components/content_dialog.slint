@@ -27,7 +27,6 @@ export component ContentDialog inherits Window {
     z: 1000;
     //theme
     in-out property <bool> is-show: false;
-    in property <float> mask-opacity: 0.5;
     // dialog
     in property <string> dialog-title: "Dialog";
     in property <string> confirm-btn-text: "Confirm";
@@ -48,7 +47,7 @@ export component ContentDialog inherits Window {
         drop-shadow-blur: 0;
         drop-shadow-offset-x: 0;
         drop-shadow-offset-y: 0;
-        opacity: root.mask-opacity;
+        opacity: 0.5;
     }
 
     area := SCard {
@@ -59,10 +58,7 @@ export component ContentDialog inherits Window {
         border-color: Token.color.surface-container-high;
         background: Token.color.surface;
         VerticalLayout {
-            padding-bottom: 24px;
-            padding-top: 24px;
-            padding-left: 24px;
-            padding-right: 24px;
+            padding: 24px;
             title := Title-Text {
                 content: dialog-title;
             }
@@ -71,11 +67,7 @@ export component ContentDialog inherits Window {
                 height: 16px;
             }
 
-            ScrollView {
-                width: 100%;
-                viewport-height: self.height - 15px;
-                @children
-            }
+            @children
 
             Rectangle {
                 height: 24px;
@@ -92,6 +84,7 @@ export component ContentDialog inherits Window {
                         root.confirm();
                     }
                 }
+
                 Button {
                     text: cancel-btn-text;
                     clicked => {
