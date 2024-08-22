@@ -1,8 +1,5 @@
-#include <Controller/Core/AccountManager.h>
-#include <Controller/UiBridge.h>
 #include <Controller/View/SettingPage.h>
 #include <Infrastructure/Utils/Config.h>
-#include <toml++/toml.hpp>
 
 EVENTO_UI_START
 

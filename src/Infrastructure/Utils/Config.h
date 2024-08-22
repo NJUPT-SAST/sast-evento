@@ -6,7 +6,7 @@
 #include <toml++/toml.h>
 
 /*
-[account.userId]
+[account.<user-id>]
 expire = <date-time>
 
 [setting]
