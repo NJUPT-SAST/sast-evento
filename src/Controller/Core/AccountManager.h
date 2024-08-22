@@ -8,7 +8,7 @@
 
 EVENTO_UI_START
 
-class AccountManager : private GlobalAgent<::AccountManager>,
+class AccountManager : private GlobalAgent<AccountManagerBridge>,
                        std::enable_shared_from_this<AccountManager> {
     friend class UiBridge;
     UiBridge& bridge;
@@ -25,7 +25,7 @@ public:
     AccountManager(AccountManager&) = delete;
     ~AccountManager();
 
-    bool isLogin();
+    bool isLogin() const;
     void requestLogin();
     void requestLogout();
 
@@ -37,8 +37,8 @@ private:
 
     static const inline std::string package = "org.sast.evento";
     static const inline std::string service = "refresh-token";
-    void setKeychainRefreshToken(const std::string& refreshToken);
-    std::string getKeychainRefreshToken();
+    void setKeychainRefreshToken(const std::string& refreshToken) const;
+    std::string getKeychainRefreshToken() const;
 
     void scheduleRenewAccessToken();
     void scheduleRenewRefreshToken();
