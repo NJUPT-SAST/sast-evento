@@ -1,29 +1,18 @@
-import { SDialog, SCard, SRadio } from "../modules/surrealism-ui/index.slint";
+import { SCard } from "../modules/surrealism-ui/index.slint";
 import { Token } from "../global.slint";
-import { Empty } from "view_base.slint";
 import { ScrollView, Button } from "std-widgets.slint";
-
 
 // Basic dialog without icon. See: https://m3.material.io/components/dialogs/specs#9a8c226b-19fa-4d6b-894e-e7d5ca9203e8
 
-component Detail-Text inherits Text {
-    in property <string> content;
-
-    text: content;
-    font-size: Token.font.body.large.size;
-    font-weight: Token.font.body.large.weight;
-    color: Token.color.on-surface;
-    height: self.preferred-height;
-}
-
 component Title-Text inherits Text {
     in property <string> content;
-
     text: content;
     font-size: Token.font.title.large.size;
     font-weight: Token.font.title.large.weight;
     color: Token.color.on-surface;
     height: self.preferred-height;
+    wrap: TextWrap.no-wrap;
+    overflow: TextOverflow.elide;
 }
 
 export component ContentDialog inherits Window {
@@ -40,8 +29,7 @@ export component ContentDialog inherits Window {
     in-out property <bool> is-show: false;
     in property <float> mask-opacity: 0.5;
     // dialog
-    in property <string> dialog-title: "Test";
-    in property <string> dialog-details: "Test content 123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123123";
+    in property <string> dialog-title: "Dialog";
     in property <string> confirm-btn-text: "Confirm";
     in property <string> cancel-btn-text: "Cancel";
     //function
@@ -85,13 +73,8 @@ export component ContentDialog inherits Window {
 
             ScrollView {
                 width: 100%;
-                viewport-height: self.height;
-                    Detail-Text {
-                        height: parent.height;
-                        width: parent.width;
-                        content: dialog-details;
-                    }
-                
+                viewport-height: self.height - 15px;
+                @children
             }
 
             Rectangle {
@@ -108,6 +91,7 @@ export component ContentDialog inherits Window {
                         root.cancel();
                     }
                 }
+
                 Button {
                     text: confirm-btn-text;
                     clicked => {
