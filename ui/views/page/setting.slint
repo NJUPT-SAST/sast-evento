@@ -1,6 +1,7 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
 import { Switch, ComboBox } from "std-widgets.slint";
+import { Switch, ComboBox, ScrollView } from "std-widgets.slint";
 
 export global SettingPageBridge {
     in-out property <int> language-index: 0;
@@ -50,79 +51,82 @@ component Divider inherits Rectangle {
 }
 
 export component SettingPage inherits Page {
-    body := VerticalLayout {
-        alignment: LayoutAlignment.start;
-        padding: 50px;
-        spacing: 15px;
-        Text {
-            text: "设置";
-            font-size: Token.font.display.medium.size;
-            font-weight: Token.font.display.medium.weight;
-        }
+    body := ScrollView {
+        viewport-height: 400px;
+        layout := VerticalLayout {
+            alignment: LayoutAlignment.start;
+            padding: 50px;
+            spacing: 15px;
+            Text {
+                text: "设置";
+                font-size: Token.font.display.medium.size;
+                font-weight: Token.font.display.medium.weight;
+            }
 
-        Divider { }
+            Divider { }
 
-        SettingItem {
-            name: "主题";
-            ComboBox {
-                width: 200px;
-                model: ["跟随系统", "浅色", "深色"];
-                current-index <=> SettingPageBridge.theme-index;
-                selected => {
-                    SettingPageBridge.change-theme();
-                    SettingPageBridge.theme-changed();
+            SettingItem {
+                name: "主题";
+                ComboBox {
+                    width: 200px;
+                    model: ["跟随系统", "浅色", "深色"];
+                    current-index <=> SettingPageBridge.theme-index;
+                    selected => {
+                        SettingPageBridge.change-theme();
+                        SettingPageBridge.theme-changed();
+                    }
                 }
             }
-        }
 
-        SettingItem {
-            name: "语言";
-            supported: false;
-            ComboBox {
-                width: 200px;
-                enabled: false;
-                model: ["简体中文", "繁體中文", "English"];
-                current-index <=> SettingPageBridge.language-index;
-                selected => {
-                    SettingPageBridge.language-changed();
+            SettingItem {
+                name: "语言";
+                supported: false;
+                ComboBox {
+                    width: 200px;
+                    enabled: false;
+                    model: ["简体中文", "繁體中文", "English"];
+                    current-index <=> SettingPageBridge.language-index;
+                    selected => {
+                        SettingPageBridge.language-changed();
+                    }
                 }
             }
-        }
 
-        Divider { }
+            Divider { }
 
-        SettingItem {
-            supported: false;
-            name: "活动开始前提醒";
-            Switch {
-                enabled: false;
-                checked <=> SettingPageBridge.notice-begin;
-                toggled => {
-                    SettingPageBridge.notice-begin-changed();
+            SettingItem {
+                supported: false;
+                name: "活动开始前提醒";
+                Switch {
+                    enabled: false;
+                    checked <=> SettingPageBridge.notice-begin;
+                    toggled => {
+                        SettingPageBridge.notice-begin-changed();
+                    }
                 }
             }
-        }
 
-        SettingItem {
-            supported: false;
-            name: "活动结束后提醒反馈";
-            Switch {
-                enabled: false;
-                checked <=> SettingPageBridge.notice-end;
-                toggled => {
-                    SettingPageBridge.notice-end-changed();
+            SettingItem {
+                supported: false;
+                name: "活动结束后提醒反馈";
+                Switch {
+                    enabled: false;
+                    checked <=> SettingPageBridge.notice-end;
+                    toggled => {
+                        SettingPageBridge.notice-end-changed();
+                    }
                 }
             }
-        }
 
-        SettingItem {
-            supported: false;
-            name: "关闭窗口后最小化到托盘";
-            Switch {
-                enabled: false;
-                checked <=> SettingPageBridge.minimal-to-tray;
-                toggled => {
-                    SettingPageBridge.minimal-to-tray-changed();
+            SettingItem {
+                supported: false;
+                name: "关闭窗口后最小化到托盘";
+                Switch {
+                    enabled: false;
+                    checked <=> SettingPageBridge.minimal-to-tray;
+                    toggled => {
+                        SettingPageBridge.minimal-to-tray-changed();
+                    }
                 }
             }
         }
