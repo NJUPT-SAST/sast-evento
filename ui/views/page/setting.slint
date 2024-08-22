@@ -1,31 +1,132 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
+import { Switch, ComboBox, ScrollView } from "std-widgets.slint";
 
-export global SettingPageBridge { }
+export global SettingPageBridge {
+    in-out property <int> language-index: 0;
+    in-out property <int> theme-index: 0;
+    in-out property <bool> notice-begin: false;
+    in-out property <bool> notice-end: false;
+    in-out property <bool> minimal-to-tray: false;
 
-export component SettingPage inherits Page {
-    // TODO: implement Setting
-    // optional
-    background := Empty { }
-
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
+    public function change-theme() {
+        if (theme-index == 1) {
+            Token.set-display-mode(ColorScheme.light);
+        } else if (theme-index == 2) {
+            Token.set-display-mode(ColorScheme.dark);
+        } else {
+            Token.set-display-mode(ColorScheme.unknown);
+        }
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
+    callback language-changed();
+    callback theme-changed();
+    callback notice-begin-changed();
+    callback notice-end-changed();
+    callback minimal-to-tray-changed();
+}
+
+component SettingItem {
+    in property <string> name;
+    in property <bool> supported: true;
+    HorizontalLayout {
+        alignment: LayoutAlignment.space-between;
+        Text {
+            text: name;
+            color: root.supported ? Token.color.on-surface : Token.color.outline;
+            font-size: Token.font.body.large.size;
+            font-weight: Token.font.body.large.weight;
+            vertical-alignment: center;
+        }
+
+        @children
+    }
+}
+
+component Divider inherits Rectangle {
+    background: Token.color.outline-variant;
+    width: 80%;
+    height: 1px;
+}
+
+export component SettingPage inherits Page {
+    body := ScrollView {
+        viewport-height: 400px;
+        layout := VerticalLayout {
+            alignment: LayoutAlignment.start;
+            padding: 50px;
+            spacing: 15px;
             Text {
-                text: "设置\n  ";
+                text: "设置";
+                font-size: Token.font.display.medium.size;
+                font-weight: Token.font.display.medium.weight;
+            }
+
+            Divider { }
+
+            SettingItem {
+                name: "主题";
+                ComboBox {
+                    width: 200px;
+                    model: ["跟随系统", "浅色", "深色"];
+                    current-index <=> SettingPageBridge.theme-index;
+                    selected => {
+                        SettingPageBridge.change-theme();
+                        SettingPageBridge.theme-changed();
+                    }
+                }
+            }
+
+            SettingItem {
+                name: "语言";
+                supported: false;
+                ComboBox {
+                    width: 200px;
+                    enabled: false;
+                    model: ["简体中文", "繁體中文", "English"];
+                    current-index <=> SettingPageBridge.language-index;
+                    selected => {
+                        SettingPageBridge.language-changed();
+                    }
+                }
+            }
+
+            Divider { }
+
+            SettingItem {
+                supported: false;
+                name: "活动开始前提醒";
+                Switch {
+                    enabled: false;
+                    checked <=> SettingPageBridge.notice-begin;
+                    toggled => {
+                        SettingPageBridge.notice-begin-changed();
+                    }
+                }
+            }
+
+            SettingItem {
+                supported: false;
+                name: "活动结束后提醒反馈";
+                Switch {
+                    enabled: false;
+                    checked <=> SettingPageBridge.notice-end;
+                    toggled => {
+                        SettingPageBridge.notice-end-changed();
+                    }
+                }
+            }
+
+            SettingItem {
+                supported: false;
+                name: "关闭窗口后最小化到托盘";
+                Switch {
+                    enabled: false;
+                    checked <=> SettingPageBridge.minimal-to-tray;
+                    toggled => {
+                        SettingPageBridge.minimal-to-tray-changed();
+                    }
+                }
             }
         }
     }
