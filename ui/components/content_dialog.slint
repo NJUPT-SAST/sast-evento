@@ -86,16 +86,16 @@ export component ContentDialog inherits Window {
                 height: self.preferred-height;
                 alignment: end;
                 Button {
+                    text: confirm-btn-text;
+                    primary: true;
+                    clicked => {
+                        root.confirm();
+                    }
+                }
+                Button {
                     text: cancel-btn-text;
                     clicked => {
                         root.cancel();
-                    }
-                }
-
-                Button {
-                    text: confirm-btn-text;
-                    clicked => {
-                        root.confirm();
                     }
                 }
             }
