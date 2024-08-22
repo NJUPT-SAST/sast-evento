@@ -11,13 +11,11 @@ void SettingPage::onCreate() {
     auto& self = *this;
 }
 int SettingPage::on_timestate(){
-    int current_itemt=0;
-    //TODO:
-    return current_itemt;
+    int time=0;
+    return time;
 }
 int SettingPage::on_languagestate(){
-    int current_iteml=0;
-    //TODO:
-    return current_iteml;
+    int lang=0;
+    return lang;
 }
 EVENTO_UI_END

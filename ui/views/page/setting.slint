@@ -2,18 +2,20 @@ import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
 import { VerticalBox, Button, Switch, ListView, StandardListView } from "std-widgets.slint";
 import { KeyBoard } from "../../modules/surrealism-ui/src/keyboard/keyboard.slint";
-export global SettingPageBridge { }
-export component SettingPage inherits Page {
-    // TODO: implement Setting
-    //day and night change
-    in-out property <int> time: 0;
+export global SettingPageBridge {
+    in-out property <int> time :0;
     in-out property <int> language: 0;
-    in-out property <int> actionbegin:0;
-    in-out property <int> actioneval:0 ;
-    callback timestate(int);
+    in-out property <bool> actionbegin:false;
+    in-out property <bool> actioneval:false;
+    callback timestate (int);
     callback languagestate(int);
     callback actionbeginstate(bool);
     callback actionevalstate(bool);
+
+ }
+export component SettingPage inherits Page {
+    // TODO: implement Setting
+    //day and night change
     VerticalBox {
         //alignment: LayoutAlignment.center;
         body := Empty {
@@ -54,7 +56,7 @@ export component SettingPage inherits Page {
         y:25px;
         model: [ { text: "深色",}, { text: "浅色" }, { text: "跟随系统" }];
         current-item-changed => {
-            root.timestate(time.current-item);
+            SettingPageBridge.timestate(time.current-item);
        }
      } 
 } 
@@ -77,7 +79,7 @@ export component SettingPage inherits Page {
                 height: 150px;
                 model: [ { text: "中文"}, { text: "English" }];
                 current-item-changed => {
-                    root.languagestate(language.current-item);
+                    SettingPageBridge.languagestate(language.current-item);
                 }
              } 
       }
@@ -96,7 +98,7 @@ export component SettingPage inherits Page {
             width: 132px;
             text: "活动开始提醒";
             toggled => {
-                root.actionbeginstate(begin.checked);
+                SettingPageBridge.actionbeginstate(begin.checked);
             }
         }
     }
@@ -114,7 +116,7 @@ export component SettingPage inherits Page {
             width: 132px;
             text: "活动评价提醒";
             toggled => {
-                root.actionevalstate(eval.checked);
+                SettingPageBridge.actionevalstate(eval.checked);
             }
         }
     }

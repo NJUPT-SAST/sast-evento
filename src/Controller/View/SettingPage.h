@@ -12,6 +12,8 @@ public:
     SettingPage(SettingPage&) = delete;
     int on_timestate();
     int on_languagestate();
+    bool on_actionbeginstate();
+    bool actionevalstate();
 private:
     void onCreate() override;
 };
