@@ -1,218 +1,130 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
-import { VerticalBox, Button, Switch, ListView, StandardListView } from "std-widgets.slint";
-import { KeyBoard } from "../../modules/surrealism-ui/src/keyboard/keyboard.slint";
+import { VerticalBox, Button, Switch, ComboBox} from "std-widgets.slint";
+
 export global SettingPageBridge {
-    in-out property <int> time :0;
-    in-out property <int> language: 0;
-    in-out property <bool> actionbegin:false;
-    in-out property <bool> actioneval:false;
-    callback timestate (int);
-    callback languagestate(int);
-    callback actionbeginstate(bool);
-    callback actionevalstate(bool);
+    in-out property <int> language-index: 0;
+    in-out property <int> theme-index: 0;
+    in-out property <bool> notice-begin: false;
+    in-out property <bool> notice-end: false;
+    in-out property <bool> minimal-to-tray: false;
 
- }
-export component SettingPage inherits Page {
-    // TODO: implement Setting
-    //day and night change
-    VerticalBox {
-        //alignment: LayoutAlignment.center;
-        body := Empty {
-            width: 100%;
-            height: 100%;
-            placeholder := Rectangle {
-                width: 1145px;
-                height: 977px;
-                x: 2px;
-                y: 1px;
-                border-width: 4px;
-                border-color: red;
-                background: white;
-                Text {
-                    text: "设置\n  ";
-                    x:67px;
-                    y:50px;
-                    font-size: 20px;
-                }               
-    Rectangle {
-        width: 90%;
-        height: 156px;
-        x:40px;
-        y:100px;
-        background:Token.color.surface-container-high;
-        border-radius:10px;
-        Text {
-            text: "夜间模式";
-            x:25px;
-            y:5px;
-            font-size: 15px;
-        }
-        
-     time :=StandardListView {
-        width: 150px;
-        height: 156px;
-        x:20px;
-        y:25px;
-        model: [ { text: "深色",}, { text: "浅色" }, { text: "跟随系统" }];
-        current-item-changed => {
-            SettingPageBridge.timestate(time.current-item);
-       }
-     } 
-} 
-    Rectangle {
-        width: 90%;
-        height: 156px;
-        x:40px;
-        y:300px;
-        background:Token.color.surface-container-high;
-        border-radius: 10px;
-        Text {
-            x:25px;
-            y:5px;
-            text: "语言";
-            font-size: 15px;
-            language:=StandardListView {
-                x:-15px;
-                y:20px;
-                width: 150px;
-                height: 150px;
-                model: [ { text: "中文"}, { text: "English" }];
-                current-item-changed => {
-                    SettingPageBridge.languagestate(language.current-item);
-                }
-             } 
-      }
-    }         
-    Rectangle {
-        width: 90%;
-        height: 4%;
-        background: Token.color.surface-container-high;
-        x:40px;
-        y:500px;
-        border-radius: 10px;
-        begin:=Switch {
-            accessible-role: AccessibleRole.none;
-            x: 14px;
-            y: 8px;
-            width: 132px;
-            text: "活动开始提醒";
-            toggled => {
-                SettingPageBridge.actionbeginstate(begin.checked);
-            }
+    public function change-theme() {
+        if (theme-index == 1) {
+            Token.set-display-mode(ColorScheme.light);
+        } else if (theme-index == 2) {
+            Token.set-display-mode(ColorScheme.dark);
+        } else {
+            Token.set-display-mode(ColorScheme.unknown);
         }
     }
-    Rectangle {
-        width: 90%;
-        height: 4%;
-        background: Token.color.surface-container-high;
-        x:40px;
-        y:550px;
-        border-radius: 10px;
-        eval:=Switch {
-            accessible-role: AccessibleRole.none;
-            x: 14px;
-            y: 8px;
-            width: 132px;
-            text: "活动评价提醒";
-            toggled => {
-                SettingPageBridge.actionevalstate(eval.checked);
-            }
-        }
-    }
-            }
-        }
-    }
-    //
 
-    // optional
-    background := Empty { }
-
+    callback language-changed();
+    callback theme-changed();
+    callback notice-begin-changed();
+    callback notice-end-changed();
+    callback minimal-to-tray-changed();
 }
-    //Button {
-    //                     visible: true;
-    //                     width: 84px;
-    //                     height: 52px;
-    //                     text: "Night";
-    //                     x: 262px;
-    //                     y: 170px;
-    //                     clicked => {
-    //                         Token.is-darkmode
-    //                     }
-    //                 }
-    //                 Rectangle {
-    //                     background: #0c0c0c;
-    //                     width: 90px;
-    //                     height: 56px;
-    //                     x:20px;
-    //                     y:170px;
-    //                     border-color: #967070dd;
-    //                     border-radius: 10px;
-    //                     Text {
-    //                     x: -20px;
-    //                     y: 2px;
-    //                     width: 128px;
-    //                     height: 48px;
-    //                     horizontal-alignment: TextHorizontalAlignment.center;
-    //                     text: "日夜切换";
-    //                     color: #ffffff;
-    //                     vertical-alignment: TextVerticalAlignment.center;
-                        
-    //                 }
-    
-    //  Rectangle { min-width: 16px; min-height: 16px; /* @lsp:ignore-node */ }}
-    //                 Button {
-    //                     visible: true;
-    //                     x: 176px;
-    //                     y: 170px;
-    //                     width: 84px;
-    //                     height: 52px;
-    //                     text: "Day";
-    //                 }
-    //                 Text {
-    //                     text: "设置背景颜色";
-    //                     x:20px;
-    //                     y:300px;
-    //                     width: 90px;
-    //                     height: 56px;
-    //                     horizontal-alignment: TextHorizontalAlignment.center;
-    //                     vertical-alignment: TextVerticalAlignment.center;
-    //                 }
-    // Switch {
-        //     width: 200px;
-        //     height: 50px;
-        //     x:25px;
-        //     y:33px;
-        //     text: "深色";
-            
-        // }
-        // Switch {
-        //     width: 200px;
-        //     height: 50px;
-        //     x:25px;
-        //     y:66px;
-        //     text: "跟随系统";
-        //     checked: true;
-        // }
-        // Switch {
-        //     width: 200px;
-        //     height: 50px;
-        //     x:25px;
-        //     y:99px;
-        //     text: "浅色";
-            
-        // }
-        //Switch {
-            //     width: 200px;
-            //     height: 50px;
-            //     text: "中文";
-            //     x:0px;
-            //     y:20px;
-            // }
-            // Switch {
-            //     width: 200px;
-            //     height: 50px;
-            //     text: "English";
-            //     x:0px;
-            //     y:70px;
-            // }
+
+component SettingItem {
+    in property <string> name;
+    in property <bool> supported: true;
+    HorizontalLayout {
+        alignment: LayoutAlignment.space-between;
+        Text {
+            text: name;
+            color: root.supported ? Token.color.on-surface : Token.color.outline;
+            font-size: Token.font.body.large.size;
+            font-weight: Token.font.body.large.weight;
+            vertical-alignment: center;
+        }
+
+        @children
+    }
+}
+
+component Divider inherits Rectangle {
+    background: Token.color.outline-variant;
+    width: 80%;
+    height: 1px;
+}
+
+export component SettingPage inherits Page {
+    body := VerticalLayout {
+        alignment: LayoutAlignment.start;
+        padding: 50px;
+        spacing: 15px;
+        Text {
+            text: "设置";
+            font-size: Token.font.display.medium.size;
+            font-weight: Token.font.display.medium.weight;
+        }
+
+        Divider { }
+
+        SettingItem {
+            name: "主题";
+            ComboBox {
+                width: 200px;
+                model: ["跟随系统", "浅色", "深色"];
+                current-index <=> SettingPageBridge.theme-index;
+                selected => {
+                    SettingPageBridge.change-theme();
+                    SettingPageBridge.theme-changed();
+                }
+            }
+        }
+
+        SettingItem {
+            name: "语言";
+            supported: false;
+            ComboBox {
+                width: 200px;
+                enabled: false;
+                model: ["简体中文", "繁體中文", "English"];
+                current-index <=> SettingPageBridge.language-index;
+                selected => {
+                    SettingPageBridge.language-changed();
+                }
+            }
+        }
+
+        Divider { }
+
+        SettingItem {
+            supported: false;
+            name: "活动开始前提醒";
+            Switch {
+                enabled: false;
+                checked <=> SettingPageBridge.notice-begin;
+                toggled => {
+                    SettingPageBridge.notice-begin-changed();
+                }
+            }
+        }
+
+        SettingItem {
+            supported: false;
+            name: "活动结束后提醒反馈";
+            Switch {
+                enabled: false;
+                checked <=> SettingPageBridge.notice-end;
+                toggled => {
+                    SettingPageBridge.notice-end-changed();
+                }
+            }
+        }
+
+        SettingItem {
+            supported: false;
+            name: "关闭窗口后最小化到托盘";
+            Switch {
+                enabled: false;
+                checked <=> SettingPageBridge.minimal-to-tray;
+                toggled => {
+                    SettingPageBridge.minimal-to-tray-changed();
+                }
+            }
+        }
+    }
+}

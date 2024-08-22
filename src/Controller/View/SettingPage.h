@@ -3,6 +3,7 @@
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
+#include <toml++/toml.hpp>
 
 EVENTO_UI_START
 
@@ -10,10 +11,7 @@ class SettingPage : public BasicView, private GlobalAgent<SettingPageBridge> {
 public:
     SettingPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     SettingPage(SettingPage&) = delete;
-    int on_timestate();
-    int on_languagestate();
-    bool on_actionbeginstate();
-    bool actionevalstate();
+
 private:
     void onCreate() override;
 };

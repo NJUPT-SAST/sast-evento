@@ -5,6 +5,18 @@
 #include <spdlog/spdlog.h>
 #include <toml++/toml.h>
 
+/*
+[account.userId]
+expire = <date-time>
+
+[setting]
+language = <int>
+minimal-to-tray = <bool>
+notice-begin = <bool>
+notice-end = <bool>
+theme = <int>
+*/
+
 namespace evento {
 
 namespace details {
@@ -19,6 +31,47 @@ const std::filesystem::path configDir =
 } // namespace details
 
 inline toml::table config;
+
+inline struct Setting {
+    int language;
+    bool minimalToTray;
+    bool noticeBegin;
+    bool noticeEnd;
+    int theme;
+} settings;
+
+static void loadSetting() {
+    if (!config.contains("setting")) {
+        config.insert("setting", toml::table{});
+    }
+    auto& setting = config["setting"].ref<toml::table>();
+
+    auto languageIdx = setting["language"].value_or(0);
+    if (languageIdx > 2) {
+        languageIdx = 0;
+    }
+    auto themeIdx = setting["theme"].value_or(0);
+    if (themeIdx > 2) {
+        themeIdx = 0;
+    }
+    auto noticeBegin = setting["notice-begin"].value_or(false);
+    auto noticeEnd = setting["notice-end"].value_or(false);
+    auto minimalToTray = setting["minimal-to-tray"].value_or(false);
+
+    evento::settings = {
+        .language = languageIdx,
+        .minimalToTray = minimalToTray,
+        .noticeBegin = noticeBegin,
+        .noticeEnd = noticeEnd,
+        .theme = themeIdx,
+    };
+}
+
+static void loadAccount() {
+    if (!config.contains("account")) {
+        config.insert("account", toml::table{});
+    }
+}
 
 inline void initConfig() {
     if (!std::filesystem::exists(details::configDir)) {
@@ -36,6 +89,9 @@ inline void initConfig() {
         spdlog::error("\"{}\" could not be opened for parsing.", path.string());
         config = toml::parse("");
     }
+
+    loadSetting();
+    loadAccount();
 }
 
 inline void saveConfig() {
