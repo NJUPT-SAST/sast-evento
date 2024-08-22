@@ -1,6 +1,5 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
-import { Switch, ComboBox } from "std-widgets.slint";
 import { Switch, ComboBox, ScrollView } from "std-widgets.slint";
 
 export global SettingPageBridge {
@@ -52,7 +51,6 @@ component Divider inherits Rectangle {
 
 export component SettingPage inherits Page {
     body := ScrollView {
-        viewport-height: 400px;
         layout := VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
