@@ -1,0 +1,24 @@
+export component StateLayer inherits Rectangle {
+    in property <bool> is-hover: false;
+    in property <bool> is-focus: false;
+    in property <bool> is-press: false;
+    in property <bool> is-drag: false;
+    pure function get-opacity() -> float {
+        if is-drag {
+            return 0.16;
+        } else if is-press {
+            return 0.1;
+        } else if is-focus {
+            return 0.1;
+        } else if is-hover {
+            return 0.08;
+        } else {
+            return 0;
+        }
+    }
+    opacity: get-opacity();
+    animate opacity {
+        duration: 100ms;
+        easing: linear;
+    }
+}

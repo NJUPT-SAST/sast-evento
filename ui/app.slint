@@ -1,7 +1,10 @@
 import "./assets/font/MiSans-Regular.ttf";
 import { Token } from "./global.slint";
 import { Button } from "std-widgets.slint";
-import { Empty } from "./components/index.slint";
+import { 
+    Empty,
+    Toast
+} from "./components/index.slint";
 import { 
     ViewManagerBridge,
     AccountManagerBridge,
@@ -33,8 +36,8 @@ import {
     SettingPage,
     SettingPageBridge
 } from "./views/index.slint";
-import { SButton } from "modules/surrealism-ui/index.slint";
-import { SAlert } from "modules/surrealism-ui/src/alert/index.slint";
+import { StateLayer } from "./components/index.slint";
+import { GlobalProps } from "modules/surrealism-ui/themes/src/index.slint";
 
 // export for C++ interact
 export { 
@@ -76,55 +79,28 @@ component PageRegion inherits Empty {
     if ViewManager.is-show(ViewName.SettingPage): setting-page := SettingPage { }
 }
 
-component Toast inherits Rectangle {
+component CircleButton inherits Rectangle {
+    in property <image> image;
+    callback clicked <=> area.clicked;
     clip: true;
-    // TODO: bk with type
-    background: Token.color.surface-variant;
-    border-radius: 8px;
-    height: 54px;
-    content := HorizontalLayout {
-        padding: 16px;
-        spacing: 8px;
-        alignment: start;
-        Rectangle {
-            width: 24px;
-            Image {
-                height: 24px;
-                width: 24px;
-                // TODO: find icons
-                source: Token.image.display.no-image;
-            }
-        }
-
-        Text {
-            max-width: self.preferred-width;
-            vertical-alignment: center;
-            horizontal-alignment: left;
-            text: MessageManager.content;
-            // TODO: replace
-            color: Token.color.on-surface-variant;
-            font-size: Token.font.body.large.size;
-            wrap: no-wrap;
-        }
-    }
-}
-
-component BackBottom inherits SButton {
     height: 48px;
     width: 48px;
     border-radius: self.width / 2;
-    text: "";
-    background: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
-    border-color: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
-    drop-shadow-color: Token.color.surface;
+    background: Token.color.surface-container;
+    area := TouchArea {
+        mouse-cursor: pointer;
+    }
+
+    StateLayer {
+        background: Token.color.on-surface;
+        is-hover: area.has-hover;
+        is-press: area.pressed;
+    }
+
     Image {
         height: 24px;
         width: 24px;
-        source: Token.image.icon.arrow-left.normal;
-    }
-
-    clicked => {
-        ViewManager.prior-view();
+        source: image;
     }
 }
 
@@ -132,18 +108,10 @@ component NavBarItem inherits Rectangle {
     in property <image> image;
     in property <string> content;
     in property <ViewName> target;
-    property <bool> selected:ViewManager.is-show(target);
-    pure function getBackdround() -> color {
-        if (!selected) {
-            return area.has-hover ? Token.color.surface-container-high : transparent;
-        } else {
-            return transparent;
-        }
-    }
-    preferred-height: 100%;
-    preferred-width: 100%;
+    // property <color> surface: Token.color.surface;
+    property <color> on-surface: Token.color.on-surface;
+    clip: true;
     border-radius: self.height / 2;
-    background: getBackdround();
     area := TouchArea {
         clicked => {
             ViewManager.clean-navigate-to(target);
@@ -151,9 +119,13 @@ component NavBarItem inherits Rectangle {
         mouse-cursor: pointer;
     }
 
+    StateLayer {
+        background: on-surface;
+        is-hover: area.has-hover;
+        is-press: area.pressed;
+    }
+
     content := HorizontalLayout {
-        // height: 48px;
-        // width: 120px;
         spacing: 8px;
         alignment: center;
         Rectangle {
@@ -169,16 +141,11 @@ component NavBarItem inherits Rectangle {
         Text {
             horizontal-alignment: center;
             vertical-alignment: center;
-            color: Token.color.on-surface;
+            color: on-surface;
             font-size: Token.font.title.medium.size;
             font-weight: Token.font.title.medium.weight;
             text: root.content;
         }
-    }
-
-    animate background {
-        duration: 200ms;
-        easing: ease-in-out;
     }
 }
 
@@ -187,29 +154,16 @@ component NavBar inherits Rectangle {
     height: 48px;
     border-radius: self.height / 2;
     background: Token.color.surface-container;
-    pure function get-navbar-current-index() -> int {
-        if (ViewManager.is-show(nav-views[0].target)) {
-            return 0;
-        }
-        if (ViewManager.is-show(nav-views[1].target)) {
-            return 1;
-        }
-        if (ViewManager.is-show(nav-views[2].target)) {
-            return 2;
-        }
-        return -1;
-    }
-    Rectangle {
+    active-indicator := Rectangle {
+        x: root.get-navbar-current-index() * self.width;
         height: 100%;
         width: root.width / nav-views.length;
-        visible: root.get-navbar-current-index() != -1;
         border-radius: self.height / 2;
+        visible: root.get-navbar-current-index() != -1;
         background: Token.color.primary-container;
-        x: root.get-navbar-current-index() * self.width;
-        z: -1;
         animate x {
-            duration: 400ms;
-            easing: ease-in-out;
+            duration: 300ms;
+            easing: ease-out-quart;
         }
     }
 
@@ -222,24 +176,18 @@ component NavBar inherits Rectangle {
             }
         }
     }
-}
 
-component ProfileBottom inherits SButton {
-    height: 48px;
-    width: 48px;
-    border-radius: self.width / 2;
-    text: "";
-    background: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
-    border-color: self.has-hover ? Token.color.surface-container-high : Token.color.surface-container;
-    drop-shadow-color: Token.color.surface;
-    Image {
-        height: 24px;
-        width: 24px;
-        source: Token.image.icon.me.normal;
-    }
-
-    clicked => {
-        ViewManager.navigate-to(ViewName.MenuOverlay);
+    pure function get-navbar-current-index() -> int {
+        if (ViewManager.is-show(nav-views[0].target)) {
+            return 0;
+        }
+        if (ViewManager.is-show(nav-views[1].target)) {
+            return 1;
+        }
+        if (ViewManager.is-show(nav-views[2].target)) {
+            return 2;
+        }
+        return -1;
     }
 }
 
@@ -252,31 +200,10 @@ export component App inherits Window {
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
-    Toast {
-        x: root.width - self.width - 16px;
-        y: root.height + 16px;
-        width: parent.width * (1 - 0.618);
-        states [
-            visible when MessageManager.visible: {
-                y: root.height - self.height - 16px;
-                in {
-                    animate y {
-                        duration: 200ms;
-                        easing: ease-out-quart;
-                    }
-                }
-                out {
-                    animate y {
-                        delay: MessageManager.timeout;
-                        duration: 200ms;
-                        easing: ease-in-quart;
-                    }
-                }
-            }
-            invisible when !MessageManager.visible: {
-                y: root.height + 16px;
-            }
-        ]
+
+    init => {
+        GlobalProps.theme = Token.surrealism-ui-default-theme;
+        GlobalProps.font.font-family = "MiSans";
     }
 
     VerticalLayout {
@@ -284,9 +211,11 @@ export component App inherits Window {
             padding: 8px;
             height: 64px;
             spacing: 8px;
-            Rectangle {
-                width: 48px;
-                BackBottom { }
+            CircleButton {
+                image: Token.image.icon.arrow-left.normal;
+                clicked => {
+                    ViewManager.prior-view();
+                }
             }
 
             NavBar {
@@ -311,9 +240,11 @@ export component App inherits Window {
                 ];
             }
 
-            Rectangle {
-                width: 48px;
-                ProfileBottom { }
+            CircleButton {
+                image: Token.image.icon.me.normal;
+                clicked => {
+                    ViewManager.navigate-to(ViewName.MenuOverlay);
+                }
             }
         }
 
@@ -323,6 +254,31 @@ export component App inherits Window {
     OverlayRegion {
         height: 100%;
         width: 100%;
-        z: 1;
+    }
+
+    Toast {
+        x: root.width - self.width - 16px;
+        y: root.height + 16px;
+        width: self.min-width > (parent.width * (1 - 0.618) / 2) ? self.preferred-width : parent.width * (1 - 0.618) / 2;
+        states [
+            visible when MessageManager.visible: {
+                y: root.height - self.height - 16px;
+                in {
+                    animate y {
+                        duration: 200ms;
+                        easing: ease-out-quart;
+                    }
+                }
+                out {
+                    animate y {
+                        duration: 200ms;
+                        easing: ease-in-quart;
+                    }
+                }
+            }
+            invisible when !MessageManager.visible: {
+                y: root.height + 16px;
+            }
+        ]
     }
 }

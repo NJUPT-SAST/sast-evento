@@ -1,12 +1,16 @@
 import { Token } from "../../global.slint";
 import { Overlay, Empty } from "../../components/index.slint";
+import { ViewManager, MessageManager, MessageType, AccountManagerBridge } from "../../logic/index.slint";
 
 import { SButton } from "../../modules/surrealism-ui/index.slint";
 
 export global LoginOverlayBridge {
     in-out property <string> version:"v0.0.0-00000000";
     callback link-login();
-    callback guest-login();
+    public function guest-login() {
+        MessageManager.show-message("访客登录尚未完成", MessageType.Info);
+        // ViewManager.prior-view();
+    }
 }
 
 component LoginContent inherits Rectangle {
@@ -207,5 +211,32 @@ component LoginContent inherits Rectangle {
 }
 
 export component LoginOverlay inherits Overlay {
+    shadow := Rectangle {
+        background: Token.color.surface;
+        // hide other view because no guest login, remember to change isTransparent()
+        // opacity: 0.75;
+        shadow-area := TouchArea {
+            clicked => {
+                // TODO: support guest login
+                // guest login disabled
+                // ViewManager.prior-view();
+            }
+            pointer-event(e) => {
+                // developer shortcut
+                if (e.modifiers.shift && e.modifiers.control && e.kind == PointerEventKind.up) {
+                    if (e.button == PointerEventButton.left) {
+                        debug("[Developer Shortcut] LoginOverlay: force close LoginView");
+                        ViewManager.prior-view();
+                    } else if (e.button == PointerEventButton.right) {
+                        debug("[Developer Shortcut] LoginOverlay: fake login, skip LoginView");
+                        AccountManagerBridge.is-login = true;
+                        debug("[Developer Shortcut] LoginOverlay: AccountManagerBridge.is-login -> true");
+                        ViewManager.prior-view();
+                    }
+                }
+            }
+        }
+    }
+
     content := LoginContent { }
 }

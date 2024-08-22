@@ -1,7 +1,10 @@
 #pragma once
 
+#include <Controller/Core/AccountManager.h>
 #include <Controller/Core/GlobalAgent.hh>
+#include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiBase.h>
+#include <Controller/Core/ViewManager.h>
 
 EVENTO_UI_START
 
