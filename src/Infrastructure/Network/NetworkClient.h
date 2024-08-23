@@ -164,10 +164,10 @@ private:
             updateCache(cacheKey,
                         CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
 
-            co_return cacheMap[cacheKey]->second.result;
+            co_return result;
         } catch (const std::exception& e) {
             std::cerr << "Request error occurred: " << e.what() << std::endl;
-            co_return JsonResult::Err(e.what());
+            co_return Err(Error(Error::JsonDes, e.what()));
         }
     }
 
@@ -175,27 +175,20 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
-        try {
-            std::string cacheKey = generateCacheKey(verb, url, params);
-            auto it = cacheMap.find(cacheKey);
-            if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
-                cacheList.splice(cacheList.begin(), cacheList, it->second);
-                co_return it->second->second.result;
-            }
-            auto req = Api::makeRequest(verb, url, params);
-            auto reply = co_await _manager->makeReply(url.host(), req);
-            if (reply.isErr())
-                co_return reply.unwrapErr();
-            auto result = reply.unwrap();
-            size_t entrySize = result.dump().size();
-            updateCache(cacheKey,
-                        CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
+        auto req = Api::makeRequest(verb, url, std::nullopt, params);
+        auto reply = co_await _manager->makeReply(url.host(), req);
+        if (reply.isErr())
+            co_return reply.unwrapErr();
 
-            co_return cacheMap[cacheKey]->second.result;
-        } catch (const std::exception& e) {
-            std::cerr << "Request error occurred: " << e.what() << std::endl;
-            co_return JsonResult::Err(e.what());
+        nlohmann::basic_json<> res;
+        try {
+            res = nlohmann::json::parse(beast::buffers_to_string(reply.unwrap().body().data()));
+            debug(), res.dump();
+        } catch (const nlohmann::json::parse_error& e) {
+            co_return Err(Error(Error::JsonDes, e.what()));
         }
+
+        co_return res;
     }
 
     // url builder
