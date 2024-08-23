@@ -7,7 +7,14 @@ import { EventoStyleToken } from "../../logic/style_token.slint";
 import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
 import { HorizontalBox, ScrollView } from "std-widgets.slint";
 
-export global DiscoveryPageBridge { }
+export global DiscoveryPageBridge { 
+    // callbacks
+    pure callback div(int, int) -> int;
+    // pure callback calc_block_height(int, int) -> int;
+    // pure callback calc_block_width(int, int) -> int;
+    pure callback calc_block_col_num(int, int) -> int;
+    pure callback calc_block_row_num(int, int) -> int;
+}
 
 struct block_data {
     img:   image,
@@ -170,43 +177,71 @@ export component DiscoveryPage inherits Page {
                     VerticalLayout {
                         // calculate actual block size
 
-                        // idx = row * block_col_num + col
-                        //        |                     |
-                        //     y/height              x/width
-                        
-                        Rectangle {
-                            // 提示词: 正在进行的活动
-                            height: 40px;
-                            width: 100%;
-                            Text {
-                                text: "正在进行的活动";
-                            }
-                        }
-                        
-                        Rectangle {
-                            background: #39c5bb;
-                            height: 200px;
-                            width: 100%;
-                        }
+                    // idx = row * block_col_num + col
+                    //        |                     |
+                    //     y/height              x/width
+                    
+                    SCarousel {
+                        width: 100%;
+                        height: root.height * 0.5;
+                        fold-height: root.height * 0.5;
+                        active: 3;
+                        focus-main: true;
+                        fit: contain;
+                        sources: [
+                            EventoImageToken.image.display.event.cpp[0],
+                            EventoImageToken.image.display.event.cpp[1],
+                            EventoImageToken.image.display.event.cpp[2],
+                        ];
+                    }
 
-                        // for itm[idx] in current_event_list: block {
-                        //     x: 1px * calcBlockX(idx, block_width, block_col_num);
-                        //     y: 1px * calcBlockY(idx, block_height, block_col_num);
-                        //     // x: block_width * (idx - idx / block_col_num) * 1px;
-                        //     // y: block_height * (idx / block_col_num) * 1px;
-                        //     height: block_height * 1px;
-                        //     width: block_width * 1px;
-                        //     data: itm;
-                        // }
-                        
-                        Rectangle {
-                            // 提示词: 最新的活动
-                            height: 40px;
-                            width: 100%;
-                            Text {
-                                text: "正在进行的活动";
+                    Rectangle {
+                        // 提示词: 正在进行的活动
+                        height: 40px;
+                        width: 100%;
+                        Text {
+                            text: "正在进行的活动";
+                        }
+                    }
+                    
+                    in property <int> block_max_w: 400;
+                    in property <int> block_max_h: 200;
+                    in property <int> block_col_num: DiscoveryPageBridge.calc_block_col_num(root.width / 1px, block_max_w);
+                    in property <int> block_row_num: DiscoveryPageBridge.calc_block_row_num(root.height / 1px, block_max_h);
+
+                    in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
+                    in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
+                    
+                    Rectangle {
+                        background: #39c5bb;
+                        width: 100%;
+                        height: (DiscoveryPageBridge.div(current_event_num, 3) + 1) * 200 * 1px;
+                        VerticalLayout {
+                            in property <int> i: 0;
+                            in property <int> j: 0;
+
+                            // row_num
+                            for i in DiscoveryPageBridge.div(current_event_num, block_col_num) : HorizontalLayout {
+                                // col_num
+                                for j in block_col_num: Empty {
+                                    if(3 * i + j <= current_event_num): block {
+                                        width: block_width * 1px;
+                                        height:block_height * 1px;
+                                        data: current_event_list[block_col_num * i + j];
+                                    }
+                                }
                             }
                         }
+                    }
+                    
+                    Rectangle {
+                        // 提示词: 最新的活动
+                        height: 40px;
+                        width: 100%;
+                        Text {
+                            text: "最新的活动";
+                        }
+                    }
 
                         Rectangle {
                             background: #66ccff;
