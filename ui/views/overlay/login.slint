@@ -1,6 +1,6 @@
 import { Token } from "../../global.slint";
 import { Overlay, Empty } from "../../components/index.slint";
-import { ViewManager, MessageManager, MessageType } from "../../logic/index.slint";
+import { ViewManager, MessageManager, MessageType, AccountManagerBridge } from "../../logic/index.slint";
 
 import { SButton } from "../../modules/surrealism-ui/index.slint";
 
@@ -213,7 +213,8 @@ component LoginContent inherits Rectangle {
 export component LoginOverlay inherits Overlay {
     shadow := Rectangle {
         background: Token.color.surface;
-        opacity: 0.75;
+        // hide other view because no guest login, remember to change isTransparent()
+        // opacity: 0.75;
         shadow-area := TouchArea {
             clicked => {
                 // TODO: support guest login
@@ -222,9 +223,16 @@ export component LoginOverlay inherits Overlay {
             }
             pointer-event(e) => {
                 // developer shortcut
-                if (e.modifiers.shift && e.modifiers.control && e.button == PointerEventButton.right && e.kind == PointerEventKind.up) {
-                    debug("Warning: you are using developer shortcut, skip LoginView");
-                    ViewManager.prior-view();
+                if (e.modifiers.shift && e.modifiers.control && e.kind == PointerEventKind.up) {
+                    if (e.button == PointerEventButton.left) {
+                        debug("[Developer Shortcut] LoginOverlay: force close LoginView");
+                        ViewManager.prior-view();
+                    } else if (e.button == PointerEventButton.right) {
+                        debug("[Developer Shortcut] LoginOverlay: fake login, skip LoginView");
+                        AccountManagerBridge.is-login = true;
+                        debug("[Developer Shortcut] LoginOverlay: AccountManagerBridge.is-login -> true");
+                        ViewManager.prior-view();
+                    }
                 }
             }
         }

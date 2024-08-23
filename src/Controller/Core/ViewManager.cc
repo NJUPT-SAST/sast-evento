@@ -30,8 +30,12 @@ void ViewManager::initStack(ViewName newView, std::shared_ptr<ViewData> data) {
     assert(!bridge.inEventLoop());
     pushView(newView, std::move(data));
     // separate operation reduce (possible) flicking when window start up and keeps invoke order
-    visibleViews.emplace(newView);
-    slint::invoke_from_event_loop([this, newView] { return showView(newView); });
+    // visibleViews.emplace(newView);
+    static bool scheduleSync = false;
+    if (!scheduleSync) {
+        scheduleSync = true;
+        slint::invoke_from_event_loop([this] { return syncViewVisibility(); });
+    }
 }
 
 void ViewManager::navigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
@@ -110,15 +114,17 @@ void ViewManager::syncViewVisibility() {
     static std::set<ViewName> newVisibleViews;
     auto& self = *this;
 
+    // generate newVisibleViews from viewStack
     newVisibleViews.clear();
     auto stack = viewStack;
-    bool meetFirstPage = false;
-    while (!meetFirstPage) {
+    bool meetFirstOpaque = false;
+    while (!meetFirstOpaque) {
         newVisibleViews.emplace(stack.top());
-        meetFirstPage = !UiUtility::isTransparent(stack.top());
+        meetFirstOpaque = !UiUtility::isTransparent(stack.top());
         stack.pop();
     }
 
+    // diff newVisibleViews with visibleViews
     static std::set<ViewName> totalViews;
     totalViews.clear();
     totalViews.merge(std::set{newVisibleViews});
@@ -134,6 +140,7 @@ void ViewManager::syncViewVisibility() {
         }
     });
 
+    // request re-calculate is-show()
     self->set_refresh(!self->get_refresh());
 }
 
