@@ -14,8 +14,8 @@ public:
 
 private:
     void onCreate() override;
-    // void onClick() override;
     void openWeb(std::string_view& url);
+    void getLog();
 };
 
 EVENTO_UI_END

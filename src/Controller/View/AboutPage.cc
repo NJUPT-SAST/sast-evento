@@ -1,5 +1,6 @@
 #include <Controller/View/AboutPage.h>
 #include <Infrastructure/Network/NetworkClient.h>
+#include <Infrastructure/Utils/Result.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <Version.h>
 #include <chrono>
@@ -18,12 +19,14 @@ void AboutPage::onCreate() {
 
     self->set_version("v" VERSION_FULL);
     self->on_open_web([this](slint::SharedString url) { openBrowser(std::string(url)); });
+    // self->on_check_update([this] {
+    //     auto result = evento::networkClient()->getLatestRelease();
+    //     return result.unwarp().ta
+    // });
+    // self->on_get_log([this] {
+    //     auto result = evento::networkClient()->getLatestRelease();
+    //     return result.unwrap().body;
+    // });
 }
-
-// void AboutPage::onClick() {
-//     auto& self = *this;
-
-//     // self->on_open_URL([this] { openBrowser("https://baidu.com"); });
-// }
 
 EVENTO_UI_END

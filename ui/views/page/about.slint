@@ -11,10 +11,11 @@ export component AboutSlint inherits Rectangle {
 
 export global AboutPageBridge {
     in-out property <string> version:"v0.0.0-00000000";
-    in-out property <string> updateMessage: "";
-    in-out property <bool> is_lastest: false;
-    callback checkUpdate() -> bool;
+    // in-out property <bool> is_lastest: false;
+    callback check-update() -> bool;
     callback open-web(string);
+    callback get-log() -> string;
+    in-out property <string> updateLog: "";
 }
 
 component Dependence inherits Rectangle {
@@ -53,7 +54,7 @@ export component AboutPage inherits Page {
             VerticalLayout {
                 text := Text {
                     width: 100%;
-                    text: "第一条更新日志1234567890123456789012345678901234567890123456789012345678901234567890\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\n第一条更新日志\nAAAAAAAAAAAAAA";
+                    text: AboutPageBridge.updateLog;
                     font-size: Token.font.body.large.size;
                     font-weight: Token.font.body.large.weight;
                     color: Token.color.on-surface;
@@ -72,7 +73,7 @@ export component AboutPage inherits Page {
     }
 
     ScrollView {
-        VerticalLayout {
+        verticallayout := VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
             spacing: 20px;
@@ -88,9 +89,26 @@ export component AboutPage inherits Page {
                     width: 220px;
                     image-fit: contain;
                     source: Token.image.display.evento;
+                    animate opacity {
+                        duration: 1000ms;
+                        easing: ease-in-out;
+                    }
+                    init => {
+                        self.opacity = 0;
+                        self.opacity = 1;
+                    }
                 }
 
-                AboutSlint { }
+                AboutSlint {
+                    animate opacity {
+                        duration: 1000ms;
+                        easing: ease-in-out;
+                    }
+                    init => {
+                        self.opacity = 0;
+                        self.opacity = 1;
+                    }
+                }
             }
 
             Rectangle {
@@ -113,10 +131,11 @@ export component AboutPage inherits Page {
                         Button {
                             text: "检查更新";
                             clicked => {
-                                if (true) {
+                                if (AboutPageBridge.check-update()) {
                                     popup.open();
                                 } else {
                                     MessageManager.show-message("已是最新版本", MessageType.Info);
+                                    self.text = "已是最新版本";
                                 }
                             }
                         }
