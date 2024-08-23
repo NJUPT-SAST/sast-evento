@@ -13,7 +13,11 @@ import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
 import { ViewManager } from "../../logic/index.slint";
 import { SDialog } from "../../modules/surrealism-ui/src/dialog/index.slint";
 import { LineEdit } from "std-widgets.slint";
-export global MyEventPageBridge { }
+import {SLink} from "../../modules/surrealism-ui/src/link/index.slint";
+
+export global MyEventPageBridge {
+
+}
 
 export component CodeGet inherits Window {
     width: 200px;
@@ -33,6 +37,14 @@ export component CodeGet inherits Window {
         self.is_show = false;
     }
 }
+
+//查看更多
+export component ForMore inherits SLink {
+    theme: Dark;
+    text: "查看更多";
+    clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
+}
+
 // 签到按钮
 component SignButton inherits SButton{
     width: 40px;
@@ -63,6 +75,7 @@ component ReviewButton inherits SButton {
     font-color: Token.color.on-surface;
     clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
 }
+
 // 信息卡片部分
 component Card inherits SCard{
     background: Token.color.surface-container-lowest;
@@ -104,7 +117,10 @@ export component SignCard inherits Card{
         x: (parent.x)+80px;
     }
     SignButton {
-        x: parent.x+300px;
+        x: (parent.width)*0.75 + parent.x;
+        clicked => {
+            get.open();
+        }
     }
 }
 
@@ -291,7 +307,7 @@ export component MyEventPage inherits Page {
 
         body := Empty {
             x: 0;
-            y: 0px;
+            y: 0;
             width: 100%;
             height: 100%;
             //schedule timeline
@@ -314,6 +330,7 @@ export component MyEventPage inherits Page {
                     end-line := Schedule { 
                         width: 50%;
                         title: "已结束";
+                        ForMore { }
                         EndForm { }
                     }
                 }
@@ -321,7 +338,7 @@ export component MyEventPage inherits Page {
             
             placeholder := Rectangle {
                 border-width: 4px;
-                border-color: red;
+                //border-color: red;
                 // Text {
                 //     text: "活动日程（我的活动）\n  未开始、进行中、已结束";
                 // }
