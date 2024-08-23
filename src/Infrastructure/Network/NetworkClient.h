@@ -110,21 +110,25 @@ private:
         return duration.count() >= 3;
     }
     void updateCache(const std::string& key, CacheEntry entry) {
-        auto it = cacheMap.find(key);
-        if (it != cacheMap.end()) {
-            cacheList.erase(it->second);
-            currentCacheSize -= it->second->second.size;
-        }
-        cacheList.push_front({key, std::move(entry)});
-        cacheMap[key] = cacheList.begin();
-        currentCacheSize += cacheList.begin()->second.size;
+        try {
+            auto it = cacheMap.find(key);
+            if (it != cacheMap.end()) {
+                cacheList.erase(it->second);
+                currentCacheSize -= it->second->second.size;
+            }
+            cacheList.push_front({key, std::move(entry)});
+            cacheMap[key] = cacheList.begin();
+            currentCacheSize += cacheList.begin()->second.size;
 
-        while (currentCacheSize > maxCacheSize) {
-            auto last = cacheList.end();
-            --last;
-            currentCacheSize -= last->second.size;
-            cacheMap.erase(last->first);
-            cacheList.pop_back();
+            while (currentCacheSize > maxCacheSize) {
+                auto last = cacheList.end();
+                --last;
+                currentCacheSize -= last->second.size;
+                cacheMap.erase(last->first);
+                cacheList.pop_back();
+            }
+        } catch (const std::exception& e) {
+            std::cerr << "Error occurred: " << e.what() << std::endl;
         }
     }
     // - success => return the `data` field from response json
@@ -134,53 +138,63 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
-        //Generate cache
-        std::string cacheKey = generateCacheKey(verb, url, params);
+        try {
+            //Generate cache
+            std::string cacheKey = generateCacheKey(verb, url, params);
 
-        //Check cache
-        auto it = cacheMap.find(cacheKey);
-        if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
-            cacheList.splice(cacheList.begin(), cacheList, it->second);
-            co_return it->second->second.result;
+            //Check cache
+            auto it = cacheMap.find(cacheKey);
+            if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
+                cacheList.splice(cacheList.begin(), cacheList, it->second);
+                co_return it->second->second.result;
+            }
+            debug(), url;
+            auto req = Api::makeRequest(verb, url, tokenBytes, params);
+
+            auto reply = co_await _manager->makeReply(url.host(), req);
+
+            if (reply.isErr())
+                co_return reply.unwrapErr();
+
+            auto result = handleResponse(reply.unwrap());
+
+            // Update cache
+            size_t entrySize = result.unwrap().dump().size();
+            updateCache(cacheKey,
+                        CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
+
+            co_return cacheMap[cacheKey]->second.result;
+        } catch (const std::exception& e) {
+            std::cerr << "Request error occurred: " << e.what() << std::endl;
+            co_return JsonResult::Err(e.what());
         }
-        debug(), url;
-        auto req = Api::makeRequest(verb, url, tokenBytes, params);
-
-        auto reply = co_await _manager->makeReply(url.host(), req);
-
-        if (reply.isErr())
-            co_return reply.unwrapErr();
-
-        auto result = handleResponse(reply.unwrap());
-
-        // Update cache
-        size_t entrySize = result.unwrap().dump().size();
-        updateCache(cacheKey,
-                    CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
-
-        co_return cacheMap[cacheKey]->second.result;
     }
 
     template<std::same_as<api::Github> Api>
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
-        std::string cacheKey = generateCacheKey(verb, url, params);
-        auto it = cacheMap.find(cacheKey);
-        if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
-            cacheList.splice(cacheList.begin(), cacheList, it->second);
-            co_return it->second->second.result;
-        }
-        auto req = Api::makeRequest(verb, url, params);
-        auto reply = co_await _manager->makeReply(url.host(), req);
-        if (reply.isErr())
-            co_return reply.unwrapErr();
-        auto result = reply.unwrap();
-        size_t entrySize = result.dump().size();
-        updateCache(cacheKey,
-                    CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
+        try {
+            std::string cacheKey = generateCacheKey(verb, url, params);
+            auto it = cacheMap.find(cacheKey);
+            if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
+                cacheList.splice(cacheList.begin(), cacheList, it->second);
+                co_return it->second->second.result;
+            }
+            auto req = Api::makeRequest(verb, url, params);
+            auto reply = co_await _manager->makeReply(url.host(), req);
+            if (reply.isErr())
+                co_return reply.unwrapErr();
+            auto result = reply.unwrap();
+            size_t entrySize = result.dump().size();
+            updateCache(cacheKey,
+                        CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
 
-        co_return cacheMap[cacheKey]->second.result;
+            co_return cacheMap[cacheKey]->second.result;
+        } catch (const std::exception& e) {
+            std::cerr << "Request error occurred: " << e.what() << std::endl;
+            co_return JsonResult::Err(e.what());
+        }
     }
 
     // url builder
