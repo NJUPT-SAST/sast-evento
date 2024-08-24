@@ -4,6 +4,7 @@
 #include <Infrastructure/Utils/Debug.h>
 #include <boost/url/param.hpp>
 #include <boost/url/params_view.hpp>
+#include <initializer_list>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
