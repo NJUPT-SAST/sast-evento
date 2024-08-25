@@ -1,33 +1,35 @@
-import { Spinner } from "std-widgets.slint";
 import { StateLayer } from "state_layer.slint";
 import { Token } from "../global.slint";
+import { LoadingAnimation } from "animation.slint";
 
 export component LoadingButton inherits Rectangle {
+    // available option
     in property <color> on-surface: Token.color.on-surface;
     in property <color> surface: Token.color.surface;
-    in-out property <bool> is-loading: false;
+    in property <bool> is-loading: false;
     in property <string> content: "No Content";
     in property <length> font-size: Token.font.body.large.size;
-    // callback clicked <=> area.clicked;
-    clip: true;
+    callback clicked <=> area.clicked;
+    // implement detail
     private property <length> max-radius: 20px;
     private property <length> icon-size: 18px;
     private property <length> default-padding: 24px;
     private property <length> icon-padding: 16px;
     private property <length> default-spacing: 8px;
-    border-radius: self.height / 2 > max-radius ? max-radius : self.height / 2;
+    clip: true;
     height: 40px;
+    background: surface;
+    border-radius: self.height / 2 > max-radius ? max-radius : self.height / 2;
     StateLayer {
         background: on-surface;
         is-hover: area.has-hover;
         is-press: area.pressed;
     }
 
-    _spinner := Spinner {
+    _spinner := LoadingAnimation {
         x: icon-padding;
-        height: icon-size;
         width: icon-size;
-        indeterminate: true;
+        stroke: on-surface;
     }
 
     _text := Text {
@@ -38,15 +40,11 @@ export component LoadingButton inherits Rectangle {
         horizontal-alignment: center;
     }
 
-    area := TouchArea {
-        clicked => {
-            is-loading = !is-loading;
-        }
-    }
+    area := TouchArea { }
 
     states [
-        loading when is-loading: {
         // width = icon-padding + icon-size + default-spacing + _text.width + default-padding
+        loading when is-loading: {
             width: icon-padding + icon-size + default-spacing + _text.width + default-padding;
             _text.x: icon-padding + icon-size + default-spacing;
             _spinner.opacity: 1;
@@ -63,8 +61,8 @@ export component LoadingButton inherits Rectangle {
                 }
             }
         }
-        normal when !is-loading: {
         // width = default-padding + _text.width + default-padding
+        normal when !is-loading: {
             width: default-padding + _text.width + default-padding;
             _text.x: default-padding;
             _spinner.opacity: 0;
