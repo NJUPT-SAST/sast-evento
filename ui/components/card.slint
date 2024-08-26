@@ -1,0 +1,68 @@
+import { Token } from "../global.slint";
+import { EventStruct } from "./event_struct.slint";
+
+export component Card inherits Rectangle {
+    out property <color> surface: Token.color.surface-container-low;
+    out property <color> on-surface: Token.color.on-surface-variant;
+    out property <color> inverse-surface: Token.color.inverse-surface;
+    out property <color> inverse-on-surface: Token.color.inverse-on-surface;
+    property <length> press-x;
+    property <length> press-y;
+    callback clicked;
+    padding: 14px;
+    width: 303px;
+    height: 188px;
+    clip: true;
+    background: surface;
+    border-radius: 12px;
+
+    states [
+        ripple when touch-area.pressed: {
+            drop-shadow-color: Token.color.surface;
+            drop-shadow-blur: 0px;
+            drop-shadow-offset-y: 0px;
+            animate-circle.radius: root.width * 1.1;
+            in {
+                animate drop-shadow-color, drop-shadow-blur, drop-shadow-offset-y, animate-circle.radius { duration: 200ms; }
+            }
+            out {
+                animate drop-shadow-color, drop-shadow-blur, drop-shadow-offset-y, animate-circle.radius { duration: 200ms; }
+            }
+        }
+        origin when !touch-area.pressed: {
+            drop-shadow-color: touch-area.has-hover ? #070707ce : Token.color.surface;
+            drop-shadow-blur: touch-area.has-hover ? 4px : 0px;
+            drop-shadow-offset-y: touch-area.has-hover ? 2px : 0px;
+            animate-circle.radius: 0px;
+        }
+    ]
+
+    touch-area := TouchArea {
+        width: 100%;
+        height: 100%;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    animate-circle := Rectangle {
+        in-out property <length> radius;
+        in-out property <length> center-x;
+        in-out property <length> center-y;
+        center-x: touch-area.pressed-x;
+        center-y: touch-area.pressed-y;
+        radius: 0px;
+        x: center-x - radius;
+        y: center-y - radius;
+        width: radius * 2;
+        height: radius * 2;
+        border-radius: radius;
+        background: Token.color.surface-variant;
+    }
+
+    content-area := VerticalLayout {
+        width: root.width - root.padding * 2;
+        height: root.height - root.padding * 2;
+        @children
+    }
+}

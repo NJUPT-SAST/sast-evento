@@ -1,0 +1,21 @@
+export enum EventState {
+    SigningUp,
+    Active, 
+    Completed,
+    Cancelled,
+}
+
+export struct EventStruct {
+    id: int,
+    summary: string,
+    summary-abbr: string,
+    description: string,
+    time: string,
+    location: string,
+    tag: string,
+    larkMeetingRoomName: string,
+    larkDepartmentName: string,
+    state: EventState,
+    is-subscribed: bool,
+    is-checkIn: bool
+}
