@@ -5,10 +5,11 @@ import { LoadingAnimation } from "animation.slint";
 export component LoadingButton inherits Rectangle {
     // available option
     in property <color> on-surface: Token.color.on-surface;
-    in property <color> surface: Token.color.surface;
+    in property <color> surface: Token.color.surface-container;
     in property <bool> is-loading: false;
     in property <string> content: "No Content";
     in property <length> font-size: Token.font.body.large.size;
+    height: 40px;
     callback clicked <=> area.clicked;
     // implement detail
     private property <length> max-radius: 20px;
@@ -17,7 +18,6 @@ export component LoadingButton inherits Rectangle {
     private property <length> icon-padding: 16px;
     private property <length> default-spacing: 8px;
     clip: true;
-    height: 40px;
     background: surface;
     border-radius: self.height / 2 > max-radius ? max-radius : self.height / 2;
     StateLayer {
@@ -40,7 +40,9 @@ export component LoadingButton inherits Rectangle {
         horizontal-alignment: center;
     }
 
-    area := TouchArea { }
+    area := TouchArea {
+        mouse-cursor: pointer;
+    }
 
     states [
         // width = icon-padding + icon-size + default-spacing + _text.width + default-padding
@@ -68,4 +70,14 @@ export component LoadingButton inherits Rectangle {
             _spinner.opacity: 0;
         }
     ]
+}
+
+// quick preview
+component Example {
+    LoadingButton {
+        content: "click me";
+        clicked => {
+            self.is-loading = !self.is-loading;
+        }
+    }
 }
