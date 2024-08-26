@@ -1,0 +1,72 @@
+/** 
+  a loading animation intended for replacing build-in component Spinner
+
+  it repeat a same animate forever.
+  the arc in animation controlled by head and tail, assert(head>=tail).
+  head and tail follow a same easing, but not in same time by using different offset.
+  the `easing` function will compress given easing function according to offset.
+  given easing function require `float(float)` function signature, input 0~1, output 0~1
+*/ 
+import { Token } from "../global.slint";
+component LoadingAnimation inherits Path {
+    // available option
+    // the time of a repetition
+    in property <duration> circle-time: 1000ms;
+    // the min distance between head and tail (percentage of a circle)
+    in property <float> distance: 0.1;
+    // width
+    stroke-width: 3px;
+    // color
+    stroke: Token.color.on-primary-container;
+    // implement detail
+    viewbox-height: 1;
+    viewbox-width: 1;
+    private property <float> radius: 0.5;
+    // 0~1, means the progress of a repetition
+    private property <float> progress: Math.mod(animation-tick() / 1ms,circle-time / 1ms) / (circle-time / 1ms);
+    private property <float> tail: easing(progress, distance) - distance / 2;
+    private property <float> head: easing(progress, - distance) + distance / 2;
+    private property <{x: float, y: float}> tail-point: polar-to-cartesian(radius, tail * 1turn);
+    private property <{x: float, y: float}> head-point: polar-to-cartesian(radius, head * 1turn);
+    MoveTo {
+        x: tail-point.x;
+        y: tail-point.y;
+    }
+
+    ArcTo {
+        sweep: true;
+        large-arc: head - tail > 0.5;
+        radius-x: radius;
+        radius-y: radius;
+        x: head-point.x;
+        y: head-point.y;
+    }
+
+    pure function easing(x: float, offset: float) -> float {
+        if (offset > 0) {
+            return x > offset ? _inner-easing((x - offset) / (1 - offset)) : 0;
+        } else if (offset < 0) {
+            return x < 1 + offset ? _inner-easing(x / (1 + offset)) : 1;
+        } else {
+            return _inner-easing(x);
+        }
+    }
+    // convenient easing change
+    pure function _inner-easing(x: float) -> float {
+        return ease-in-out-quint(x);
+    }
+    // easing function from https://easings.net/
+    pure function ease-in-out-sine(x: float) -> float {
+        return -(Math.cos(3.1415926 * x * 1rad) - 1) / 2;
+    }
+    pure function ease-in-out-quint(x: float) -> float {
+        return x < 0.5 ? 16 * x * x * x * x * x : 1 - Math.pow(-2 * x + 2, 5) / 2;
+    }
+    // polar to cartesian coordinate system
+    pure function polar-to-cartesian(r: float, theta: angle) -> {x: float, y: float} {
+        return {
+            x: 0.5 + r * Math.cos(theta - 90deg),
+            y: 0.5 + r * Math.sin(theta - 90deg),
+        };
+    }
+}
