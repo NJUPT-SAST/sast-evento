@@ -1,107 +1,46 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
-import { SCarousel } from "../../modules/surrealism-ui/index.slint";
-import { EventoImageToken } from "../../assets/image/image_token.slint";
-import { EventoStyleToken } from "../../logic/style_token.slint";
-import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
-import { HorizontalBox, ScrollView } from "std-widgets.slint";
 
-export global DiscoveryPageBridge { 
-    // callbacks
-    pure callback div(int, int) -> int;
-    // pure callback calc_block_height(int, int) -> int;
-    // pure callback calc_block_width(int, int) -> int;
-    pure callback calc_block_col_num(int, int) -> int;
-    pure callback calc_block_row_num(int, int) -> int;
-}
-
-struct block_data {
-    img:   image,
-    title: string,
-    date:  string,
-    time:  string,
-    info:  string
-}
-
-// infomation of events
-component block {
-    preferred-height: 200px;
-    preferred-width: 400px;
-    in property <block_data> data;
-    Rectangle {
-        background: #ffffff;
-        HorizontalLayout {
-            preview := Image{
-                height: 100%;
-                width: 50%;
-                image-fit: contain;
-                source: data.img;
-            }
-            VerticalLayout {
-                title := Text { 
-                    text: data.title; 
-                    font-size: EventoStyleToken.font.title.medium.size;   
-                    font-weight: EventoStyleToken.font.title.medium.weight;  
-                }
-                date  := Text { 
-                    text: data.date; 
-                    font-size: EventoStyleToken.font.display.medium.size; 
-                    font-weight: EventoStyleToken.font.display.medium.weight;
-                }
-                time  := Text { 
-                    text: data.time; 
-                    font-size: EventoStyleToken.font.display.medium.size; 
-                    font-weight: EventoStyleToken.font.display.medium.weight;
-                }
-                info  := Text { 
-                    text: data.info; 
-                    font-size: EventoStyleToken.font.display.medium.size; 
-                    font-weight: EventoStyleToken.font.display.medium.weight;
-                }
-            }
-        }
-    }
-}
+export global DiscoveryPageBridge { }
 
 export component DiscoveryPage inherits Page {
-    // debug sample data
-    // struct block_data {
-    //     img:   image,
-    //     title: string,
-    //     date:  string,
-    //     time:  string,
-    //     info:  string
-    // }
-    in property <int> current_event_num: 10;
-    in property <[block_data]> current_event_list: [
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"}
-    ];
-    in property <int> newest_event_num: 10;
-    in property <[block_data]> newest_event_list: [
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"},
-        { img: EventoImageToken.image.display.event.cpp[0], title: "C++组授课", date: "7月22日", time: "13:30-15:30", info: "C++组\n活动授课"}
-    ];
-    // end debug data
-    
-
-    
+    /*  demo code for generating corresponding C++ code correctly
+        remove this when EventCard&EventCardGroup is truly used
+        otherwise "Convert.h/Convert.cc" will fail to compile    */
+    EventCardGroup {
+        item-width: parent.width * 0.25;
+        model: [
+            {
+                id: 1,
+                summary-abbr: "软",
+                summary: "软件研发部 C++组授课",
+                time: "09.30 14:30 - 09.30 15:30",
+                location: "仙林校区 大学生活动中心101",
+                description: "组内授课"
+            },
+            {
+                id: 2,
+                summary-abbr: "软",
+                summary: "软件研发部 Web组授课",
+                time: "09.30 14:30 - 09.30 15:30",
+                location: "仙林校区 大学生活动中心101",
+                description: "组内授课"
+            },
+            {
+                id: 3,
+                summary-abbr: "软",
+                summary: "软件研发部 C#组授课",
+                time: "09.30 14:30 - 09.30 15:30",
+                location: "仙林校区 大学生活动中心101",
+                description: "组内授课"
+            }
+        ];
+        item-clicked(event-struct) => {
+            debug("id: " + event-struct.id + " title: " + event-struct.summary);
+        }
+    }
+    // TODO: implement Discovery
+    // optional
     background := Empty { }
 
     layout := VerticalLayout {
