@@ -1,0 +1,175 @@
+import { Token } from "../global.slint";
+import { EventStruct } from "./event_struct.slint";
+import { Card } from "./card.slint";
+
+export component EventCard inherits Card {
+    in-out property <EventStruct> event: {
+        summary: "活动标题",
+        summary-abbr: "活",
+        time: "活动时间",
+        location: "活动地点",
+        description: "活动内容",
+        id: 0
+    };
+    header := HorizontalLayout {
+        // width: 100%;
+        height: abbr-circle.height;
+        alignment: LayoutAlignment.space-between;
+        spacing: self.width - abbr-circle.width - pentagon.width;
+        abbr-circle := Rectangle {
+            width: 28px;
+            height: self.width;
+            border-radius: self.width / 2;
+            background: root.on-surface;
+            abbr-text := Text {
+                color: root.inverse-on-surface;
+                text: event.summary-abbr;
+                font-size: Token.font.label.small.size;
+                font-weight: Token.font.label.small.weight;
+            }
+        }
+
+        VerticalLayout {
+            width: 10px;
+            height: abbr-circle.width;
+            Rectangle {
+                width: pentagon.width;
+                height: (abbr-circle.height - pentagon.height) / 2;
+            }
+
+            pentagon := Image {
+                width: 10px;
+                height: self.width;
+                colorize: root.on-surface;
+                source: Token.image.icon.pentagon;
+            }
+
+            Rectangle {
+                width: pentagon.width;
+                height: (abbr-circle.height - pentagon.height) / 2;
+            }
+        }
+    }
+
+    title := VerticalLayout {
+        height: root.height - root.padding * 2 - abbr-circle.height - info.height;
+        alignment: center;
+        event-title := Text {
+            color: root.inverse-surface;
+            text: event.summary;
+            wrap: word-wrap;
+            font-size: Token.font.body.large.size;
+            font-weight: Token.font.headline.large.weight;
+        }
+    }
+
+    info := VerticalLayout {
+        height: time-label.height * 3 + self.spacing * 2;
+        alignment: center;
+        spacing: 2px;
+        time-label := Rectangle {
+            height: 20px;
+            HorizontalLayout {
+                spacing: 6px;
+                time-icon := Image {
+                    width: 16px;
+                    height: self.width;
+                    source: Token.image.icon.time;
+                    colorize: time-text.color;
+                }
+
+                time-text := Text {
+                    font-size: Token.font.label.small.size;
+                    text: event.time;
+                    width: parent.width - time-icon.width - parent.spacing;
+                    overflow: elide;
+                }
+            }
+        }
+
+        location-label := Rectangle {
+            height: 20px;
+            HorizontalLayout {
+                spacing: 6px;
+                location-icon := Image {
+                    width: 16px;
+                    height: self.width;
+                    source: Token.image.icon.locate;
+                    colorize: location-text.color;
+                }
+
+                location-text := Text {
+                    font-size: Token.font.label.small.size;
+                    text: event.location;
+                    width: parent.width - location-icon.width - parent.spacing;
+                    overflow: elide;
+                }
+            }
+        }
+
+        description-label := Rectangle {
+            height: 20px;
+            HorizontalLayout {
+                spacing: 6px;
+                description-icon := Image {
+                    width: 16px;
+                    height: self.width;
+                    source: Token.image.icon.topic;
+                    colorize: location-text.color;
+                }
+
+                description-text := Text {
+                    font-size: Token.font.label.small.size;
+                    text: event.description;
+                    width: parent.width - description-icon.width - parent.spacing;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}
+
+export component EventCardGroup inherits Rectangle {
+    in-out property <[EventStruct]> model;
+    in-out property <length> horizontal-spacing: 20px;
+    in-out property <length> vertical-spacing: 20px;
+    in-out property <length> item-width: 303px;
+    out property <length> item-height: 188px;
+    property <int> row-count: floor(model.length / 3) * 3 == model.length ? model.length / 3 : floor(model.length / 3) + 1;
+    callback item-clicked(EventStruct);
+    width: item-width * 3 + horizontal-spacing * 4;
+    height: item-height * 3 + vertical-spacing * (row-count + 1);
+
+    function row-indexes(start-idx: int) -> [int] {
+        if start-idx + 1 < root.model.length {
+            if start-idx + 2 < root.model.length {
+                return [start-idx, start-idx + 1, start-idx + 2];
+            } else {
+                return [start-idx, start-idx + 1];
+            }
+        }
+        return [start-idx];
+    }
+
+    VerticalLayout {
+        width: 100%;
+        height: 100%;
+        alignment: center;
+        spacing: root.vertical-spacing;
+        for row-idx in row-count: HorizontalLayout {
+            property <int> start-idx: row-idx * 3;
+            width: 100%;
+            height: root.item-height;
+            alignment: start;
+            padding: (self.width - self.spacing * 2 - root.item-width * 3) / 2;
+            spacing: root.horizontal-spacing;
+            for idx in root.row-indexes(start-idx): EventCard {
+                event: root.model[idx];
+                width: root.item-width;
+                clicked => {
+                    root.item-clicked(self.event);
+                }
+            }
+        }
+    }
+}
