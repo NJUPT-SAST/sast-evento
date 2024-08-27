@@ -3,39 +3,49 @@ import { Page, Empty } from "../../components/index.slint";
 import { Button, VerticalBox,GroupBox,LineEdit} from "std-widgets.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { EventoStyleToken } from "../../logic/style_token.slint";
-import { AboutSlint, HorizontalBox,ScrollView } from "std-widgets.slint";
+import { AboutSlint, HorizontalBox,ScrollView, GridBox } from "std-widgets.slint";
 import { SButton } from "../../modules/surrealism-ui/index.slint";
+import { ViewManager,ViewName } from "../../logic/view_manager.slint";
 component AboutSlint inherits Rectangle {
     height: 25%;
     AboutSlint { } 
 }
 export global SearchPageBridge {
     callback Searchtext(string);
-    callback clickFilterDivision();
+    callback clickFilterDivision(bool);
     callback clickFilterName();
     callback clickFilterTime();
+    in-out property <bool> sign_Filter_Division;
+    in-out property <bool> close_Filter_Division;
  }
-component Filter_Button_Type inherits SButton {
-    text: "按名称筛选";
-               border-color: Token.color.outline;
-               border-width: 1px;
-               clicked => {
-                 SearchPageBridge.clickFilterName();
-            }
-}
+/*component Filter_Button_Type inherits Button {
+              /* border-color: Token.color.outline;
+               border-width: 1px;*/
+}*/
 component FilterForm inherits ScrollView {
-    visible: true;
+    in-out property <bool> clicked_Yes:SearchPageBridge.sign_Filter_Division;  
+    visible: SearchPageBridge.close_Filter_Division;
     height: 192px;
     width: 108px;
-    viewport-height: self.height;
+    viewport-height: self.height*3;
     viewport-width: self.width;
     VerticalLayout {
         Rectangle {
          background: #505050;
          VerticalLayout {
-             b1:=Filter-Button-Type{text: "按部门筛选";}
-             b2:=Filter-Button-Type{text: "按时间筛选";}
-             b3:=Filter-Button-Type{}
+             b1:=Button{text: "按部门筛选";clicked=>{
+                SearchPageBridge.clickFilterDivision(b1.pressed);
+                ViewManager.clean-navigate-to(ViewName.DetailPage);
+             }}
+             
+             b2:=Button{text: "按时间筛选";clicked=>{
+                SearchPageBridge.clickFilterTime();
+                //ViewManager.navigate-to(ViewName.DetailPage);
+             }}
+             b3:=Button{text:"按名称筛选";clicked => {
+                SearchPageBridge.clickFilterName();
+               // ViewManager.navigate-to(ViewName.DetailPage);
+             }}
             }
           
 
@@ -44,6 +54,36 @@ component FilterForm inherits ScrollView {
     }
    
 }
+component DivisionForm inherits Rectangle {//按部门筛选下拉菜单
+    visible:SearchPageBridge.sign_Filter_Division;
+    height: 192px;
+    width: 108px;
+    VerticalLayout {
+        Button {
+            text: "软件研发部";
+            clicked => {
+                ViewManager.navigate-to(ViewName.DetailPage);
+                SearchPageBridge.close_Filter_Division;
+            }
+        }
+        Button {
+            text: "电子部";
+            clicked => {
+                ViewManager.navigate-to(ViewName.DetailPage);
+            }
+        }
+        Button {
+            text: "外联部";
+            clicked => {
+                ViewManager.navigate-to(ViewName.DetailPage);
+            }
+        }
+        //可添加
+    }
+}
+/*component Filter_Form_Type inherits GridBox {
+    
+}*/
 
 export component SearchPage inherits Page {
     
@@ -120,8 +160,19 @@ export component SearchPage inherits Page {
                                 Filter-Button.focus();
                             }
                     }  
-                    Filter_Form:=FilterForm {}  
-                    
+                    Filter_Form:=FilterForm {} 
+                   
+                   /* states [
+                        layout when SearchPageBridge.sign_Filter_Division:{
+                            Division_Form.visible:true;
+                        }
+                        layout when !SearchPageBridge.sign_Filter_Division:{
+                            Division_Form.visible:false;
+                            
+                        }
+                    ]       */
+                   Division_Form:=DivisionForm {}
+                
                 }  
                 Rectangle {
                     width:3%;
@@ -163,3 +214,5 @@ export component SearchPage inherits Page {
 
 }
 }
+
+
