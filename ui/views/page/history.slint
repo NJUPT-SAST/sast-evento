@@ -1,12 +1,176 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
+import { SCard,STimeLine,STimeLineItem } from "../../modules/surrealism-ui/index.slint";
+import {SStar,SButton} from "../../modules/surrealism-ui/index.slint";
 
 export global HistoryPageBridge { }
+
+component CommentItem {
+    property <string> context;
+    property <bool> reviewed;
+    property <bool> editing;
+    content := VerticalLayout {
+        spacing: 8px;
+        padding: 8px;
+        SStar {
+            score: 3;
+            theme: Dark;
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            Rectangle {
+                width: 324px;
+                height: 70%;
+                border-radius: 10px;
+                border-color: grey;
+                border-width: 1px;
+                TextInput {
+                    text <=> context;
+                    font-size: 16px;
+                    padding: 8px;
+                }
+            }
+
+            Rectangle {
+                width: 60px;
+                height: 60px;
+                background: Token.color.surface-container;
+                border-radius: 30px;
+                Image {
+                    width: 100%;
+                    height: 100%;
+                }
+            }
+        }
+    }
+}
+
+component Divider inherits Rectangle {
+    width: 75%;
+    height: 1px;
+    background: Token.color.outline-variant;
+}
+
+component DividerVirtical inherits Rectangle {
+    width: 1px;
+    height: 80%;
+    background: Token.color.outline-variant;
+}
 
 export component HistoryPage inherits Page {
     // TODO: implement History
     // optional
-    background := Empty { }
+    //background := Empty { }
+
+    body := VerticalLayout {
+        padding: 50px;
+        //padding-top: 30px;
+        spacing: 8px;
+        Text {
+            text: "历史活动";
+            font-size: Token.font.headline.medium.size;
+            font-weight: Token.font.headline.medium.weight;
+        }
+
+        Divider { }
+
+        STimeLineItem {
+            width: parent.width;
+            height: root.height / 4;
+            theme: Light;
+            date: "2024.7.24 101中区 15:30-17:30";
+            SCard {
+                theme: Light;
+                height: parent.center-height();
+                width: parent.center-width();
+                HorizontalLayout {
+                    padding: 8px;
+                    spacing: 8px;
+                    Rectangle {
+                        width: 10%;
+                        height: 75%;
+                        border-radius: 5px;
+                        background: Token.color.surface-container;
+                    }
+
+                    Text {
+                        width: 50%;
+                        height: parent.height;
+                        text: "活动名称";
+                        font-size: Token.font.headline.small.size;
+                        font-weight: Token.font.headline.small.weight;
+                    }
+
+                    DividerVirtical { }
+
+                    CommentItem { }
+                }
+            }
+
+            area := TouchArea {
+                width: parent.width;
+                height: parent.height;
+                mouse-cursor: pointer;
+            }
+
+            clicked(is_active) => {
+                debug(is-active);
+                self.active = !self.active;
+            }
+        }
+
+        STimeLineItem {
+            width: parent.width;
+            height: root.height / 4;
+            theme: Light;
+            date: "2024.7.24 101中区 15:30-17:30";
+            SCard {
+                theme: Light;
+                height: parent.center-height();
+                width: parent.center-width();
+            }
+
+            clicked(is_active) => {
+                debug(is-active);
+                self.active = !self.active;
+            }
+        }
+
+        STimeLineItem {
+            width: parent.width;
+            height: root.height / 4;
+            theme: Light;
+            date: "2024.7.24 101中区 15:30-17:30";
+            SCard {
+                theme: Light;
+                height: parent.center-height();
+                width: parent.center-width();
+            }
+
+            clicked(is_active) => {
+                debug(is-active);
+                self.active = !self.active;
+            }
+        }
+
+        STimeLineItem {
+            width: parent.width;
+            height: root.height / 4;
+            theme: Light;
+            date: "2024.7.24 101中区 15:30-17:30";
+            SCard {
+                theme: Light;
+                height: parent.center-height();
+                width: parent.center-width();
+            }
+
+            clicked(is_active) => {
+                debug(is-active);
+                self.active = !self.active;
+            }
+        }
+    }
 
     layout := VerticalLayout {
         visible: false;
@@ -16,17 +180,10 @@ export component HistoryPage inherits Page {
         height: 100%;
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "历史活动（全部的）\n  ";
-            }
-        }
-    }
+    // body := Empty {
+    //     x: 0;
+    //     y: 0;
+    //     width: 100%;
+    //     height: 100%;
+    // }
 }
