@@ -1,12 +1,16 @@
 import { Token } from "../../global.slint";
 import { Overlay, Empty } from "../../components/index.slint";
+import { ViewManager, MessageManager, MessageType, AccountManagerBridge } from "../../logic/index.slint";
 
 import { SButton } from "../../modules/surrealism-ui/index.slint";
 
 export global LoginOverlayBridge {
     in-out property <string> version:"v0.0.0-00000000";
     callback link-login();
-    callback guest-login();
+    public function guest-login() {
+        MessageManager.show-message("访客登录尚未完成", MessageType.Info);
+        // ViewManager.prior-view();
+    }
 }
 
 component LoginContent inherits Rectangle {
@@ -122,6 +126,7 @@ component LoginContent inherits Rectangle {
                         Image {
                             height: 32px;
                             source: Token.image.icon.sast-link;
+                            colorize: Token.color.inverse-on-surface;
                         }
                     }
 
@@ -156,7 +161,8 @@ component LoginContent inherits Rectangle {
                     Image {
                         horizontal-stretch: 1;
                         height: 30px;
-                        source: Token.image.icon.account-box-outline;
+                        source: Token.image.icon.account-box;
+                        colorize: Token.color.on-surface;
                     }
 
                     Rectangle {
@@ -164,12 +170,14 @@ component LoginContent inherits Rectangle {
                         Text {
                             text: "访客登录";
                             font-size: Token.font.body.large.size;
+                            color: Token.color.on-surface;
                         }
 
                         // underline
-                            Text {
+                        Text {
                             visible: guest-button-area.has-hover;
                             text: "_________";
+                            color: Token.color.on-surface;
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                         }
@@ -207,5 +215,32 @@ component LoginContent inherits Rectangle {
 }
 
 export component LoginOverlay inherits Overlay {
+    shadow := Rectangle {
+        background: Token.color.surface;
+        // hide other view because no guest login, remember to change isTransparent()
+        // opacity: 0.75;
+        shadow-area := TouchArea {
+            clicked => {
+                // TODO: support guest login
+                // guest login disabled
+                // ViewManager.prior-view();
+            }
+            pointer-event(e) => {
+                // developer shortcut
+                if (e.modifiers.shift && e.modifiers.control && e.kind == PointerEventKind.up) {
+                    if (e.button == PointerEventButton.left) {
+                        debug("[Developer Shortcut] LoginOverlay: force close LoginView");
+                        ViewManager.prior-view();
+                    } else if (e.button == PointerEventButton.right) {
+                        debug("[Developer Shortcut] LoginOverlay: fake login, skip LoginView");
+                        AccountManagerBridge.is-login = true;
+                        debug("[Developer Shortcut] LoginOverlay: AccountManagerBridge.is-login -> true");
+                        ViewManager.prior-view();
+                    }
+                }
+            }
+        }
+    }
+
     content := LoginContent { }
 }
