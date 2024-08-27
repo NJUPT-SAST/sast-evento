@@ -3,7 +3,6 @@
 #include <Controller/UiBridge.h>
 #include <algorithm>
 #include <cassert>
-#include <memory>
 #include <set>
 #include <spdlog/spdlog.h>
 
@@ -26,7 +25,7 @@ ViewManager::ViewManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& 
     });
 }
 
-void ViewManager::initStack(ViewName newView, std::shared_ptr<ViewData> data) {
+void ViewManager::initStack(ViewName newView, std::any data) {
     assert(!bridge.inEventLoop());
     pushView(newView, std::move(data));
     // separate operation reduce (possible) flicking when window start up and keeps invoke order
@@ -38,7 +37,7 @@ void ViewManager::initStack(ViewName newView, std::shared_ptr<ViewData> data) {
     }
 }
 
-void ViewManager::navigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
+void ViewManager::navigateTo(ViewName newView, std::any data) {
     auto& self = *this;
     navAssert();
     if (newView == viewStack.top()) {
@@ -50,7 +49,7 @@ void ViewManager::navigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
     syncViewVisibility();
 }
 
-void ViewManager::cleanNavigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
+void ViewManager::cleanNavigateTo(ViewName newView, std::any data) {
     auto& self = *this;
     navAssert();
     if (newView == viewStack.top()) {
@@ -69,7 +68,7 @@ void ViewManager::cleanNavigateTo(ViewName newView, std::shared_ptr<ViewData> da
     syncViewVisibility();
 }
 
-void ViewManager::replaceNavigateTo(ViewName newView, std::shared_ptr<ViewData> data) {
+void ViewManager::replaceNavigateTo(ViewName newView, std::any data) {
     auto& self = *this;
     navAssert();
     if (newView == viewStack.top()) {
@@ -100,7 +99,7 @@ bool ViewManager::isVisible(ViewName target) {
     return visibleViews.find(target) != visibleViews.end();
 }
 
-void ViewManager::pushView(ViewName newView, std::shared_ptr<ViewData>&& data) {
+void ViewManager::pushView(ViewName newView, std::any&& data) {
     viewStack.push(newView);
     viewData.emplace(std::move(data));
 }
