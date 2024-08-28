@@ -49,16 +49,13 @@ export component SearchPage inherits Page {
         VerticalLayout {
             horizontal-stretch: 0.2;
             spacing: 15px;
-            HorizontalLayout {
-                spacing: 10px;
-                search-box := LineEdit {
-                    horizontal-stretch: 0;
-                    font-size: Token.font.body.large.size;
-                    placeholder-text: "在找什么部门呢";
-                    edited(keyword) => {
-                        debug("search keyword: " + keyword);
-                        SearchPageBridge.filter-department(keyword);
-                    }
+            LineEdit {
+                width: 280px;
+                font-size: Token.font.body.large.size;
+                placeholder-text: "在找什么部门呢";
+                edited(keyword) => {
+                    debug("search keyword: " + keyword);
+                    SearchPageBridge.filter-department(keyword);
                 }
             }
 
