@@ -80,28 +80,28 @@ component Avatar inherits Rectangle {
 export component MenuOverlay inherits Overlay {
     states [
         is-show when MenuOverlayBridge.is-show: {
-            shadow.background: Colors.rgba(0,0,0,0.5);
+            shadow.opacity: 0.32;
             content.x: root.width - content.width;
             in {
-                animate content.x, shadow.background {
+                animate content.x, shadow.opacity {
                     duration: 400ms;
                     easing: ease-out-quart;
                 }
             }
             out {
-                animate content.x, shadow.background {
+                animate content.x, shadow.opacity {
                     duration: 200ms;
                     easing: ease-in-quart;
                 }
             }
         }
         not-show when !MenuOverlayBridge.is-show: {
-            shadow.background: Colors.rgba(0,0,0,0);
+            shadow.opacity: 0;
             content.x: root.width;
         }
     ]
     shadow := Rectangle {
-        background: transparent;
+        background: Token.color.scrim;
         shadow-area := TouchArea {
             clicked => {
                 MenuOverlayBridge.is-show = false;
