@@ -1,218 +1,68 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
-import { Button, VerticalBox,GroupBox,LineEdit} from "std-widgets.slint";
-import { EventoImageToken } from "../../assets/image/image_token.slint";
-import { EventoStyleToken } from "../../logic/style_token.slint";
-import { AboutSlint, HorizontalBox,ScrollView, GridBox } from "std-widgets.slint";
-import { SButton } from "../../modules/surrealism-ui/index.slint";
-import { ViewManager,ViewName } from "../../logic/view_manager.slint";
-component AboutSlint inherits Rectangle {
-    height: 25%;
-    AboutSlint { } 
-}
-export global SearchPageBridge {
-    callback Searchtext(string);
-    callback clickFilterDivision(bool);
-    callback clickFilterName();
-    callback clickFilterTime();
-    in-out property <bool> sign_Filter_Division;
-    in-out property <bool> close_Filter_Division;
- }
-/*component Filter_Button_Type inherits Button {
-              /* border-color: Token.color.outline;
-               border-width: 1px;*/
-}*/
-component FilterForm inherits ScrollView {
-    in-out property <bool> clicked_Yes:SearchPageBridge.sign_Filter_Division;  
-    visible: SearchPageBridge.close_Filter_Division;
-    height: 192px;
-    width: 108px;
-    viewport-height: self.height*3;
-    viewport-width: self.width;
-    VerticalLayout {
-        Rectangle {
-         background: #505050;
-         VerticalLayout {
-             b1:=Button{text: "按部门筛选";clicked=>{
-                SearchPageBridge.clickFilterDivision(b1.pressed);
-                ViewManager.clean-navigate-to(ViewName.DetailPage);
-             }}
-             
-             b2:=Button{text: "按时间筛选";clicked=>{
-                SearchPageBridge.clickFilterTime();
-                //ViewManager.navigate-to(ViewName.DetailPage);
-             }}
-             b3:=Button{text:"按名称筛选";clicked => {
-                SearchPageBridge.clickFilterName();
-               // ViewManager.navigate-to(ViewName.DetailPage);
-             }}
-            }
-          
+import { Page, EventCardGroup, EventStruct } from "../../components/index.slint";
+import { Button, LineEdit, ScrollView, ListView, StandardListView } from "std-widgets.slint";
+import { StateLayer } from "../../components/state_layer.slint";
 
+export global SearchPageBridge {
+    out property <[StandardListViewItem]> department: [
+        { text: "C++组"},   
+        { text: "C#组"},   
+        { text: "游戏组"},       
+        { text: "Web组"},   
+        { text: "Graphics组"},   
+        { text: "运维组"},       
+    ];
+    out property <[EventStruct]> event-model: [
+        {
+            id: 1,
+            summary-abbr: "软",
+            summary: "软件研发部 C++组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 2,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 3,
+            summary-abbr: "软",
+            summary: "软件研发部 C#组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
         }
-    
-    }
-   
+    ];
 }
-component DivisionForm inherits Rectangle {//按部门筛选下拉菜单
-    visible:SearchPageBridge.sign_Filter_Division;
-    height: 192px;
-    width: 108px;
-    VerticalLayout {
-        Button {
-            text: "软件研发部";
-            clicked => {
-                ViewManager.navigate-to(ViewName.DetailPage);
-                SearchPageBridge.close_Filter_Division;
-            }
-        }
-        Button {
-            text: "电子部";
-            clicked => {
-                ViewManager.navigate-to(ViewName.DetailPage);
-            }
-        }
-        Button {
-            text: "外联部";
-            clicked => {
-                ViewManager.navigate-to(ViewName.DetailPage);
-            }
-        }
-        //可添加
-    }
-}
-/*component Filter_Form_Type inherits GridBox {
-    
-}*/
 
 export component SearchPage inherits Page {
-    
-    // TODO: implement Search
-    // optional
-    
-    background := Empty { }
-    
-    layout := VerticalLayout {  
-        visible: true;  
-        x: 0;  
-        y: 0;  
-        width: 100%;  
-        height: 100%;  
-        
-        Rectangle {
-            height: 20%;
-          //  background: #a5cddb;
-            background: Token.color.surface;
+    HorizontalLayout {
+        padding: 50px;
+        spacing: 20px;
+        VerticalLayout {
+            horizontal-stretch: 0.2;
+            spacing: 15px;
+            search-box := LineEdit {
+                placeholder-text: "在找什么部门呢";
+            }
+
+            StandardListView {
+                model: SearchPageBridge.department;
+            }
         }
-        
-        Rectangle {  
-            preferred-width: 512px;  
-            preferred-height: 200px;  
-            background: Token.color.surface;  
-            border-color: Token.color.outline;  
-            border-radius: 4px;  
-            border-width: 2px;  
-  
-            HorizontalLayout {  // 使用水平布局分隔搜索和过滤器  
-                Rectangle {
-                    width:10%;
-                   //background: #a5cddb;
-                   background: Token.color.surface;
+
+        ScrollView {
+            EventCardGroup {
+                model: SearchPageBridge.event-model;
+                item-clicked(event-struct) => {
+                    debug("id: " + event-struct.id + " title: " + event-struct.summary);
                 }
-                Rectangle {//search Box
-                    GroupBox{
-                        title:"Search Box";
-                        height: parent.height;    
-                        width: parent.width;        
-                       imput:= LineEdit {
-                            placeholder-text: "enter text";
-                            accepted => {
-                                debug(imput.text);
-                                SearchPageBridge.Searchtext(imput.text);
-                            }
-                            
-                        
-                        }
-                    }
-                    width: 70%;  
-                }  
-                Rectangle {
-                    width:7%;
-                  //  background: #a5cddb;
-                  background: Token.color.surface;
-                }
-                Rectangle {  // 过滤器区域  
-                    width: 10%; // 假设过滤器占据剩余空间  
-                    states [
-                          layout when Filter-Button.has-focus:{
-                              Filter_Form.visible:true;
-                          }  
-                          layout when !Filter-Button.has-focus:{
-                              Filter_Form.visible:false;
-                          }
-                    ]
-                    
-                    Filter_Button:=Button {
-                        width: 100%;
-                        height: 40%;
-                        text: "Filter";   
-                         clicked => {
-                                Filter-Button.focus();
-                            }
-                    }  
-                    Filter_Form:=FilterForm {} 
-                   
-                   /* states [
-                        layout when SearchPageBridge.sign_Filter_Division:{
-                            Division_Form.visible:true;
-                        }
-                        layout when !SearchPageBridge.sign_Filter_Division:{
-                            Division_Form.visible:false;
-                            
-                        }
-                    ]       */
-                   Division_Form:=DivisionForm {}
-                
-                }  
-                Rectangle {
-                    width:3%;
-                    //background: #a5cddb;
-                    background: Token.color.surface;
-                }
-            }  
-            
-       
-    }  
-    
-    Rectangle {
-        height: 10%;
-        background: Token.color.surface;
-    }
-    Rectangle {
-        height: 20%;
-        Image {
-            width: parent.width*0.4;
-            height: parent.height;
-            source: Token.image.display.evento;
+            }
         }
-        background: Token.color.surface;
     }
-
-    Rectangle {
-        height: 10%;
-        background: Token.color.surface;
-    }
-    Rectangle {
-        height: 40%;
-        AboutSlint {}
-        background: Token.color.surface;
-    }
-    Rectangle {
-        height: 10%;
-        background: Token.color.surface;
-    }
-
 }
-}
-
-
