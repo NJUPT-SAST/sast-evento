@@ -41,6 +41,7 @@ component MenuItem inherits Rectangle {
             width: 20px;
             height: self.width;
             source: root.icon;
+            colorize: label-color;
         }
 
         Text {
@@ -57,6 +58,24 @@ component Divider inherits Rectangle {
     width: 90%;
     height: 2px;
     background: Token.color.outline;
+}
+
+component Avatar inherits Rectangle {
+    in property <length> size;
+    in property <image> image;
+    in property <bool> have-avatar;
+    in property <image> alt-image;
+    in property <color> alt-colorize;
+    clip: true;
+    border-radius: self.height / 2;
+    height: size;
+    width: size;
+    Image {
+        height: size;
+        width: size;
+        source: have-avatar ? image : alt-image;
+        colorize: have-avatar ? #00000000 : alt-colorize;
+    }
 }
 
 export component MenuOverlay inherits Overlay {
@@ -99,7 +118,6 @@ export component MenuOverlay inherits Overlay {
         background: Token.color.surface-container;
         border-top-left-radius: 16px;
         border-bottom-left-radius: self.border-top-left-radius;
-
         VerticalLayout {
             padding: 10px;
             padding-top: 30px;
@@ -108,9 +126,12 @@ export component MenuOverlay inherits Overlay {
                 HorizontalLayout {
                     spacing: 10px;
                     padding-bottom: 10px;
-                    SAvatar {
-                        avatar-size: 64px;
-                        avatar: AccountManager.is-login ? MenuOverlayBridge.user-avatar : Token.image.icon.me.normal;
+                    Avatar {
+                        size: 64px;
+                        image: MenuOverlayBridge.user-avatar;
+                        have-avatar: AccountManager.is-login;
+                        alt-image: Token.image.icon.me;
+                        alt-colorize: Token.color.on-surface;
                     }
 
                     VerticalLayout {
@@ -122,14 +143,12 @@ export component MenuOverlay inherits Overlay {
                             font-weight: Token.font.title.large.weight;
                             color: Token.color.on-surface;
                         }
-
                         if AccountManager.is-login:Text {
                             text: MenuOverlayBridge.user-name;
                             font-size: Token.font.title.large.size;
                             font-weight: Token.font.title.large.weight;
                             color: Token.color.on-surface;
                         }
-
                         if AccountManager.is-login:Text {
                             text: MenuOverlayBridge.user-signature;
                             font-size: Token.font.title.small.size;
@@ -159,35 +178,31 @@ export component MenuOverlay inherits Overlay {
             Divider { }
 
             if AccountManager.is-login:MenuItem {
-                icon: Token.image.icon.me.normal;
+                icon: Token.image.icon.me;
                 label: "个人资料";
                 clicked => {
                     MenuOverlayBridge.open-link-web();
                 }
             }
-
             if AccountManager.is-login:MenuItem {
-                icon: Token.image.icon.history.normal;
+                icon: Token.image.icon.history;
                 label: "历史活动";
                 clicked => {
                     MenuOverlayBridge.is-show = false;
                     ViewManager.replace-navigate-to(ViewName.HistoryPage)
                 }
             }
-
             if AccountManager.is-login:MenuItem {
-                icon: Token.image.icon.card.normal;
+                icon: Token.image.icon.card;
                 label: "纪念卡";
                 clicked => {
                     // NOTE: Unsupport
                     MessageManager.show-message("功能还在开发中，咕咕咕 😣", MessageType.Info);
                 }
             }
-
             if AccountManager.is-login:Divider { }
-
             MenuItem {
-                icon: Token.image.icon.setting.normal;
+                icon: Token.image.icon.setting;
                 label: "设置";
                 clicked => {
                     MenuOverlayBridge.is-show = false;
@@ -196,7 +211,7 @@ export component MenuOverlay inherits Overlay {
             }
 
             MenuItem {
-                icon: Token.image.icon.info.normal;
+                icon: Token.image.icon.info;
                 label: "关于";
                 clicked => {
                     MenuOverlayBridge.is-show = false;
@@ -205,7 +220,6 @@ export component MenuOverlay inherits Overlay {
             }
 
             if AccountManager.is-login:Divider { }
-
             if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.logout;
                 label: "退出登录";

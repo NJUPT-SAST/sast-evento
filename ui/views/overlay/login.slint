@@ -126,6 +126,7 @@ component LoginContent inherits Rectangle {
                         Image {
                             height: 32px;
                             source: Token.image.icon.sast-link;
+                            colorize: Token.color.inverse-on-surface;
                         }
                     }
 
@@ -160,7 +161,8 @@ component LoginContent inherits Rectangle {
                     Image {
                         horizontal-stretch: 1;
                         height: 30px;
-                        source: Token.image.icon.account-box-outline;
+                        source: Token.image.icon.account-box;
+                        colorize: Token.color.on-surface;
                     }
 
                     Rectangle {
@@ -168,12 +170,14 @@ component LoginContent inherits Rectangle {
                         Text {
                             text: "访客登录";
                             font-size: Token.font.body.large.size;
+                            color: Token.color.on-surface;
                         }
 
                         // underline
-                            Text {
+                        Text {
                             visible: guest-button-area.has-hover;
                             text: "_________";
+                            color: Token.color.on-surface;
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                         }

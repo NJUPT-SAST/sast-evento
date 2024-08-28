@@ -81,18 +81,20 @@ component PageRegion inherits Empty {
 
 component CircleButton inherits Rectangle {
     in property <image> image;
+    in property <color> surface: Token.color.surface-container;
+    in property <color> on-surface: Token.color.on-surface;
     callback clicked <=> area.clicked;
     clip: true;
     height: 48px;
     width: 48px;
     border-radius: self.width / 2;
-    background: Token.color.surface-container;
+    background: surface;
     area := TouchArea {
         mouse-cursor: pointer;
     }
 
     StateLayer {
-        background: Token.color.on-surface;
+        background: on-surface;
         is-hover: area.has-hover;
         is-press: area.pressed;
     }
@@ -101,6 +103,7 @@ component CircleButton inherits Rectangle {
         height: 24px;
         width: 24px;
         source: image;
+        colorize: on-surface;
     }
 }
 
@@ -135,6 +138,7 @@ component NavBarItem inherits Rectangle {
                 width: 24px;
                 height: self.width;
                 source: root.image;
+                colorize: on-surface;
             }
         }
 
@@ -200,19 +204,17 @@ export component App inherits Window {
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
-
     init => {
         GlobalProps.theme = Token.surrealism-ui-default-theme;
         GlobalProps.font.font-family = "MiSans";
     }
-
     VerticalLayout {
         heading := HorizontalLayout {
             padding: 8px;
             height: 64px;
             spacing: 8px;
             CircleButton {
-                image: Token.image.icon.arrow-left.normal;
+                image: Token.image.icon.arrow-left;
                 clicked => {
                     ViewManager.prior-view();
                 }
@@ -223,7 +225,7 @@ export component App inherits Window {
                 horizontal-stretch: 1;
                 nav-views: [
                     {
-                        icon:Token.image.icon.home.normal,
+                        icon:Token.image.icon.home,
                         content:"活动广场",
                         target:ViewName.DiscoveryPage,
                     },
@@ -233,7 +235,7 @@ export component App inherits Window {
                         target:ViewName.SearchPage,
                     },
                     {
-                        icon:Token.image.icon.schedule.normal,
+                        icon:Token.image.icon.schedule,
                         content:"活动日程",
                         target:ViewName.MyEventPage,
                     },
@@ -241,7 +243,7 @@ export component App inherits Window {
             }
 
             CircleButton {
-                image: Token.image.icon.me.normal;
+                image: Token.image.icon.me;
                 clicked => {
                     ViewManager.navigate-to(ViewName.MenuOverlay);
                 }

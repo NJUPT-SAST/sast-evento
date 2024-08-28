@@ -1,9 +1,11 @@
 import { MessageManager, MessageType } from "../logic/message_manager.slint";
 import { Token } from "../global.slint";
+import { Button } from "../modules/surrealism-ui/src/button/button.slint";
+import { MessageManagerBridge } from "../logic/index.slint";
 
 export component Toast inherits Rectangle {
     property <bool> have-icon: false;
-    property <image> icon: Token.image.icon.info.normal;
+    property <image> icon: Token.image.icon.info;
     property <color> surface: Token.color.surface-variant;
     property <color> on-surface: Token.color.on-surface-variant;
     clip: true;
@@ -20,6 +22,7 @@ export component Toast inherits Rectangle {
                 height: 24px;
                 width: 24px;
                 source: icon;
+                colorize: on-surface;
             }
         }
         text := Text {
@@ -35,16 +38,44 @@ export component Toast inherits Rectangle {
     states [
         error when MessageManager.type == MessageType.Error: {
             have-icon: true;
-            icon: Token.image.icon.error_on-error;
+            icon: Token.image.icon.error;
             surface: Token.color.error;
             on-surface: Token.color.on-error;
         }
         warning when MessageManager.type == MessageType.Warning: {
             have-icon: true;
-            icon: Token.image.icon.error_on-surface-variant;
+            icon: Token.image.icon.error;
         }
         info when MessageManager.type == MessageType.Info: {
             have-icon: false;
         }
     ]
+}
+
+component Test {
+    HorizontalLayout {
+        y: - self.height;
+        Button {
+            text: "Info";
+            clicked => {
+                MessageManagerBridge.type = MessageType.Info;
+            }
+        }
+
+        Button {
+            text: "Warning";
+            clicked => {
+                MessageManagerBridge.type = MessageType.Warning;
+            }
+        }
+
+        Button {
+            text: "Error";
+            clicked => {
+                MessageManagerBridge.type = MessageType.Error;
+            }
+        }
+    }
+
+    Toast { }
 }
