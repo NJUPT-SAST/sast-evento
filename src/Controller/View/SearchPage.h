@@ -13,6 +13,10 @@ public:
 
 private:
     void onCreate() override;
+
+    void onShow() override;
+
+    std::vector<std::string> _departments;
 };
 
 EVENTO_UI_END

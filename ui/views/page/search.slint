@@ -4,7 +4,7 @@ import { Button, LineEdit, ScrollView, ListView, StandardListView } from "std-wi
 import { StateLayer } from "../../components/state_layer.slint";
 
 export global SearchPageBridge {
-    out property <[StandardListViewItem]> department: [
+    in-out property <[StandardListViewItem]> department: [
         { text: "C++组"},   
         { text: "C#组"},   
         { text: "游戏组"},       
@@ -12,7 +12,7 @@ export global SearchPageBridge {
         { text: "Graphics组"},   
         { text: "运维组"},       
     ];
-    out property <[EventStruct]> event-model: [
+    in-out property <[EventStruct]> event-model: [
         {
             id: 1,
             summary-abbr: "软",
@@ -45,7 +45,7 @@ export global SearchPageBridge {
 export component SearchPage inherits Page {
     HorizontalLayout {
         padding: 50px;
-        spacing: 20px;
+        spacing: 15px;
         VerticalLayout {
             horizontal-stretch: 0.2;
             spacing: 15px;
@@ -66,6 +66,12 @@ export component SearchPage inherits Page {
                     SearchPageBridge.load-department-events(idx);
                 }
             }
+        }
+
+        Rectangle {
+            width: 1px;
+            height: 80%;
+            background: Token.color.outline-variant;
         }
 
         ScrollView {
