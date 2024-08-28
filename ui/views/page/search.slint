@@ -38,6 +38,8 @@ export global SearchPageBridge {
             description: "组内授课"
         }
     ];
+    callback filter-department(string);
+    callback load-department-events(int);
 }
 
 export component SearchPage inherits Page {
@@ -47,12 +49,29 @@ export component SearchPage inherits Page {
         VerticalLayout {
             horizontal-stretch: 0.2;
             spacing: 15px;
-            search-box := LineEdit {
-                placeholder-text: "在找什么部门呢";
+            HorizontalLayout {
+                spacing: 10px;
+                search-box := LineEdit {
+                    horizontal-stretch: 0;
+                    placeholder-text: "在找什么部门呢";
+                }
+
+                Button {
+                    text: "搜索";
+                    width: self.preferred-width;
+                    clicked => {
+                        debug("search: " + search-box.text);
+                        SearchPageBridge.filter-department(search-box.text);
+                    }
+                }
             }
 
             StandardListView {
                 model: SearchPageBridge.department;
+                current-item-changed(idx) => {
+                    debug("current item changed: " + idx);
+                    SearchPageBridge.load-department-events(idx);
+                }
             }
         }
 
@@ -61,6 +80,7 @@ export component SearchPage inherits Page {
                 model: SearchPageBridge.event-model;
                 item-clicked(event-struct) => {
                     debug("id: " + event-struct.id + " title: " + event-struct.summary);
+                    // TODO: navigate to detail page
                 }
             }
         }
