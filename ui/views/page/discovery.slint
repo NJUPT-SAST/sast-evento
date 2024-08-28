@@ -8,7 +8,6 @@ export component DiscoveryPage inherits Page {
         remove this when EventCard&EventCardGroup is truly used
         otherwise "Convert.h/Convert.cc" will fail to compile    */
     EventCardGroup {
-        item-width: parent.width * 0.25;
         model: [
             {
                 id: 1,
@@ -39,6 +38,7 @@ export component DiscoveryPage inherits Page {
             debug("id: " + event-struct.id + " title: " + event-struct.summary);
         }
     }
+
     // TODO: implement Discovery
     // optional
     background := Empty { }
