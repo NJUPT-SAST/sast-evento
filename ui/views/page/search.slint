@@ -53,15 +53,11 @@ export component SearchPage inherits Page {
                 spacing: 10px;
                 search-box := LineEdit {
                     horizontal-stretch: 0;
+                    font-size: Token.font.body.large.size;
                     placeholder-text: "在找什么部门呢";
-                }
-
-                Button {
-                    text: "搜索";
-                    width: self.preferred-width;
-                    clicked => {
-                        debug("search: " + search-box.text);
-                        SearchPageBridge.filter-department(search-box.text);
+                    edited(keyword) => {
+                        debug("search keyword: " + keyword);
+                        SearchPageBridge.filter-department(keyword);
                     }
                 }
             }
