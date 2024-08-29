@@ -196,62 +196,14 @@ export component DiscoveryPage inherits Page {
         y: 0;
         width: 100%;
         height: 100%;
-        //Text {
-        //    text: "活动广场（用于发现活动）\n  进行中、未开始\n  （需要跳转到历史活动页面，需要多考虑一下）";
-        //}
-        VerticalLayout {
-            Rectangle {
-                width: 100%;
-                height: 50%;
-                background: #39c5bb;
-                // 这里摆放轮播图
-                //Text {
-                //    text: "轮播图(活动广场)";
-                //}
-                SCarousel {
-                    height: parent.height;
-                    width: parent.width;
-                    fold-height: parent.height;
-                    active: 3;
-                    focus-main: true;
-                    fit: contain;
-                    sources: [
-                        EventoImageToken.image.display.event.cpp[0],
-                        EventoImageToken.image.display.event.cpp[1],
-                        EventoImageToken.image.display.event.cpp[2],
-                    ];
-                }
-            }
 
             Rectangle {
                 width: 100%;
-                height: 50%;
-
-                background: #39c5bb;
-                // in property <int> block_num: current_event_num + newest_event_num;
-                // in property <int> block_max_h: 120;
-                // in property <int> block_max_w: 150;
-
-                // // functions to calculate actual row and col num
-                // pure callback getBlockRowNum(int, int) -> int;
-                // pure callback getBlockColNum(int, int) -> int;
-
-                // in property <int> block_row_num: getBlockRowNum(root.height / 1px, block_max_h); // 实际显示的行数
-                // in property <int> block_col_num: getBlockColNum(root.width  / 1px, block_max_w); // 实际显示的列数
-
-
-                // pure callback calcBlockX(int, int, int)->int;
-                // pure callback calcBlockY(int, int, int)->int;
+                height: 100%;
 
                 ScrollView {
-                    // in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
-                    // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
-                    viewport-width: parent.width;
-                    viewport-height: 480px;
-                    // width: parent.width;
-                    // height: 1px * block_height * block_row_num;
-                    height: parent.height;
-                    width: parent.width;
+                    height: root.height;
+                    width: root.width;
 
                     VerticalLayout {
                         // calculate actual block size
