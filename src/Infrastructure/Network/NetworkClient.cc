@@ -1,7 +1,14 @@
 #include "NetworkClient.h"
+#include "Infrastructure/Cache/Cache.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
+#include <boost/beast/core/buffers_to_string.hpp>
+#include <boost/beast/core/file.hpp>
+#include <boost/beast/core/file_base.hpp>
+#include <boost/beast/http/message.hpp>
+#include <boost/beast/http/string_body.hpp>
 #include <boost/url/param.hpp>
+#include <filesystem>
 #include <initializer_list>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -389,6 +396,37 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
     co_return Ok(entity);
+}
+
+Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
+    http::request<http::string_body> req{http::verb::get, url.path(), 11};
+    // use cache first
+    auto cacheDir = CacheManager::cacheDir();
+    if (!cacheDir) {
+        co_return Err(Error(Error::Data, "cache dir not found"));
+    }
+
+    auto path = *cacheDir / CacheManager::generateFilename(url);
+
+    if (std::filesystem::exists(path)) {
+        co_return Ok(path);
+    }
+
+    // if cache not exists, download file
+    auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+    if (reply.isErr())
+        co_return Err(reply.unwrapErr());
+
+    auto response = reply.unwrap();
+
+    if (response.result() != http::status::ok) {
+        co_return Err(Error(Error::Network, std::to_string(response.result_int())));
+    }
+
+    if (!CacheManager::saveToDisk(beast::buffers_to_string(response.body().data()), path))
+        co_return Err(Error(Error::Data, "save file failed"));
+
+    co_return Ok(path);
 }
 
 urls::url NetworkClient::githubEndpoint(std::string_view endpoint) {

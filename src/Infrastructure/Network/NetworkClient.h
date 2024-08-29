@@ -85,7 +85,7 @@ public:
 
     Task<Result<ReleaseEntity>> getLatestRelease();
 
-    Task<Result<std::filesystem::path>> downloadFile(urls::url_view url);
+    Task<Result<std::filesystem::path>> getFile(urls::url_view url);
 
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists

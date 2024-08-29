@@ -23,16 +23,17 @@ struct CacheEntry {
 
 class CacheManager {
 public:
-    CacheManager() { load(); }
-    ~CacheManager() { save(); }
-
     static std::string generateKey(http::verb verb,
                                    urls::url_view url,
                                    const std::initializer_list<urls::param>& params);
 
     static std::string generateFilename(urls::url_view url);
 
+    static std::optional<std::filesystem::path> cacheDir();
+
     static bool isExpired(const CacheEntry& entry);
+
+    static bool saveToDisk(std::string const& data, std::filesystem::path const& path);
 
     void insert(const std::string& key, const CacheEntry& entry);
 
@@ -41,11 +42,6 @@ public:
     static constexpr size_t MAX_CACHE_SIZE = 64 * 1024 * 1024;
 
 private:
-    void load();
-    void save();
-
-    void saveToDisk();
-
     std::list<std::pair<std::string, CacheEntry>> _cacheList;
     std::unordered_map<std::string, decltype(_cacheList.begin())> _cacheMap;
     inline static size_t currentCacheSize = 0;
