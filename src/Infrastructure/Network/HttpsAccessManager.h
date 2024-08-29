@@ -6,16 +6,10 @@
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/http/dynamic_body.hpp>
-#include <boost/beast/http/message.hpp>
-#include <boost/beast/http/verb.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url/url.hpp>
 #include <chrono>
-#include <functional> // for std::hash
-#include <mutex>
 #include <string>
-#include <unordered_map>
 
 namespace evento {
 
@@ -52,16 +46,6 @@ private:
     net::ssl::context& _ctx;
     std::chrono::seconds _timeout; // respective timeout of ssl handshake & http
     beast::flat_buffer _buffer;    // http buffer is used for reading and must be persisted
-
-    // Cache for storing downloaded images
-    std::unordered_map<std::string, http::response<http::dynamic_body>> _cache;
-    std::mutex _cacheMutex;
-
-    // Helper function to save response body to a file
-    void saveToFile(const std::string& filename, const beast::flat_buffer& buffer);
-
-    // Helper function to generate a unique filename based on URL
-    std::string generateFilename(const std::string& url);
 };
 
 } // namespace evento

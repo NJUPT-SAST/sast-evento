@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Infrastructure/Cache/Cache.h>
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
 #include <Infrastructure/Network/HttpsAccessManager.h>
@@ -8,18 +9,16 @@
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/awaitable.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/http/verb.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
-#include <chrono>
 #include <concepts>
+#include <filesystem>
 #include <initializer_list>
-#include <iostream>
-#include <list>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <spdlog/spdlog.h>
 #include <string>
-#include <unordered_map>
 
 namespace evento {
 
@@ -36,12 +35,6 @@ using ContributorList = std::vector<ContributorEntity>;
 
 template<typename T>
 using Task = net::awaitable<T>;
-
-struct CacheEntry {
-    JsonResult result;
-    std::chrono::steady_clock::time_point insertTime;
-    std::size_t size; //cache size
-};
 
 class NetworkClient {
 public:
@@ -92,6 +85,8 @@ public:
 
     Task<Result<ReleaseEntity>> getLatestRelease();
 
+    Task<Result<std::filesystem::path>> downloadFile(urls::url_view url);
+
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists
     std::optional<std::string> tokenBytes;
@@ -100,69 +95,50 @@ private:
     NetworkClient(net::ssl::context& ctx);
     static NetworkClient* getInstance();
     //cache data processing
-    static std::string generateCacheKey(
-        http::verb verb,
-        const urls::url_view& url,
-        const std::initializer_list<urls::param>& params); //auxiliary function to generate cache key
 
-    static bool isCacheEntryExpired(const CacheEntry& entry) {
-        auto now = std::chrono::steady_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::hours>(now - entry.insertTime);
-        return duration.count() >= 3;
-    }
-    void updateCache(const std::string& key, CacheEntry entry) {
-        try {
-            auto it = cacheMap.find(key);
-            if (it != cacheMap.end()) {
-                cacheList.erase(it->second);
-                currentCacheSize -= it->second->second.size;
-            }
-            cacheList.emplace_front(key, std::move(entry));
-            cacheMap[key] = cacheList.begin();
-            currentCacheSize += cacheList.begin()->second.size;
-
-            while (currentCacheSize > maxCacheSize) {
-                auto last = cacheList.end();
-                --last;
-                currentCacheSize -= last->second.size;
-                cacheMap.erase(last->first);
-                cacheList.pop_back();
-            }
-        } catch (const std::exception& e) {
-            std::cerr << "Error occurred: " << e.what() << std::endl;
-        }
-    }
     // - success => return the `data` field from response json
     //            maybe json object or json array
     // - error => return error message
     template<std::same_as<api::Evento> Api>
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
-                             std::initializer_list<urls::param> const& params = {}) {
+                             std::initializer_list<urls::param> const& params = {},
+                             bool useCache = false) {
         try {
-            //Generate cache
-            std::string cacheKey = generateCacheKey(verb, url, params);
+            spdlog::info("Requesting: {}", url.data());
 
-            //Check cache
-            auto it = cacheMap.find(cacheKey);
-            if (it != cacheMap.end() && !isCacheEntryExpired(it->second->second)) {
-                cacheList.splice(cacheList.begin(), cacheList, it->second);
-                co_return it->second->second.result;
+            auto cacheKey = CacheManager::generateKey(verb, url, params);
+
+            if (useCache) {
+                //Generate cache
+
+                //Check cache
+                auto cacheEntry = _cacheManager->get(cacheKey);
+
+                if (cacheEntry) {
+                    spdlog::info("Cache hit: {}", cacheKey);
+                    co_return Ok(cacheEntry->result);
+                }
             }
-            debug(), url;
+
             auto req = Api::makeRequest(verb, url, tokenBytes, params);
 
-            auto reply = co_await _manager->makeReply(url.host(), req);
+            auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
 
             if (reply.isErr())
                 co_return reply.unwrapErr();
 
             auto result = handleResponse(reply.unwrap());
 
-            // Update cache
-            size_t entrySize = result.unwrap().dump().size();
-            updateCache(cacheKey,
-                        CacheEntry{std::move(result), std::chrono::steady_clock::now(), entrySize});
+            if (useCache && result.isOk()) {
+                // Update cache
+                size_t entrySize = result.unwrap().dump().size();
+
+                _cacheManager->insert(cacheKey,
+                                      {std::move(result.unwrap()),
+                                       std::chrono::steady_clock::now(),
+                                       entrySize});
+            }
 
             co_return result;
         } catch (const std::exception& e) {
@@ -176,7 +152,7 @@ private:
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
         auto req = Api::makeRequest(verb, url, std::nullopt, params);
-        auto reply = co_await _manager->makeReply(url.host(), req);
+        auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
         if (reply.isErr())
             co_return reply.unwrapErr();
 
@@ -204,11 +180,8 @@ private:
 
 private:
     net::ssl::context& _ctx;
-    std::unique_ptr<HttpsAccessManager> _manager;
-    std::list<std::pair<std::string, CacheEntry>> cacheList;               // LRU 缓存列表
-    std::unordered_map<std::string, decltype(cacheList.begin())> cacheMap; // 缓存映射(changed,TBD)
-    size_t currentCacheSize = 0;                                           // 当前缓存大小
-    const size_t maxCacheSize = 64 * 1024 * 1024;
+    std::unique_ptr<HttpsAccessManager> _httpsAccessManager;
+    std::unique_ptr<CacheManager> _cacheManager;
     friend NetworkClient* networkClient();
 };
 

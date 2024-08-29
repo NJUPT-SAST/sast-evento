@@ -5,16 +5,10 @@
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/error.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <boost/asio/ssl/stream_base.hpp>
-#include <boost/beast/http/dynamic_body.hpp>
-#include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
-#include <boost/system/detail/error_code.hpp>
 #include <boost/system/system_error.hpp>
 #include <boost/url.hpp>
-#include <fstream>
-#include <sstream>
 
 namespace evento {
 
@@ -22,17 +16,6 @@ constexpr const char USER_AGENT[] = "SAST-Evento-Desktop/1";
 
 Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
                                                    http::request<http::string_body> req) {
-    std::string url = host + std::string(req.target());
-
-    // Check cache first
-    {
-        std::lock_guard<std::mutex> lock(_cacheMutex);
-        auto it = _cache.find(url);
-        if (it != _cache.end()) {
-            co_return Ok(it->second);
-        }
-    }
-
     auto resolver = net::use_awaitable_t<boost::asio::any_io_executor>::as_default_on(
         tcp::resolver(co_await net::this_coro::executor));
 
@@ -84,39 +67,12 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
 
     // Gracefully close the stream - do not threat every error as an exception!
     auto [ec] = co_await stream.async_shutdown(net::as_tuple(net::use_awaitable));
-    if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated)) {
+    if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated))
         // If we get here then the connection is closed gracefully
-        // Cache the response
-        {
-            std::lock_guard<std::mutex> lock(_cacheMutex);
-            _cache[url] = res;
-        }
-
-        // Generate a unique filename and save the response body to a file
-        std::string filename = generateFilename(url);
-        saveToFile(filename, _buffer);
-
         co_return Ok(res);
-    }
 
     debug(), ec, ec.message();
     co_return Err(Error(Error::Network, ec.message()));
-}
-
-void HttpsAccessManager::saveToFile(const std::string& filename, const beast::flat_buffer& buffer) {
-    std::ofstream file(filename, std::ios::binary);
-    if (file.is_open()) {
-        file.write(static_cast<const char*>(buffer.data().data()), buffer.size());
-        file.close();
-    }
-}
-
-std::string HttpsAccessManager::generateFilename(const std::string& url) {
-    std::hash<std::string> hasher;
-    std::size_t hash = hasher(url);
-    std::stringstream ss;
-    ss << "image_" << hash << ".jpg";
-    return ss.str();
 }
 
 } // namespace evento

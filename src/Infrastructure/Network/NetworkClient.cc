@@ -1,9 +1,7 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
-#include <Infrastructure/Utils/Debug.h>
 #include <boost/url/param.hpp>
-#include <boost/url/params_view.hpp>
 #include <initializer_list>
 #include <memory>
 #include <nlohmann/json.hpp>
@@ -19,7 +17,7 @@ constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencode
 
 NetworkClient::NetworkClient(net::ssl::context& ctx)
     : _ctx(ctx)
-    , _manager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
+    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
 
 NetworkClient* NetworkClient::getInstance() {
     static ssl::context ctx(ssl::context::sslv23);
@@ -346,17 +344,6 @@ Task<Result<DepartmentEntityList>> NetworkClient::getDepartmentList() {
     }
 
     co_return Ok(entity);
-}
-
-std::string NetworkClient::generateCacheKey(http::verb verb,
-                                            const urls::url_view& url,
-                                            const std::initializer_list<urls::param>& params) {
-    std::string key = std::string(url.data(), url.size()) + "|"
-                      + std::to_string(static_cast<int>(verb));
-    for (const auto& param : params) {
-        key += "|" + std::string(param.key) + "=" + std::string(param.value);
-    }
-    return key;
 }
 
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
