@@ -11,12 +11,29 @@ import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
 import { SResult} from "../../modules/surrealism-ui/src/result/index.slint";
 import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
 import { ViewManager } from "../../logic/index.slint";
-import { LineEdit } from "std-widgets.slint";
+import { LineEdit, VerticalBox } from "std-widgets.slint";
+import { EventCard, EventCardGroup} from "../../components/index.slint";
+import { EventStruct, EventState } from "../../components/index.slint";
 
 export global MyEventPageBridge {
+    in-out property <[EventStruct]> info-sub;
+    in-out property <[EventStruct]> info-start;
+    in-out property <[EventStruct]> info-end;
+    in-out property <string> event-code : "";
+    in-out property <int> sub-event-num : 0;
+    in-out property <int> start-event-num : 0;
+    in-out property <int> id : 1;
 
+    pure callback return-array-sub()->[int];
+    pure callback return-array-start()->[int];
+
+    callback get-code(string);
+    callback get-event-id(int,string)->int;
+    callback back-event-id(int)->int;
+    callback is-check-in()->bool;
+
+    callback show-mess(int,string,string)->string;
 }
-
 
 export component result-succes inherits Window {
     property <bool> is_show : false;
@@ -38,6 +55,8 @@ export component result-succes inherits Window {
 
 export component result-fail inherits Window {
     property <bool> is_show : false;
+    // 用于判断是不是确认了密码
+    property <bool> is-confirm: false;
     visible: false;
     SResult {
         text: "抱歉,密码错误"+"\n"+"签到失败";
@@ -114,6 +133,7 @@ export component ForMore inherits SLink {
 
 // 签到按钮
 component SignButton inherits SButton{
+    in-out property <int> s-id : 0;
     width: 40px;
     height: 20px;
     background: Token.color.surface;
@@ -143,9 +163,11 @@ component ReviewButton inherits SButton {
     clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
 }
 
-// 信息卡片部分
 component Card inherits SCard{
-    background: Token.color.surface-container-lowest;
+    in-out property <string> title : "标题";
+    property <string> introduction : "介绍";
+    property <string> content : "内容";
+    background: Token.color.primary-container;
     Icon {
         x: parent.x+30px;
         height: 50px;
@@ -155,10 +177,7 @@ component Card inherits SCard{
     info := Rectangle{
         x: parent.x+80px;
         preferred-height: 200px;
-        preferred-width: 200px;
-        property <string> title : "标题";
-        property <string> introduction : "介绍";
-        property <string> content : "内容";
+        preferred-width: 300px;
         VerticalLayout {
             alignment: center;
             SText {
@@ -201,6 +220,7 @@ export component SignLine inherits STimeLine{
     STimeLineItem {
         width: (parent.width)+80px;
         height: parent.height;
+        theme: Dark;
         SignCard {
             x: (parent.x)-10px;
             y: parent.y;
@@ -213,6 +233,7 @@ export component StartLine inherits STimeLine{
     STimeLineItem {
         width: (parent.width)+80px;
         height: parent.height;
+        theme: Dark;
         Card {
             x: (parent.x)-10px;
             y: parent.y;
@@ -225,6 +246,7 @@ export component EndLine inherits STimeLine{
     STimeLineItem {
         width: (parent.width)+80px;
         height: parent.height;
+        theme: Dark;
         ReviewCard {
             x: (parent.x)-10px;
             y: parent.y;
@@ -379,21 +401,22 @@ export component MyEventPage inherits Page {
             height: 100%;
             //schedule timeline
             HorizontalLayout {
-                padding: 50px;
                 signin-line := Schedule {
                     width: 50%;
                     height: 100%;
                     title: "已报名";
-                    SignForm { }
-                    SignForm { }
-                    SignForm { }
+                    for idx in MyEventPageBridge.return-array-sub(): Rectangle {
+                        SignForm {}
+                    }
                 }
                 VerticalLayout {
                     spacing: 150px;
                     start-line := Schedule { 
                         width: 50%;
                         title: "进行中";
-                        StartForm { }
+                        for idx in MyEventPageBridge.return-array-start(): Rectangle {
+                            StartForm {}
+                        }
                     }
                     end-line := Schedule { 
                         width: 50%;
@@ -403,15 +426,9 @@ export component MyEventPage inherits Page {
                     }
                 }
             }
-            
             placeholder := Rectangle {
                 border-width: 4px;
-                //border-color: red;
-                // Text {
-                //     text: "活动日程（我的活动）\n  未开始、进行中、已结束";
-                // }
             }
         }
     //}
 }
-
