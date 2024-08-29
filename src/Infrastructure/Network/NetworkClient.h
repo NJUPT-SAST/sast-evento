@@ -47,21 +47,23 @@ public:
 
     Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
-    Task<Result<EventQueryRes>> getActiveEventList();
+    Task<Result<EventQueryRes>> getActiveEventList(bool useCache = false);
 
-    Task<Result<EventQueryRes>> getLatestEventList();
+    Task<Result<EventQueryRes>> getLatestEventList(bool useCache = false);
 
-    Task<Result<EventQueryRes>> getHistoryEventList(int page, int size = 10);
+    Task<Result<EventQueryRes>> getHistoryEventList(int page, int size = 10, bool useCache = false);
 
     Task<Result<EventQueryRes>> getDepartmentEventList(std::string const& larkDepartment,
                                                        int page,
-                                                       int size = 10);
+                                                       int size = 10,
+                                                       bool useCache = false);
 
-    Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params);
+    Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params,
+                                             bool useCache = false);
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
-    Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(int eventId);
+    Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(int eventId, bool useCache = false);
 
     Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string const& content);
 
@@ -71,15 +73,15 @@ public:
 
     Task<Result<bool>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
 
-    Task<Result<EventEntityList>> getParticipatedEvent();
+    Task<Result<EventEntityList>> getParticipatedEvent(bool useCache = false);
 
-    Task<Result<EventEntityList>> getSubscribedEvent();
+    Task<Result<EventEntityList>> getSubscribedEvent(bool useCache = false);
 
-    Task<Result<SlideEntityList>> getHomeSlide();
+    Task<Result<SlideEntityList>> getHomeSlide(bool useCache = false);
 
-    Task<Result<SlideEntityList>> getEventSlide(int eventId);
+    Task<Result<SlideEntityList>> getEventSlide(int eventId, bool useCache = false);
 
-    Task<Result<DepartmentEntityList>> getDepartmentList();
+    Task<Result<DepartmentEntityList>> getDepartmentList(bool useCache = false);
 
     Task<Result<ContributorList>> getContributors();
 
