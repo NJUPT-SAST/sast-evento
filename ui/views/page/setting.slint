@@ -51,10 +51,20 @@ component Divider inherits Rectangle {
 
 export component SettingPage inherits Page {
     ScrollView {
+        TouchArea {
+            pointer-event(e) => {
+                if (e.button == PointerEventButton.left) {
+                    theme-box.clear-focus();
+                    language-box.clear-focus();
+                }
+            }
+        }
+
         VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
             spacing: 15px;
+
             Text {
                 text: "设置";
                 font-size: Token.font.display.medium.size;
@@ -65,7 +75,7 @@ export component SettingPage inherits Page {
 
             SettingItem {
                 name: "主题";
-                ComboBox {
+                theme-box := ComboBox {
                     width: 200px;
                     model: ["跟随系统", "浅色", "深色"];
                     current-index <=> SettingPageBridge.theme-index;
@@ -79,7 +89,7 @@ export component SettingPage inherits Page {
             SettingItem {
                 name: "语言";
                 supported: false;
-                ComboBox {
+                language-box := ComboBox {
                     width: 200px;
                     enabled: false;
                     model: ["简体中文", "繁體中文", "English"];
