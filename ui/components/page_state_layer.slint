@@ -1,5 +1,7 @@
-import { LoadingAnimation } from "animation.slint";
 import { Token } from "../global.slint";
+import { LoadingAnimation } from "./animation.slint";
+import { Button } from "./button.slint";
+import { Empty } from "index.slint";
 
 /**
  * this component ALWAYS appears on top of other elements at the same level.
@@ -9,10 +11,12 @@ import { Token } from "../global.slint";
  * states:
  * - loading state will show loading animate and a message.
  *      @property is-loading: loading state
+ *      @property loading-message: show as message like "loading ..."
  * 
  * - error state will show a message and a retry button.
  *      @property is-error: error state
  *      @property error-message: show when in error state
+ *      @property error-retry-message: show as retry button content
  *      @callback error-retry: invoke when retry button clicked
  * 
  * state priority (descending):
@@ -23,8 +27,10 @@ export component PageStateLayer {
     // option
     in property <color> background: Token.color.surface;
     in property <bool> is-loading;
+    in property <string> loading-message: "加载中 ...";
     in property <bool> is-error;
-    in property <string> error-message: "Unknown error";
+    in property <string> error-message: "No Content";
+    in property <string> error-retry-message: "Retry";
     callback error-retry();
     // implement
     private property <color> on-surface: Token.color.on-surface;
@@ -47,11 +53,11 @@ export component PageStateLayer {
             LoadingAnimation {
                 width: 24px;
                 height: 24px;
-                stroke: on-surface;
+                color: on-surface;
             }
 
             Text {
-                text: "加载中 ...";
+                text: loading-message;
                 font-size: Token.font.body.large.size;
                 font-weight: Token.font.body.large.weight;
                 color: on-surface;
@@ -62,6 +68,7 @@ export component PageStateLayer {
     private property <bool> show-error-layer;
     if show-error-layer: _error-layer := VerticalLayout {
         alignment: center;
+        spacing: 24px;
         HorizontalLayout {
             alignment: center;
             spacing: 8px;
@@ -80,13 +87,15 @@ export component PageStateLayer {
             }
         }
 
-        // TODO: await button refactor
-        // Button {
-        //     type: ;
-        //     clicked => {
-        //         root.error-retry();
-        //     }
-        // }
+        Empty {
+            Button {
+                type: filled;
+                content: error-retry-message;
+                clicked => {
+                    root.error-retry();
+                }
+            }
+        }
     }
     states [
         error when is-error: {
