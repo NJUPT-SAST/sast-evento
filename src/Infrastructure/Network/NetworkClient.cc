@@ -1,9 +1,15 @@
 #include "NetworkClient.h"
+#include "Infrastructure/Cache/Cache.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
-#include <Infrastructure/Utils/Debug.h>
+#include <boost/beast/core/buffers_to_string.hpp>
+#include <boost/beast/core/file.hpp>
+#include <boost/beast/core/file_base.hpp>
+#include <boost/beast/http/message.hpp>
+#include <boost/beast/http/string_body.hpp>
 #include <boost/url/param.hpp>
-#include <boost/url/params_view.hpp>
+#include <filesystem>
+#include <initializer_list>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -18,7 +24,7 @@ constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencode
 
 NetworkClient::NetworkClient(net::ssl::context& ctx)
     : _ctx(ctx)
-    , _manager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
+    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
 
 NetworkClient* NetworkClient::getInstance() {
     static ssl::context ctx(ssl::context::sslv23);
@@ -76,10 +82,13 @@ Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshT
     co_return Ok();
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getActiveEventList() {
+Task<Result<EventQueryRes>> NetworkClient::getActiveEventList(
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
-                                                               {{"active", "true"}}));
+                                                               {{"active", "true"}}),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -93,10 +102,13 @@ Task<Result<EventQueryRes>> NetworkClient::getActiveEventList() {
     co_return Ok(entity);
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getLatestEventList() {
+Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
-                                                               {{"start", "now"}}));
+                                                               {{"start", "now"}}),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -110,12 +122,15 @@ Task<Result<EventQueryRes>> NetworkClient::getLatestEventList() {
     co_return Ok(entity);
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(int page, int size) {
+Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
+    int page, int size, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
                                                                 {"size", std::to_string(size)},
-                                                                {"end", "now"}}));
+                                                                {"end", "now"}}),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -129,15 +144,19 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(int page, int siz
     co_return Ok(entity);
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(std::string const& larkDepartment,
-                                                                  int page,
-                                                                  int size) {
+Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
+    std::string const& larkDepartment,
+    int page,
+    int size,
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
                                                                 {"size", std::to_string(size)},
                                                                 {"larkDepartmentName",
-                                                                 larkDepartment}}));
+                                                                 larkDepartment}}),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -151,9 +170,12 @@ Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(std::string co
     co_return Ok(entity);
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getEventList(std::initializer_list<urls::param> params) {
+Task<Result<EventQueryRes>> NetworkClient::getEventList(
+    std::initializer_list<urls::param> params, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query", params));
+                                                      endpoint("/v2/client/event/query", params),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -183,11 +205,14 @@ Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
     co_return Ok(entity);
 }
 
-Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(int eventId) {
+Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(
+    int eventId, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this
                       ->request<api::Evento>(http::verb::get,
                                              endpoint(std::format("/v2/client/event/{}/feedback",
-                                                                  eventId)));
+                                                                  eventId)),
+                                             {},
+                                             cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -265,9 +290,12 @@ Task<Result<bool>> NetworkClient::subscribeDepartment(std::string const& larkDep
     co_return Err(Error(Error::Data, "response data type error"));
 }
 
-Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent() {
+Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent(
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/participated"));
+                                                      endpoint("/v2/client/event/participated"),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -281,9 +309,12 @@ Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent() {
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getSubscribedEvent() {
+Task<Result<EventEntityList>> NetworkClient::getSubscribedEvent(
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/subscribed"));
+                                                      endpoint("/v2/client/event/subscribed"),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -297,9 +328,12 @@ Task<Result<EventEntityList>> NetworkClient::getSubscribedEvent() {
     co_return Ok(entity);
 }
 
-Task<Result<SlideEntityList>> NetworkClient::getHomeSlide() {
+Task<Result<SlideEntityList>> NetworkClient::getHomeSlide(
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/slide"));
+                                                      endpoint("/v2/client/event/slide"),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -313,11 +347,14 @@ Task<Result<SlideEntityList>> NetworkClient::getHomeSlide() {
     co_return Ok(entity);
 }
 
-Task<Result<SlideEntityList>> NetworkClient::getEventSlide(int eventId) {
+Task<Result<SlideEntityList>> NetworkClient::getEventSlide(
+    int eventId, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint(
                                                           std::format("/v2/client/event/{}/slide",
-                                                                      eventId)));
+                                                                      eventId)),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -331,9 +368,12 @@ Task<Result<SlideEntityList>> NetworkClient::getEventSlide(int eventId) {
     co_return Ok(entity);
 }
 
-Task<Result<DepartmentEntityList>> NetworkClient::getDepartmentList() {
+Task<Result<DepartmentEntityList>> NetworkClient::getDepartmentList(
+    std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("v2/client/lark/department"));
+                                                      endpoint("v2/client/lark/department"),
+                                                      {},
+                                                      cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -390,6 +430,37 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
     co_return Ok(entity);
+}
+
+Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
+    http::request<http::string_body> req{http::verb::get, url.path(), 11};
+    // use cache first
+    auto cacheDir = CacheManager::cacheDir();
+    if (!cacheDir) {
+        co_return Err(Error(Error::Data, "cache dir not found"));
+    }
+
+    auto path = *cacheDir / CacheManager::generateFilename(url);
+
+    if (std::filesystem::exists(path)) {
+        co_return Ok(path);
+    }
+
+    // if cache not exists, download file
+    auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+    if (reply.isErr())
+        co_return Err(reply.unwrapErr());
+
+    auto response = reply.unwrap();
+
+    if (response.result() != http::status::ok) {
+        co_return Err(Error(Error::Network, std::to_string(response.result_int())));
+    }
+
+    if (!CacheManager::saveToDisk(beast::buffers_to_string(response.body().data()), path))
+        co_return Err(Error(Error::Data, "save file failed"));
+
+    co_return Ok(path);
 }
 
 urls::url NetworkClient::githubEndpoint(std::string_view endpoint) {

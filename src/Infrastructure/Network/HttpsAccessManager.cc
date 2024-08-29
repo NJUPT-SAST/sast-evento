@@ -5,12 +5,8 @@
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/ssl/error.hpp>
 #include <boost/asio/ssl/stream.hpp>
-#include <boost/asio/ssl/stream_base.hpp>
-#include <boost/beast/http/dynamic_body.hpp>
-#include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
-#include <boost/system/detail/error_code.hpp>
 #include <boost/system/system_error.hpp>
 #include <boost/url.hpp>
 
