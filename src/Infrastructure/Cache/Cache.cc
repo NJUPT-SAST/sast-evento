@@ -75,17 +75,17 @@ void CacheManager::insert(const std::string& key, const CacheEntry& entry) {
     auto it = _cacheMap.find(key);
     if (it != _cacheMap.end()) {
         _cacheList.erase(it->second);
-        currentCacheSize -= it->second->second.size;
+        _currentCacheSize -= it->second->second.size;
     }
 
     _cacheList.emplace_front(key, entry);
     _cacheMap[key] = _cacheList.begin();
-    currentCacheSize += entry.size;
+    _currentCacheSize += entry.size;
 
-    while (currentCacheSize > MAX_CACHE_SIZE) {
+    while (_currentCacheSize > MAX_CACHE_SIZE) {
         auto last = _cacheList.end();
         --last;
-        currentCacheSize -= last->second.size;
+        _currentCacheSize -= last->second.size;
         _cacheMap.erase(last->first);
         _cacheList.pop_back();
     }
@@ -93,7 +93,7 @@ void CacheManager::insert(const std::string& key, const CacheEntry& entry) {
 
 std::optional<CacheEntry> CacheManager::get(std::string const& key) {
     if (isExpired(_cacheMap[key]->second)) {
-        currentCacheSize -= _cacheMap[key]->second.size;
+        _currentCacheSize -= _cacheMap[key]->second.size;
         _cacheList.erase(_cacheMap[key]);
         _cacheMap.erase(key);
         return std::nullopt;

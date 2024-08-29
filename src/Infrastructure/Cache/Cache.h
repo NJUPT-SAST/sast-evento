@@ -2,8 +2,8 @@
 
 #include <boost/beast/http.hpp>
 #include <boost/url.hpp>
-#include <boost/url/url_view.hpp>
 #include <chrono>
+#include <cstddef>
 #include <list>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -37,6 +37,8 @@ public:
 
     void insert(const std::string& key, const CacheEntry& entry);
 
+    static std::size_t currentCacheSize() { return _currentCacheSize; }
+
     std::optional<CacheEntry> get(std::string const& key);
 
     static constexpr size_t MAX_CACHE_SIZE = 64 * 1024 * 1024;
@@ -44,7 +46,7 @@ public:
 private:
     std::list<std::pair<std::string, CacheEntry>> _cacheList;
     std::unordered_map<std::string, decltype(_cacheList.begin())> _cacheMap;
-    inline static size_t currentCacheSize = 0;
+    inline static std::size_t _currentCacheSize = 0;
 };
 
 } // namespace evento
