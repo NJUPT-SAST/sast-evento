@@ -1,5 +1,5 @@
 import { Palette, Button } from "std-widgets.slint";
-import { EventoStyleToken } from "../../logic/index.slint";
+import { MdStyleToken } from "../../logic/md_style_token.slint";
 
 struct ImgPair {
     light: image,
@@ -54,7 +54,7 @@ export global EventoImageToken {
         display: display,
     };
     pure function switcher(img: ImgPair) -> image {
-        return EventoStyleToken.is-darkmode ? img.dark : img.light;
+        return MdStyleToken.is-darkmode ? img.dark : img.light;
     }
     //
     // icon used as small image in button, navbar and so on

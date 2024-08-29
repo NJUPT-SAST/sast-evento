@@ -1,32 +1,42 @@
 import { Palette, Button } from "std-widgets.slint";
+export { 
+    MdFontData,
+    MdElevationData,
+}
 
 // font
-struct EventoFontData {
+struct MdFontData {
     size: length,
     weight: int,
 }
 
-struct EventoFontSize {
-    large: EventoFontData,
-    medium: EventoFontData,
-    small: EventoFontData,
+struct MdFontTypeData {
+    large: MdFontData,
+    medium: MdFontData,
+    small: MdFontData,
 }
 
 // five types: large, headline, title, body, label
 // more info: https://m3.material.io/styles/typography/applying-type#ab657e7c-cb93-45ff-92c6-686959dc19ae
-struct EventoFontCollection {
-    display: EventoFontSize,
-    headline: EventoFontSize,
-    title: EventoFontSize,
-    body: EventoFontSize,
-    label: EventoFontSize,
+struct MdFontStruct {
+    display: MdFontTypeData,
+    headline: MdFontTypeData,
+    title: MdFontTypeData,
+    body: MdFontTypeData,
+    label: MdFontTypeData,
 }
 
 // color
 // more info: https://m3.material.io/styles/color/roles
-struct EventoColorCollection {
+struct MdColorStruct {
+    primary: color,
+    on-primary: color,
     primary-container: color,
     on-primary-container: color,
+    secondary: color,
+    on-secondary: color,
+    secondary-container: color,
+    on-secondary-container: color,
     surface: color,
     on-surface: color,
     surface-variant: color,
@@ -42,12 +52,34 @@ struct EventoColorCollection {
     outline-variant: color,
     error: color,
     on-error: color,
+    scrim: color,
+    shadow: color,
 }
 
-export global EventoStyleToken {
-    out property <EventoColorCollection> color:{
+struct MdElevationData {
+    offset-y: length,
+    blur: length,
+}
+
+struct MdElevationStruct {
+    level0: MdElevationData,
+    level1: MdElevationData,
+    level2: MdElevationData,
+    level3: MdElevationData,
+    level4: MdElevationData,
+    level5: MdElevationData,
+}
+
+export global MdStyleToken {
+    out property <MdColorStruct> color:{
+        primary: switcher({ light: #6750A4, dark: #D0BCFF }),
+        on-primary: switcher({ light: #FFFFFF, dark: #381E72 }),
         primary-container: switcher({ light: #EADDFF, dark: #4F378B }),
         on-primary-container: switcher({ light: #4F378B, dark: #EADDFF }),
+        secondary: switcher({ light: #625B71, dark: #CCC2DC }),
+        on-secondary: switcher({ light: #FFFFFF, dark: #332D41 }),
+        secondary-container: switcher({ light: #E8DEF8, dark: #4A4458 }),
+        on-secondary-container: switcher({ light: #4A4458, dark: #E8DEF8 }),
         surface: switcher({ light: #FEF7FF, dark: #141218 }),
         on-surface: switcher({ light:#1D1B20, dark:  #E6E0E9 }),
         surface-variant: switcher({ light: #E7E0EC, dark: #49454F }),
@@ -63,10 +95,12 @@ export global EventoStyleToken {
         outline-variant: switcher({ light: #CAC4D0, dark: #49454F }),
         error: switcher({ light: #B3261E, dark: #F2B8B5 }),
         on-error: switcher({ light: #FFFFFF, dark: #601410 }),
+        scrim: #000000,
+        shadow: #000000,
     };
     // source: https://m3.material.io/styles/typography/type-scale-tokens#a734c6ed-634c-4abb-adb2-35daf0aed06a
     // prefer large, use body.large (16px) for body text
-    out property <EventoFontCollection> font:{
+    out property <MdFontStruct> font:{
         display: {
             large: {
                 size: 57px,
@@ -138,8 +172,51 @@ export global EventoStyleToken {
             }
         },
     };
+    out property <MdElevationStruct> elevation:{
+        level0: {
+            offset-y: 0px,
+            blur: 0px,
+        },
+        level1: {
+            offset-y: 1px,
+            blur: 2px,
+        },
+        level2: {
+            offset-y: 3px,
+            blur: 4px,
+        },
+        level3: {
+            offset-y: 6px,
+            blur: 7px,
+        },
+        level4: {
+            offset-y: 8px,
+            blur: 9px,
+        },
+        level5: {
+            offset-y: 12px,
+            blur: 13px,
+        },
+    };
     out property <bool> is-darkmode: Palette.color-scheme == ColorScheme.dark;
     pure function switcher(color: {light:color,dark:color}) -> color {
         return self.is-darkmode ? color.dark : color.light;
     }
 }
+
+// component ElevationTest {
+//     Rectangle {
+//         background: white;
+//     }
+
+//     Rectangle {
+//         private property <MdElevationData> level: MdStyleToken.elevation.level1;
+//         background: white;
+//         height: 50px;
+//         width: 50px;
+//         drop-shadow-offset-y: level.offset-y;
+//         drop-shadow-blur: level.blur;
+//         drop-shadow-color: black;
+//         border-radius: 20px;
+//     }
+// }
