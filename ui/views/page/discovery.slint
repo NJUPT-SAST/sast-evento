@@ -1,6 +1,7 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
-import { EventCardGroup } from "../../components/event_card.slint";
+import { EventCard, EventCardGroup } from "../../components/event_card.slint";
+import { EventStruct } from "../../components/event_struct.slint";
 import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { EventoStyleToken } from "../../logic/style_token.slint";
@@ -16,93 +17,172 @@ export global DiscoveryPageBridge {
     pure callback calc_block_row_num(int, int) -> int;
 }
 
-struct block_data {
-    img:   image,
-    title: string,
-    date:  string,
-    time:  string,
-    info:  string
-}
+// struct block_data {
+//     img:   image,
+//     title: string,
+//     date:  string,
+//     time:  string,
+//     info:  string
+// }
 
 // infomation of events
-component block {
-    preferred-height: 200px;
-    preferred-width: 400px;
-    in property <block_data> data;
-    Rectangle {
-        background: #ffffff;
-        HorizontalLayout {
-            preview := Image{
-                height: 100%;
-                width: 50%;
-                image-fit: contain;
-                source: data.img;
-            }
-            VerticalLayout {
-                title := Text { 
-                    text: data.title; 
-                    font-size: EventoStyleToken.font.title.medium.size;   
-                    font-weight: EventoStyleToken.font.title.medium.weight;  
-                }
-                date  := Text { 
-                    text: data.date; 
-                    font-size: EventoStyleToken.font.display.medium.size; 
-                    font-weight: EventoStyleToken.font.display.medium.weight;
-                }
-                time  := Text { 
-                    text: data.time; 
-                    font-size: EventoStyleToken.font.display.medium.size; 
-                    font-weight: EventoStyleToken.font.display.medium.weight;
-                }
-                info  := Text { 
-                    text: data.info; 
-                    font-size: EventoStyleToken.font.display.medium.size; 
-                    font-weight: EventoStyleToken.font.display.medium.weight;
-                }
-            }
-        }
-    }
-}
+// component block {
+//     preferred-height: 200px;
+//     preferred-width: 400px;
+//     in property <block_data> data;
+//     Rectangle {
+//         background: #ffffff;
+//         HorizontalLayout {
+//             preview := Image{
+//                 height: 100%;
+//                 width: 50%;
+//                 image-fit: contain;
+//                 source: data.img;
+//             }
+//             VerticalLayout {
+//                 title := Text { 
+//                     text: data.title; 
+//                     font-size: EventoStyleToken.font.title.medium.size;   
+//                     font-weight: EventoStyleToken.font.title.medium.weight;  
+//                 }
+//                 date  := Text { 
+//                     text: data.date; 
+//                     font-size: EventoStyleToken.font.display.medium.size; 
+//                     font-weight: EventoStyleToken.font.display.medium.weight;
+//                 }
+//                 time  := Text { 
+//                     text: data.time; 
+//                     font-size: EventoStyleToken.font.display.medium.size; 
+//                     font-weight: EventoStyleToken.font.display.medium.weight;
+//                 }
+//                 info  := Text { 
+//                     text: data.info; 
+//                     font-size: EventoStyleToken.font.display.medium.size; 
+//                     font-weight: EventoStyleToken.font.display.medium.weight;
+//                 }
+//             }
+//         }
+//     }
+// }
 
 export component DiscoveryPage inherits Page {
     /*  demo code for generating corresponding C++ code correctly
         remove this when EventCard&EventCardGroup is truly used
         otherwise "Convert.h/Convert.cc" will fail to compile    */
-    EventCardGroup {
-        model: [
-            {
-                id: 1,
-                summary-abbr: "软",
-                summary: "软件研发部 C++组授课",
-                time: "09.30 14:30 - 09.30 15:30",
-                location: "仙林校区 大学生活动中心101",
-                description: "组内授课"
-            },
-            {
-                id: 2,
-                summary-abbr: "软",
-                summary: "软件研发部 Web组授课",
-                time: "09.30 14:30 - 09.30 15:30",
-                location: "仙林校区 大学生活动中心101",
-                description: "组内授课"
-            },
-            {
-                id: 3,
-                summary-abbr: "软",
-                summary: "软件研发部 C#组授课",
-                time: "09.30 14:30 - 09.30 15:30",
-                location: "仙林校区 大学生活动中心101",
-                description: "组内授课"
-            }
-        ];
-        item-clicked(event-struct) => {
-            debug("id: " + event-struct.id + " title: " + event-struct.summary);
-        }
-    }
 
     // TODO: implement Discovery
     // optional
     background := Empty { }
+    
+    //BEGIN debug data
+
+    in property <[EventStruct]> event_list: [
+        {
+            id: 1,
+            summary-abbr: "软",
+            summary: "软件研发部 C++组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 2,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 3,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 4,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 5,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 6,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 7,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 8,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 9,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 10,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 11,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 12,
+            summary-abbr: "软",
+            summary: "软件研发部 Web组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 13,
+            summary-abbr: "软",
+            summary: "软件研发部 C#组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        }
+    ];
+    //END   debug data
 
     layout := VerticalLayout {
         visible: false;
@@ -189,155 +269,57 @@ export component DiscoveryPage inherits Page {
                         focus-main: true;
                         fit: contain;
                         sources: [
-                            EventoImageToken.image.display.event.cpp[0],
-                            EventoImageToken.image.display.event.cpp[1],
-                            EventoImageToken.image.display.event.cpp[2],
+                            EventoImageToken.image.display.event.default[0],
+                            EventoImageToken.image.display.event.default[0],
+                            EventoImageToken.image.display.event.default[0],
                         ];
                     }
-
-                    Rectangle {
-                        // 提示词: 正在进行的活动
-                        height: 40px;
-                        width: 100%;
-                        Text {
-                            text: "正在进行的活动";
-                        }
-                    }
-                    
-                    in property <int> block_max_w: 400;
-                    in property <int> block_max_h: 200;
-                    in property <int> block_col_num: DiscoveryPageBridge.calc_block_col_num(root.width / 1px, block_max_w);
-                    in property <int> block_row_num: DiscoveryPageBridge.calc_block_row_num(root.height / 1px, block_max_h);
-
-                    in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
-                    in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
                     
                     Rectangle {
-                        background: #39c5bb;
-                        width: 100%;
-                        height: (DiscoveryPageBridge.div(current_event_num, 3) + 1) * 200 * 1px;
-                        VerticalLayout {
-                            in property <int> i: 0;
-                            in property <int> j: 0;
-
-                            // row_num
-                            for i in DiscoveryPageBridge.div(current_event_num, block_col_num) : HorizontalLayout {
-                                // col_num
-                                for j in block_col_num: Empty {
-                                    if(3 * i + j <= current_event_num): block {
-                                        width: block_width * 1px;
-                                        height:block_height * 1px;
-                                        data: current_event_list[block_col_num * i + j];
-                                    }
-                                }
+                        // this height is put here to ensure the scrollview can scroll
+                        // it should be caluculated with number of event list
+                        height: 600px;
+                        EventCardGroup {
+                            model: event_list;
+                            item-clicked(event-struct) => {
+                                debug("id: " + event-struct.id + " title: " + event-struct.summary);
                             }
                         }
                     }
-                    
-                    Rectangle {
-                        // 提示词: 最新的活动
-                        height: 40px;
-                        width: 100%;
-                        Text {
-                            text: "最新的活动";
-                        }
-                    }
-
-                        Rectangle {
-                            background: #66ccff;
-                            height: 200px;
-                            width: 100%;
-                        }
-                        
-                        // for ... block ... : 最新的活动内容
-                        // for itm[idx] in newest_event_list: block {
-                        //     x: 1px * calcBlockX(idx, block_width, block_col_num);
-                        //     y: 1px * calcBlockY(idx, block_height, block_col_num);
-                        //     // x: block_width * (idx - idx / block_col_num) * 1px;
-                        //     // y: block_height * (idx / block_col_num) * 1px;
-                        //     height: block_height * 1px;
-                        //     width: block_width * 1px;
-                        //     data: itm;
-                        // }
-
-                    }
 
                 }
+
+                    
+                    // in property <int> block_max_w: 400;
+                    // in property <int> block_max_h: 200;
+                    // in property <int> block_col_num: DiscoveryPageBridge.calc_block_col_num(root.width / 1px, block_max_w);
+                    // in property <int> block_row_num: DiscoveryPageBridge.calc_block_row_num(root.height / 1px, block_max_h);
+
+                    // in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
+                    // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
+                    // 
+                    // Rectangle {
+                    //     background: #39c5bb;
+                    //     width: 100%;
+                    //     height: (DiscoveryPageBridge.div(current_event_num, 3) + 1) * 200 * 1px;
+                    //     VerticalLayout {
+                    //         in property <int> i: 0;
+                    //         in property <int> j: 0;
+
+                    //         // row_num
+                    //         for i in DiscoveryPageBridge.div(current_event_num, block_col_num) : HorizontalLayout {
+                    //             // col_num
+                    //             for j in block_col_num: Empty {
+                    //                 if(3 * i + j <= current_event_num): block {
+                    //                     width: block_width * 1px;
+                    //                     height:block_height * 1px;
+                    //                     data: current_event_list[block_col_num * i + j];
+                    //                 }
+                    //             }
+                    //         }
+                    //     }
+                    // }
             }
-
-            // 正在进行的活动
-            // Rectangle {
-            //     width: 100%;
-            //     height: 50%;
-            //     VerticalLayout {
-            //         Rectangle {
-            //             height: 50%;
-            //             Flickable {
-            //                 in-out property <int> sum_of_blocks: 7;
-
-            //                 // calculate the number of blocks
-            //                 // the num of displayed blocks depends on the actual width of the window
-            //                 property <int> block_num: 0;
-            //                 // what is the proper k ???
-            //                 property <int> k: 10;
-            //                 pure public function calcBlockNum(sum_of_blocks: int) -> int {
-            //                     if (self.width > k * 100px) {
-            //                         return sum_of_blocks > 4 ? 4 : sum_of_blocks;
-            //                     } else if (self.width > k * 50px) {
-            //                         return sum_of_blocks > 3 ? 3 : sum_of_blocks;
-            //                     } else if (self.width > k * 25px) {
-            //                         return sum_of_blocks > 2 ? 2 : sum_of_blocks;
-            //                     }
-            //                     return 1;
-            //                 }
-
-            //                 property <int> actual_shown_block_num: calcBlockNum(sum_of_blocks);
-
-            //                 height: 80%;
-            //                 width: parent.width;
-            //                 viewport-height: parent.height;
-            //                 viewport-width: (parent.width / actual_shown_block_num * sum_of_blocks);
-            //                 HorizontalLayout {
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #919191;
-            //                     }
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #39c5bb;
-            //                     }
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #66ccff;
-            //                     }
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #b30074;
-            //                     }
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #66ccff;
-            //                     }
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #39c5bb;
-            //                     }
-            //                     Rectangle {
-            //                         width: root.width / actual_shown_block_num;
-            //                         background: #919191;
-            //                     }
-            //                 }    
-            //             }
-            //         }
-            //         Rectangle {
-            //             background: #1e1e2e;
-            //             height: 50%;
-            //             Text {
-            //                 text: "最新的活动";
-            //             }
-            //         }
-            //     }
-            // }
         }
     }
 }
