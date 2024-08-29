@@ -3,7 +3,6 @@
 #include <boost/beast/http.hpp>
 #include <boost/url.hpp>
 #include <chrono>
-#include <cstddef>
 #include <list>
 #include <nlohmann/json.hpp>
 #include <optional>
@@ -16,8 +15,9 @@ namespace http = beast::http;
 namespace urls = boost::urls;
 
 struct CacheEntry {
-    nlohmann::basic_json<> result;
+    nlohmann::basic_json<> data;
     std::chrono::steady_clock::time_point insertTime;
+    std::chrono::steady_clock::duration ttl;
     std::size_t size; //cache size
 };
 

@@ -28,8 +28,7 @@ std::string CacheManager::generateFilename(urls::url_view url) {
 }
 
 bool CacheManager::isExpired(const CacheEntry& entry) {
-    using namespace std::chrono_literals;
-    return std::chrono::steady_clock::now() - entry.insertTime >= 1h;
+    return std::chrono::steady_clock::now() - entry.insertTime >= entry.ttl;
 }
 
 std::optional<std::filesystem::path> CacheManager::cacheDir() {

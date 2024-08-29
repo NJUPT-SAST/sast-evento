@@ -11,6 +11,7 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
+#include <chrono>
 #include <concepts>
 #include <filesystem>
 #include <initializer_list>
@@ -36,6 +37,8 @@ using ContributorList = std::vector<ContributorEntity>;
 template<typename T>
 using Task = net::awaitable<T>;
 
+using namespace std::chrono_literals;
+
 class NetworkClient {
 public:
     NetworkClient(const NetworkClient&) = delete;
@@ -47,23 +50,28 @@ public:
 
     Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
 
-    Task<Result<EventQueryRes>> getActiveEventList(bool useCache = false);
+    Task<Result<EventQueryRes>> getActiveEventList(
+        std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventQueryRes>> getLatestEventList(bool useCache = false);
+    Task<Result<EventQueryRes>> getLatestEventList(
+        std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventQueryRes>> getHistoryEventList(int page, int size = 10, bool useCache = false);
+    Task<Result<EventQueryRes>> getHistoryEventList(
+        int page, int size = 10, std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventQueryRes>> getDepartmentEventList(std::string const& larkDepartment,
-                                                       int page,
-                                                       int size = 10,
-                                                       bool useCache = false);
+    Task<Result<EventQueryRes>> getDepartmentEventList(
+        std::string const& larkDepartment,
+        int page,
+        int size = 10,
+        std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params,
-                                             bool useCache = false);
+                                             std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<AttachmentEntity>> getAttachment(int eventId);
 
-    Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(int eventId, bool useCache = false);
+    Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(
+        int eventId, std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string const& content);
 
@@ -73,15 +81,19 @@ public:
 
     Task<Result<bool>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
 
-    Task<Result<EventEntityList>> getParticipatedEvent(bool useCache = false);
+    Task<Result<EventEntityList>> getParticipatedEvent(
+        std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventEntityList>> getSubscribedEvent(bool useCache = false);
+    Task<Result<EventEntityList>> getSubscribedEvent(
+        std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<SlideEntityList>> getHomeSlide(bool useCache = false);
+    Task<Result<SlideEntityList>> getHomeSlide(std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<SlideEntityList>> getEventSlide(int eventId, bool useCache = false);
+    Task<Result<SlideEntityList>> getEventSlide(int eventId,
+                                                std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<DepartmentEntityList>> getDepartmentList(bool useCache = false);
+    Task<Result<DepartmentEntityList>> getDepartmentList(
+        std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<ContributorList>> getContributors();
 
@@ -105,48 +117,42 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {},
-                             bool useCache = false) {
-        try {
-            spdlog::info("Requesting: {}", url.data());
+                             std::chrono::steady_clock::duration cacheTtl = 1min) {
+        spdlog::info("Requesting: {}", url.data());
 
-            auto cacheKey = CacheManager::generateKey(verb, url, params);
+        auto cacheKey = CacheManager::generateKey(verb, url, params);
 
-            if (useCache) {
-                //Generate cache
+        if (cacheTtl != 0s) {
+            //Check cache
+            auto cacheEntry = _cacheManager->get(cacheKey);
 
-                //Check cache
-                auto cacheEntry = _cacheManager->get(cacheKey);
-
-                if (cacheEntry) {
-                    spdlog::info("Cache hit: {}", cacheKey);
-                    co_return Ok(cacheEntry->result);
-                }
+            if (cacheEntry) {
+                spdlog::info("Cache hit: {}", cacheKey);
+                co_return Ok(cacheEntry->data);
             }
-
-            auto req = Api::makeRequest(verb, url, tokenBytes, params);
-
-            auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
-
-            if (reply.isErr())
-                co_return reply.unwrapErr();
-
-            auto result = handleResponse(reply.unwrap());
-
-            if (useCache && result.isOk()) {
-                // Update cache
-                size_t entrySize = result.unwrap().dump().size();
-
-                _cacheManager->insert(cacheKey,
-                                      {std::move(result.unwrap()),
-                                       std::chrono::steady_clock::now(),
-                                       entrySize});
-            }
-
-            co_return result;
-        } catch (const std::exception& e) {
-            std::cerr << "Request error occurred: " << e.what() << std::endl;
-            co_return Err(Error(Error::JsonDes, e.what()));
         }
+
+        auto req = Api::makeRequest(verb, url, tokenBytes, params);
+
+        auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+
+        if (reply.isErr())
+            co_return reply.unwrapErr();
+
+        auto result = handleResponse(reply.unwrap());
+
+        if (cacheTtl != 0s && result.isOk()) {
+            // Update cache
+            size_t entrySize = result.unwrap().dump().size();
+
+            _cacheManager->insert(cacheKey,
+                                  {.data = std::move(result.unwrap()),
+                                   .insertTime = std::chrono::steady_clock::now(),
+                                   .ttl = cacheTtl,
+                                   .size = entrySize});
+        }
+
+        co_return result;
     }
 
     template<std::same_as<api::Github> Api>
