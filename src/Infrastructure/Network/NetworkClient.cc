@@ -359,17 +359,6 @@ std::string NetworkClient::generateCacheKey(http::verb verb,
     return key;
 }
 
-std::string NetworkClient::generateCacheKey(http::verb verb,
-                                            const urls::url_view& url,
-                                            const std::initializer_list<urls::param>& params) {
-    std::string key = std::string(url.data(), url.size()) + "|"
-                      + std::to_string(static_cast<int>(verb));
-    for (const auto& param : params) {
-        key += "|" + std::string(param.key) + "=" + std::string(param.value);
-    }
-    return key;
-}
-
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
     return urls::url(EVENTO_API_GATEWAY + endpoint.data());
 }

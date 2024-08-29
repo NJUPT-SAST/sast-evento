@@ -105,7 +105,7 @@ private:
         const urls::url_view& url,
         const std::initializer_list<urls::param>& params); //auxiliary function to generate cache key
 
-    static bool isCacheEntryExpired(const CacheEntry& entry) const {
+    static bool isCacheEntryExpired(const CacheEntry& entry) {
         auto now = std::chrono::steady_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::hours>(now - entry.insertTime);
         return duration.count() >= 3;
@@ -117,7 +117,7 @@ private:
                 cacheList.erase(it->second);
                 currentCacheSize -= it->second->second.size;
             }
-            cacheList.emplace_front({key, std::move(entry)});
+            cacheList.emplace_front(key, std::move(entry));
             cacheMap[key] = cacheList.begin();
             currentCacheSize += cacheList.begin()->second.size;
 

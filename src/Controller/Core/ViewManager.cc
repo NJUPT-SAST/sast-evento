@@ -3,7 +3,6 @@
 #include <Controller/UiBridge.h>
 #include <algorithm>
 #include <cassert>
-#include <memory>
 #include <set>
 #include <spdlog/spdlog.h>
 
