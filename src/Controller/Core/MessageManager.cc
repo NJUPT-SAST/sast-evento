@@ -32,8 +32,9 @@ void MessageManager::showMessage(std::string content,
     auto& self = *this;
     auto id = nextId++;
 
+    UiUtility::StylishLog::general(logOrigin,
+                                   std::format("new message [{}] content = \"{}\"", id, content));
     newToast(id, {.content = slint::SharedString(content), .type = type});
-    UiUtility::StylishLog::newMessageShowed(logOrigin, content);
 
     // set auto hide
     evento::executor()->asyncExecute(
@@ -46,6 +47,9 @@ void MessageManager::showMessage(std::string content,
 void MessageManager::hideMessage(int id) {
     if (auto index = getIndex(id); index != -1 && !toastList->row_data(getIndex(id))->removed) {
         hideToast(id);
+    } else {
+        UiUtility::StylishLog::messageOperation(
+            logOrigin, id, "scheduled hide cancelled: already hidden or deleted");
     }
 }
 
@@ -62,6 +66,7 @@ void MessageManager::newToast(int id, MessageData data) {
     // prepare data then instantiate a toast
     messageData.insert({id, data});
     toastList->push_back({id, 0});
+    UiUtility::StylishLog::messageOperation(logOrigin, id, "instantiate toast, data added");
 
     // make animation available
     slint::invoke_from_event_loop([this, id] { showToast(id); });
@@ -69,6 +74,7 @@ void MessageManager::newToast(int id, MessageData data) {
 
 void MessageManager::showToast(int id) {
     operateToastData(id, increaseElevation);
+    UiUtility::StylishLog::messageOperation(logOrigin, id, "show");
 
     // correct existing toast elevation
     for (int i = 0; i < toastList->row_count(); i++) {
@@ -80,6 +86,7 @@ void MessageManager::showToast(int id) {
 
 void MessageManager::hideToast(int id) {
     operateToastData(id, markRemoved);
+    UiUtility::StylishLog::messageOperation(logOrigin, id, "hide");
 
     // wait animation finished
     evento::executor()->asyncExecute(
@@ -102,6 +109,7 @@ void MessageManager::deleteToast(int id) {
     // delete instance and data
     toastList->erase(getIndex(id));
     messageData.erase(id);
+    UiUtility::StylishLog::general(logOrigin, std::format("delete message [{}]", id));
 }
 
 void MessageManager::operateToastData(int id, std::function<ToastData(ToastData)> operation) {
