@@ -73,6 +73,13 @@ jobs:
         version: 14
         platform: x64
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: 6.7.2
+        arch: gcc_64
+        modules: "qtwidgets qtnetwork"
+
     - name: Setup Rust toolchain
       uses: moonrepo/setup-rust@v1
       with:
