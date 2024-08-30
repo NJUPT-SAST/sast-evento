@@ -1,81 +1,109 @@
-import { MessageManager, MessageType } from "../logic/message_manager.slint";
-import { Token } from "../global.slint";
-import { Button } from "../modules/surrealism-ui/src/button/button.slint";
-import { MessageManagerBridge } from "../logic/index.slint";
+import { MessageManager, MessageManagerBridge, MessageType, MessageData, ToastData } from "../logic/message_manager.slint";
+import { Token, MdFontData } from "../global.slint";
+import { Button } from "./button.slint";
+import { Empty } from "view_base.slint";
 
-export component Toast inherits Rectangle {
-    property <bool> have-icon: false;
-    property <image> icon: Token.image.icon.info;
-    property <color> surface: Token.color.surface-variant;
-    property <color> on-surface: Token.color.on-surface-variant;
-    clip: true;
-    background: surface;
-    border-radius: 8px;
-    height: 48px;
-    content := HorizontalLayout {
-        padding: 16px;
-        spacing: 12px;
-        alignment: start;
-        if have-icon: Rectangle {
-            width: 24px;
-            Image {
-                height: 24px;
-                width: 24px;
-                source: icon;
-                colorize: on-surface;
+export component Toast {
+    // option
+    in property <ToastData> toast-data;
+    // out
+    out property <int> elevation: toast-data.elevation;
+    out property <bool> removed: toast-data.removed;
+    // implement
+    min-height: 48px;
+    min-width: _body.min-width;
+    preferred-height: 48px;
+    preferred-width: _body.preferred-width;
+    private property <color> surface: Token.color.surface-variant;
+    private property <color> on-surface: Token.color.on-surface-variant;
+    private property <MdFontData> font: Token.font.body.large;
+    private property <bool> have-icon: false;
+    private property <image> icon;
+    private property <MessageData> message-data: MessageManager.get-message(toast-data.id);
+    // private property <MessageData> message-data: { content: "123", type: MessageType.Info };
+    _body := Rectangle {
+        x: 0;
+        y: 0;
+        clip: true;
+        height <=> root.height;
+        width <=> root.width;
+        background: surface;
+        border-radius: 8px;
+        _area := TouchArea {
+            clicked => {
+                MessageManager.hide-message(toast-data.id);
             }
         }
-        text := Text {
-            max-width: self.preferred-width;
-            vertical-alignment: center;
-            horizontal-alignment: left;
-            text: MessageManager.content;
-            color: on-surface;
-            font-size: Token.font.body.large.size;
+
+        _content := HorizontalLayout {
+            padding: 16px;
+            spacing: 12px;
+            alignment: start;
+            if have-icon: _icon := Empty {
+                width: 24px;
+                Image {
+                    height: 24px;
+                    width: 24px;
+                    source: icon;
+                    colorize: on-surface;
+                }
+            }
+            _text := Text {
+                vertical-alignment: center;
+                horizontal-alignment: left;
+                text: message-data.content;
+                color: on-surface;
+                font-size: font.size;
+                font-weight: font.weight;
+            }
         }
     }
 
-    states [
-        error when MessageManager.type == MessageType.Error: {
-            have-icon: true;
-            icon: Token.image.icon.error;
-            surface: Token.color.error;
-            on-surface: Token.color.on-error;
-        }
-        warning when MessageManager.type == MessageType.Warning: {
-            have-icon: true;
-            icon: Token.image.icon.error;
-        }
-        info when MessageManager.type == MessageType.Info: {
-            have-icon: false;
-        }
-    ]
+    // TODO: support more type
+    // states [
+    //     error when MessageManager.type == MessageType.Error: {
+    //         have-icon: true;// icon: Token.image.icon.error;
+    //         surface: Token.color.error;
+    //         on-surface: Token.color.on-error;
+    //     }
+    //     warning when MessageManager.type == MessageType.Warning: {
+    //         have-icon: true;// icon: Token.image.icon.error;
+    //     }
+    //     info when MessageManager.type == MessageType.Info: {
+    //         have-icon: false;
+    //     }
+    // ]
 }
 
 component Test {
-    HorizontalLayout {
-        y: - self.height;
-        Button {
-            text: "Info";
-            clicked => {
-                MessageManagerBridge.type = MessageType.Info;
-            }
-        }
+    // HorizontalLayout {
+    //     y: - self.height;
+    //     Button {
+    //         content: "Info";
+    //         clicked => {
+    //             MessageManagerBridge.type = MessageType.Info;
+    //         }
+    //     }
 
-        Button {
-            text: "Warning";
-            clicked => {
-                MessageManagerBridge.type = MessageType.Warning;
-            }
-        }
+    //     Button {
+    //         content: "Warning";
+    //         clicked => {
+    //             MessageManagerBridge.type = MessageType.Warning;
+    //         }
+    //     }
 
-        Button {
-            text: "Error";
-            clicked => {
-                MessageManagerBridge.type = MessageType.Error;
-            }
+    //     Button {
+    //         content: "Error";
+    //         clicked => {
+    //             MessageManagerBridge.type = MessageType.Error;
+    //         }
+    //     }
+    // }
+
+    Toast {
+        // width: 20px;
+        init => {
+            debug(self.width)
         }
     }
-
-    Toast { }
 }

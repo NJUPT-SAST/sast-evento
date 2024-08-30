@@ -1,10 +1,10 @@
+#include <Controller/AsyncExecutor.hh>
 #include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiBase.h>
 #include <Controller/Core/UiUtility.h>
 #include <chrono>
-#include <slint.h>
+#include <memory>
 #include <spdlog/spdlog.h>
-#include <string_view>
 
 EVENTO_UI_START
 
@@ -13,43 +13,107 @@ MessageManager::MessageManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBr
     , bridge(bridge) {
     auto& self = *this;
 
+    toastList = std::make_shared<slint::VectorModel<ToastData>>();
+
     self->on_show_message([this](slint::SharedString content, MessageType type) {
         showMessage(std::string(content), type);
     });
+
+    self->on_get_message([this](int id) -> MessageData { return getMessage(id); });
+
+    self->on_hide_message([this](int id) { hideMessage(id); });
+
+    self->set_toast_list(toastList);
 }
 
 void MessageManager::showMessage(std::string content,
                                  MessageType type,
                                  std::chrono::steady_clock::duration timeout) {
     auto& self = *this;
+    auto id = nextId++;
 
-    if (isMessageShow) {
-        hideMessage();
-        evento::executor()->asyncExecute(
-            doNothing,
-            [=, this] { showMessage(content, type, timeout); },
-            animationLength,
-            AsyncExecutor::Once | AsyncExecutor::Delay);
-        return;
-    }
-
+    newToast(id, {.content = slint::SharedString(content), .type = type});
     UiUtility::StylishLog::newMessageShowed(logOrigin, content);
-    isMessageShow = true;
-    self->set_type(type);
-    self->set_content(std::string_view(content));
-    self->set_visible(true);
+
+    // set auto hide
     evento::executor()->asyncExecute(
         doNothing,
-        [this] { hideMessage(); },
+        [this, id] { hideMessage(id); },
         timeout + animationLength,
         AsyncExecutor::Once | AsyncExecutor::Delay);
 }
 
-void MessageManager::hideMessage() {
+void MessageManager::hideMessage(int id) {
+    if (auto index = getIndex(id); index != -1 && !toastList->row_data(getIndex(id))->removed) {
+        hideToast(id);
+    }
+}
+
+int MessageManager::getIndex(int id) {
+    for (int i = 0; i < toastList->row_count(); i++) {
+        if (toastList->row_data(i)->id == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+void MessageManager::newToast(int id, MessageData data) {
+    // prepare data then instantiate a toast
+    messageData.insert({id, data});
+    toastList->push_back({id, 0});
+
+    // make animation available
+    slint::invoke_from_event_loop([this, id] { showToast(id); });
+}
+
+void MessageManager::showToast(int id) {
+    operateToastData(id, increaseElevation);
+
+    // correct existing toast elevation
+    for (int i = 0; i < toastList->row_count(); i++) {
+        if (i != getIndex(id)) {
+            operateToastData(toastList->row_data(i)->id, increaseElevation);
+        }
+    }
+}
+
+void MessageManager::hideToast(int id) {
+    operateToastData(id, markRemoved);
+
+    // wait animation finished
+    evento::executor()->asyncExecute(
+        doNothing,
+        [this, id] { deleteToast(id); },
+        animationLength,
+        AsyncExecutor::Once | AsyncExecutor::Delay);
+}
+
+void MessageManager::deleteToast(int id) {
+    // correct existing toast elevation bigger than given id
+    int removedElevation = toastList->row_data(getIndex(id))->elevation;
+    for (int i = 0; i < toastList->row_count(); i++) {
+        auto toastData = toastList->row_data(i);
+        if (toastData->elevation > removedElevation) {
+            operateToastData(toastData->id, decreaseElevation);
+        }
+    }
+
+    // delete instance and data
+    toastList->erase(getIndex(id));
+    messageData.erase(id);
+}
+
+void MessageManager::operateToastData(int id, std::function<ToastData(ToastData)> operation) {
+    auto index = getIndex(id);
+    auto data = toastList->row_data(index).value();
+    toastList->set_row_data(index, operation(data));
+}
+
+MessageData MessageManager::getMessage(int id) {
     auto& self = *this;
 
-    isMessageShow = false;
-    self->set_visible(false);
+    return messageData.at(id);
 }
 
 EVENTO_UI_END

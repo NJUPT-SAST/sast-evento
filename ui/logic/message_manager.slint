@@ -4,18 +4,34 @@ export enum MessageType{
     Error
 }
 
+export struct MessageData {
+    content: string,
+    type: MessageType,
+}
+
+export struct ToastData {
+    id: int,
+    elevation: int,
+    removed: bool,
+}
+
 export global MessageManagerBridge {
-    in-out property <string> content: "Test content";
-    in-out property <bool> visible;
-    in-out property <MessageType> type;
+    in-out property <[ToastData]> toast-list;
+    in-out property <bool> refresh;
     callback show-message(string, MessageType);
+    pure callback get-message(int) -> MessageData;
+    callback hide-message(int);
 }
 
 export global MessageManager {
-    out property <string> content: MessageManagerBridge.content;
-    out property <bool> visible: MessageManagerBridge.visible;
-    out property <MessageType> type: MessageManagerBridge.type;
+    out property <[ToastData]> toast-list: MessageManagerBridge.toast-list;
     public function show-message(content: string, type: MessageType) {
         MessageManagerBridge.show-message(content, type);
+    }
+    pure public function get-message(id: int) -> MessageData {
+        return MessageManagerBridge.get-message(id);
+    }
+    public function hide-message(id: int) {
+        MessageManagerBridge.hide-message(id);
     }
 }
