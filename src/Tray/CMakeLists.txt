@@ -10,9 +10,12 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6Widgets CONFIG REQUIRED)
+find_package(Qt6Network CONFIG REQUIRED)
 
 set(PROJECT_SOURCES
     main.cpp
+    TcpServer.h
+    TcpServer.cpp
     res.qrc
 )
 
@@ -21,7 +24,7 @@ qt_add_executable(sast-evento-tray
     ${PROJECT_SOURCES}
 )
 
-target_link_libraries(sast-evento-tray PRIVATE Qt6::Widgets)
+target_link_libraries(sast-evento-tray PRIVATE Qt6::Widgets Qt6::Network)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
