@@ -2,6 +2,8 @@
 #include "Controller/Convert.hh"
 #include "Infrastructure/Network/NetworkClient.h"
 #include "Infrastructure/Utils/Result.h"
+#include "app.h"
+#include "slint.h"
 #include "slint_string.h"
 #include <Controller/View/MyEventPage.h>
 #include <Infrastructure/Network/ResponseStruct.h>
@@ -18,8 +20,6 @@ void MyEventPage::onCreate() {
 }
 void MyEventPage::onShow() {
     auto& self = *this;
-    // auto [Id,Summary,Description,Start,End,Location,Tag,LarkMeetingRoomName,
-    //         LarkDepartmentName,State,IsSubscribed,IsCheckedIn] = evento::EventEntity();
     //获取订阅活动的信息
     evento::executor()->asyncExecute(evento::networkClient()->getSubscribedEvent(),
                                      [&self](Result<EventEntityList> event) {
@@ -54,7 +54,7 @@ void MyEventPage::onShow() {
                                      });
     auto m_list_end = self->get_info_end();
     //返回数组的回调，获取当前订阅的活动个数
-    self->set_sub_event_num((int) m_list_sub->row_count());
+    self->set_sub_event_num(int(m_list_sub->row_count()));
     auto sub_num = self->get_sub_event_num();
     self->on_return_array_sub([sub_num] {
         if (sub_num <= 0) {
@@ -67,7 +67,7 @@ void MyEventPage::onShow() {
         }
     });
     //返回数组的回调，获取当前进行的活动个数
-    self->set_start_event_num((int) m_list_active->row_count());
+    self->set_start_event_num(int(m_list_active->row_count()));
     auto active_num = self->get_start_event_num();
     self->on_return_array_start([active_num] {
         if (active_num <= 0) {
@@ -96,7 +96,16 @@ void MyEventPage::onShow() {
     for (auto n = 1; n <= end_num; ++n) {
         now_id_end.push_back(m_list_end->row_data(n)->id);
     }
-
+    //得到id的索引
+    int sub, active = -1;
+    self->on_get_num([&sub, &active](slint::SharedString part) {
+        if (part == "subscribe") {
+            return sub + 1;
+        } else if (part == "active") {
+            return active + 1;
+        }
+    });
+    //获取id
     self->on_get_event_id(
         [now_id_subscribe, now_id_active, now_id_end](int count, slint::SharedString state) {
             std::string State = std::string(state);
@@ -142,6 +151,8 @@ void MyEventPage::onShow() {
             m_list_get = m_list->row_data(cow)->larkDepartmentName;
         } else if (Part == "room") {
             m_list_get = m_list->row_data(cow)->larkMeetingRoomName;
+        } else if (Part == "location") {
+            m_list_get = m_list->row_data(cow)->location;
         }
         return m_list_get;
     });

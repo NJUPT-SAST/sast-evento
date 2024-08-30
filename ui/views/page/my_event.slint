@@ -25,19 +25,27 @@ export global MyEventPageBridge {
     in-out property <int> id : 1;
 
     pure callback return-array-sub()->[int];
+    pure callback return-num-sub()->int;
     pure callback return-array-start()->[int];
+    pure callback return-num-end()->int;
 
     callback get-code(string);
-    callback get-event-id(int,string)->int;
+    pure callback get-event-id(int,string)->int;
     callback back-event-id(int)->int;
     callback is-check-in()->bool;
 
-    callback show-mess(int,string,string)->string;
+    pure callback show-mess(int,string,string)->string;
+
+    pure callback get-num(string)->int;
 }
 
-export component result-succes inherits Window {
+export component result-success inherits Window {
     property <bool> is_show : false;
     visible: false;
+    x: 500px;
+    y: 200px;
+    width: 200px;
+    height: 300px;
     SResult {
         text: "签到成功";
         result-type: Success;
@@ -55,9 +63,11 @@ export component result-succes inherits Window {
 
 export component result-fail inherits Window {
     property <bool> is_show : false;
-    // 用于判断是不是确认了密码
-    property <bool> is-confirm: false;
     visible: false;
+    x: 500px;
+    y: 200px;
+    width: 200px;
+    height: 300px;
     SResult {
         text: "抱歉,密码错误"+"\n"+"签到失败";
         result-type: Error;
@@ -78,7 +88,7 @@ export component CodeGet inherits Window {
     height: 90px;
     property <bool> is_show : false;
     visible: is_show;
-    LineEdit {
+    code-txt := LineEdit {
         width: 150px;
         height: 40px;
         placeholder-text: "Enter code here";
@@ -97,7 +107,7 @@ export component CodeGet inherits Window {
             font-size: 10px;
             color: Token.color.on-surface;
         }
-        clicked => {parent.close()}
+        clicked => {parent.close();parent.judge(code-txt.text);}
     }
     SButton{
         x: (parent.x)+75px;
@@ -112,22 +122,32 @@ export component CodeGet inherits Window {
             font-size: 10px;
             color: Token.color.on-surface;
         }
-        clicked => {parent.close()}
+        clicked => {parent.close();code-txt.text="";}
     }
+    success := result-success{}
+    fail := result-fail{}
     public function open() {
         self.is_show = true;
     }
     public function close() {
         self.is_show = false;
     }
+    //检查code
+    public function judge(code:string) {
+        MyEventPageBridge.get-code(code-txt.text);
+        if(MyEventPageBridge.is-check-in()){
+            success.open();
+        }else{
+            fail.open();
+        }
+
+    }
 }
-
-
-
 //查看更多
 export component ForMore inherits SLink {
     theme: Dark;
     text: "查看更多";
+    font-size: 20px;
     clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
 }
 
@@ -162,43 +182,7 @@ component ReviewButton inherits SButton {
     font-color: Token.color.on-surface;
     clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
 }
-
-component Card inherits SCard{
-    in-out property <string> title : "标题";
-    property <string> introduction : "介绍";
-    property <string> content : "内容";
-    background: Token.color.primary-container;
-    Icon {
-        x: parent.x+30px;
-        height: 50px;
-        width: 50px;
-        source: Token.image.icon.evento;
-    }
-    info := Rectangle{
-        x: parent.x+80px;
-        preferred-height: 200px;
-        preferred-width: 300px;
-        VerticalLayout {
-            alignment: center;
-            SText {
-                font-size: Token.font.headline.small.size;
-                color: Token.color.outline;
-                text: title;
-            }
-            SText{
-                font-size: Token.font.label.small.size;
-                color: Token.color.outline;
-                text: introduction;
-            }
-            SText{
-                font-size: Token.font.label.small.size;
-                color: Token.color.outline;
-                text: content;
-            }
-        }
-    }
-}
-export component SignCard inherits Card{
+export component SignCard{
     get := CodeGet{ 
         x: (parent.x)+80px;
     }
@@ -210,185 +194,17 @@ export component SignCard inherits Card{
     }
 }
 
-export component ReviewCard inherits Card{
+export component ReviewCard{
     ReviewButton {
-        x: parent.x+300px;
+        x: parent.x+(parent.width)*0.75;
     }
 }
 
-export component SignLine inherits STimeLine{
-    STimeLineItem {
-        width: (parent.width)+80px;
-        height: parent.height;
-        theme: Dark;
-        SignCard {
-            x: (parent.x)-10px;
-            y: parent.y;
-            height: (parent.height)-50px;
-            width: 350px;
-        }
-    }
+component MyEventCard inherits EventCard {
+    in-out property <int> count: -1;
 }
-export component StartLine inherits STimeLine{
-    STimeLineItem {
-        width: (parent.width)+80px;
-        height: parent.height;
-        theme: Dark;
-        Card {
-            x: (parent.x)-10px;
-            y: parent.y;
-            height: (parent.height)-50px;
-            width: 350px;
-        }
-    }
-}
-export component EndLine inherits STimeLine{
-    STimeLineItem {
-        width: (parent.width)+80px;
-        height: parent.height;
-        theme: Dark;
-        ReviewCard {
-            x: (parent.x)-10px;
-            y: parent.y;
-            height: (parent.height)-50px;
-            width: 350px;
-        }
-    }
-}
-// a simple event form
-component SignForm {
-    Rectangle {
-        preferred-height: 200px;
-        preferred-width: 500px;
-        mes := Rectangle{
-            x: (parent.x)+5px;
-            preferred-height: 200px;
-            preferred-width: 50px;
-            property <string> data : "日期";
-            property <string> place : "地点";
-            property <string> time : "时间";
-            VerticalLayout {
-                alignment: center;
-                SText {
-                    color: Token.color.outline;
-                    text: data;
-                }
-                SText{
-                    color: Token.color.outline;
-                    text: place;
-                }
-                SText{
-                    color: Token.color.outline;
-                    text: time;
-                }
-            }
-        }
-        SignLine {
-            x: mes.x + 80px;
-            width: 20px;
-            height: parent.height;
-        }
-    }
-}
-
-component StartForm {
-    Rectangle {
-        preferred-height: 200px;
-        preferred-width: 500px;
-        mes := Rectangle{
-            x: (parent.x)+5px;
-            preferred-height: 200px;
-            preferred-width: 50px;
-            property <string> data : "日期";
-            property <string> place : "地点";
-            property <string> time : "时间";
-            VerticalLayout {
-                alignment: center;
-                SText {
-                    color: Token.color.outline;
-                    text: data;
-                }
-                SText{
-                    color: Token.color.outline;
-                    text: place;
-                }
-                SText{
-                    color: Token.color.outline;
-                    text: time;
-                }
-            }
-        }
-        StartLine {
-            x: mes.x + 80px;
-            width: 20px;
-            height: parent.height;
-        }
-    }
-}
-
-component EndForm {
-    Rectangle {
-        preferred-height: 200px;
-        preferred-width: 500px;
-        mes := Rectangle{
-            x: (parent.x)+5px;
-            preferred-height: 200px;
-            preferred-width: 50px;
-            property <string> data : "日期";
-            property <string> place : "地点";
-            property <string> time : "时间";
-            VerticalLayout {
-                alignment: center;
-                SText {
-                    color: Token.color.outline;
-                    text: data;
-                }
-                SText{
-                    color: Token.color.outline;
-                    text: place;
-                }
-                SText{
-                    color: Token.color.outline;
-                    text: time;
-                }
-            }
-        }
-        EndLine {
-            x: mes.x + 80px;
-            width: 20px;
-            height: parent.height;
-        }
-    }
-}
-
-// a simple component for schedule
-component Schedule {
-    preferred-height: 800px;
-    preferred-width: 600px;
-    in-out property <string> title : "";
-    VerticalLayout {
-        spacing: 5px;
-        //title
-        SText {
-            x: (parent.width)/2-(parent.x)-50px;
-            color: Token.color.on-surface;
-            font-size: Token.font.title.large.size;
-            text: title;
-        }
-        //SDvider
-        SDivider {
-            //y: parent.y+40px;
-            width: 500px;
-            height: 2px;
-            }
-        //SText && STimeLine (separate)
-        @children
-    }
-}
-
 export component MyEventPage inherits Page {
-    // TODO: implement MyEvent
-    // optional
+
     // ScrollView {
         background := Empty { }
 
@@ -399,33 +215,122 @@ export component MyEventPage inherits Page {
             y: 0;
             width: 100%;
             height: 100%;
-            //schedule timeline
-            HorizontalLayout {
-                signin-line := Schedule {
-                    width: 50%;
+                //subscribe板块
+                sub := Empty {  
+                    x: root.x;
+                    y: root.y;
                     height: 100%;
-                    title: "已报名";
-                    for idx in MyEventPageBridge.return-array-sub(): Rectangle {
-                        SignForm {}
+                    width: 48%;
+                    txt-s := SText {
+                        x: parent.x;
+                        y: parent.y;
+                        text: "已报名:";
+                        font-size: 25px;
+                        font-weight: 30;
+                        color: Token.color.on-surface;
                     }
-                }
-                VerticalLayout {
-                    spacing: 150px;
-                    start-line := Schedule { 
-                        width: 50%;
-                        title: "进行中";
-                        for idx in MyEventPageBridge.return-array-start(): Rectangle {
-                            StartForm {}
+                    for index in MyEventPageBridge.return-array-sub(): Rectangle {
+                        MyEventCard {
+                            count: MyEventPageBridge.get-num("subscribe");
+                            width: sub.width;
+                            height: 110px;
+                            x: txt-s.x;
+                            y: txt-s.y+35px+self.count*self.height*1.05;
+                            event: {
+                                id: MyEventPageBridge.get-event-id(self.count,"subscribe"),
+                                summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","summary"),
+                                summary-abbr: "软",
+                                time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","time"),
+                                location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","location"),
+                                description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","description")
+                            };
+                            SignCard {}
                         }
                     }
-                    end-line := Schedule { 
-                        width: 50%;
-                        title: "已结束";
-                        ForMore { }
-                        EndForm { }
+                }
+                //active板块
+                active := Empty{
+                    x: root.x+sub.width*1.01;
+                    y: root.y;
+                    height: 50%;
+                    width: 48%;
+                    txt-a := SText{
+                        x: parent.x;
+                        y: parent.y;
+                        text: "进行中:";
+                        font-size: 25px;
+                        font-weight: 30;
+                        color: Token.color.on-surface;
+                    }
+                    for index in MyEventPageBridge.return-array-start(): Rectangle {
+                        MyEventCard {
+                            count: MyEventPageBridge.get-num("active");
+                            width: active.width;
+                            height: 110px;
+                            x: txt-a.x;
+                            y: txt-a.y+35px+self.count*self.height*1.05;
+                            event: {
+                                id: MyEventPageBridge.get-event-id(self.count,"active"),
+                                summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","summary"),
+                                summary-abbr: "软",
+                                time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","time"),
+                                location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","location"),
+                                description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","description")
+                            };
+                        }
                     }
                 }
-            }
+                //end板块
+                end := Empty{
+                    x: active.x;
+                    y: active.y+active.height*1.01;
+                    height: 24%;
+                    width: 48%;
+                    txt-e := SText{
+                        x: parent.x;
+                        y: parent.y;
+                        text: "已结束:";
+                        font-size: 25px;
+                        font-weight: 30;
+                        color: Token.color.on-surface;
+                    }
+                    link := ForMore {
+                        x: txt-e.x;
+                        y: txt-e.y;
+                    }
+                    MyEventCard {
+                        count: 0; //本页面只展示一个活动
+                        width: end.width;
+                        height: 110px;
+                        x: link.x;
+                        y: link.y+30px;
+                        event: {
+                            id: MyEventPageBridge.get-event-id(self.count,"end"),
+                            summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","summary"),
+                            summary-abbr: "软",
+                            time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","time"),
+                            location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","location"),
+                            description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","description")
+                        };
+                        ReviewCard {}
+                    }
+                }
+                //cancel板块（只提供了标题）
+                cancel := Empty{
+                    x: end.x;
+                    y: end.y+end.height*1.01;
+                    height: 24%;
+                    width: 48%;
+                    txt-c := SText{
+                        x: parent.x;
+                        y: parent.y;
+                        text: "已取消:";
+                        font-size: 25px;
+                        font-weight: 30;
+                        color: Token.color.on-surface;
+                    }
+                }
+            
             placeholder := Rectangle {
                 border-width: 4px;
             }
