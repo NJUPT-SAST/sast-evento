@@ -5,7 +5,6 @@
 #include "slint_string.h"
 #include <Controller/View/MyEventPage.h>
 #include <Infrastructure/Network/ResponseStruct.h>
-#include <map>
 #include <string>
 #include <vector>
 EVENTO_UI_START
