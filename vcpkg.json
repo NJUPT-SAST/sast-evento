@@ -4,6 +4,7 @@
         "boost-system",
         "boost-beast",
         "boost-url",
+        "boost-process",
         "openssl",
         "nlohmann-json",
         "spdlog",

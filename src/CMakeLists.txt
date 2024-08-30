@@ -40,6 +40,7 @@ target_link_libraries(${PROJECT_NAME}
     Boost::system
     Boost::url
     Boost::beast
+    Boost::process
     OpenSSL::Crypto
     OpenSSL::SSL
     nlohmann_json::nlohmann_json
