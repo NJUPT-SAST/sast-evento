@@ -251,23 +251,6 @@ export component App inherits Window {
                     ViewManager.navigate-to(ViewName.MenuOverlay);
                 }
             }
-
-            CircleButton {
-                image: Token.image.icon.error;
-                property <int> idx: 0;
-                clicked => {
-                    idx += 1;
-                    MessageManager.show-message(idx + " " + animation-tick() / 1ms, MessageType.Info);
-                }
-            }
-
-            CircleButton {
-                image: Token.image.icon.locate;
-                property <int> idx: 0;
-                clicked => {
-                    debug(MessageManager.toast-list[0]);
-                }
-            }
         }
 
         PageRegion { }
@@ -278,10 +261,14 @@ export component App inherits Window {
         width: 100%;
     }
 
+    private property <length> toast-padding: 16px;
+    private property <length> toast-vertical-spacing: 8px;
+    private property <length> toast-height: 48px;
+    private property <Point> toast-origin: { x: root.width - toast-padding, y: root.height - toast-padding };
     for item in MessageManager.toast-list: Toast {
         toast-data: item;
         x: root.width - toast-padding - self.width;
-        y: root.height + toast-padding;
+        y: get-toast-y(self.elevation);
         width: self.min-width > (parent.width * (1 - 0.618) / 2) ? self.preferred-width : parent.width * (1 - 0.618) / 2;
         animate y {
             duration: 200ms;
@@ -289,7 +276,6 @@ export component App inherits Window {
         }
         states [
             removed when self.removed: {
-                y: root.get-toast-y(self.elevation);
                 x: root.width - toast-padding - self.width / 2;
                 opacity: 0;
                 in {
@@ -305,19 +291,13 @@ export component App inherits Window {
             }
             // self.elevation > 0
             visible when self.elevation > 0: {
-                y: root.get-toast-y(self.elevation);
                 opacity: 1;
             }
             invisible when self.elevation == 0: {
-                y: root.height + toast-padding;
                 opacity: 0;
             }
         ]
     }
-    private property <length> toast-padding: 16px;
-    private property <length> toast-vertical-spacing: 8px;
-    private property <length> toast-height: 48px;
-    private property <Point> toast-origin: { x: root.width - toast-padding, y: root.height - toast-padding };
     function get-toast-y(elevation: int) -> length {
         if (elevation > 0) {
             return toast-origin.y - elevation * toast-height - (elevation - 1) * toast-vertical-spacing;

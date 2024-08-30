@@ -60,19 +60,21 @@ export component Toast {
     }
 
     // TODO: support more type
-    // states [
-    //     error when MessageManager.type == MessageType.Error: {
-    //         have-icon: true;// icon: Token.image.icon.error;
-    //         surface: Token.color.error;
-    //         on-surface: Token.color.on-error;
-    //     }
-    //     warning when MessageManager.type == MessageType.Warning: {
-    //         have-icon: true;// icon: Token.image.icon.error;
-    //     }
-    //     info when MessageManager.type == MessageType.Info: {
-    //         have-icon: false;
-    //     }
-    // ]
+    states [
+        error when message-data.type == MessageType.Error: {
+            have-icon: true;
+            icon: Token.image.icon.error;
+            surface: Token.color.error;
+            on-surface: Token.color.on-error;
+        }
+        warning when message-data.type == MessageType.Warning: {
+            have-icon: true;
+            icon: Token.image.icon.error;
+        }
+        info when message-data.type == MessageType.Info: {
+            have-icon: false;
+        }
+    ]
 }
 
 component Test {
