@@ -12,6 +12,13 @@
         {
             "name": "libsecret",
             "platform": "!(windows | uwp | osx)"
+        },
+        {
+            "name": "qtbase",
+            "default-features": false,
+            "features": [
+                "widgets"
+            ]
         }
     ]
 }
