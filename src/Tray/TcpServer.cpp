@@ -6,9 +6,10 @@ TcpServer::TcpServer()
     : server(new QTcpServer)
     , socket(nullptr) {
     QObject::connect(server, &QTcpServer::newConnection, this, &TcpServer::readData);
-    std::cout << "1920" << std::endl;
-    if (!server->listen(QHostAddress::Any, 1920)) {
-        std::cerr << "Failed to listen on port 1920\n";
+    if (!server->listen(QHostAddress::LocalHost, 0)) {
+        std::cerr << "Failed to listen on port" << server->serverPort() << std::endl;
+    } else {
+        std::cout << server->serverPort() << std::endl;
     }
 }
 
@@ -16,6 +17,7 @@ void TcpServer::readData() {
     socket = server->nextPendingConnection();
     QObject::connect(socket, &QTcpSocket::readyRead, [this] {
         auto data = socket->readAll();
+        qDebug() << data;
         if (data == Message::EXIT) {
             emit exitAppReceived();
         } else {

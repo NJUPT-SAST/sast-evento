@@ -1,3 +1,6 @@
+#include "Infrastructure/IPC/SocketClient.h"
+#include "app.h"
+#include "slint.h"
 #include <Controller/Core/AccountManager.h>
 #include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiUtility.h>
@@ -62,17 +65,17 @@ void UiBridge::show() {
     uiEntry->show();
 }
 
-void UiBridge::run() {
+void UiBridge::run(slint::EventLoopMode mode) {
     UiUtility::StylishLog::viewActionTriggered(logOrigin, "onCreate");
     call(actions::onCreate);
 
     show();
     spdlog::debug("--- enter slint event loop ---");
     eventLoopRunning = true;
-    slint::run_event_loop();
+    slint::run_event_loop(mode);
+    exit();
     eventLoopRunning = false;
     spdlog::debug("--- exit slint event loop ---");
-    hide();
 
     UiUtility::StylishLog::viewActionTriggered(logOrigin, "onDestroy");
     call(actions::onDestroy);
@@ -86,6 +89,7 @@ void UiBridge::exit() {
     if (eventLoopRunning) {
         UiUtility::StylishLog::viewActionTriggered(logOrigin, "onStop");
         slint::invoke_from_event_loop([&self = *this] { self.call(actions::onStop); });
+        ipc()->send("EXIT");
         slint::quit_event_loop();
     }
 }

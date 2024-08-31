@@ -10,6 +10,7 @@
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/process.hpp>
+#include <boost/system/detail/error_code.hpp>
 #include <cstdlib>
 #include <slint.h>
 #include <spdlog/spdlog.h>
@@ -75,13 +76,18 @@ net::awaitable<std::string> SocketClient::receive() {
     co_return data;
 }
 
-net::awaitable<void> SocketClient::send(std::string const& message) {
+void SocketClient::send(std::string const& message) {
     if (!_socket) {
         spdlog::error("Socket is not connected");
-        co_return;
+        return;
     }
 
-    co_await net::async_write(*_socket, net::buffer(message), net::use_awaitable);
+    spdlog::info("IPC Send: {}", message);
+    net::async_write(*_socket, net::buffer(message), [](boost::system::error_code ec, std::size_t) {
+        if (ec) {
+            spdlog::error(ec.message());
+        }
+    });
 }
 
 void SocketClient::close() {
@@ -94,7 +100,7 @@ void SocketClient::close() {
 }
 
 net::awaitable<void> SocketClient::handleReceive(std::string const& message) {
-    spdlog::info("Received: {}", message);
+    spdlog::info("IPC Received: {}", message);
     auto action = _actions.find(message);
     if (action != _actions.end()) {
         slint::invoke_from_event_loop(action->second);

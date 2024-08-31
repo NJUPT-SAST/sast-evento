@@ -19,7 +19,7 @@ public:
     void startTray();
 
     net::awaitable<void> connect(std::uint16_t port);
-    net::awaitable<void> send(std::string const& message);
+    void send(std::string const& message);
     net::awaitable<std::string> receive();
     void close();
 

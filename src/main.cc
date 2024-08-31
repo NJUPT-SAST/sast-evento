@@ -1,3 +1,4 @@
+#include "slint.h"
 #include <Controller/UiBridge.h>
 #include <Infrastructure/IPC/SocketClient.h>
 #include <Infrastructure/Utils/Config.h>
@@ -27,7 +28,8 @@ int main(int argc, char** argv) {
 
     socketClient.startTray();
 
-    uiBridge.run();
+    uiBridge.run(evento::settings.minimalToTray ? slint::EventLoopMode::RunUntilQuit
+                                                : slint::EventLoopMode::QuitOnLastWindowClosed);
 
     evento::saveConfig();
 }
