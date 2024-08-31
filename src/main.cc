@@ -1,4 +1,5 @@
 #include <Controller/UiBridge.h>
+#include <Infrastructure/IPC/SocketClient.h>
 #include <Infrastructure/Utils/Config.h>
 #include <Infrastructure/Utils/Logger.hh>
 #include <Version.h>
@@ -13,6 +14,21 @@ int main(int argc, char** argv) {
     spdlog::info("SAST Evento version: v" VERSION_FULL);
 
     evento::UiBridge uiBridge(App::create());
-    uiBridge.run();
+
+    evento::SocketClient socketClient({
+        {evento::SocketClient::MessageType::ShowWindow, [&uiBridge] { uiBridge.show(); }},
+        {evento::SocketClient::MessageType::ShowAboutPage,
+         [&uiBridge] {
+             uiBridge.show();
+             uiBridge.getViewManager().navigateTo(ViewName::AboutPage);
+         }},
+        {evento::SocketClient::MessageType::ExitApp, [&uiBridge] { uiBridge.exit(); }},
+    });
+
+    socketClient.startTray();
+
+    uiBridge.run(evento::settings.minimalToTray ? slint::EventLoopMode::RunUntilQuit
+                                                : slint::EventLoopMode::QuitOnLastWindowClosed);
+
     evento::saveConfig();
 }

@@ -12,6 +12,7 @@
 #include <Controller/View/MyEventPage.h>
 #include <Controller/View/SearchPage.h>
 #include <Controller/View/SettingPage.h>
+#include <Infrastructure/IPC/SocketClient.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -26,11 +27,6 @@ UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
     attachAllViews();
 
     slint::invoke_from_event_loop([this] { return onEnterEventLoop(); });
-
-    uiEntry->window().on_close_requested([this] {
-        onExitEventLoop();
-        return slint::CloseRequestResponse::HideWindow;
-    });
 
     viewManager->initStack(ViewName::DiscoveryPage);
     if (!accountManager->isLogin()) {
@@ -62,17 +58,16 @@ void UiBridge::show() {
     uiEntry->show();
 }
 
-void UiBridge::run() {
+void UiBridge::run(slint::EventLoopMode mode) {
     UiUtility::StylishLog::viewActionTriggered(logOrigin, "onCreate");
     call(actions::onCreate);
 
     show();
     spdlog::debug("--- enter slint event loop ---");
     eventLoopRunning = true;
-    slint::run_event_loop();
-    eventLoopRunning = false;
+    slint::run_event_loop(mode);
     spdlog::debug("--- exit slint event loop ---");
-    hide();
+    exit();
 
     UiUtility::StylishLog::viewActionTriggered(logOrigin, "onDestroy");
     call(actions::onDestroy);
@@ -84,9 +79,11 @@ void UiBridge::hide() {
 
 void UiBridge::exit() {
     if (eventLoopRunning) {
-        UiUtility::StylishLog::viewActionTriggered(logOrigin, "onStop");
+        onExitEventLoop();
         slint::invoke_from_event_loop([&self = *this] { self.call(actions::onStop); });
+        ipc()->exitTray();
         slint::quit_event_loop();
+        eventLoopRunning = false;
     }
 }
 
