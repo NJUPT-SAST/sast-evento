@@ -38,7 +38,7 @@ private:
     net::awaitable<void> handleReceive(std::string const& message);
 
     net::awaitable<void> connect(std::uint16_t port);
-    void send(std::string const& message);
+    net::awaitable<void> send(std::string message);
     net::awaitable<std::string> receive();
     void close();
 

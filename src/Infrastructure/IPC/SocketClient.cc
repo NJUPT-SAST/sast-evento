@@ -65,7 +65,7 @@ void SocketClient::startTray() {
 }
 
 void SocketClient::exitTray() {
-    send("EXIT");
+    net::co_spawn(_socket->get_executor(), send("EXIT"), net::detached);
 }
 
 void SocketClient::showOrUpdateMessage(int messageId,
@@ -82,10 +82,9 @@ void SocketClient::showOrUpdateMessage(int messageId,
     evento::executor()->asyncExecute(
         [messageId, this]() -> net::awaitable<void> {
             if (_messageMap.contains(messageId)) {
-                ipc()->send(_messageMap[messageId]);
+                co_await ipc()->send(_messageMap[messageId]);
                 _messageMap.erase(messageId);
             }
-            co_return;
         },
         []() {},
         time - std::chrono::steady_clock::now(),
@@ -126,18 +125,14 @@ net::awaitable<std::string> SocketClient::receive() {
     co_return data;
 }
 
-void SocketClient::send(std::string const& message) {
+net::awaitable<void> SocketClient::send(std::string message) {
     if (!_socket) {
         spdlog::error("Socket is not connected");
-        return;
+        co_return;
     }
 
     spdlog::info("IPC Send: {}", message);
-    net::async_write(*_socket, net::buffer(message), [](boost::system::error_code ec, std::size_t) {
-        if (ec) {
-            spdlog::error(ec.message());
-        }
-    });
+    co_await net::async_write(*_socket, net::buffer(message), net::use_awaitable);
 }
 
 void SocketClient::close() {
