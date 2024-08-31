@@ -1,6 +1,3 @@
-#include "Infrastructure/IPC/SocketClient.h"
-#include "app.h"
-#include "slint.h"
 #include <Controller/Core/AccountManager.h>
 #include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiUtility.h>
@@ -15,6 +12,7 @@
 #include <Controller/View/MyEventPage.h>
 #include <Controller/View/SearchPage.h>
 #include <Controller/View/SettingPage.h>
+#include <Infrastructure/IPC/SocketClient.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 
