@@ -30,11 +30,6 @@ UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
 
     slint::invoke_from_event_loop([this] { return onEnterEventLoop(); });
 
-    uiEntry->window().on_close_requested([this] {
-        onExitEventLoop();
-        return slint::CloseRequestResponse::HideWindow;
-    });
-
     viewManager->initStack(ViewName::DiscoveryPage);
     if (!accountManager->isLogin()) {
         viewManager->initStack(ViewName::LoginOverlay);
@@ -73,9 +68,8 @@ void UiBridge::run(slint::EventLoopMode mode) {
     spdlog::debug("--- enter slint event loop ---");
     eventLoopRunning = true;
     slint::run_event_loop(mode);
-    exit();
-    eventLoopRunning = false;
     spdlog::debug("--- exit slint event loop ---");
+    exit();
 
     UiUtility::StylishLog::viewActionTriggered(logOrigin, "onDestroy");
     call(actions::onDestroy);
@@ -87,10 +81,11 @@ void UiBridge::hide() {
 
 void UiBridge::exit() {
     if (eventLoopRunning) {
-        UiUtility::StylishLog::viewActionTriggered(logOrigin, "onStop");
+        onExitEventLoop();
         slint::invoke_from_event_loop([&self = *this] { self.call(actions::onStop); });
         ipc()->send("EXIT");
         slint::quit_event_loop();
+        eventLoopRunning = false;
     }
 }
 

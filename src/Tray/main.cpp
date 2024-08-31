@@ -4,6 +4,7 @@
 #include <QSystemTrayIcon>
 #include <qobject.h>
 #include <qobjectdefs.h>
+#include <qsystemtrayicon.h>
 
 void exitApp() {
     QApplication::exit();
@@ -23,6 +24,8 @@ int main(int argc, char* argv[]) {
     QObject::connect(aboutAction, &QAction::triggered, &server, &TcpServer::sendShowAboutPage);
     QAction* closeAction = menu->addAction("退出");
     QObject::connect(closeAction, &QAction::triggered, &server, &TcpServer::sendExitApp);
+    QObject::connect(tray, &QSystemTrayIcon::messageClicked, &server, &TcpServer::sendShowWindow);
+    QObject::connect(tray, &QSystemTrayIcon::activated, &server, &TcpServer::sendShowWindow);
     tray->setContextMenu(menu);
 
     QObject::connect(&server, &TcpServer::exitAppReceived, exitApp);

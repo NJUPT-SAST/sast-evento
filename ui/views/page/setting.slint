@@ -1,6 +1,7 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
 import { Switch, ComboBox, ScrollView } from "std-widgets.slint";
+import { MessageManager, MessageType } from "../../logic/index.slint";
 
 export global SettingPageBridge {
     in-out property <int> language-index: 0;
@@ -103,10 +104,8 @@ export component SettingPage inherits Page {
             Divider { }
 
             SettingItem {
-                supported: false;
                 name: "活动开始前提醒";
                 Switch {
-                    enabled: false;
                     checked <=> SettingPageBridge.notice-begin;
                     toggled => {
                         SettingPageBridge.notice-begin-changed();
@@ -115,10 +114,8 @@ export component SettingPage inherits Page {
             }
 
             SettingItem {
-                supported: false;
                 name: "活动结束后提醒反馈";
                 Switch {
-                    enabled: false;
                     checked <=> SettingPageBridge.notice-end;
                     toggled => {
                         SettingPageBridge.notice-end-changed();
@@ -127,13 +124,12 @@ export component SettingPage inherits Page {
             }
 
             SettingItem {
-                supported: false;
                 name: "关闭窗口后最小化到托盘";
                 Switch {
-                    enabled: false;
                     checked <=> SettingPageBridge.minimal-to-tray;
                     toggled => {
                         SettingPageBridge.minimal-to-tray-changed();
+                        MessageManager.show-message("下次启动应用时生效", MessageType.Info);
                     }
                 }
             }

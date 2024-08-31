@@ -1,3 +1,4 @@
+#include "app.h"
 #include "slint.h"
 #include <Controller/UiBridge.h>
 #include <Infrastructure/IPC/SocketClient.h>
