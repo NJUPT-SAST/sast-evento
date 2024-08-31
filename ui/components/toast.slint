@@ -36,11 +36,13 @@ export component Toast {
         }
 
         _content := HorizontalLayout {
-            padding: 16px;
-            spacing: 12px;
+            padding-left: 16px;
+            padding-right: 16px;
+            spacing: 8px;
             alignment: start;
             if have-icon: _icon := Empty {
                 width: 24px;
+                height: 100%;
                 Image {
                     height: 24px;
                     width: 24px;
@@ -48,64 +50,41 @@ export component Toast {
                     colorize: on-surface;
                 }
             }
-            _text := Text {
-                vertical-alignment: center;
-                horizontal-alignment: left;
-                text: message-data.content;
-                color: on-surface;
-                font-size: font.size;
-                font-weight: font.weight;
+            Empty {
+                height: 100%;
+                _text := Text {
+                    text: message-data.content;
+                    color: on-surface;
+                    font-size: font.size;
+                    font-weight: font.weight;
+                }
             }
+
+            states [
+                have-icon when have-icon: {
+                    padding-left: 12px;
+                }
+            ]
         }
     }
 
-    // TODO: support more type
     states [
-        error when message-data.type == MessageType.Error: {
+        error when message-data.type == MessageType.error: {
             have-icon: true;
             icon: Token.image.icon.error;
             surface: Token.color.error;
             on-surface: Token.color.on-error;
         }
-        warning when message-data.type == MessageType.Warning: {
+        warning when message-data.type == MessageType.warning: {
             have-icon: true;
             icon: Token.image.icon.error;
         }
-        info when message-data.type == MessageType.Info: {
+        success when message-data.type == MessageType.success: {
+            have-icon: true;
+            icon: Token.image.icon.check-circle;
+        }
+        info when message-data.type == MessageType.info: {
             have-icon: false;
         }
     ]
-}
-
-component Test {
-    // HorizontalLayout {
-    //     y: - self.height;
-    //     Button {
-    //         content: "Info";
-    //         clicked => {
-    //             MessageManagerBridge.type = MessageType.Info;
-    //         }
-    //     }
-
-    //     Button {
-    //         content: "Warning";
-    //         clicked => {
-    //             MessageManagerBridge.type = MessageType.Warning;
-    //         }
-    //     }
-
-    //     Button {
-    //         content: "Error";
-    //         clicked => {
-    //             MessageManagerBridge.type = MessageType.Error;
-    //         }
-    //     }
-    // }
-
-    Toast {
-        // width: 20px;
-        init => {
-            debug(self.width)
-        }
-    }
 }
