@@ -32,6 +32,8 @@ public:
         static constexpr std::string_view ExitApp = "EXIT";
     };
 
+    inline static SocketClient* _instance = nullptr;
+
 private:
     net::awaitable<void> handleReceive(std::string const& message);
 
@@ -40,14 +42,10 @@ private:
     net::awaitable<std::string> receive();
     void close();
 
-    inline static SocketClient* _instance = nullptr;
-
     std::unique_ptr<net::ip::tcp::socket> _socket;
     std::unordered_map<std::string_view, std::function<void()>> _actions;
 
     std::unordered_map<int, std::string> _messageMap;
-
-    friend SocketClient* ipc();
 };
 
 SocketClient* ipc();

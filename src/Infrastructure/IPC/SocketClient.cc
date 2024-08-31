@@ -71,14 +71,16 @@ void SocketClient::showOrUpdateMessage(int messageId,
         return;
     }
     _messageMap[messageId] = message;
-    auto interval = time - std::chrono::steady_clock::now();
     evento::executor()->asyncExecute(
-        [messageId, interval, this]() {
-            if (_messageMap.contains(messageId))
+        [messageId, this]() -> net::awaitable<void> {
+            if (_messageMap.contains(messageId)) {
                 ipc()->send(_messageMap[messageId]);
+                _messageMap.erase(messageId);
+            }
+            co_return;
         },
         []() {},
-        interval,
+        time - std::chrono::steady_clock::now(),
         AsyncExecutor::Delay | AsyncExecutor::Once);
 }
 
