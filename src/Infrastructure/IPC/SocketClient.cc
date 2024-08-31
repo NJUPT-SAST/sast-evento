@@ -67,8 +67,7 @@ void SocketClient::showOrUpdateMessage(int messageId,
         return;
     }
     if (_messageMap.contains(messageId)) {
-        _messageMap[messageId] = message;
-        return;
+        _messageMap.erase(messageId);
     }
     _messageMap[messageId] = message;
     evento::executor()->asyncExecute(
