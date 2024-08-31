@@ -1,5 +1,4 @@
 #include "NetworkClient.h"
-#include "Infrastructure/Cache/Cache.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
 #include <boost/beast/core/buffers_to_string.hpp>
