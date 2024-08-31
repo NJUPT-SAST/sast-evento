@@ -83,7 +83,7 @@ void UiBridge::exit() {
     if (eventLoopRunning) {
         onExitEventLoop();
         slint::invoke_from_event_loop([&self = *this] { self.call(actions::onStop); });
-        ipc()->send("EXIT");
+        ipc()->exitTray();
         slint::quit_event_loop();
         eventLoopRunning = false;
     }

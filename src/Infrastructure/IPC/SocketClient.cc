@@ -6,12 +6,15 @@
 #include <boost/asio/detached.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include <boost/asio/this_coro.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/process.hpp>
 #include <boost/system/detail/error_code.hpp>
+#include <chrono>
 #include <cstdlib>
+#include <memory>
 #include <slint.h>
 #include <spdlog/spdlog.h>
 
@@ -50,6 +53,43 @@ void SocketClient::startTray() {
                   net::detached);
 
     tray.detach();
+}
+
+void SocketClient::exitTray() {
+    send("EXIT");
+}
+
+void SocketClient::showOrUpdateMessage(int messageId,
+                                       std::string const& message,
+                                       std::chrono::steady_clock::time_point const& time) {
+    if (messageId == 0) {
+        spdlog::warn("Invalid message id");
+        return;
+    }
+    if (_messageMap.contains(messageId)) {
+        _messageMap[messageId] = message;
+        return;
+    }
+    _messageMap[messageId] = message;
+    auto interval = time - std::chrono::steady_clock::now();
+    evento::executor()->asyncExecute(
+        [messageId, interval, this]() {
+            if (_messageMap.contains(messageId))
+                ipc()->send(_messageMap[messageId]);
+        },
+        []() {},
+        interval,
+        AsyncExecutor::Delay | AsyncExecutor::Once);
+}
+
+void SocketClient::cancelMessage(int messageId) {
+    if (messageId == 0) {
+        spdlog::warn("Invalid message id");
+        return;
+    }
+    if (_messageMap.contains(messageId)) {
+        _messageMap.erase(messageId);
+    }
 }
 
 net::awaitable<void> SocketClient::connect(std::uint16_t port) {

@@ -3,6 +3,7 @@
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <chrono>
 #include <functional>
 #include <string_view>
 #include <unordered_map>
@@ -17,11 +18,13 @@ public:
     ~SocketClient();
 
     void startTray();
+    void exitTray();
 
-    net::awaitable<void> connect(std::uint16_t port);
-    void send(std::string const& message);
-    net::awaitable<std::string> receive();
-    void close();
+    void showOrUpdateMessage(int messageId,
+                             std::string const& message,
+                             std::chrono::steady_clock::time_point const& time);
+
+    void cancelMessage(int messageId);
 
     struct MessageType {
         static constexpr std::string_view ShowWindow = "SHOW";
@@ -32,10 +35,17 @@ public:
 private:
     net::awaitable<void> handleReceive(std::string const& message);
 
+    net::awaitable<void> connect(std::uint16_t port);
+    void send(std::string const& message);
+    net::awaitable<std::string> receive();
+    void close();
+
     inline static SocketClient* _instance = nullptr;
 
     std::unique_ptr<net::ip::tcp::socket> _socket;
     std::unordered_map<std::string_view, std::function<void()>> _actions;
+
+    std::unordered_map<int, std::string> _messageMap;
 
     friend SocketClient* ipc();
 };
