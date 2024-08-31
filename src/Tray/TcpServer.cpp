@@ -1,20 +1,15 @@
 #include "TcpServer.h"
 #include <QApplication>
+#include <iostream>
 
 TcpServer::TcpServer()
     : server(new QTcpServer)
     , socket(nullptr) {
-    server->moveToThread(&thread);
     QObject::connect(server, &QTcpServer::newConnection, this, &TcpServer::readData);
-    QObject::connect(&thread, &QThread::started, [this]() {
-        qDebug() << "Listening on port 1920";
-        if (!server->listen(QHostAddress::Any, 1920)) {
-            qDebug() << "Failed to listen on port 1920";
-        }
-    });
-    QObject::connect(&thread, &QThread::finished, server, &QObject::deleteLater);
-
-    thread.start();
+    std::cout << "1920" << std::endl;
+    if (!server->listen(QHostAddress::Any, 1920)) {
+        std::cerr << "Failed to listen on port 1920\n";
+    }
 }
 
 void TcpServer::readData() {
@@ -52,6 +47,8 @@ void TcpServer::sendData(QByteArray const& data) {
 }
 
 TcpServer::~TcpServer() {
-    thread.quit();
-    thread.wait();
+    if (socket) {
+        socket->close();
+        socket->deleteLater();
+    }
 }

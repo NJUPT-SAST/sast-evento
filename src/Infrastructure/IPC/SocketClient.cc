@@ -2,48 +2,64 @@
 #include <Controller/AsyncExecutor.hh>
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/co_spawn.hpp>
+#include <boost/asio/connect.hpp>
+#include <boost/asio/detached.hpp>
 #include <boost/asio/ip/address.hpp>
 #include <boost/asio/read.hpp>
+#include <boost/asio/this_coro.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/write.hpp>
-#include <exception>
+#include <boost/process.hpp>
+#include <cstdlib>
+#include <slint.h>
 #include <spdlog/spdlog.h>
-#include <utility>
 
 namespace evento {
 
-SocketClient::SocketClient(net::io_context& io_context,
-                           std::unordered_map<std::string_view, std::function<void()>> actions)
-    : _ioc(io_context)
-    , _actions(std::move(actions)) {
+namespace bp = boost::process;
+
+SocketClient::SocketClient(std::unordered_map<std::string_view, std::function<void()>> actions)
+    : _actions(std::move(actions)) {
     if (!_instance)
         _instance = this;
-    evento::executor()->asyncExecute(evento::ipc()->connect(1920), []() {});
 }
 
 SocketClient::~SocketClient() {
     close();
 }
 
-net::awaitable<void> SocketClient::connect(std::uint16_t port) {
-    _socket = std::make_unique<net::ip::tcp::socket>(_ioc);
-    net::ip::tcp::endpoint endpoint(net::ip::make_address("127.0.0.1"), port);
-    co_await _socket->async_connect(endpoint, net::use_awaitable);
-    net::co_spawn(
-        _ioc,
-        [this] { return receive(); },
-        [this](std::exception_ptr e, std::string message) {
-            if (e) {
-                try {
-                    std::rethrow_exception(e);
-                } catch (const std::exception& ex) {
-                    spdlog::error("Error: {}", ex.what());
-                    return;
-                }
-            }
+void SocketClient::startTray() {
+    bp::ipstream pipe;
+    boost::filesystem::path trayPath = boost::filesystem::current_path().parent_path() / "Tray";
+#if defined(EVENTO_DEBUG)
+    trayPath /= "Debug/sast-evento-tray";
+#else
+    trayPath /= "Release/sast-evento-tray";
+#endif
+    bp::child tray(trayPath, bp::std_out > pipe, bp::std_err > bp::null);
 
-            handleReceive(message);
-        });
+    std::string line;
+    while (pipe && std::getline(pipe, line) && !line.empty())
+        break;
+
+    spdlog::info("Tray started at: {}", line);
+
+    net::co_spawn(executor()->getIoContext(),
+                  connect(std::strtol(line.c_str(), nullptr, 10)),
+                  net::detached);
+
+    tray.detach();
+}
+
+net::awaitable<void> SocketClient::connect(std::uint16_t port) {
+    _socket = std::make_unique<net::ip::tcp::socket>(co_await net::this_coro::executor);
+    net::ip::tcp::endpoint endpoint(net::ip::make_address("127.0.0.1"), port);
+
+    co_await _socket->async_connect(endpoint, net::use_awaitable);
+
+    for (;;) {
+        net::co_spawn(_socket->get_executor(), handleReceive(co_await receive()), net::detached);
+    }
 }
 
 net::awaitable<std::string> SocketClient::receive() {
@@ -77,14 +93,15 @@ void SocketClient::close() {
     }
 }
 
-void SocketClient::handleReceive(std::string const& message) {
+net::awaitable<void> SocketClient::handleReceive(std::string const& message) {
     spdlog::info("Received: {}", message);
     auto action = _actions.find(message);
     if (action != _actions.end()) {
-        action->second();
+        slint::invoke_from_event_loop(action->second);
     } else {
         spdlog::warn("Unknown message: {}", message);
     }
+    co_return;
 }
 
 SocketClient* ipc() {

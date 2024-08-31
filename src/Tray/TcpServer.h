@@ -3,7 +3,6 @@
 #include <QByteArray>
 #include <QTcpServer>
 #include <QTcpSocket>
-#include <QThread>
 
 class TcpServer : public QObject {
     Q_OBJECT
@@ -31,7 +30,6 @@ private slots:
     void sendData(QByteArray const& data);
 
 private:
-    QTcpServer* server;
-    QTcpSocket* socket;
-    QThread thread;
+    QTcpServer* server{};
+    QTcpSocket* socket{};
 };

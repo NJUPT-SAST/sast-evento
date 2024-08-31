@@ -13,9 +13,10 @@ namespace net = boost::asio;
 
 class SocketClient {
 public:
-    SocketClient(net::io_context& io_context,
-                 std::unordered_map<std::string_view, std::function<void()>> actions);
+    SocketClient(std::unordered_map<std::string_view, std::function<void()>> actions);
     ~SocketClient();
+
+    void startTray();
 
     net::awaitable<void> connect(std::uint16_t port);
     net::awaitable<void> send(std::string const& message);
@@ -29,11 +30,10 @@ public:
     };
 
 private:
-    void handleReceive(std::string const& message);
+    net::awaitable<void> handleReceive(std::string const& message);
 
     inline static SocketClient* _instance = nullptr;
 
-    net::io_context& _ioc;
     std::unique_ptr<net::ip::tcp::socket> _socket;
     std::unordered_map<std::string_view, std::function<void()>> _actions;
 
