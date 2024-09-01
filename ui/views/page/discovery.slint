@@ -10,9 +10,6 @@ import { HorizontalBox, ScrollView } from "std-widgets.slint";
 
 export global DiscoveryPageBridge { 
     // callbacks
-    pure callback div(int, int) -> int;
-    pure callback calc_block_col_num(int, int) -> int;
-    pure callback calc_block_row_num(int, int) -> int;
 }
 
 export component DiscoveryPage inherits Page {
@@ -226,32 +223,6 @@ export component DiscoveryPage inherits Page {
                         }
                     }
 
-                    // in property <int> block_max_w: 400;
-                    // in property <int> block_max_h: 200;
-                    // in property <int> block_col_num: DiscoveryPageBridge.calc_block_col_num(root.width / 1px, block_max_w);
-                    // in property <int> block_row_num: DiscoveryPageBridge.calc_block_row_num(root.height / 1px, block_max_h);
-
-                    // in property<int> block_width:  min(block_max_w, root.width / 1px / block_col_num);
-                    // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
-                    // 
-                    // Rectangle {
-                    //     width: 100%;
-                    //     height: (DiscoveryPageBridge.div(event_num, block_col_num) + 1) * 200 * 1px;
-                    //     VerticalLayout {
-                    //         in property <int> i: 0;
-                    //         in property <int> j: 0;
-
-                    //         // row_num
-                    //         for i in DiscoveryPageBridge.div(event_num, block_col_num) : HorizontalLayout {
-                    //             // col_num
-                    //             for j in block_col_num: Empty {
-                    //                 if(3 * i + j <= event_num): EventCard {
-                    //                     event: event_list[3 * i + j];
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                    // }
                 }
             }
         }
