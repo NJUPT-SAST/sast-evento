@@ -189,10 +189,11 @@ export component DiscoveryPage inherits Page {
                         }
                     }
 
-                    in property <int> block_row_num: floor(event_list.length / 3) * 3 == event_list.length ? event_list.length / 3 : floor(event_list.length / 3) + 1;
+                    in property <[EventStruct]> current_event_list: event_list;
+                    in property <int> current_event_row_num: floor(current_event_list.length / 3) * 3 == current_event_list.length ? current_event_list.length / 3 : floor(current_event_list.length / 3) + 1;
                     
                     Rectangle {
-                        height: block_row_num * 188px + 20px * (block_row_num - 1);
+                        height: current_event_row_num * 188px + 20px * (current_event_row_num - 1);
                         EventCardGroup {
                             model: event_list;
                             item-clicked(event-struct) => {
@@ -212,11 +213,11 @@ export component DiscoveryPage inherits Page {
                         }
                     }
 
-                    // newest event num
-                    // in property <int> block_row_num: floor(event_list.length / 3) * 3 == event_list.length ? event_list.length / 3 : floor(event_list.length / 3) + 1;
+                    in property <[EventStruct]> newest_event_list: event_list;
+                    in property <int> newest_event_row_num: floor(newest_event_list.length / 3) * 3 == newest_event_list.length ? newest_event_list.length / 3 : floor(newest_event_list.length / 3) + 1;
                     
                     Rectangle {
-                        height: block_row_num * 188px + 20px * (block_row_num - 1);
+                        height: newest_event_row_num * 188px + 20px * (newest_event_row_num - 1);
                         EventCardGroup {
                             model: event_list;
                             item-clicked(event-struct) => {
