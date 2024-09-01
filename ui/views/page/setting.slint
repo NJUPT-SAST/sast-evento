@@ -126,7 +126,6 @@ export component SettingPage inherits Page {
                     checked <=> SettingPageBridge.minimal-to-tray;
                     toggled => {
                         SettingPageBridge.minimal-to-tray-changed();
-                        MessageManager.show-message("下次启动应用时生效", MessageType.info);
                     }
                 }
             }
