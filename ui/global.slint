@@ -17,6 +17,9 @@ export global Token {
     out property color <=> MdStyleToken.color;
     out property elevation <=> MdStyleToken.elevation;
     public function set-display-mode(color-scheme: ColorScheme) {
+        if (color-scheme == ColorScheme.unknown) {
+            return;
+        }
         Palette.color-scheme = color-scheme;
     }
     public function switch-display-mode() {

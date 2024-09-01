@@ -12,13 +12,22 @@ public:
 
     class StylishLog {
     public:
+        static void general(std::string origin, std::string content) {
+            spdlog::debug("{}: {}", origin, content);
+        }
         static void viewActionTriggered(std::string origin,
                                         std::string actionName,
-                                        std::string viewName = std::string("All-View"));
+                                        std::string viewName = std::string("All-View")) {
+            spdlog::debug("{}: {}: triggered {}", origin, viewName, actionName);
+        }
         static void viewVisibilityChanged(std::string origin,
                                           std::string actionName,
-                                          std::string viewName);
-        static void newMessageShowed(std::string origin, std::string content);
+                                          std::string viewName) {
+            spdlog::debug("{}: {} visibility changed: {}", origin, viewName, actionName);
+        }
+        static void messageOperation(std::string origin, int id, std::string content) {
+            spdlog::debug("{}: message [{}]: {}", origin, id, content);
+        }
     };
 
 private:

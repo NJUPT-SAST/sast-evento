@@ -9,7 +9,6 @@ export global SettingPageBridge {
     in-out property <bool> notice-begin: false;
     in-out property <bool> notice-end: false;
     in-out property <bool> minimal-to-tray: false;
-
     public function change-theme() {
         if (theme-index == 1) {
             Token.set-display-mode(ColorScheme.light);
@@ -19,7 +18,6 @@ export global SettingPageBridge {
             Token.set-display-mode(ColorScheme.unknown);
         }
     }
-
     callback language-changed();
     callback theme-changed();
     callback notice-begin-changed();
@@ -65,7 +63,6 @@ export component SettingPage inherits Page {
             alignment: LayoutAlignment.start;
             padding: 50px;
             spacing: 15px;
-
             Text {
                 text: "设置";
                 font-size: Token.font.display.medium.size;
@@ -129,7 +126,7 @@ export component SettingPage inherits Page {
                     checked <=> SettingPageBridge.minimal-to-tray;
                     toggled => {
                         SettingPageBridge.minimal-to-tray-changed();
-                        MessageManager.show-message("下次启动应用时生效", MessageType.Info);
+                        MessageManager.show-message("下次启动应用时生效", MessageType.info);
                     }
                 }
             }
