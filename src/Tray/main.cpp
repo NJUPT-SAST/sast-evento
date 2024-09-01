@@ -25,7 +25,13 @@ int main(int argc, char* argv[]) {
     QAction* closeAction = menu->addAction("退出");
     QObject::connect(closeAction, &QAction::triggered, &server, &TcpServer::sendExitApp);
     QObject::connect(tray, &QSystemTrayIcon::messageClicked, &server, &TcpServer::sendShowWindow);
-    QObject::connect(tray, &QSystemTrayIcon::activated, &server, &TcpServer::sendShowWindow);
+    QObject::connect(tray,
+                     &QSystemTrayIcon::activated,
+                     [&server](QSystemTrayIcon::ActivationReason reason) {
+                         if (reason == QSystemTrayIcon::Trigger) {
+                             server.sendShowWindow();
+                         }
+                     });
     tray->setContextMenu(menu);
 
     QObject::connect(&server, &TcpServer::exitAppReceived, exitApp);
