@@ -27,8 +27,10 @@ int main(int argc, char** argv) {
 
     socketClient.startTray();
 
-    uiBridge.run(evento::settings.minimalToTray ? slint::EventLoopMode::RunUntilQuit
-                                                : slint::EventLoopMode::QuitOnLastWindowClosed);
+    // block until exit event loop
+    uiBridge.run();
+
+    socketClient.exitTray();
 
     evento::saveConfig();
 }

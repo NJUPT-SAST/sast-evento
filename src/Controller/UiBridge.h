@@ -45,7 +45,7 @@ public:
     // same as Slint show();
     void show();
     // will show(), run event loop, then hide()
-    void run(slint::EventLoopMode mode);
+    void run();
     // same as Slint hide();
     void hide();
     // called from other thread (for tray)
