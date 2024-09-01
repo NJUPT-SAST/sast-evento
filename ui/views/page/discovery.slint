@@ -10,59 +10,9 @@ import { HorizontalBox, ScrollView } from "std-widgets.slint";
 export global DiscoveryPageBridge { 
     // callbacks
     pure callback div(int, int) -> int;
-    // pure callback calc_block_height(int, int) -> int;
-    // pure callback calc_block_width(int, int) -> int;
     pure callback calc_block_col_num(int, int) -> int;
     pure callback calc_block_row_num(int, int) -> int;
 }
-
-// struct block_data {
-//     img:   image,
-//     title: string,
-//     date:  string,
-//     time:  string,
-//     info:  string
-// }
-
-// infomation of events
-// component block {
-//     preferred-height: 200px;
-//     preferred-width: 400px;
-//     in property <block_data> data;
-//     Rectangle {
-//         background: #ffffff;
-//         HorizontalLayout {
-//             preview := Image{
-//                 height: 100%;
-//                 width: 50%;
-//                 image-fit: contain;
-//                 source: data.img;
-//             }
-//             VerticalLayout {
-//                 title := Text { 
-//                     text: data.title; 
-//                     font-size: EventoStyleToken.font.title.medium.size;   
-//                     font-weight: EventoStyleToken.font.title.medium.weight;  
-//                 }
-//                 date  := Text { 
-//                     text: data.date; 
-//                     font-size: EventoStyleToken.font.display.medium.size; 
-//                     font-weight: EventoStyleToken.font.display.medium.weight;
-//                 }
-//                 time  := Text { 
-//                     text: data.time; 
-//                     font-size: EventoStyleToken.font.display.medium.size; 
-//                     font-weight: EventoStyleToken.font.display.medium.weight;
-//                 }
-//                 info  := Text { 
-//                     text: data.info; 
-//                     font-size: EventoStyleToken.font.display.medium.size; 
-//                     font-weight: EventoStyleToken.font.display.medium.weight;
-//                 }
-//             }
-//         }
-//     }
-// }
 
 export component DiscoveryPage inherits Page {
     /*  demo code for generating corresponding C++ code correctly
@@ -75,6 +25,7 @@ export component DiscoveryPage inherits Page {
     
     //BEGIN debug data
 
+    in property <int> event_num;
     in property <[EventStruct]> event_list: [
         {
             id: 1,
@@ -226,10 +177,10 @@ export component DiscoveryPage inherits Page {
                         ];
                     }
                     
+                    in property <int> block_row_num: floor(event_list.length / 3) * 3 == event_list.length ? event_list.length / 3 : floor(event_list.length / 3) + 1;
+                    
                     Rectangle {
-                        // this height is put here to ensure the scrollview can scroll
-                        // it should be caluculated with number of event list
-                        height: 600px;
+                        height: block_row_num * 188px + 20px * (block_row_num - 1);
                         EventCardGroup {
                             model: event_list;
                             item-clicked(event-struct) => {
@@ -238,9 +189,6 @@ export component DiscoveryPage inherits Page {
                         }
                     }
 
-                }
-
-                    
                     // in property <int> block_max_w: 400;
                     // in property <int> block_max_h: 200;
                     // in property <int> block_col_num: DiscoveryPageBridge.calc_block_col_num(root.width / 1px, block_max_w);
@@ -250,26 +198,24 @@ export component DiscoveryPage inherits Page {
                     // in property<int> block_height: min(block_max_h, root.height/ 1px / block_row_num);
                     // 
                     // Rectangle {
-                    //     background: #39c5bb;
                     //     width: 100%;
-                    //     height: (DiscoveryPageBridge.div(current_event_num, 3) + 1) * 200 * 1px;
+                    //     height: (DiscoveryPageBridge.div(event_num, block_col_num) + 1) * 200 * 1px;
                     //     VerticalLayout {
                     //         in property <int> i: 0;
                     //         in property <int> j: 0;
 
                     //         // row_num
-                    //         for i in DiscoveryPageBridge.div(current_event_num, block_col_num) : HorizontalLayout {
+                    //         for i in DiscoveryPageBridge.div(event_num, block_col_num) : HorizontalLayout {
                     //             // col_num
                     //             for j in block_col_num: Empty {
-                    //                 if(3 * i + j <= current_event_num): block {
-                    //                     width: block_width * 1px;
-                    //                     height:block_height * 1px;
-                    //                     data: current_event_list[block_col_num * i + j];
+                    //                 if(3 * i + j <= event_num): EventCard {
+                    //                     event: event_list[3 * i + j];
                     //                 }
                     //             }
                     //         }
                     //     }
                     // }
+                }
             }
         }
     }
