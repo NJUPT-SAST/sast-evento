@@ -18,9 +18,10 @@ public:
     MessageManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     MessageManager(MessageManager&) = delete;
 
-    void showMessage(std::string content,
-                     MessageType type = MessageType::Info,
-                     std::chrono::steady_clock::duration timeout = std::chrono::milliseconds(3000));
+    // @return message id
+    int showMessage(std::string content,
+                    MessageType type = MessageType::Info,
+                    std::chrono::steady_clock::duration timeout = std::chrono::milliseconds(3000));
 
     // unnecessary to invoke if set correct timeout
     void hideMessage(int id);

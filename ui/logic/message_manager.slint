@@ -19,15 +19,15 @@ export struct ToastData {
 export global MessageManagerBridge {
     in-out property <[ToastData]> toast-list;
     in-out property <bool> refresh;
-    callback show-message(string, MessageType);
+    callback show-message(string, MessageType) -> int;
     pure callback get-message(int) -> MessageData;
     callback hide-message(int);
 }
 
 export global MessageManager {
     out property <[ToastData]> toast-list: MessageManagerBridge.toast-list;
-    public function show-message(content: string, type: MessageType) {
-        MessageManagerBridge.show-message(content, type);
+    public function show-message(content: string, type: MessageType) -> int {
+        return MessageManagerBridge.show-message(content, type);
     }
     pure public function get-message(id: int) -> MessageData {
         return MessageManagerBridge.get-message(id);

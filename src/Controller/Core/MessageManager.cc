@@ -16,7 +16,7 @@ MessageManager::MessageManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBr
     toastList = std::make_shared<slint::VectorModel<ToastData>>();
 
     self->on_show_message([this](slint::SharedString content, MessageType type) {
-        showMessage(std::string(content), type);
+        return showMessage(std::string(content), type);
     });
 
     self->on_get_message([this](int id) -> MessageData { return getMessage(id); });
@@ -26,9 +26,9 @@ MessageManager::MessageManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBr
     self->set_toast_list(toastList);
 }
 
-void MessageManager::showMessage(std::string content,
-                                 MessageType type,
-                                 std::chrono::steady_clock::duration timeout) {
+int MessageManager::showMessage(std::string content,
+                                MessageType type,
+                                std::chrono::steady_clock::duration timeout) {
     auto& self = *this;
     auto id = nextId++;
 
@@ -42,6 +42,8 @@ void MessageManager::showMessage(std::string content,
         [this, id] { hideMessage(id); },
         timeout + animationLength,
         AsyncExecutor::Once | AsyncExecutor::Delay);
+
+    return id;
 }
 
 void MessageManager::hideMessage(int id) {
