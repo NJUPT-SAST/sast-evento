@@ -4,6 +4,7 @@ import { EventCard, EventCardGroup } from "../../components/event_card.slint";
 import { EventStruct } from "../../components/event_struct.slint";
 import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
+import { Token } from "../../global.slint";
 import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
 import { HorizontalBox, ScrollView } from "std-widgets.slint";
 
@@ -177,7 +178,42 @@ export component DiscoveryPage inherits Page {
                         ];
                     }
                     
+                    Rectangle {
+                        height: 40px;
+                        width: 100%;
+                        Text {
+                            color: Token.color.inverse-surface;
+                            font-size: Token.font.title.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            text: "正在进行的活动";
+                        }
+                    }
+
                     in property <int> block_row_num: floor(event_list.length / 3) * 3 == event_list.length ? event_list.length / 3 : floor(event_list.length / 3) + 1;
+                    
+                    Rectangle {
+                        height: block_row_num * 188px + 20px * (block_row_num - 1);
+                        EventCardGroup {
+                            model: event_list;
+                            item-clicked(event-struct) => {
+                                debug("id: " + event-struct.id + " title: " + event-struct.summary);
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        height: 40px;
+                        width: 100%;
+                        Text {
+                            color: Token.color.inverse-surface;
+                            font-size: Token.font.title.large.size;
+                            font-weight: Token.font.label.large.weight;
+                            text: "最新的活动";
+                        }
+                    }
+
+                    // newest event num
+                    // in property <int> block_row_num: floor(event_list.length / 3) * 3 == event_list.length ? event_list.length / 3 : floor(event_list.length / 3) + 1;
                     
                     Rectangle {
                         height: block_row_num * 188px + 20px * (block_row_num - 1);
