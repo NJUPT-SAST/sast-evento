@@ -8,6 +8,10 @@ on:
     paths: 
     - "src/**"
     - ".github/workflows/format-check.yml"
+    branches:
+      - main
+      - dev
+      
 jobs:
   format-check:
     name: Format Check

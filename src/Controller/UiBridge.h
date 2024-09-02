@@ -9,6 +9,7 @@ EVENTO_UI_START
 class UiBridge : GlobalAgent<::UiBridge> {
     friend class ViewManager;
     friend class AccountManager;
+    friend class MessageManager;
 
     slint::ComponentHandle<UiEntryName> uiEntry;
     bool eventLoopRunning = false;
@@ -48,7 +49,7 @@ public:
     // same as Slint hide();
     void hide();
     // called from other thread (for tray)
-    [[deprecated("no tray in project now")]] void exit();
+    void exit();
 
     bool inEventLoop() const;
 

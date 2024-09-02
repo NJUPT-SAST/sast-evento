@@ -1,0 +1,271 @@
+import { StateLayer } from "state_layer.slint";
+import { Token, MdElevationData, MdFontData } from "../global.slint";
+import { LoadingAnimation } from "animation.slint";
+import { Empty } from "view_base.slint";
+
+export enum ButtonType{
+    elevated,
+    filled,
+    filled-tonal,
+    outlined,
+    text,
+}
+/**
+ * a general button matching MD3 common button requirement.
+ * ref: https://m3.material.io/components/buttons/overview
+ * 
+ * support general item as icon, max size: 18px*18px, just add as a child element.
+ * 
+ * types:
+ * - elevated
+ * - filled
+ * - filled-tonal
+ * - outlined
+ * - text
+ */
+export component Button {
+    callback clicked <=> _area.clicked;
+    // option
+    in property <ButtonType> type: text;
+    in property <bool> disable;
+    in property <string> content: "No Content";
+    in property <bool> have-icon: false;
+    in property <color> elevated-surface: Token.color.surface-container-low;
+    in property <color> elevated-on-surface: Token.color.primary;
+    in property <color> filled-surface: Token.color.primary;
+    in property <color> filled-on-surface: Token.color.on-primary;
+    in property <color> filled-tonal-surface: Token.color.secondary-container;
+    in property <color> filled-tonal-on-surface: Token.color.on-secondary-container;
+    in property <color> outlined-on-surface: Token.color.primary;
+    in property <color> outlined-outline: Token.color.outline;
+    in property <color> text-on-surface: Token.color.primary;
+    // out
+    out property <color> surface;
+    out property <color> on-surface;
+    out property <color> outline;
+    out property <MdElevationData> elevation: Token.elevation.level0;
+    // implement
+    private property <color> disable-color: Token.color.on-surface;
+    private property <MdFontData> font: Token.font.body.large;
+    private property <length> max-radius: 20px;
+    private property <length> icon-size: 18px;
+    private property <length> default-padding: 24px;
+    private property <length> icon-padding: 16px;
+    private property <length> default-spacing: 8px;
+    min-height: 40px;
+    min-width: _body.min-width;
+    preferred-height: 40px;
+    preferred-width: _body.preferred-width;
+    // max-height: 40px;
+    // max-width: _body.max-width;
+    vertical-stretch: 0;
+    horizontal-stretch: 0;
+    _body := Rectangle {
+        x: 0;
+        y: 0;
+        height <=> parent.height;
+        width <=> parent.width;
+        background: surface;
+        border-color: outline;
+        border-radius: self.height / 2 > max-radius ? max-radius : self.height / 2;
+        drop-shadow-color: Token.color.shadow;
+        drop-shadow-offset-y: elevation.offset-y;
+        drop-shadow-blur: elevation.blur;
+        clip: true;
+        StateLayer {
+            color: on-surface;
+            disable: root.disable;
+            is-hover: _area.has-hover;
+            is-press: _area.pressed;
+        }
+
+        _body-layout := HorizontalLayout {
+            alignment: center;
+            padding-left: default-padding;
+            padding-right: default-padding;
+            spacing: 0;
+            _icon-bound := Empty {
+                height: 100%;
+                opacity: 0;
+                _icon := Rectangle {
+                    height: icon-size;
+                    width: icon-size;
+                    clip: true;
+                    @children
+                }
+            }
+
+            Empty {
+                height: 100%;
+                _text := Text {
+                    text: content;
+                    font-size: font.size;
+                    font-weight: font.weight;
+                    color: on-surface;
+                    vertical-alignment: center;
+                }
+            }
+
+            states [
+                have-icon when have-icon: {
+                    spacing: default-spacing;
+                    padding-left: icon-padding;
+                    _icon-bound.opacity: 1;
+                    _icon-bound.width: icon-size;
+                    in {
+                        animate spacing, padding-left, _icon-bound.opacity, _icon-bound.width {
+                            duration: 200ms;
+                            easing: ease-in-out-quint;
+                        }
+                    }
+                    out {
+                        animate spacing, padding-left, _icon-bound.opacity, _icon-bound.width {
+                            duration: 200ms;
+                            easing: ease-in-out-quint;
+                        }
+                    }
+                }
+            ]
+        }
+
+        _area := TouchArea {
+            mouse-cursor: disable ? default : pointer;
+        }
+
+        animate drop-shadow-offset-y, drop-shadow-blur {
+            duration: 200ms;
+            easing: ease-in-out-quint;
+        }
+    }
+
+    animate surface, on-surface, outline {
+        duration: 200ms;
+        easing: ease-in-out-quint;
+    }
+    states [
+        elevated-disable when disable && type == ButtonType.elevated: {
+            surface: disable-color.with-alpha(0.12);
+            on-surface: disable-color.with-alpha(0.38);
+            elevation: Token.elevation.level0;
+            _body.drop-shadow-color: #00000000;
+        }
+        elevated when type == ButtonType.elevated: {
+            surface: elevated-surface;
+            on-surface: elevated-on-surface;
+            elevation: Token.elevation.level1;
+        }
+        filled-disable when disable && type == ButtonType.filled: {
+            surface: disable-color.with-alpha(0.12);
+            on-surface: disable-color.with-alpha(0.38);
+        }
+        filled when type == ButtonType.filled: {
+            surface: filled-surface;
+            on-surface: filled-on-surface;
+        }
+        filled-tonal-disable when disable && type == ButtonType.filled-tonal: {
+            surface: disable-color.with-alpha(0.12);
+            on-surface: disable-color.with-alpha(0.38);
+        }
+        filled-tonal when type == ButtonType.filled-tonal: {
+            surface: filled-tonal-surface;
+            on-surface: filled-tonal-on-surface;
+        }
+        outlined-disable when disable && type == ButtonType.outlined: {
+            surface: transparent;
+            on-surface: disable-color.with-alpha(0.38);
+            outline: outlined-outline.with-alpha(0.12);
+            _body.border-width: 1px;
+        }
+        outlined when type == ButtonType.outlined: {
+            surface: transparent;
+            on-surface: outlined-on-surface;
+            outline: outlined-outline;
+            _body.border-width: 1px;
+        }
+        text-disable when disable && type == ButtonType.text: {
+            surface: transparent;
+            on-surface: disable-color.with-alpha(0.38);
+        }
+        text when type == ButtonType.text: {
+            surface: transparent;
+            on-surface: text-on-surface;
+        }
+    ]
+}
+
+// quick preview
+component Example {
+    property <bool> disable;
+    property <bool> icon;
+    VerticalLayout {
+        // alignment: start;
+        // width: 500px;
+        HorizontalLayout {
+            Button {
+                content: "disable";
+                type: ButtonType.elevated;
+                clicked => {
+                    root.disable = !root.disable;
+                }
+            }
+
+            Button {
+                content: "icon";
+                type: ButtonType.elevated;
+                clicked => {
+                    root.icon = !root.icon;
+                }
+            }
+        }
+
+        Button {
+            have-icon: icon;
+            type: ButtonType.elevated;
+            disable: root.disable;
+            LoadingAnimation {
+                disable: parent.disable;
+                color: parent.on-surface;
+            }
+        }
+
+        Button {
+            have-icon: icon;
+            type: ButtonType.filled;
+            disable: root.disable;
+            LoadingAnimation {
+                color: parent.on-surface;
+                disable: parent.disable;
+            }
+        }
+
+        Button {
+            have-icon: icon;
+            type: ButtonType.filled-tonal;
+            disable: root.disable;
+            LoadingAnimation {
+                disable: parent.disable;
+                color: parent.on-surface;
+            }
+        }
+
+        Button {
+            have-icon: icon;
+            type: ButtonType.outlined;
+            disable: root.disable;
+            LoadingAnimation {
+                disable: parent.disable;
+                color: parent.on-surface;
+            }
+        }
+
+        Button {
+            have-icon: icon;
+            type: ButtonType.text;
+            disable: root.disable;
+            LoadingAnimation {
+                disable: parent.disable;
+                color: parent.on-surface;
+            }
+        }
+    }
+}

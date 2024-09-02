@@ -1,0 +1,52 @@
+export component StateLayer {
+    // option
+    in property <color> color: #00000000;
+    in property <color> background: #00000000;
+    in property <bool> is-hover: false;
+    in property <bool> is-focus: false;
+    in property <bool> is-press: false;
+    in property <bool> is-drag: false;
+    in property <bool> disable;
+    // implement
+    height: 100%;
+    width: 100%;
+    _body := Rectangle {
+        background: color == rgba(0,0,0,0) ? background : color;
+        opacity: 0;
+        animate opacity {
+            duration: 100ms;
+            easing: linear;
+        }
+    }
+
+    states [
+        disable when disable: {
+            _body.opacity: 0;
+        }
+        drag when is-drag: {
+            _body.opacity: 0.16;
+        }
+        press when is-press: {
+            _body.opacity: 0.1;
+        }
+        focus when is-focus: {
+            _body.opacity: 0.1;
+        }
+        hover when is-hover: {
+            _body.opacity: 0.08;
+        }
+    ]
+}
+
+component Test {
+    StateLayer {
+        width: 100%;
+        height: 100%;
+        background: red;
+        is-hover: area.has-hover;
+        is-press: area.pressed;
+        // disable: true;
+    }
+
+    area := TouchArea { }
+}

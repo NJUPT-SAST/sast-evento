@@ -16,7 +16,9 @@ if (POLICY CMP0167)
 endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
-option(EVENTO_EMBED_RESOURCES "ON to request slint embed resources")
+
+option(EVENTO_EMBED_RESOURCES OFF "Request slint embed resources")
+set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
 
 if(APPLE)
   set(MACOSX_BUNDLE_GUI_IDENTIFIER ${IDENTIFIER})
@@ -51,7 +53,7 @@ endif (NOT Slint_FOUND)
 
 # find vcpkg-installed
 find_package(spdlog REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system url beast)
+find_package(Boost REQUIRED COMPONENTS system url beast process)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(PkgConfig REQUIRED)

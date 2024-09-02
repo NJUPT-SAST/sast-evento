@@ -24,6 +24,14 @@ jobs:
           version: 14
           platform: x64
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: 6.6.2
+          arch: gcc_64
+          cache: true
+          cache-key-prefix: ${{ runner.os }}-qt
+
       - name: Setup Rust toolchain
         uses: moonrepo/setup-rust@v1
         with:
@@ -40,13 +48,19 @@ jobs:
             !${{ github.workspace }}/build/*/cargo/build/**/incremental
             ${{ github.workspace }}/build/corrosion/**/target
             !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-          key: corrosion-${{ runner.os }}
+          key: corrosion-${{ runner.os }}-qt
+
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
 
       - name: Setup vcpkg
         uses: lukka/run-vcpkg@v11
         with:
           vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
           vcpkgJsonGlob: 'vcpkg.json'
+
+      - name: CMake Generate
+        run: cmake --preset native -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
         uses: ZedThree/clang-tidy-review@v0.19.0
@@ -55,5 +69,3 @@ jobs:
           build_dir: build
           config_file: ".clang-tidy"
           exclude: "3rdpart/*, build/*"
-          cmake_command: |
-            cmake --preset native -DCMAKE_EXPORT_COMPILE_COMMANDS=ON

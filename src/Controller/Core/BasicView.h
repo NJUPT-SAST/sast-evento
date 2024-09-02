@@ -1,7 +1,10 @@
 #pragma once
 
+#include <Controller/Core/AccountManager.h>
 #include <Controller/Core/GlobalAgent.hh>
+#include <Controller/Core/MessageManager.h>
 #include <Controller/Core/UiBase.h>
+#include <Controller/Core/ViewManager.h>
 
 EVENTO_UI_START
 
@@ -14,6 +17,11 @@ protected:
         : bridge(bridge) {}
 
 public:
+    BasicView(const BasicView&) = delete;
+    BasicView& operator=(const BasicView&) = delete;
+    BasicView(BasicView&&) = delete;
+    BasicView& operator=(BasicView&&) = delete;
+
     virtual ~BasicView() = default;
 
 private:
