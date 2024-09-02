@@ -1,8 +1,9 @@
 import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
 import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
-import { VerticalBox, HorizontalBox, LineEdit, TextEdit } from "std-widgets.slint";
+import { VerticalBox, HorizontalBox, LineEdit, TextEdit, ScrollView } from "std-widgets.slint";
 import { SIcon, SCatalog, SStar, SButton } from "../../modules/surrealism-ui/index.slint";
+import { TimeLine } from "../../modules/surrealism-ui/src/timeline/timeline.slint";
 
 
 export global DetailPageBridge {
@@ -97,32 +98,25 @@ component IconText {
 }
 
 component EventInfoBlock {
-    info-title := Text {
-        x: 0px;
-        y: 0px;
-        text: "活动信息";
-        font-size: 28px;
-    }
-
     in property <[{icon: image, text: string}]> model: [
-        { icon: Token.image.icon.home.normal, text: "feipiao,1" },
-        { icon: Token.image.icon.home.normal, text: "feipiao,2" },
-        { icon: Token.image.icon.home.normal, text: "feipiao,3" },
-        { icon: Token.image.icon.home.normal, text: "feipiao,4" },
-        { icon: Token.image.icon.home.normal, text: "feipiao,5" },
-        { icon: Token.image.icon.home.normal, text: "feipiao,6" },
+        { icon: Token.image.icon.time, text: "9月1日 14:00-15:00" },
+        { icon: Token.image.icon.locate, text: "大学生活动中心 101中区" },
+        { icon: Token.image.icon.department, text: "C++组" },
+        { icon: Token.image.icon.category, text: "软研授课" },
+        { icon: Token.image.icon.tag, text: "C++" },
+        { icon: Token.image.icon.topic, text: "输入输出流" },
     ];
     VerticalLayout {
         x: 0px;
-        y: 40px;
-        spacing: 2px;
+        y: 10px;
+        spacing: 10px;
         for data in root.model: repeated-icontext := IconText {
             width: parent.width;
             height: (parent.height - parent.y - (model.length - 1) * parent.spacing) / model.length;
             visible: true;
             x: 0px;
             text: data.text;
-            icon: Token.image.icon.home.normal;
+            icon: data.icon;
         }
     }
 }
@@ -145,76 +139,60 @@ export component DetailPage inherits Page {
         y: 0;
         width: 100%;
         height: 100%;
-        HorizontalBox {
-            padding: 30px;
-            spacing: 10px;
-            recleft := Rectangle {
-                width: 50%;
-                VerticalLayout {
-                    spacing: 20px;
-                    Rectangle {
-                        height: 55%;
-                        EventInfoBlock {
-                            x: 40px;
-                            y: 0px;
-                            width: parent.width - self.x;
-                            height: parent.height - self.y;
-                        }
-                    }
+        ScrollView {
+            y: 20px;
+            width: parent.width;
+            height: parent.height - 100px;
+            VerticalLayout {
+                x: 40px;
+                width: parent.width - 2 * self.x;
+                spacing: 20px;
+                Text {
+                    width: parent.width;
+                    height: 50px;
+                    text: "软件研发部 C++组授课";
+                    font-size: 35px;
+                }
 
-                    Rectangle {
-                        CommentBlock {
-                            x: 10px;
-                            y: 10px;
-                            width: parent.width - self.x;
-                            height: parent.height - self.y - 10px;
-                        }
-                    }
+                Text {
+                    width: parent.width;
+                    height: 35px;
+                    text: "报名中";
+                    font-size: 30px;
+                }
+
+                EventInfoBlock {
+                    width: parent.width;
+                    height: 200px;
+                }
+
+                CommentBlock {
+                    x: 10px;
+                    width: parent.width - 2 * self.x;
+                    height: 280px;
                 }
             }
+        }
 
-            Rectangle {
-                // border-width: 3px;
-                // border-color: black;
+        Rectangle {
+            y: parent.height - 60px;
+            width: parent.width;
+            height: 40px;
+            // background: Token.color.primary-container;
+            SButton {
+                x: 20px;
+                y: 0px;
+                width: 120px;
+                height: parent.height;
+                text: "报名";
+            }
 
-                Image {
-                    source: Token.image.icon.evento;
-                    x: 20px;
-                    y: 20px;
-                    width: min(parent.width - self.x, display-rec.y) - 20px;
-                    height: self.width;
-                }
-
-                display-rec := Rectangle {
-                    x: 20px;
-                    y: parent.height - self.height - 20px;
-                    width: parent.width - self.x;
-                    height: 150px;
-                    Text {
-                        x: 0px;
-                        y: 0px;
-                        width: 100px;
-                        height: 30px;
-                        text: "<状态>";
-                        font-size: 28px;
-                    }
-
-                    SButton {
-                        x: 40px;
-                        y: 55px;
-                        width: parent.width - 2 * self.x;
-                        height: 40px;
-                        text: "报名";
-                    }
-
-                    SButton {
-                        x: 40px;
-                        y: 105px;
-                        width: parent.width - 2 * self.x;
-                        height: 40px;
-                        text: "签到";
-                    }
-                }
+            SButton {
+                x: 160px;
+                y: 0px;
+                width: 120px;
+                height: parent.height;
+                text: "签到";
             }
         }
     }
