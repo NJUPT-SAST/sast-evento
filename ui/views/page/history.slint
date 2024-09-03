@@ -2,7 +2,9 @@ import { Token } from "../../global.slint";
 import { Page, Empty } from "../../components/index.slint";
 import { SCard,STimeLine,STimeLineItem } from "../../modules/surrealism-ui/index.slint";
 import {SStar,SButton} from "../../modules/surrealism-ui/index.slint";
-
+import { Card } from "../../components/card.slint";
+import { SPagination } from "../../modules/surrealism-ui/index.slint";
+import {Themes,UseIcons} from "../../modules/surrealism-ui/use/index.slint";
 export global HistoryPageBridge { }
 
 component CommentItem {
@@ -20,8 +22,8 @@ component CommentItem {
         HorizontalLayout {
             spacing: 8px;
             Rectangle {
-                width: 324px;
-                height: 70%;
+                width: 450px;
+                height: 75px;
                 border-radius: 10px;
                 border-color: grey;
                 border-width: 1px;
@@ -32,29 +34,23 @@ component CommentItem {
                 }
             }
 
-            Rectangle {
-                width: 60px;
-                height: 60px;
-                background: Token.color.surface-container;
-                border-radius: 30px;
-                Image {
-                    width: 100%;
-                    height: 100%;
+            SButton {
+                height: 75px;
+                width: 75px;
+                text: "评价";
+                font-size: Token.font.label.medium.size;
+                font-weight: Token.font.label.medium.weight;
+                clicked => {
+                    // TODO: implement review
                 }
             }
         }
     }
 }
 
-component Divider inherits Rectangle {
-    width: 75%;
-    height: 1px;
-    background: Token.color.outline-variant;
-}
-
 component DividerVirtical inherits Rectangle {
     width: 1px;
-    height: 80%;
+    height: 100px;
     background: Token.color.outline-variant;
 }
 
@@ -64,7 +60,7 @@ export component HistoryPage inherits Page {
     //background := Empty { }
 
     body := VerticalLayout {
-        padding: 50px;
+        padding: 16px;
         //padding-top: 30px;
         spacing: 8px;
         Text {
@@ -73,33 +69,44 @@ export component HistoryPage inherits Page {
             font-weight: Token.font.headline.medium.weight;
         }
 
-        Divider { }
-
         STimeLineItem {
-            width: parent.width;
+            // width: parent.width;
             height: root.height / 4;
-            theme: Light;
             date: "2024.7.24 101中区 15:30-17:30";
-            SCard {
-                theme: Light;
+            Card {
                 height: parent.center-height();
                 width: parent.center-width();
                 HorizontalLayout {
                     padding: 8px;
                     spacing: 8px;
                     Rectangle {
-                        width: 10%;
-                        height: 75%;
+                        width: 100px;
+                        height: 100px;
                         border-radius: 5px;
                         background: Token.color.surface-container;
                     }
 
-                    Text {
-                        width: 50%;
-                        height: parent.height;
-                        text: "活动名称";
-                        font-size: Token.font.headline.small.size;
-                        font-weight: Token.font.headline.small.weight;
+                    VerticalLayout {
+                        width: 680px;
+                        padding: 8px;
+                        Text {
+                            horizontal-alignment: TextHorizontalAlignment.left;
+                            vertical-alignment: TextVerticalAlignment.top;
+                            text: "活动名称：软件研发部C++组授课";
+                            overflow: elide;
+                            font-size: Token.font.headline.small.size;
+                            font-weight: Token.font.headline.small.weight;
+                            color: Token.color.on-surface;
+                        }
+
+                        Text {
+                            horizontal-alignment: TextHorizontalAlignment.left;
+                            text: "活动介绍";
+                            overflow: elide;
+                            font-size: Token.font.label.medium.size;
+                            font-weight: Token.font.label.medium.weight;
+                            color: Token.color.on-surface;
+                        }
                     }
 
                     DividerVirtical { }
@@ -108,12 +115,6 @@ export component HistoryPage inherits Page {
                 }
             }
 
-            area := TouchArea {
-                width: parent.width;
-                height: parent.height;
-                mouse-cursor: pointer;
-            }
-
             clicked(is_active) => {
                 debug(is-active);
                 self.active = !self.active;
@@ -121,12 +122,10 @@ export component HistoryPage inherits Page {
         }
 
         STimeLineItem {
-            width: parent.width;
+            // width: parent.width;
             height: root.height / 4;
-            theme: Light;
             date: "2024.7.24 101中区 15:30-17:30";
-            SCard {
-                theme: Light;
+            Card {
                 height: parent.center-height();
                 width: parent.center-width();
             }
@@ -138,12 +137,10 @@ export component HistoryPage inherits Page {
         }
 
         STimeLineItem {
-            width: parent.width;
+            // width: parent.width;
             height: root.height / 4;
-            theme: Light;
             date: "2024.7.24 101中区 15:30-17:30";
-            SCard {
-                theme: Light;
+            Card {
                 height: parent.center-height();
                 width: parent.center-width();
             }
@@ -154,36 +151,12 @@ export component HistoryPage inherits Page {
             }
         }
 
-        STimeLineItem {
-            width: parent.width;
-            height: root.height / 4;
-            theme: Light;
-            date: "2024.7.24 101中区 15:30-17:30";
-            SCard {
-                theme: Light;
-                height: parent.center-height();
-                width: parent.center-width();
-            }
-
-            clicked(is_active) => {
-                debug(is-active);
-                self.active = !self.active;
+        Empty {
+            a := SPagination {
+                page-size: 10;
+                total: 100;
+                visible-range: 6;
             }
         }
     }
-
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    // body := Empty {
-    //     x: 0;
-    //     y: 0;
-    //     width: 100%;
-    //     height: 100%;
-    // }
 }
