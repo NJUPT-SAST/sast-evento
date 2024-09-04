@@ -134,7 +134,7 @@ export component AboutPage inherits Page {
                                 if (AboutPageBridge.check-update()) {
                                     popup.open();
                                 } else {
-                                    MessageManager.show-message("已是最新版本", MessageType.Info);
+                                    MessageManager.show-message("已是最新版本", MessageType.info);
                                     self.text = "已是最新版本";
                                 }
                             }
