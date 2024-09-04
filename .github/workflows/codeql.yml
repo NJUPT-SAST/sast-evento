@@ -76,7 +76,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: 6.6.2
+        version: 6.6.3
         arch: gcc_64
         cache: true
         cache-key-prefix: ${{ runner.os }}-qt
