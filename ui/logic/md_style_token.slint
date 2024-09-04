@@ -1,0 +1,222 @@
+import { Palette, Button } from "std-widgets.slint";
+export { 
+    MdFontData,
+    MdElevationData,
+}
+
+// font
+struct MdFontData {
+    size: length,
+    weight: int,
+}
+
+struct MdFontTypeData {
+    large: MdFontData,
+    medium: MdFontData,
+    small: MdFontData,
+}
+
+// five types: large, headline, title, body, label
+// more info: https://m3.material.io/styles/typography/applying-type#ab657e7c-cb93-45ff-92c6-686959dc19ae
+struct MdFontStruct {
+    display: MdFontTypeData,
+    headline: MdFontTypeData,
+    title: MdFontTypeData,
+    body: MdFontTypeData,
+    label: MdFontTypeData,
+}
+
+// color
+// more info: https://m3.material.io/styles/color/roles
+struct MdColorStruct {
+    primary: color,
+    on-primary: color,
+    primary-container: color,
+    on-primary-container: color,
+    secondary: color,
+    on-secondary: color,
+    secondary-container: color,
+    on-secondary-container: color,
+    surface: color,
+    on-surface: color,
+    surface-variant: color,
+    on-surface-variant: color,
+    surface-container-highest: color,
+    surface-container-high: color,
+    surface-container: color,
+    surface-container-low: color,
+    surface-container-lowest: color,
+    inverse-surface: color,
+    inverse-on-surface: color,
+    outline: color,
+    outline-variant: color,
+    error: color,
+    on-error: color,
+    scrim: color,
+    shadow: color,
+}
+
+struct MdElevationData {
+    offset-y: length,
+    blur: length,
+}
+
+struct MdElevationStruct {
+    level0: MdElevationData,
+    level1: MdElevationData,
+    level2: MdElevationData,
+    level3: MdElevationData,
+    level4: MdElevationData,
+    level5: MdElevationData,
+}
+
+export global MdStyleToken {
+    out property <MdColorStruct> color:{
+        primary: switcher({ light: #6750A4, dark: #D0BCFF }),
+        on-primary: switcher({ light: #FFFFFF, dark: #381E72 }),
+        primary-container: switcher({ light: #EADDFF, dark: #4F378B }),
+        on-primary-container: switcher({ light: #4F378B, dark: #EADDFF }),
+        secondary: switcher({ light: #625B71, dark: #CCC2DC }),
+        on-secondary: switcher({ light: #FFFFFF, dark: #332D41 }),
+        secondary-container: switcher({ light: #E8DEF8, dark: #4A4458 }),
+        on-secondary-container: switcher({ light: #4A4458, dark: #E8DEF8 }),
+        surface: switcher({ light: #FEF7FF, dark: #141218 }),
+        on-surface: switcher({ light:#1D1B20, dark:  #E6E0E9 }),
+        surface-variant: switcher({ light: #E7E0EC, dark: #49454F }),
+        on-surface-variant: switcher({ light: #49454F, dark: #CAC4D0 }),
+        surface-container-highest: switcher({ light: #E6E0E9, dark: #36343B }),
+        surface-container-high: switcher({ light: #ECE6F0, dark: #2B2930 }),
+        surface-container: switcher({ light: #F3EDF7, dark: #211F26 }),
+        surface-container-low: switcher({ light: #F7F2FA, dark: #1D1B20 }),
+        surface-container-lowest: switcher({ light: #FFFFFF, dark: #0F0D13 }),
+        inverse-surface: switcher({ light: #322F35, dark: #E6E0E9 }),
+        inverse-on-surface: switcher({ light: #F5EFF7, dark: #322F35 }),
+        outline: switcher({ light: #79747E, dark: #938F99 }),
+        outline-variant: switcher({ light: #CAC4D0, dark: #49454F }),
+        error: switcher({ light: #B3261E, dark: #F2B8B5 }),
+        on-error: switcher({ light: #FFFFFF, dark: #601410 }),
+        scrim: #000000,
+        shadow: #000000,
+    };
+    // source: https://m3.material.io/styles/typography/type-scale-tokens#a734c6ed-634c-4abb-adb2-35daf0aed06a
+    // prefer large, use body.large (16px) for body text
+    out property <MdFontStruct> font:{
+        display: {
+            large: {
+                size: 57px,
+                weight: 400,
+            },
+            medium: {
+                size: 45px,
+                weight:400,
+            },
+            small: {
+                size: 36px,
+                weight:400,
+            }
+        },
+        headline: {
+            large: {
+                size: 32px,
+                weight: 400,
+            },
+            medium: {
+                size: 28px,
+                weight: 400,
+            },
+            small: {
+                size: 24px,
+                weight: 400,
+            }
+        },
+        title: {
+            large: {
+                size: 22px,
+                weight: 400,
+            },
+            medium: {
+                size: 16px,
+                weight: 500,
+            },
+            small: {
+                size: 14px,
+                weight: 500,
+            }
+        },
+        body: {
+            large: {
+                size: 16px,
+                weight: 400,
+            },
+            medium: {
+                size: 14px,
+                weight: 400,
+            },
+            small: {
+                size: 12px,
+                weight:400,
+            }
+        },
+        label: {
+            large: {
+                size: 14px,
+                weight: 500,
+            },
+            medium: {
+                size: 12px,
+                weight: 500,
+            },
+            small: {
+                size: 11px,
+                weight: 500,
+            }
+        },
+    };
+    out property <MdElevationStruct> elevation:{
+        level0: {
+            offset-y: 0px,
+            blur: 0px,
+        },
+        level1: {
+            offset-y: 1px,
+            blur: 2px,
+        },
+        level2: {
+            offset-y: 3px,
+            blur: 4px,
+        },
+        level3: {
+            offset-y: 6px,
+            blur: 7px,
+        },
+        level4: {
+            offset-y: 8px,
+            blur: 9px,
+        },
+        level5: {
+            offset-y: 12px,
+            blur: 13px,
+        },
+    };
+    out property <bool> is-darkmode: Palette.color-scheme == ColorScheme.dark;
+    pure function switcher(color: {light:color,dark:color}) -> color {
+        return self.is-darkmode ? color.dark : color.light;
+    }
+}
+
+// component ElevationTest {
+//     Rectangle {
+//         background: white;
+//     }
+
+//     Rectangle {
+//         private property <MdElevationData> level: MdStyleToken.elevation.level1;
+//         background: white;
+//         height: 50px;
+//         width: 50px;
+//         drop-shadow-offset-y: level.offset-y;
+//         drop-shadow-blur: level.blur;
+//         drop-shadow-color: black;
+//         border-radius: 20px;
+//     }
+// }

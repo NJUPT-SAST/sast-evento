@@ -12,6 +12,7 @@
 #include <Controller/View/MyEventPage.h>
 #include <Controller/View/SearchPage.h>
 #include <Controller/View/SettingPage.h>
+#include <Infrastructure/Utils/Config.h>
 #include <memory>
 #include <spdlog/spdlog.h>
 
@@ -25,13 +26,18 @@ UiBridge::UiBridge(slint::ComponentHandle<UiEntryName> uiEntry)
     , messageManager(std::make_shared<MessageManager>(uiEntry, *this)) {
     attachAllViews();
 
+    // schedule for init views in event loop
     slint::invoke_from_event_loop([this] { return onEnterEventLoop(); });
 
+    // take control of exit event loop from slint, make minimalToTray effective immediately, work with slint::EventLoopMode::RunUntilQuit
     uiEntry->window().on_close_requested([this] {
-        onExitEventLoop();
+        if (!settings.minimalToTray) {
+            exit();
+        }
         return slint::CloseRequestResponse::HideWindow;
     });
 
+    // load basic views
     viewManager->initStack(ViewName::DiscoveryPage);
     if (!accountManager->isLogin()) {
         viewManager->initStack(ViewName::LoginOverlay);
@@ -69,7 +75,10 @@ void UiBridge::run() {
     show();
     spdlog::debug("--- enter slint event loop ---");
     eventLoopRunning = true;
-    slint::run_event_loop();
+
+    // slint::EventLoopMode::RunUntilQuit work with on_close_requested line in constructor
+    slint::run_event_loop(slint::EventLoopMode::RunUntilQuit);
+
     eventLoopRunning = false;
     spdlog::debug("--- exit slint event loop ---");
     hide();
@@ -84,8 +93,7 @@ void UiBridge::hide() {
 
 void UiBridge::exit() {
     if (eventLoopRunning) {
-        UiUtility::StylishLog::viewActionTriggered(logOrigin, "onStop");
-        slint::invoke_from_event_loop([&self = *this] { self.call(actions::onStop); });
+        slint::invoke_from_event_loop([this] { onExitEventLoop(); });
         slint::quit_event_loop();
     }
 }
