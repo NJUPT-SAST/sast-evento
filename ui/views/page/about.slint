@@ -1,8 +1,10 @@
 import { Token } from "../../global.slint";
 import { Page, Empty, ContentDialog } from "../../components/index.slint";
-import { AboutSlint, Button, ScrollView } from "std-widgets.slint";
-import { SLink} from "../../modules/surrealism-ui/index.slint";
+import { AboutSlint, ScrollView } from "std-widgets.slint";
+import { SLink } from "../../modules/surrealism-ui/index.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
+import { Button, ButtonType } from "../../components/index.slint";
+
 
 // Made with Slint badge
 export component AboutSlint inherits Rectangle {
@@ -89,25 +91,10 @@ export component AboutPage inherits Page {
                     width: 220px;
                     image-fit: contain;
                     source: Token.image.display.evento;
-                    animate opacity {
-                        duration: 1000ms;
-                        easing: ease-in-out;
-                    }
-                    init => {
-                        self.opacity = 0;
-                        self.opacity = 1;
-                    }
                 }
 
                 AboutSlint {
-                    animate opacity {
-                        duration: 1000ms;
-                        easing: ease-in-out;
-                    }
-                    init => {
-                        self.opacity = 0;
-                        self.opacity = 1;
-                    }
+                    height: 100px;
                 }
             }
 
@@ -129,13 +116,13 @@ export component AboutPage inherits Page {
                         }
 
                         Button {
-                            text: "检查更新";
+                            type: ButtonType.text;
+                            content: "检查更新";
                             clicked => {
                                 if (AboutPageBridge.check-update()) {
                                     popup.open();
                                 } else {
                                     MessageManager.show-message("已是最新版本", MessageType.info);
-                                    self.text = "已是最新版本";
                                 }
                             }
                         }
@@ -154,7 +141,8 @@ export component AboutPage inherits Page {
                         }
 
                         Button {
-                            text: "GitHub Issues";
+                            type: ButtonType.text;
+                            content: "GitHub Issues";
                             clicked => {
                                 AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/issues")
                             }
@@ -238,11 +226,19 @@ export component AboutPage inherits Page {
                                     }
 
                                     Dependence {
+                                        content: "Boost.Process";
+                                    }
+
+                                    Dependence {
                                         content: "OpenSSL";
                                     }
 
                                     Dependence {
                                         content: "Slint";
+                                    }
+
+                                    Dependence {
+                                        content: "Qt6";
                                     }
 
                                     Dependence {

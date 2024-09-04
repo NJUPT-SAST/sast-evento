@@ -1,6 +1,7 @@
 import { SCard } from "../modules/surrealism-ui/index.slint";
 import { Token } from "../global.slint";
-import { ScrollView, Button } from "std-widgets.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Button, ButtonType } from "button.slint";
 
 // Basic dialog without icon. See: https://m3.material.io/components/dialogs/specs#9a8c226b-19fa-4d6b-894e-e7d5ca9203e8
 
@@ -78,15 +79,18 @@ export component ContentDialog inherits Window {
                 height: self.preferred-height;
                 alignment: end;
                 Button {
-                    text: confirm-btn-text;
-                    primary: true;
+                    type: text;
+                    content: confirm-btn-text;
+                    text-on-surface: Token.color.primary;
                     clicked => {
                         root.confirm();
                     }
                 }
 
                 Button {
-                    text: cancel-btn-text;
+                    type: text;
+                    content: cancel-btn-text;
+                    text-on-surface: Token.color.outline-variant;
                     clicked => {
                         root.cancel();
                     }
