@@ -10,7 +10,6 @@ EVENTO_UI_START
 class AboutPage : public BasicView, private GlobalAgent<AboutPageBridge> {
 public:
     AboutPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
-    AboutPage(AboutPage&) = delete;
 
 private:
     void onCreate() override;

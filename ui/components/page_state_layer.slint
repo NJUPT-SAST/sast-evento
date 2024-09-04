@@ -1,0 +1,135 @@
+import { Token } from "../global.slint";
+import { LoadingAnimation } from "./animation.slint";
+import { Button } from "./button.slint";
+import { Empty } from "./view_base.slint";
+
+export enum PageState{
+    normal,
+    loading,
+    error,
+}
+/**
+ * this component ALWAYS appears on top of other elements at the same level.
+ * when no state specific, component will invisible.
+ * @property background: for hide other visible components
+ * 
+ * states: (@property state)
+ * - loading state will show loading animate and a message.
+ *      @property loading-message: show as message like "loading ..."
+ * 
+ * - error state will show a message and a retry button.
+ *      @property error-message: show when in error state
+ *      @property error-retry-message: show as retry button content
+ *      @callback error-retry: invoke when retry button clicked
+ * 
+ * state priority (descending):
+ * - error
+ * - loading
+ */
+export component PageStateLayer {
+    // option
+    in property <PageState> state: normal;
+    in property <color> background: Token.color.surface;
+    in property <string> loading-message: "加载中 ...";
+    in property <string> error-message: "No Content";
+    in property <string> error-retry-message: "Retry";
+    callback error-retry();
+    // implement
+    private property <color> on-surface: Token.color.on-surface;
+    width: 100%;
+    height: 100%;
+    z: 100;
+    _background := Rectangle {
+        background: background;
+    }
+
+    // this touch area is to hide the touch area of invisible elements
+    _area := TouchArea { }
+
+    // loading layer
+    private property <bool> show-loading-layer;
+    if show-loading-layer: _loading-layer := VerticalLayout {
+        alignment: center;
+        HorizontalLayout {
+            height: self.preferred-height;
+            alignment: center;
+            spacing: 8px;
+            LoadingAnimation {
+                width: 24px;
+                height: 24px;
+                color: on-surface;
+            }
+
+            Text {
+                text: loading-message;
+                font-size: Token.font.body.large.size;
+                font-weight: Token.font.body.large.weight;
+                color: on-surface;
+            }
+        }
+    }
+    // error layer
+    private property <bool> show-error-layer;
+    if show-error-layer: _error-layer := VerticalLayout {
+        alignment: center;
+        spacing: 24px;
+        HorizontalLayout {
+            alignment: center;
+            spacing: 8px;
+            Image {
+                width: 24px;
+                height: 24px;
+                source: Token.image.icon.error;
+                colorize: Token.color.error;
+            }
+
+            Text {
+                text: error-message;
+                font-size: Token.font.body.large.size;
+                font-weight: Token.font.body.large.weight;
+                color: Token.color.error;
+            }
+        }
+
+        Empty {
+            Button {
+                type: filled;
+                content: error-retry-message;
+                clicked => {
+                    root.error-retry();
+                }
+            }
+        }
+    }
+    states [
+        error when state == PageState.error: {
+            visible: true;
+            show-error-layer: true;
+        }
+        loading when state == PageState.loading: {
+            visible: true;
+            show-loading-layer: true;
+        }
+        normal when true: {
+            visible: false;
+        }
+    ]
+}
+
+component Test {
+    PageStateLayer {
+        state: error;
+        error-retry => {
+            debug("retry")
+        }
+    }
+
+    Rectangle {
+        background: black;
+        Button {
+            clicked => {
+                debug("123123")
+            }
+        }
+    }
+}

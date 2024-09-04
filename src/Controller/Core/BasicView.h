@@ -17,6 +17,11 @@ protected:
         : bridge(bridge) {}
 
 public:
+    BasicView(const BasicView&) = delete;
+    BasicView& operator=(const BasicView&) = delete;
+    BasicView(BasicView&&) = delete;
+    BasicView& operator=(BasicView&&) = delete;
+
     virtual ~BasicView() = default;
 
 private:

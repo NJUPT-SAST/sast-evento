@@ -1,16 +1,25 @@
 import { EventoImageToken } from "./assets/index.slint";
-import { EventoStyleToken } from "./logic/index.slint";
+import { MdStyleToken } from "./logic/md_style_token.slint";
 
 import { Palette } from "std-widgets.slint";
 import { Themes } from "./modules/surrealism-ui/use/index.slint";
 
+export { 
+    MdFontData,
+    MdElevationData,
+} from "./logic/md_style_token.slint";
+
 export global Token {
-    out property is-darkmode <=> EventoStyleToken.is-darkmode;
+    out property is-darkmode <=> MdStyleToken.is-darkmode;
     out property <Themes> surrealism-ui-default-theme: is-darkmode ? Dark : Light;
     out property image <=> EventoImageToken.image;
-    out property font <=> EventoStyleToken.font;
-    out property color <=> EventoStyleToken.color;
+    out property font <=> MdStyleToken.font;
+    out property color <=> MdStyleToken.color;
+    out property elevation <=> MdStyleToken.elevation;
     public function set-display-mode(color-scheme: ColorScheme) {
+        if (color-scheme == ColorScheme.unknown) {
+            return;
+        }
         Palette.color-scheme = color-scheme;
     }
     public function switch-display-mode() {

@@ -1,43 +1,37 @@
-import { Palette } from "std-widgets.slint";
-import { EventoStyleToken } from "../../logic/index.slint";
+import { Palette, Button } from "std-widgets.slint";
+import { MdStyleToken } from "../../logic/md_style_token.slint";
 
 struct ImgPair {
     light: image,
     dark: image,
 }
 
-struct ClickIcon {
-    // used when normal state
-    normal: image,
-    // used when user interacting such as click, hover...
-    interact: image,
-}
-
+// icon won't change according to 
 struct EventoIconCollection {
     evento: image,
     sast-link: image,
-    arrow-left: ClickIcon,
-    card: ClickIcon,
+    arrow-left: image,
+    card: image,
     category: image,
     department: image,
-    history: ClickIcon,
-    home: ClickIcon,
-    info: ClickIcon,
-    error_on-surface-variant: image,
-    error_on-error: image,
+    history: image,
+    home: image,
+    info: image,
+    error: image,
     locate: image,
     logout: image,
-    me: ClickIcon,
-    schedule: ClickIcon,
-    setting: ClickIcon,
-    star-border: image,
-    star-border-blue: image,
-    star-fill: image,
+    me: image,
+    schedule: image,
+    setting: image,
+    star-empty: image,
+    star-full: image,
     tag: image,
     time: image,
     topic: image,
-    tree-list: ClickIcon,
-    account-box-outline: image,
+    tree-list: image,
+    account-box: image,
+    pentagon: image,
+    check-circle: image,
 }
 
 struct EventoDisplayCollection {
@@ -46,14 +40,6 @@ struct EventoDisplayCollection {
     avatar: [image],
     event: {
         default: [image],
-        union: [image],
-        cpp: [image],
-        csharp: [image],
-        frontend: [image],
-        backend: [image],
-        game: [image],
-        lambda: [image],
-        python: [image],
     },
     no_image: image,
 }
@@ -69,140 +55,50 @@ export global EventoImageToken {
         display: display,
     };
     pure function switcher(img: ImgPair) -> image {
-        return EventoStyleToken.is-darkmode ? img.dark : img.light;
+        return MdStyleToken.is-darkmode ? img.dark : img.light;
     }
     //
     // icon used as small image in button, navbar and so on
     // icon will change according to darkmode switch
     property <EventoIconCollection> icon:{
-        // Product specific
+        // exception for colorize
         evento: switcher({
             light: @image-url("./icon/evento.png"),
             dark: @image-url("./icon/evento_dark.png"),
         }),
         // sast-link is intended to be used in invert color
-        sast-link: switcher({
-            light: @image-url("./icon/sast-link.svg"),
-            dark: @image-url("./icon/sast-link_dark.svg"),
-        }),
-        // General usage
-        arrow-left: {
-            normal: switcher({
-                light: @image-url("./icon/arrow-left.svg"),
-                dark: @image-url("./icon/arrow-left_dark.svg"),
-            }),
-            interact: @image-url("./icon/arrow-left_blue.svg"),
-        },
-        card: {
-            normal: switcher({
-                light: @image-url("./icon/card.svg"),
-                dark: @image-url("./icon/card_dark.svg"),
-            }),
-            interact: @image-url("./icon/card_blue.svg"),
-        },
-        category: switcher({
-            light: @image-url("./icon/category.svg"),
-            dark: @image-url("./icon/category_dark.svg"),
-        }),
-        department: switcher({
-            light: @image-url("./icon/department.svg"),
-            dark: @image-url("./icon/department_dark.svg"),
-        }),
-        history: {
-            normal: switcher({
-                light: @image-url("./icon/history.svg"),
-                dark: @image-url("./icon/history_dark.svg"),
-            }),
-            interact: @image-url("./icon/history_blue.svg"),
-        },
-        home: {
-            normal: switcher({
-                light: @image-url("./icon/home.svg"),
-                dark: @image-url("./icon/home_dark.svg"),
-            }),
-            interact: @image-url("./icon/home_blue.svg"),
-        },
-        info: {
-            normal: switcher({
-                light: @image-url("./icon/info.svg"),
-                dark: @image-url("./icon/info_dark.svg"),
-            }),
-            interact: @image-url("./icon/info_blue.svg"),
-        },
-        error_on-surface-variant:switcher({
-            light: @image-url("./icon/error_on-surface-variant.svg"),
-            dark: @image-url("./icon/error_on-surface-variant_dark.svg"),
-        }),
-        error_on-error:switcher({
-            light: @image-url("./icon/error_on-error.svg"),
-            dark: @image-url("./icon/error_on-error_dark.svg"),
-        }),
-        locate: switcher({
-            light: @image-url("./icon/locate.svg"),
-            dark: @image-url("./icon/locate_dark.svg"),
-        }),
+        sast-link: @image-url("./icon/sast-link.svg"),
+        arrow-left: @image-url("./icon/arrow-left.svg"),
+        card: @image-url("./icon/card.svg"),
+        category: @image-url("./icon/category.svg"),
+        department: @image-url("./icon/department.svg"),
+        history: @image-url("./icon/history.svg"),
+        home: @image-url("./icon/home.svg"),
+        info: @image-url("./icon/info.svg"),
+        error:@image-url("./icon/error.svg"),
+        locate: @image-url("./icon/locate.svg"),
         logout: @image-url("./icon/logout.svg"),
-        me: {
-            normal: switcher({
-                light: @image-url("./icon/me.svg"),
-                dark: @image-url("./icon/me_dark.svg"),
-            }),
-            interact: @image-url("./icon/me_blue.svg"),
-        },
-        schedule: {
-            normal: switcher({
-                light: @image-url("./icon/schedule.svg"),
-                dark: @image-url("./icon/schedule_dark.svg"),
-            }),
-            interact: @image-url("./icon/schedule_blue.svg"),
-        },
-        setting: {
-            normal: switcher({
-                light: @image-url("./icon/setting.svg"),
-                dark: @image-url("./icon/setting_dark.svg"),
-            }),
-            interact: @image-url("./icon/setting_blue.svg"),
-        },
-        star-border: switcher({
-            light: @image-url("./icon/star.svg"),
-            dark: @image-url("./icon/star_dark.svg"),
-        }),
-        star-border-blue: @image-url("./icon/star_blue.svg"),
-        star-fill: @image-url("./icon/star_fill.svg"),
-        tag: switcher({
-            light: @image-url("./icon/tag.svg"),
-            dark: @image-url("./icon/tag_dark.svg"),
-        }),
-        time: switcher({
-            light: @image-url("./icon/time.svg"),
-            dark: @image-url("./icon/time_dark.svg"),
-        }),
-        topic: switcher({
-            light: @image-url("./icon/topic.svg"),
-            dark: @image-url("./icon/topic_dark.svg"),
-        }),
-        tree-list: {
-            normal: switcher({
-                light: @image-url("./icon/tree-list.svg"),
-                dark: @image-url("./icon/tree-list_dark.svg"),
-            }),
-            interact: @image-url("./icon/tree-list_blue.svg"),
-        },
-        account-box-outline: switcher({
-            light: @image-url("./icon/account-box-outline.svg"),
-            dark: @image-url("./icon/account-box-outline_dark.svg"),
-        }),
+        me: @image-url("./icon/me.svg"),
+        schedule: @image-url("./icon/schedule.svg"),
+        setting: @image-url("./icon/setting.svg"),
+        star-empty: @image-url("./icon/star-empty.svg"),
+        star-full: @image-url("./icon/star-full.svg"),
+        tag: @image-url("./icon/tag.svg"),
+        time: @image-url("./icon/time.svg"),
+        topic: @image-url("./icon/topic.svg"),
+        tree-list: @image-url("./icon/tree-list.svg"),
+        account-box: @image-url("./icon/account-box-outline.svg"),
+        pentagon: @image-url("./icon/pentagon.svg"),
+        check-circle: @image-url("./icon/check-circle.svg"),
     };
     // display used as images bigger than icon
     // most display image won't change according to darkmode switch
     property <EventoDisplayCollection> display:{
-        // Product specific
         evento: switcher({
             light: @image-url("./display/evento/evento.png"),
             dark: @image-url("./display/evento/evento_dark.png"),
         }),
         evento-bg: @image-url("./display/evento/evento_bg.png"),
-        // Other
         avatar: [
             @image-url("./display/avatar/avatar_1.svg"),
             @image-url("./display/avatar/avatar_2.svg"),
@@ -223,39 +119,24 @@ export global EventoImageToken {
                 @image-url("./display/event/default_2.png"),
                 @image-url("./display/event/default_3.png"),
             ],
-            union: [
-                @image-url("./display/event/union_1.png"),
-                @image-url("./display/event/union_2.png"),
-            ],
-            cpp: [
-                @image-url("./display/event/cpp_1.svg"),
-                @image-url("./display/event/cpp_2.png"),
-                @image-url("./display/event/cpp_3.png"),
-            ],
-            csharp: [
-                @image-url("./display/event/csharp_1.png"),
-            ],
-            frontend: [
-                @image-url("./display/event/frontend_1.png"),
-                @image-url("./display/event/frontend_2.png"),
-                @image-url("./display/event/frontend_3.png"),
-            ],
-            backend: [
-                @image-url("./display/event/backend_1.png"),
-            ],
-            game: [
-                @image-url("./display/event/game_1.svg"),
-                @image-url("./display/event/game_2.jpg"),
-                @image-url("./display/event/game_3.jpg"),
-            ],
-            lambda: [
-                @image-url("./display/event/lambda_1.png"),
-                @image-url("./display/event/lambda_2.png"),
-            ],
-            python: [
-                @image-url("./display/event/python_1.png"),
-            ],
         },
         no_image: @image-url("./display/no_image.png"),
     };
+}
+
+// colorize animation example
+component Example {
+    property <bool> is;
+    Button {
+        y: - self.height;
+        clicked => {
+            is = !is;
+        }
+    }
+
+    Image {
+        source: EventoImageToken.image.icon.category;
+        colorize: is ? black : blue;
+        animate colorize { duration: 1s; }
+    }
 }

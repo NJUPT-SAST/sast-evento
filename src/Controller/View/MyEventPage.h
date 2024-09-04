@@ -9,7 +9,6 @@ EVENTO_UI_START
 class MyEventPage : public BasicView, private GlobalAgent<MyEventPageBridge> {
 public:
     MyEventPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
-    MyEventPage(MyEventPage&) = delete;
 
 private:
     void onCreate() override;

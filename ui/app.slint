@@ -13,7 +13,9 @@ import {
     AccountManager,
     MessageManager,
     ViewName,
-    MessageType
+    MessageType,
+    MessageData,
+    ToastData
 } from "./logic/index.slint";
 
 import { 
@@ -44,11 +46,10 @@ export {
     ViewManagerBridge,
     AccountManagerBridge,
     MessageManagerBridge,
-    ViewManager,
-    AccountManager,
-    MessageManager,
     ViewName,
     MessageType,
+    MessageData,
+    ToastData,
     LoginOverlayBridge,
     MenuOverlayBridge,
     DiscoveryPageBridge,
@@ -81,18 +82,20 @@ component PageRegion inherits Empty {
 
 component CircleButton inherits Rectangle {
     in property <image> image;
+    in property <color> surface: Token.color.surface-container;
+    in property <color> on-surface: Token.color.on-surface;
     callback clicked <=> area.clicked;
     clip: true;
     height: 48px;
     width: 48px;
     border-radius: self.width / 2;
-    background: Token.color.surface-container;
+    background: surface;
     area := TouchArea {
         mouse-cursor: pointer;
     }
 
     StateLayer {
-        background: Token.color.on-surface;
+        background: on-surface;
         is-hover: area.has-hover;
         is-press: area.pressed;
     }
@@ -101,6 +104,7 @@ component CircleButton inherits Rectangle {
         height: 24px;
         width: 24px;
         source: image;
+        colorize: on-surface;
     }
 }
 
@@ -135,6 +139,7 @@ component NavBarItem inherits Rectangle {
                 width: 24px;
                 height: self.width;
                 source: root.image;
+                colorize: on-surface;
             }
         }
 
@@ -194,25 +199,25 @@ component NavBar inherits Rectangle {
 export component App inherits Window {
     title: "SAST Evento";
     default-font-family: "MiSans";
+    default-font-size: Token.font.body.large.size;
+    default-font-weight: Token.font.body.medium.weight;
     min-width: 500px;
     min-height: 400px;
     preferred-width: 1024px;
     preferred-height: 634px;
     background: Token.color.surface;
     icon: Token.image.icon.evento;
-
     init => {
         GlobalProps.theme = Token.surrealism-ui-default-theme;
         GlobalProps.font.font-family = "MiSans";
     }
-
     VerticalLayout {
         heading := HorizontalLayout {
             padding: 8px;
             height: 64px;
             spacing: 8px;
             CircleButton {
-                image: Token.image.icon.arrow-left.normal;
+                image: Token.image.icon.arrow-left;
                 clicked => {
                     ViewManager.prior-view();
                 }
@@ -223,7 +228,7 @@ export component App inherits Window {
                 horizontal-stretch: 1;
                 nav-views: [
                     {
-                        icon:Token.image.icon.home.normal,
+                        icon:Token.image.icon.home,
                         content:"活动广场",
                         target:ViewName.DiscoveryPage,
                     },
@@ -233,7 +238,7 @@ export component App inherits Window {
                         target:ViewName.SearchPage,
                     },
                     {
-                        icon:Token.image.icon.schedule.normal,
+                        icon:Token.image.icon.schedule,
                         content:"活动日程",
                         target:ViewName.MyEventPage,
                     },
@@ -241,7 +246,7 @@ export component App inherits Window {
             }
 
             CircleButton {
-                image: Token.image.icon.me.normal;
+                image: Token.image.icon.me;
                 clicked => {
                     ViewManager.navigate-to(ViewName.MenuOverlay);
                 }
@@ -256,29 +261,48 @@ export component App inherits Window {
         width: 100%;
     }
 
-    Toast {
-        x: root.width - self.width - 16px;
-        y: root.height + 16px;
+    private property <length> toast-padding: 16px;
+    private property <length> toast-vertical-spacing: 8px;
+    private property <length> toast-height: 48px;
+    private property <Point> toast-origin: { x: root.width - toast-padding, y: root.height - toast-padding };
+    for item in MessageManager.toast-list: Toast {
+        toast-data: item;
+        x: root.width - toast-padding - self.width;
+        y: get-toast-y(self.elevation);
         width: self.min-width > (parent.width * (1 - 0.618) / 2) ? self.preferred-width : parent.width * (1 - 0.618) / 2;
+        animate y {
+            duration: 200ms;
+            easing: ease-out-quart;
+        }
         states [
-            visible when MessageManager.visible: {
-                y: root.height - self.height - 16px;
+            removed when self.removed: {
+                x: root.width - toast-padding - self.width / 2;
+                opacity: 0;
                 in {
-                    animate y {
+                    animate opacity {
                         duration: 200ms;
-                        easing: ease-out-quart;
+                        easing: linear;
                     }
-                }
-                out {
-                    animate y {
+                    animate x {
                         duration: 200ms;
                         easing: ease-in-quart;
                     }
                 }
             }
-            invisible when !MessageManager.visible: {
-                y: root.height + 16px;
+            // self.elevation > 0
+            visible when self.elevation > 0: {
+                opacity: 1;
+            }
+            invisible when self.elevation == 0: {
+                opacity: 0;
             }
         ]
+    }
+    function get-toast-y(elevation: int) -> length {
+        if (elevation > 0) {
+            return toast-origin.y - elevation * toast-height - (elevation - 1) * toast-vertical-spacing;
+        } else {
+            return root.height + toast-padding;
+        }
     }
 }
