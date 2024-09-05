@@ -21,10 +21,8 @@ std::string CacheManager::generateKey(http::verb verb,
     return key;
 }
 
-std::string CacheManager::generateFilename(urls::url_view url) {
-    auto name = std::to_string(std::hash<std::string>{}(url.data()));
-    auto extension = url.path().substr(url.path().find_last_of('.'));
-    return name + extension;
+std::string CacheManager::generateStem(urls::url_view url) {
+    return std::to_string(std::hash<std::string>{}(url.data()));
 }
 
 bool CacheManager::isExpired(const CacheEntry& entry) {
@@ -64,8 +62,9 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
 #error "Unsupported platform"
 #endif
 
-    if (!fs::is_directory(cacheFileDir))
-        return std::nullopt;
+    if (!fs::exists(cacheFileDir) || !fs::is_directory(cacheFileDir)) {
+        fs::create_directory(cacheFileDir);
+    }
 
     return fs::absolute(cacheFileDir);
 }
@@ -105,7 +104,6 @@ std::optional<CacheEntry> CacheManager::get(std::string const& key) {
 }
 
 bool CacheManager::saveToDisk(std::string const& data, fs::path const& path) {
-    fs::create_directories(path.parent_path());
     std::ofstream file(path, std::ios::binary);
     if (file.is_open()) {
         file << data;

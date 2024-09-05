@@ -159,6 +159,8 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
+        spdlog::info("Requesting: {}", url.data());
+
         auto req = Api::makeRequest(verb, url, std::nullopt, params);
         auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
         if (reply.isErr())

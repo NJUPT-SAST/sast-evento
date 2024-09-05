@@ -27,7 +27,7 @@ public:
                                    urls::url_view url,
                                    const std::initializer_list<urls::param>& params);
 
-    static std::string generateFilename(urls::url_view url);
+    static std::string generateStem(urls::url_view url);
 
     static std::optional<std::filesystem::path> cacheDir();
 

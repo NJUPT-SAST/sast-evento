@@ -2,8 +2,7 @@
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
 #include <boost/beast/core/buffers_to_string.hpp>
-#include <boost/beast/core/file.hpp>
-#include <boost/beast/core/file_base.hpp>
+#include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/url/param.hpp>
@@ -439,11 +438,18 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
         co_return Err(Error(Error::Data, "cache dir not found"));
     }
 
-    auto path = *cacheDir / CacheManager::generateFilename(url);
+    auto stem = CacheManager::generateStem(url);
 
-    if (std::filesystem::exists(path)) {
-        co_return Ok(path);
+    std::filesystem::directory_iterator iter(*cacheDir);
+    for (const auto& file : iter) {
+        if (file.path().filename().stem().string() == stem) {
+            co_return Ok(std::filesystem::absolute(file.path()));
+        }
     }
+
+    req.set(http::field::host, url.host_name());
+    req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
+    req.set(http::field::accept, "*/*");
 
     // if cache not exists, download file
     auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
@@ -456,9 +462,19 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
         co_return Err(Error(Error::Network, std::to_string(response.result_int())));
     }
 
-    if (!CacheManager::saveToDisk(beast::buffers_to_string(response.body().data()), path))
-        co_return Err(Error(Error::Data, "save file failed"));
+    auto type = response.find(http::field::content_type);
+    if (type == response.end()) {
+        co_return Err(Error(Error::Data, "file type error"));
+    }
 
+    auto value = type->value();
+    stem += '.';
+    stem += value.substr(value.find('/') + 1);
+    auto path = *cacheDir / stem;
+
+    if (!CacheManager::saveToDisk(beast::buffers_to_string(response.body().data()), path)) {
+        co_return Err(Error(Error::Data, "save file failed"));
+    }
     co_return Ok(path);
 }
 
