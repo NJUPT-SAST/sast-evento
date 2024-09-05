@@ -2,10 +2,10 @@
 
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
-#include <Controller/Core/UiBase.h>
-#include <string>
 
 EVENTO_UI_START
+
+namespace fs = std::filesystem;
 
 class AboutPage : public BasicView, private GlobalAgent<AboutPageBridge> {
 public:
@@ -13,8 +13,12 @@ public:
 
 private:
     void onCreate() override;
-    void openWeb(std::string_view& url);
-    void getLog();
+    void onShow() override;
+
+    void loadContributors();
+    void checkUpdate();
+
+    std::vector<slint::Image> avatars;
 };
 
 EVENTO_UI_END

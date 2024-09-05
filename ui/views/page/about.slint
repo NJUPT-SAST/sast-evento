@@ -3,21 +3,25 @@ import { Page, Empty, ContentDialog } from "../../components/index.slint";
 import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { SLink } from "../../modules/surrealism-ui/index.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
-import { Button, ButtonType } from "../../components/index.slint";
+import { Button, ButtonType, LoadingAnimation } from "../../components/index.slint";
+import { Avatar } from "../../modules/surrealism-ui/src/avatar/avatar.slint";
 
-
-// Made with Slint badge
-export component AboutSlint inherits Rectangle {
-    AboutSlint { }
+export enum Status {
+    Normal,
+    Loading,
+    Error,
 }
 
 export global AboutPageBridge {
-    in-out property <string> version:"v0.0.0-00000000";
-    // in-out property <bool> is_lastest: false;
-    callback check-update() -> bool;
+    in property <string> version:"v0.0.0-00000000";
+    in property <string> update-log: "";
+    in property <Status> contributors-status: Status.Normal;
+    in property <Status> check-update-status: Status.Normal;
+    in property <[image]> contributors: [];
+    in-out property <bool> show-popup: false;
+    callback check-update();
+    callback load-contributors();
     callback open-web(string);
-    callback get-log() -> string;
-    in-out property <string> updateLog: "";
 }
 
 component Dependence inherits Rectangle {
@@ -52,11 +56,12 @@ export component AboutPage inherits Page {
         dialog-title: "更新日志";
         confirm-btn-text: "更新";
         cancel-btn-text: "取消";
+        is-show <=> AboutPageBridge.show-popup;
         ScrollView {
             VerticalLayout {
                 text := Text {
                     width: 100%;
-                    text: AboutPageBridge.updateLog;
+                    text: AboutPageBridge.update-log;
                     font-size: Token.font.body.large.size;
                     font-weight: Token.font.body.large.weight;
                     color: Token.color.on-surface;
@@ -66,7 +71,7 @@ export component AboutPage inherits Page {
         }
 
         confirm => {
-            AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/releases");
+            AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/releases/latest");
             popup.close();
         }
         cancel => {
@@ -116,14 +121,15 @@ export component AboutPage inherits Page {
                         }
 
                         Button {
+                            have-icon: AboutPageBridge.check-update-status == Status.Loading;
                             type: ButtonType.text;
                             content: "检查更新";
+                            LoadingAnimation {
+                                color: parent.on-surface;
+                            }
+
                             clicked => {
-                                if (AboutPageBridge.check-update()) {
-                                    popup.open();
-                                } else {
-                                    MessageManager.show-message("已是最新版本", MessageType.info);
-                                }
+                                AboutPageBridge.check-update();
                             }
                         }
                     }
@@ -299,10 +305,29 @@ export component AboutPage inherits Page {
                         vertical-alignment: center;
                     }
 
-                    ScrollView {
+                    if AboutPageBridge.contributors-status == Status.Error: Button {
+                        type: ButtonType.text;
+                        content: "重新加载";
+                        clicked => {
+                            AboutPageBridge.load-contributors();
+                        }
+                    }
+
+                    if AboutPageBridge.contributors-status == Status.Loading: LoadingAnimation {
+                        color: Token.color.on-surface;
+                        height: 40px;
+                    }
+
+                    if AboutPageBridge.contributors-status == Status.Normal: ScrollView {
+                        height: 60px;
                         HorizontalLayout {
-                            Text {
-                                text: "贡献者列表";
+                            spacing: 15px;
+                            for img in AboutPageBridge.contributors: Avatar {
+                                avatar-size: 40px;
+                                height: 40px;
+                                width: 40px;
+                                image-fit: ImageFit.contain;
+                                avatar: img;
                             }
                         }
                     }
