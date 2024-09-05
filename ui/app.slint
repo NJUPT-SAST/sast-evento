@@ -213,8 +213,10 @@ export component App inherits Window {
     }
     VerticalLayout {
         heading := HorizontalLayout {
-            padding: 8px;
-            height: 64px;
+            padding-top: 40px;
+            padding-left: 50px;
+            padding-right: 50px;
+            height: 64px + self.padding-top;
             spacing: 8px;
             CircleButton {
                 image: Token.image.icon.arrow-left;
