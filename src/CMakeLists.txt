@@ -20,9 +20,9 @@ endif()
 
 slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
 
-if(EVENTO_EMBED_RESOURCES)
+if (CMAKE_BUILD_TYPE STREQUAL "Release")
   set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
-endif(EVENTO_EMBED_RESOURCES)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
