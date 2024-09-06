@@ -1,4 +1,4 @@
-import "./assets/font/MiSans-Regular.ttf";
+//import "./assets/font/MiSans-Regular.ttf";
 import { Token } from "./global.slint";
 import { Button } from "std-widgets.slint";
 import { 
@@ -198,7 +198,6 @@ component NavBar inherits Rectangle {
 
 export component App inherits Window {
     title: "SAST Evento";
-    default-font-family: "MiSans";
     default-font-size: Token.font.body.large.size;
     default-font-weight: Token.font.body.medium.weight;
     min-width: 500px;
@@ -209,7 +208,6 @@ export component App inherits Window {
     icon: Token.image.icon.evento;
     init => {
         GlobalProps.theme = Token.surrealism-ui-default-theme;
-        GlobalProps.font.font-family = "MiSans";
     }
     VerticalLayout {
         heading := HorizontalLayout {
