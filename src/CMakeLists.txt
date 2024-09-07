@@ -1,8 +1,8 @@
 add_executable(${PROJECT_NAME} ${VERSION_RC_PATH})
 
-file(GLOB_RECURSE SOURCES *.cc *.h *.hpp)
+file(GLOB_RECURSE SOURCES Controller/*.cc Infrastructure/*.cc)
 
-target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} main.cc)
 
 # hide cmdline in Release Mode for MSVC
 if (MSVC)
