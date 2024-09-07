@@ -41,3 +41,7 @@ CMakeUserPresets.json
 /build
 /out
 /.vscode/settings.json
+
+action-cli
+
+*.rc

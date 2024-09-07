@@ -55,7 +55,7 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     auto home = std::getenv("HOME");
     if (home == nullptr) {
         spdlog::warn("HOME environment variable not found");
-        return;
+        return std::nullopt;
     }
     cacheFileDir = fs::path(home) / "Library" / "Caches" / "evento";
 #else

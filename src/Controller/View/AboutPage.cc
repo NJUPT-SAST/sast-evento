@@ -53,7 +53,7 @@ void AboutPage::loadContributors() {
                                            self.avatars[i] = slint::Image();
                                        } else {
                                            self.avatars[i] = slint::Image::load_from_path(
-                                               result.unwrap().c_str());
+                                               result.unwrap().string().c_str());
                                        }
 
                                        if (i == self.avatars.size() - 1) {

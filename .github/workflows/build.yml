@@ -1,21 +1,42 @@
 name: Build
 # Complete packaging in the future
 
-on: 
+on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
-  job:
-    name: ${{ matrix.os }}
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  build:
+    env:
+      QT_VERSION: 6.6.3
+    name: Build ${{ matrix.rid }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest]
-        # how to use macos ???
+        rid: [linux-x64, win-x64, win-arm64, macos]
+        include:
+        - rid: linux-x64
+          rust_target: x86_64-unknown-linux-gnu
+          qt_arch: 'gcc_64'
+          os: ubuntu-24.04
+        - rid: win-x64
+          msvc_arch: x64
+          rust_target: x86_64-pc-windows-msvc
+          qt_arch: 'win64_msvc2019_64'
+          os: windows-latest
+        - rid: win-arm64
+          msvc_arch: arm64
+          rust_target: aarch64-pc-windows-msvc
+          qt_host_arch: 'win64_msvc2019_64'
+          qt_arch: 'win64_msvc2019_arm64'
+          os: windows-latest
+        - rid: macos
+          rust_target: aarch64-apple-darwin
+          qt_arch: 'clang_64'
+          os: macos-14
 
     steps:
     - name: Checkout repository
@@ -24,8 +45,8 @@ jobs:
           submodules: recursive
 
     - name: Set up GCC
-      if: matrix.os == 'ubuntu-24.04'
-      uses: egor-tensin/setup-gcc@v1
+      if: startsWith(matrix.rid, 'linux-')
+      uses: egor-tensin/setup-gcc@v1.3
       with:
         version: 14
         platform: x64
@@ -34,6 +55,7 @@ jobs:
       uses: moonrepo/setup-rust@v1
       with:
         channel: stable
+        targets: ${{ matrix.rust_target }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -46,7 +68,7 @@ jobs:
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-        key: corrosion-${{ runner.os }}
+        key: corrosion-${{ matrix.rid }}
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest
@@ -57,8 +79,167 @@ jobs:
         vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
         vcpkgJsonGlob: 'vcpkg.json'
 
-    - name: Build with CMake
-      uses: lukka/run-cmake@v10
+    - name: Install Qt (Tools on Host)
+      if: matrix.qt_host_arch && (matrix.qt_arch != matrix.qt_host_arch)
+      uses: jurplel/install-qt-action@v4
       with:
-        configurePreset: 'native'
-        buildPreset: 'native-release'
+        version: ${{ env.QT_VERSION }}
+        arch: ${{ matrix.qt_host_arch }}
+        cache: true
+        set-env: false
+        add-tools-to-path: false
+
+    - name: Save Qt Host Path
+      if: matrix.qt_host_arch && (matrix.qt_arch != matrix.qt_host_arch)
+      shell: pwsh
+      run: |
+        $qtHostPath = Join-Path $env:RUNNER_WORKSPACE "Qt"
+        $qtHostPath = Get-ChildItem -Path $qtHostPath | Select-Object -First 1
+        $qtHostPath = Get-ChildItem -Path $qtHostPath | Select-Object -First 1
+        Write-Host "Using Qt host path: $qtHostPath"
+        Write-Output "QT_HOST_PATH=$qtHostPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ env.QT_VERSION }}
+        arch: ${{ matrix.qt_arch }}
+        cache: true
+      
+    - name: Install Windows SDK for arm64
+      if: matrix.rid == 'win-arm64'
+      uses: ChristopheLav/windows-sdk-install@v1
+      with:
+        version-sdk: 26100
+        features: OptionId.DesktopCPParm64
+
+    - name: Build
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $rid = '${{ matrix.rid }}'
+        $additionalConfigureArgs = @()
+        if ($rid.StartsWith('win-')) {
+          $vsPath = &(Join-Path ${env:ProgramFiles(x86)} "\Microsoft Visual Studio\Installer\vswhere.exe") -property installationpath
+          Import-Module (Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
+          Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments '-arch=${{ matrix.msvc_arch }} -host_arch=x64'
+          $additionalConfigureArgs += '-DPKG_CONFIG_EXECUTABLE:FILEPATH=./build/vcpkg_installed/x64-windows/tools/pkgconf/pkgconf.exe'
+        }
+        $qtHostPath = $env:QT_HOST_PATH
+        if ($qtHostPath.Length -ne 0) {
+          $additionalConfigureArgs += "-DQT_HOST_PATH:PATH=$qtHostPath"
+        }
+        cmake --preset native -DRust_CARGO_TARGET=${{ matrix.rust_target }} @additionalConfigureArgs
+        cmake --build --preset native-release
+        if ($rid.StartsWith('win-')) {
+          echo winSdkDir=$env:WindowsSdkDir >> $env:GITHUB_ENV
+          echo winSdkVer=$env:WindowsSdkVersion >> $env:GITHUB_ENV
+          echo vcToolsInstallDir=$env:VCToolsInstallDir >> $env:GITHUB_ENV
+          echo vcToolsRedistDir=$env:VCToolsRedistDir >> $env:GITHUB_ENV
+        }
+
+    - name: Package for Windows
+      if: startsWith(matrix.rid, 'win-') && startsWith(github.event.ref, 'refs/tags/')
+      env:
+        msvcArch: ${{ matrix.msvc_arch }}
+      shell: pwsh
+      run: scripts\windows-publish.ps1
+
+    - name: Package for deb
+      if: matrix.rid == 'linux-x64' && startsWith(github.event.ref, 'refs/tags/')
+      shell: bash
+      run: |
+        mkdir -p sast-evento/DEBIAN
+        touch sast-evento/DEBIAN/control
+        cat >> sast-evento/DEBIAN/control << EOF
+        Package: sast-evento
+        Version: ${{ github.ref_name }}
+        Architecture: x64
+        Priority: optional
+        Essential: no
+        Depends: qt6-base-dev
+        Maintainer: NJUPT-SAST-C++
+        Description: An event management system developed and used by NJUPT SAST
+        EOF
+        mkdir -p sast-evento/usr/bin
+        mkdir -p sast-evento/usr/lib
+        cp build/src/Release/sast-evento sast-evento/usr/bin
+        cp build/src/Tray/Release/sast-evento-tray sast-evento/usr/bin
+        cp build/3rdpart/sast-link-cxx-sdk/Release/libsast-link.so.1 sast-evento/usr/lib
+        cp build/3rdpart/sast-link-cxx-sdk/src/details/Release/libsast-link_details.so sast-evento/usr/lib
+        cp build/_deps/slint-build/libslint_cpp.so sast-evento/usr/lib
+        dpkg-deb --build sast-evento
+
+    - name: Package for pacman
+      if: matrix.rid == 'linux-x64' && startsWith(github.event.ref, 'refs/tags/')
+      shell: bash
+      run: |
+        sudo apt install makepkg
+        touch PKGBUILD
+        cat >> PKGBUILD << EOF
+        # Maintainer: NJUPT-SAST <sast@njupt.edu.cn>
+        pkgname=sast-evento-bin
+        pkgver=${{ github.ref_name }}
+        pkgdesc="An event management system developed and used by NJUPT SAST"
+        arch=(x86_64)
+        url="https://github.com/NJUPT-SAST-CPP/sast-evento"
+        license=(MIT)
+        depends=(qt6-base)
+        provides=(sast-evento)
+        conflicts=(sast-evento)
+        replaces=(sast-evento-appimage)
+        package() {
+          install -Dm755 "\$srcdir/../build/src/Release/sast-evento" "\$pkgdir/usr/bin/sast-evento"
+          install -Dm755 "\$srcdir/../build/src/Tray/Release/sast-evento-tray" "\$pkgdir/usr/bin/sast-evento-tray"
+          install -Dm644 "\$srcdir/../build/3rdpart/sast-link-cxx-sdk/Release/libsast-link.so" "\$pkgdir/usr/lib/libsast-link.so"
+          install -Dm644 "\$srcdir/../build/3rdpart/sast-link-cxx-sdk/src/details/Release/libsast-link_details.so" "\$pkgdir/usr/lib/libsast-link_details.so"
+          install -Dm644 "\$srcdir/../build/_deps/slint-build/libslint_cpp.so" "\$pkgdir/usr/lib/libslint_cpp.so"
+        }
+        EOF
+        cat PKGBUILD
+        makepkg
+        
+    - uses: actions/upload-artifact@v2
+      if: startsWith(github.event.ref, 'refs/tags/') && startsWith(matrix.rid, 'win-')
+      with:
+        name: sast-evento-${{ matrix.rid }}
+        path: dist
+
+    - uses: actions/upload-artifact@v2
+      if: startsWith(github.event.ref, 'refs/tags/') && matrix.rid == 'linux-x64'
+      with:
+        name: sast-evento-${{ matrix.rid }}-deb
+        path: sast-evento.deb
+
+    - uses: actions/upload-artifact@v2
+      if: startsWith(github.event.ref, 'refs/tags/') && matrix.rid == 'linux-x64'
+      with:
+        name: sast-evento-bin-${{ github.ref_name }}-x86_64.pkg.tar.zst
+        path: sast-evento-bin-${{ github.ref_name }}-x86_64.pkg.tar.zst
+
+    - name: Inno Setup
+      if: startsWith(github.event.ref, 'refs/tags/') && startsWith(matrix.rid, 'win-')
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      with:
+        path: ./action-cli/InstallerScript.iss
+        options: /O+
+
+    - name: Upload Windows Release
+      if: startsWith(github.event.ref, 'refs/tags/') && startsWith(matrix.rid, 'win-')
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: ./action-cli/installer.exe
+        asset_name: sast-evento-${{ matrix.rid }}.exe
+        tag: ${{ github.ref }}
+        overwrite: true 
+
+    - name: Upload Linux Release (deb)
+      if: startsWith(github.event.ref, 'refs/tags/') && matrix.rid == 'linux-x64'
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: sast-evento.deb
+        asset_name: sast-evento-${{ matrix.rid }}.deb
+        tag: ${{ github.ref }}
+        overwrite: true 

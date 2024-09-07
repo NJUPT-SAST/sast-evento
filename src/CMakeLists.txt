@@ -1,4 +1,4 @@
-add_executable(${PROJECT_NAME})
+add_executable(${PROJECT_NAME} ${VERSION_RC_PATH})
 
 file(GLOB_RECURSE SOURCES *.cc *.h *.hpp)
 
@@ -20,7 +20,8 @@ endif()
 
 slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
 
-if (CMAKE_BUILD_TYPE STREQUAL "Release")
+if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
+  message("Embedding resources in the executable")
   set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
 endif()
 

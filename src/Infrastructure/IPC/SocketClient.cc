@@ -34,18 +34,18 @@ SocketClient::~SocketClient() {
 
 void SocketClient::startTray() {
     bp::ipstream pipe;
-    boost::filesystem::path trayPath = boost::filesystem::current_path().parent_path() / "Tray";
+    boost::filesystem::path trayPath = boost::filesystem::current_path().parent_path();
 #if defined(EVENTO_DEBUG)
 #ifdef _WIN32
-    trayPath /= "Debug/sast-evento-tray.exe";
+    trayPath /= "Tray/Debug/sast-evento-tray.exe";
 #else
-    trayPath /= "Debug/sast-evento-tray";
+    trayPath /= "Tray/Debug/sast-evento-tray";
 #endif
 #else
 #ifdef _WIN32
-    trayPath /= "Release/sast-evento-tray.exe";
+    trayPath = "sast-evento-tray.exe";
 #else
-    trayPath /= "Release/sast-evento-tray";
+    trayPath = "/usr/bin/sast-evento-tray";
 #endif
 #endif
     bp::child tray(trayPath, bp::std_out > pipe, bp::std_err > bp::null);

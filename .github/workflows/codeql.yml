@@ -98,7 +98,7 @@ jobs:
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-        key: corrosion-${{ runner.os }}-qt
+        key: corrosion-linux-x64
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest

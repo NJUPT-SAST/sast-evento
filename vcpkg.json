@@ -9,7 +9,10 @@
         "nlohmann-json",
         "spdlog",
         "tomlplusplus",
-        "pkgconf",
+        {
+            "name": "pkgconf",
+            "host": true
+        },
         {
             "name": "libsecret",
             "platform": "!(windows | uwp | osx)"
