@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
     TcpServer server;
 
-    auto* tray = new QSystemTrayIcon(QIcon(":/img/evento.svg"));
+    auto* tray = new QSystemTrayIcon(QIcon(":/img/evento.png"));
     tray->setToolTip(QStringLiteral("SAST Evento"));
     auto* menu = new QMenu();
     QAction* showAction = menu->addAction("显示");
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]) {
 
     QObject::connect(&server, &TcpServer::exitAppReceived, exitApp);
     QObject::connect(&server, &TcpServer::showMessageReceived, [tray](QByteArray data) {
-        tray->showMessage("SAST Evento", data, QIcon(":/img/evento.svg"));
+        tray->showMessage("SAST Evento", data, QIcon(":/img/evento.png"));
     });
 
     tray->show();
