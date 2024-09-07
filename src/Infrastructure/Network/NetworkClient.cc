@@ -369,7 +369,7 @@ Task<Result<SlideEntityList>> NetworkClient::getEventSlide(
 Task<Result<DepartmentEntityList>> NetworkClient::getDepartmentList(
     std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("v2/client/lark/department"),
+                                                      endpoint("/v2/client/lark/department"),
                                                       {},
                                                       cacheTtl);
     if (result.isErr())
