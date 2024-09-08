@@ -121,4 +121,9 @@ EventStructModel from(const EventEntityList& list) {
     return std::make_shared<slint::VectorModel<EventStruct>>(model);
 }
 
+ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl) {
+    return {.avatar = slint::Image::load_from_path(avatar.string().c_str()),
+            .html_url = slint::SharedString(htmlUrl)};
+}
+
 } // namespace evento::convert

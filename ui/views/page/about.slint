@@ -4,7 +4,6 @@ import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { SLink } from "../../modules/surrealism-ui/index.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
 import { Button, ButtonType, LoadingAnimation } from "../../components/index.slint";
-import { Avatar } from "../../modules/surrealism-ui/src/avatar/avatar.slint";
 
 export enum Status {
     Normal,
@@ -12,12 +11,17 @@ export enum Status {
     Error,
 }
 
+export struct ContributorStruct {
+    avatar: image,
+    html-url: string,
+}
+
 export global AboutPageBridge {
     in property <string> version:"v0.0.0-00000000";
     in property <string> update-log: "";
     in property <Status> contributors-status: Status.Normal;
     in property <Status> check-update-status: Status.Normal;
-    in property <[image]> contributors: [];
+    in property <[ContributorStruct]> contributors: [];
     in-out property <bool> show-popup: false;
     callback check-update();
     callback load-contributors();
@@ -46,6 +50,31 @@ component Divider inherits Rectangle {
     background: Token.color.outline-variant;
     width: 90%;
     height: 1px;
+}
+
+component Avatar inherits Rectangle {
+    in property <length> avatar-size: 40px;
+    in property <image> avatar;
+    in property <ImageFit> image-fit: ImageFit.contain;
+    callback clicked();
+    width: avatar-size;
+    height: avatar-size;
+    border-radius: self.width / 2;
+    clip: true;
+
+    Image {
+        height: root.height;
+        width: root.width;
+        source: avatar;
+        image-fit: root.image-fit;
+    }
+
+    TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            parent.clicked();
+        }
+    }
 }
 
 export component AboutPage inherits Page {
@@ -322,12 +351,11 @@ export component AboutPage inherits Page {
                         height: 60px;
                         HorizontalLayout {
                             spacing: 15px;
-                            for img in AboutPageBridge.contributors: Avatar {
-                                avatar-size: 40px;
-                                height: 40px;
-                                width: 40px;
-                                image-fit: ImageFit.contain;
-                                avatar: img;
+                            for contributor in AboutPageBridge.contributors: Avatar {
+                                avatar: contributor.avatar;
+                                clicked => {
+                                    AboutPageBridge.open-web(contributor.html-url);
+                                }
                             }
                         }
                     }
