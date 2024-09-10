@@ -228,19 +228,19 @@ jobs:
         target: 'pkgbuild'
         pkgname: build-aux/sast-evento-bin/
         
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       if: startsWith(matrix.rid, 'win-')
       with:
         name: sast-evento-${{ github.ref_name }}-${{ matrix.rid }}.exe
         path: dist
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       if:  matrix.rid == 'linux-x64'
       with:
         name: sast-evento-${{ github.ref_name }}-${{ matrix.rid }}.deb
         path: sast-evento.deb
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       if: matrix.rid == 'linux-x64'
       with:
         name: sast-evento-bin-${{ github.ref_name }}-x86_64.pkg.tar.zst
