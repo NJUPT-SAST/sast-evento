@@ -248,7 +248,7 @@ jobs:
 
     - name: Inno Setup
       if: startsWith(matrix.rid, 'win-')
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
       with:
         path: ./action-cli/InstallerScript.iss
         options: /O+
