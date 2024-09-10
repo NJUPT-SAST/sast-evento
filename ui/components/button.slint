@@ -68,7 +68,6 @@ export component Button {
         background: surface;
         border-color: outline;
         border-radius: self.height / 2 > max-radius ? max-radius : self.height / 2;
-        drop-shadow-color: Token.color.shadow;
         drop-shadow-offset-y: elevation.offset-y;
         drop-shadow-blur: elevation.blur;
         clip: true;
@@ -153,6 +152,7 @@ export component Button {
             surface: elevated-surface;
             on-surface: elevated-on-surface;
             elevation: Token.elevation.level1;
+            _body.drop-shadow-color: Token.color.shadow;
         }
         filled-disable when disable && type == ButtonType.filled: {
             surface: disable-color.with-alpha(0.12);

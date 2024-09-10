@@ -24,8 +24,10 @@ struct Github {
         [[maybe_unused]] std::initializer_list<urls::param> const& formParams = {}) {
         http::request<http::string_body> req{verb, url.path(), 11};
 
+        req.set(http::field::host, url.host_name());
         req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
         req.set(http::field::accept, MIME_GITHUB_JSON);
+        req.set("X-GitHub-Api-Version", "2022-11-28");
 
         return req;
     }

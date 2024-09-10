@@ -73,6 +73,14 @@ jobs:
         version: 14
         platform: x64
 
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: 6.6.3
+        arch: gcc_64
+        cache: true
+        cache-key-prefix: ${{ runner.os }}-qt
+
     - name: Setup Rust toolchain
       uses: moonrepo/setup-rust@v1
       with:
@@ -90,7 +98,7 @@ jobs:
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-        key: corrosion-${{ runner.os }}
+        key: corrosion-linux-x64
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest

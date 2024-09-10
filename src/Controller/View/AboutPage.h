@@ -2,17 +2,23 @@
 
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
-#include <Controller/Core/UiBase.h>
 
 EVENTO_UI_START
+
+namespace fs = std::filesystem;
 
 class AboutPage : public BasicView, private GlobalAgent<AboutPageBridge> {
 public:
     AboutPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
-    AboutPage(AboutPage&) = delete;
 
 private:
     void onCreate() override;
+    void onShow() override;
+
+    void loadContributors();
+    void checkUpdate();
+
+    std::vector<ContributorStruct> contributors;
 };
 
 EVENTO_UI_END

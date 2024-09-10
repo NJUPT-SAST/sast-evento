@@ -6,7 +6,7 @@
   SAST Evento
 </h1>
 <p align="center">
-  NJUPT SAST C++组 SoC 项目
+  NJUPT SAST C++ 组 SoC 项目
 </p>
 
 <p align="center">
@@ -18,7 +18,7 @@
 
 ## 关于
 
-这个仓库包含了 C++ 组 2024 年暑期代码活动的任务和项目。该活动由 SAST 组织，旨在为学生提供学习和贡献开源项目的机会。
+这个仓库包含了 SAST C++ 组 2024 年 Summer of Code 的任务和项目。
 
 ## 简介
 
@@ -45,6 +45,7 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 - CMake 3.15 或更高版本
 - vcpkg 包管理器
 - Rust 工具链
+- Qt 6.x (`Qt6::Widgets` & `Qt6::Network`)
 
 ### 克隆
 
@@ -93,6 +94,7 @@ cmake --build --preset native
 ### 项目依赖
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)
+- [Boost.Process](https://github.com/boostorg/process)
 - [OpenSSL](https://github.com/openssl/openssl)
 - [Slint](https://github.com/slint-ui/slint)
 - [toml++](https://github.com/marzer/tomlplusplus)
