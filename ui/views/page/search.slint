@@ -1,10 +1,10 @@
 import { Token } from "../../global.slint";
-import { Page, EventCardGroup, EventStruct } from "../../components/index.slint";
+import { Page, EventCardGroup, EventStruct, StateLayer, PageState, LoadingAnimation } from "../../components/index.slint";
 import { Button, LineEdit, ScrollView, ListView, StandardListView } from "std-widgets.slint";
-import { StateLayer } from "../../components/state_layer.slint";
+import { SPagination } from "../../modules/surrealism-ui/index.slint";
 
 export global SearchPageBridge {
-    in-out property <[StandardListViewItem]> department: [
+    in property <[StandardListViewItem]> department: [
         { text: "C++组"},   
         { text: "C#组"},   
         { text: "游戏组"},       
@@ -12,7 +12,7 @@ export global SearchPageBridge {
         { text: "Graphics组"},   
         { text: "运维组"},       
     ];
-    in-out property <[EventStruct]> event-model: [
+    in property <[EventStruct]> event-model: [
         {
             id: 1,
             summary-abbr: "软",
@@ -36,34 +36,92 @@ export global SearchPageBridge {
             time: "09.30 14:30 - 09.30 15:30",
             location: "仙林校区 大学生活动中心101",
             description: "组内授课"
+        },
+        {
+            id: 3,
+            summary-abbr: "软",
+            summary: "软件研发部 C#组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 3,
+            summary-abbr: "软",
+            summary: "软件研发部 C#组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
+        },
+        {
+            id: 3,
+            summary-abbr: "软",
+            summary: "软件研发部 C#组授课",
+            time: "09.30 14:30 - 09.30 15:30",
+            location: "仙林校区 大学生活动中心101",
+            description: "组内授课"
         }
     ];
+    in property <PageState> list-state: normal;
+    in property <PageState> events-state: normal;
+    in property <int> total: 50;
+    out property <int> page-size: 12;
     callback filter-department(string);
     callback load-department-events(int);
 }
 
 export component SearchPage inherits Page {
+    TouchArea {
+        pointer-event(e) => {
+            if (e.button == PointerEventButton.left) {
+                search-box.clear-focus();
+            }
+        }
+        z: -1;
+    }
+
     HorizontalLayout {
         padding: 50px;
         spacing: 15px;
         VerticalLayout {
-            horizontal-stretch: 0.2;
             spacing: 15px;
-            LineEdit {
-                width: 280px;
-                font-size: Token.font.body.large.size;
-                placeholder-text: "在找什么部门呢";
-                edited(keyword) => {
-                    debug("search keyword: " + keyword);
-                    SearchPageBridge.filter-department(keyword);
+            HorizontalLayout {
+                search-box := LineEdit {
+                    width: 260px;
+                    height: 50px;
+                    font-size: Token.font.body.large.size;
+                    placeholder-text: "在找什么部门呢";
+                    edited(keyword) => {
+                        debug("search keyword: " + keyword);
+                        SearchPageBridge.filter-department(keyword);
+                    }
+                }
+
+                // occupy here to align with the department-list below
+                Rectangle {
+                    width: 12px;
                 }
             }
 
-            StandardListView {
-                model: SearchPageBridge.department;
-                current-item-changed(idx) => {
-                    debug("current item changed: " + idx);
-                    SearchPageBridge.load-department-events(idx);
+            if SearchPageBridge.list-state == PageState.loading: Rectangle {
+                LoadingAnimation {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+            if SearchPageBridge.list-state == PageState.error: Rectangle {
+                Button {
+                    text: "重新加载";
+                }
+            }
+
+            if SearchPageBridge.list-state == PageState.normal: Rectangle {
+                StandardListView {
+                    model: SearchPageBridge.department;
+                    current-item-changed(idx) => {
+                        debug("current item changed: " + idx);
+                        SearchPageBridge.load-department-events(idx);
+                    }
                 }
             }
         }
@@ -74,12 +132,26 @@ export component SearchPage inherits Page {
             background: Token.color.outline-variant;
         }
 
-        ScrollView {
-            EventCardGroup {
-                model: SearchPageBridge.event-model;
-                item-clicked(event-struct) => {
-                    debug("id: " + event-struct.id + " title: " + event-struct.summary);
-                    // TODO: navigate to detail page
+        VerticalLayout {
+            Rectangle {
+                ScrollView {
+                    viewport-height: (cards.item-height + cards.vertical-spacing) * cards.row-count;
+                    cards := EventCardGroup {
+                        model: SearchPageBridge.event-model;
+                        item-clicked(event-struct) => {
+                            debug("id: " + event-struct.id + " title: " + event-struct.summary);
+                            // TODO: navigate to detail page
+                        }
+                    }
+                }
+            }
+
+            if SearchPageBridge.total > SearchPageBridge.page-size: Rectangle {
+                height: 30px;
+                SPagination {
+                    page-size: SearchPageBridge.page-size;
+                    total: SearchPageBridge.total;
+                    theme: Token.surrealism-ui-default-theme;
                 }
             }
         }
