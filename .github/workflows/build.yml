@@ -223,7 +223,7 @@ jobs:
 
     - name: Package for pacman
       if: matrix.rid == 'linux-x64' 
-      uses: 2m/arch-pkgbuild-builder@v1.16
+      uses: 2m/arch-pkgbuild-builder@v1.21
       with:
         target: 'pkgbuild'
         pkgname: build-aux/sast-evento-bin/
