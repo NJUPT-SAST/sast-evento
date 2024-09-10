@@ -4,64 +4,8 @@ import { Button, LineEdit, ScrollView, ListView, StandardListView } from "std-wi
 import { SPagination } from "../../modules/surrealism-ui/index.slint";
 
 export global SearchPageBridge {
-    in property <[StandardListViewItem]> department: [
-        { text: "C++组"},   
-        { text: "C#组"},   
-        { text: "游戏组"},       
-        { text: "Web组"},   
-        { text: "Graphics组"},   
-        { text: "运维组"},       
-    ];
-    in property <[EventStruct]> event-model: [
-        {
-            id: 1,
-            summary-abbr: "软",
-            summary: "软件研发部 C++组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 2,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 3,
-            summary-abbr: "软",
-            summary: "软件研发部 C#组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 3,
-            summary-abbr: "软",
-            summary: "软件研发部 C#组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 3,
-            summary-abbr: "软",
-            summary: "软件研发部 C#组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 3,
-            summary-abbr: "软",
-            summary: "软件研发部 C#组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        }
-    ];
+    in property <[StandardListViewItem]> department: [];
+    in property <[EventStruct]> event-model: [];
     in property <PageState> list-state: normal;
     in property <PageState> events-state: normal;
     in property <int> total: 50;
@@ -100,6 +44,7 @@ export component SearchPage inherits Page {
                     height: 50px;
                     font-size: Token.font.body.large.size;
                     placeholder-text: "在找什么部门呢";
+                    enabled: SearchPageBridge.list-state == PageState.normal;
                     edited(keyword) => {
                         debug("search keyword: " + keyword);
                         SearchPageBridge.filter-department(keyword);
