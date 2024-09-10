@@ -1,31 +1,152 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page, EventCardGroup, EventStruct, StateLayer, PageState, LoadingAnimation } from "../../components/index.slint";
+import { Button, LineEdit, ScrollView, ListView, StandardListView } from "std-widgets.slint";
+import { SPagination } from "../../modules/surrealism-ui/index.slint";
 
-export global SearchPageBridge { }
+export global SearchPageBridge {
+    in property <[StandardListViewItem]> department: [];
+    in property <[EventStruct]> event-model: [];
+    in property <PageState> list-state: normal;
+    in property <PageState> events-state: normal;
+    in property <int> total: 0;
+    out property <int> page-size: 12;
+    in-out property <StandardListViewItem> current-department;
+    in-out property <int> current-department-index: -1;
+    callback filter-department(string);
+    callback load-department-list();
+    callback load-department-events(int);
+
+    public function select(index: int) {
+        current-department-index = index;
+    }
+}
 
 export component SearchPage inherits Page {
-    // TODO: implement Search
-    // optional
-    background := Empty { }
+    property <int> current-page-index: 0;
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
+    TouchArea {
+        pointer-event(e) => {
+            if (e.button == PointerEventButton.left) {
+                search-box.clear-focus();
+            }
+        }
+        z: -1;
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "搜索(部门活动)\n  按组筛选、按照自己参加筛选\n  对组添加订阅";
+    HorizontalLayout {
+        padding: 50px;
+        spacing: 15px;
+        VerticalLayout {
+            spacing: 15px;
+            HorizontalLayout {
+                search-box := LineEdit {
+                    width: 260px;
+                    height: 50px;
+                    font-size: Token.font.body.large.size;
+                    placeholder-text: "在找什么部门呢";
+                    enabled: SearchPageBridge.list-state == PageState.normal;
+                    edited(keyword) => {
+                        debug("search keyword: " + keyword);
+                        SearchPageBridge.filter-department(keyword);
+                    }
+                }
+
+                // occupy here to align with the department-list below
+                Rectangle {
+                    width: 12px;
+                }
+            }
+
+            if SearchPageBridge.list-state == PageState.loading: Rectangle {
+                LoadingAnimation {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+            if SearchPageBridge.list-state == PageState.error: Rectangle {
+                Button {
+                    text: "重新加载";
+                    clicked => {
+                        SearchPageBridge.load-department-list();
+                    }
+                }
+            }
+
+            if SearchPageBridge.list-state == PageState.normal: Rectangle {
+                StandardListView {
+                    model: SearchPageBridge.department;
+                    current-item: SearchPageBridge.current-department-index;
+                    current-item-changed(idx) => {
+                        SearchPageBridge.current-department = SearchPageBridge.department[idx];
+                        SearchPageBridge.load-department-events(root.current-page-index);
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            width: 1px;
+            height: 80%;
+            background: Token.color.outline-variant;
+        }
+
+        VerticalLayout {
+            Rectangle {
+                if SearchPageBridge.list-state == PageState.normal && SearchPageBridge.events-state == PageState.normal && SearchPageBridge.event-model.length != 0: ScrollView {
+                    viewport-height: (cards.item-height + cards.vertical-spacing) * cards.row-count;
+                    cards := EventCardGroup {
+                        model: SearchPageBridge.event-model;
+                        item-clicked(event-struct) => {
+                            debug("id: " + event-struct.id + " title: " + event-struct.summary);
+                            // TODO: navigate to detail page
+                        }
+                    }
+                }
+
+                if SearchPageBridge.events-state == PageState.loading: Rectangle {
+                    LoadingAnimation {
+                        width: 40px;
+                        height: 40px;
+                    }
+                }
+
+                if SearchPageBridge.events-state == PageState.error: Rectangle {
+                    Button {
+                        text: "重新加载";
+                        clicked => {
+                            SearchPageBridge.load-department-events(current-page-index);
+                        }
+                    }
+                }
+
+                if SearchPageBridge.list-state != PageState.normal || SearchPageBridge.event-model.length == 0: Rectangle {
+                    Text {
+                        text: "什么都没有呢";
+                        font-size: Token.font.body.large.size;
+                        font-weight: Token.font.body.large.weight;
+                        color: Token.color.outline;
+                    }
+                }
+            }
+
+            if SearchPageBridge.total > SearchPageBridge.page-size: Rectangle {
+                height: 30px;
+                SPagination {
+                    page-size: SearchPageBridge.page-size;
+                    total: SearchPageBridge.total;
+                    theme: Token.surrealism-ui-default-theme;
+                    active <=> root.current-page-index;
+
+                    pre => {
+                        SearchPageBridge.load-department-events(root.current-page-index);
+                    }
+                    next => {
+                        SearchPageBridge.load-department-events(root.current-page-index);
+                    }
+                    clicked => {
+                        SearchPageBridge.load-department-events(root.current-page-index);
+                    }
+                }
             }
         }
     }

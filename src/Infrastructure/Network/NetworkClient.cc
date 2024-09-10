@@ -22,7 +22,8 @@ constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencode
 
 NetworkClient::NetworkClient(net::ssl::context& ctx)
     : _ctx(ctx)
-    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
+    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true))
+    , _cacheManager(std::make_unique<CacheManager>()) {}
 
 NetworkClient* NetworkClient::getInstance() {
     static ssl::context ctx(ssl::context::sslv23);

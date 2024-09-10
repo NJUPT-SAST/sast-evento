@@ -90,16 +90,23 @@ void CacheManager::insert(const std::string& key, const CacheEntry& entry) {
 }
 
 std::optional<CacheEntry> CacheManager::get(std::string const& key) {
-    if (isExpired(_cacheMap[key]->second)) {
+    if (_cacheMap.empty()) {
+        return std::nullopt;
+    }
+
+    auto it = _cacheMap.find(key);
+
+    if (it == _cacheMap.end()) {
+        return std::nullopt;
+    }
+
+    if (isExpired(it->second->second)) {
         _currentCacheSize -= _cacheMap[key]->second.size;
         _cacheList.erase(_cacheMap[key]);
         _cacheMap.erase(key);
         return std::nullopt;
     }
-    auto it = _cacheMap.find(key);
-    if (it == _cacheMap.end()) {
-        return std::nullopt;
-    }
+
     return it->second->second;
 }
 
