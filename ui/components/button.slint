@@ -194,78 +194,78 @@ export component Button {
 }
 
 // quick preview
-component Example {
-    property <bool> disable;
-    property <bool> icon;
-    VerticalLayout {
-        // alignment: start;
-        // width: 500px;
-        HorizontalLayout {
-            Button {
-                content: "disable";
-                type: ButtonType.elevated;
-                clicked => {
-                    root.disable = !root.disable;
-                }
-            }
+// component Example {
+//     property <bool> disable;
+//     property <bool> icon;
+//     VerticalLayout {
+//         // alignment: start;
+//         // width: 500px;
+//         HorizontalLayout {
+//             Button {
+//                 content: "disable";
+//                 type: ButtonType.elevated;
+//                 clicked => {
+//                     root.disable = !root.disable;
+//                 }
+//             }
 
-            Button {
-                content: "icon";
-                type: ButtonType.elevated;
-                clicked => {
-                    root.icon = !root.icon;
-                }
-            }
-        }
+//             Button {
+//                 content: "icon";
+//                 type: ButtonType.elevated;
+//                 clicked => {
+//                     root.icon = !root.icon;
+//                 }
+//             }
+//         }
 
-        Button {
-            have-icon: icon;
-            type: ButtonType.elevated;
-            disable: root.disable;
-            LoadingAnimation {
-                disable: parent.disable;
-                color: parent.on-surface;
-            }
-        }
+//         Button {
+//             have-icon: icon;
+//             type: ButtonType.elevated;
+//             disable: root.disable;
+//             LoadingAnimation {
+//                 disable: parent.disable;
+//                 color: parent.on-surface;
+//             }
+//         }
 
-        Button {
-            have-icon: icon;
-            type: ButtonType.filled;
-            disable: root.disable;
-            LoadingAnimation {
-                color: parent.on-surface;
-                disable: parent.disable;
-            }
-        }
+//         Button {
+//             have-icon: icon;
+//             type: ButtonType.filled;
+//             disable: root.disable;
+//             LoadingAnimation {
+//                 color: parent.on-surface;
+//                 disable: parent.disable;
+//             }
+//         }
 
-        Button {
-            have-icon: icon;
-            type: ButtonType.filled-tonal;
-            disable: root.disable;
-            LoadingAnimation {
-                disable: parent.disable;
-                color: parent.on-surface;
-            }
-        }
+//         Button {
+//             have-icon: icon;
+//             type: ButtonType.filled-tonal;
+//             disable: root.disable;
+//             LoadingAnimation {
+//                 disable: parent.disable;
+//                 color: parent.on-surface;
+//             }
+//         }
 
-        Button {
-            have-icon: icon;
-            type: ButtonType.outlined;
-            disable: root.disable;
-            LoadingAnimation {
-                disable: parent.disable;
-                color: parent.on-surface;
-            }
-        }
+//         Button {
+//             have-icon: icon;
+//             type: ButtonType.outlined;
+//             disable: root.disable;
+//             LoadingAnimation {
+//                 disable: parent.disable;
+//                 color: parent.on-surface;
+//             }
+//         }
 
-        Button {
-            have-icon: icon;
-            type: ButtonType.text;
-            disable: root.disable;
-            LoadingAnimation {
-                disable: parent.disable;
-                color: parent.on-surface;
-            }
-        }
-    }
-}
+//         Button {
+//             have-icon: icon;
+//             type: ButtonType.text;
+//             disable: root.disable;
+//             LoadingAnimation {
+//                 disable: parent.disable;
+//                 color: parent.on-surface;
+//             }
+//         }
+//     }
+// }

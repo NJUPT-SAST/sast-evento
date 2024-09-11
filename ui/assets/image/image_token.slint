@@ -98,20 +98,3 @@ export global EventoImageToken {
         avatar: @image-url("./display/avatar/avatar_1.svg"),
     };
 }
-
-// colorize animation example
-component Example {
-    property <bool> is;
-    Button {
-        y: - self.height;
-        clicked => {
-            is = !is;
-        }
-    }
-
-    Image {
-        source: EventoImageToken.image.icon.category;
-        colorize: is ? black : blue;
-        animate colorize { duration: 1s; }
-    }
-}
