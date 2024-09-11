@@ -14,8 +14,6 @@ export global SettingPageBridge {
             Token.set-display-mode(ColorScheme.light);
         } else if (theme-index == 2) {
             Token.set-display-mode(ColorScheme.dark);
-        } else {
-            Token.set-display-mode(ColorScheme.unknown);
         }
     }
     callback language-changed();
@@ -79,6 +77,9 @@ export component SettingPage inherits Page {
                     current-index <=> SettingPageBridge.theme-index;
                     selected => {
                         SettingPageBridge.change-theme();
+                        if (SettingPageBridge.theme-index == 0) {
+                            MessageManager.show-message("下次启动时生效", MessageType.info);
+                        }
                         SettingPageBridge.theme-changed();
                     }
                 }
