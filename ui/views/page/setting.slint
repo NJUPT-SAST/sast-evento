@@ -23,7 +23,8 @@ export global SettingPageBridge {
     callback minimal-to-tray-changed();
 }
 
-component SettingItem {
+component SettingItem inherits Rectangle {
+    height: 40px;
     in property <string> name;
     in property <bool> supported: true;
     HorizontalLayout {
@@ -60,11 +61,15 @@ export component SettingPage inherits Page {
         VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
-            spacing: 15px;
+            spacing: 10px;
             Text {
                 text: "设置";
                 font-size: Token.font.display.medium.size;
                 font-weight: Token.font.display.medium.weight;
+            }
+
+            Rectangle {
+                height: 5px;
             }
 
             Divider { }
