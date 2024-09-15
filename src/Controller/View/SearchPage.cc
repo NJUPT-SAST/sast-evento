@@ -21,7 +21,7 @@ void SearchPage::onCreate() {
         std::vector<slint::StandardListViewItem> results;
 
         for (auto const& result : self.departments | std::views::filter(isMatch)) {
-            results.emplace_back(result);
+            results.emplace_back(slint::StandardListViewItem{result});
         }
 
         auto model = std::make_shared<slint::VectorModel<slint::StandardListViewItem>>(results);
@@ -59,7 +59,7 @@ void SearchPage::loadDepartmentList() {
 
             model.reserve(self.departments.size());
             for (auto const& item : self.departments) {
-                model.emplace_back(item);
+                model.emplace_back(slint::StandardListViewItem{item});
             }
 
             self->set_department(
