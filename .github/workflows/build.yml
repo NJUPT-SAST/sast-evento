@@ -11,34 +11,30 @@ permissions: write-all
 
 jobs:
   build:
-    env:
-      QT_VERSION: 6.6.3
     name: Build ${{ matrix.rid }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        rid: [linux-x64, win-x64, win-arm64, macos]
+        rid: [linux-x64, win-x64, win-arm64, macos-arm64]
         include:
         - rid: linux-x64
           rust_target: x86_64-unknown-linux-gnu
-          qt_arch: 'gcc_64'
           os: ubuntu-24.04
+          qt_arch: gcc_64
         - rid: win-x64
           msvc_arch: x64
           rust_target: x86_64-pc-windows-msvc
-          qt_arch: 'win64_msvc2019_64'
+          vcpkg_target_triplet: 'x64-windows-static'
           os: windows-latest
         - rid: win-arm64
           msvc_arch: arm64
           rust_target: aarch64-pc-windows-msvc
-          qt_host_arch: 'win64_msvc2019_64'
-          qt_arch: 'win64_msvc2019_arm64'
+          vcpkg_target_triplet: 'arm64-windows-static'
           os: windows-latest
-        - rid: macos
+        - rid: macos-arm64
           rust_target: aarch64-apple-darwin
-          qt_arch: 'clang_64'
-          os: macos-14
+          os: macos-latest
 
     steps:
     - name: Checkout repository
@@ -52,6 +48,30 @@ jobs:
       with:
         version: 14
         platform: x64
+
+    - name: Setup toolchains for building Qt
+      if: ${{ !matrix.qt_arch }}
+      shell: pwsh
+      run: | 
+        if (Get-Command apt-get -ErrorAction SilentlyContinue) {
+          $deps = 'autoconf', 'automake', 'autoconf-archive', '^libxcb.*-dev',
+            'libx11-xcb-dev', 'libxrender-dev', 'libxi-dev',
+            'libxkbcommon-dev', 'libxkbcommon-x11-dev',
+            'libglu1-mesa-dev', 'libegl1-mesa-dev'
+          sudo apt-get update
+          sudo apt-get install -y @deps
+        } elseif (Get-Command brew -ErrorAction SilentlyContinue) {
+          $deps = 'autoconf', 'automake', 'autoconf-archive', 'libtool'
+          brew install @deps
+        }
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      if: matrix.qt_arch
+      with:
+        version: '6.6.3'
+        arch: ${{ matrix.qt_arch }}
+        cache: true
 
     - name: Setup Rust toolchain
       uses: moonrepo/setup-rust@v1
@@ -81,45 +101,13 @@ jobs:
         vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
         vcpkgJsonGlob: 'vcpkg.json'
 
-    - name: Install Qt (Tools on Host)
-      if: matrix.qt_host_arch && (matrix.qt_arch != matrix.qt_host_arch)
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        arch: ${{ matrix.qt_host_arch }}
-        cache: true
-        set-env: false
-        add-tools-to-path: false
-
-    - name: Save Qt Host Path
-      if: matrix.qt_host_arch && (matrix.qt_arch != matrix.qt_host_arch)
-      shell: pwsh
-      run: |
-        $qtHostPath = Join-Path $env:RUNNER_WORKSPACE "Qt"
-        $qtHostPath = Get-ChildItem -Path $qtHostPath | Select-Object -First 1
-        $qtHostPath = Get-ChildItem -Path $qtHostPath | Select-Object -First 1
-        Write-Host "Using Qt host path: $qtHostPath"
-        Write-Output "QT_HOST_PATH=$qtHostPath" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v4
-      with:
-        version: ${{ env.QT_VERSION }}
-        arch: ${{ matrix.qt_arch }}
-        cache: true
-      
-    - name: Install Windows SDK for arm64
-      if: matrix.rid == 'win-arm64'
-      uses: ChristopheLav/windows-sdk-install@v1
-      with:
-        version-sdk: 26100
-        features: OptionId.DesktopCPParm64
-
     - name: Build
       shell: pwsh
       run: |
         $ErrorActionPreference = "Stop"
         $rid = '${{ matrix.rid }}'
+        $vcpkgTargetTriplet = '${{ matrix.vcpkg_target_triplet }}'
+        $qtArch = '${{ matrix.qt_arch }}'
         $additionalConfigureArgs = @()
         if ($rid.StartsWith('win-')) {
           $vsPath = &(Join-Path ${env:ProgramFiles(x86)} "\Microsoft Visual Studio\Installer\vswhere.exe") -property installationpath
@@ -127,157 +115,227 @@ jobs:
           Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments '-arch=${{ matrix.msvc_arch }} -host_arch=x64'
           $additionalConfigureArgs += '-DPKG_CONFIG_EXECUTABLE:FILEPATH=./build/vcpkg_installed/x64-windows/tools/pkgconf/pkgconf.exe'
         }
-        $qtHostPath = $env:QT_HOST_PATH
-        if ($qtHostPath.Length -ne 0) {
-          $additionalConfigureArgs += "-DQT_HOST_PATH:PATH=$qtHostPath"
+        if ($vcpkgTargetTriplet) {
+          $additionalConfigureArgs += "-DVCPKG_TARGET_TRIPLET:STRING=$vcpkgTargetTriplet"
         }
-        cmake --preset native -DRust_CARGO_TARGET=${{ matrix.rust_target }} @additionalConfigureArgs
+        if (-not $qtArch) {
+          $additionalConfigureArgs += "-DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg"
+        }
+        $additionalConfigureArgs += "-DRust_CARGO_TARGET=${{ matrix.rust_target }}"
+
+        # Install as portable software
+        $additionalConfigureArgs += '-DCMAKE_INSTALL_LIBDIR=.'
+        $additionalConfigureArgs += '-DCMAKE_INSTALL_BINDIR=.'
+        if ($rid.StartsWith('linux-')) {
+          $additionalConfigureArgs += '-DCMAKE_INSTALL_RPATH=$ORIGIN'
+        }
+        if ($rid.StartsWith('macos-')) {
+          $additionalConfigureArgs += '-DCMAKE_INSTALL_RPATH=@loader_path'
+        }
+
+        cmake --preset native @additionalConfigureArgs
         cmake --build --preset native-release
-        if ($rid.StartsWith('win-')) {
-          echo winSdkDir=$env:WindowsSdkDir >> $env:GITHUB_ENV
-          echo winSdkVer=$env:WindowsSdkVersion >> $env:GITHUB_ENV
-          echo vcToolsInstallDir=$env:VCToolsInstallDir >> $env:GITHUB_ENV
-          echo vcToolsRedistDir=$env:VCToolsRedistDir >> $env:GITHUB_ENV
-        }
 
-    - name: Package for Windows
-      if: startsWith(matrix.rid, 'win-')
-      env:
-        msvcArch: ${{ matrix.msvc_arch }}
+    - name: Archive files
       shell: pwsh
-      run: scripts\windows-publish.ps1
-
-    - name: Make .desktop file
-      if: matrix.rid == 'linux-x64'
-      shell: bash
       run: |
-        touch sast-evento.desktop
-        cat >> sast-evento.desktop << EOF
-        [Desktop Entry]
-        Name=SAST Evento
-        Version=${{ github.ref_name }}
-        Categories=Education;
-        Type=Application
-        Comment=An event management system developed and used by NJUPT SAST
-        Exec=sast-evento
-        Icon=evento
-        Terminal=false
-        EOF
+        $ErrorActionPreference = "Stop"
 
-    - name: Package for deb
-      if: matrix.rid == 'linux-x64'
-      shell: bash
-      run: |
-        mkdir -p sast-evento/DEBIAN
-        touch sast-evento/DEBIAN/control
-        cat >> sast-evento/DEBIAN/control << EOF
-        Package: sast-evento
-        Version: ${{ github.ref_name }}
-        Architecture: x64
-        Priority: optional
-        Essential: no
-        Depends: qt6-base-dev
-        Maintainer: NJUPT-SAST-C++
-        Description: An event management system developed and used by NJUPT SAST
-        EOF
-        mkdir -p sast-evento/usr/bin
-        mkdir -p sast-evento/usr/lib
-        install -Dm755 build/src/Release/sast-evento sast-evento/usr/bin
-        install -Dm755 build/src/Tray/Release/sast-evento-tray sast-evento/usr/bin
-        install -Dm644 build/3rdpart/sast-link-cxx-sdk/Release/libsast-link.so.1 sast-evento/usr/lib
-        install -Dm644 build/3rdpart/sast-link-cxx-sdk/src/details/Release/libsast-link_details.so sast-evento/usr/lib
-        install -Dm644 build/_deps/slint-build/libslint_cpp.so sast-evento/usr/lib
-        install -Dm644 ui/assets/image/icon/evento.png sast-evento/usr/share/pixmaps/evento.png
-        install -Dm644 sast-evento.desktop sast-evento/usr/share/applications/sast-evento.desktop
-        dpkg-deb --build sast-evento
+        # Install the built files
+        cmake --install ./build --prefix ./installed
 
-    - name: Prepare PKGBUILD
-      if: matrix.rid == 'linux-x64'
-      shell: bash
-      run: |
-        mkdir -p build-aux/sast-evento-bin
-        touch build-aux/sast-evento-bin/PKGBUILD
-        cat >> build-aux/sast-evento-bin/PKGBUILD << EOF
-        # Maintainer: NJUPT-SAST <sast@njupt.edu.cn>
-        pkgname=sast-evento-bin
-        pkgver=${{ github.ref_name }}
-        pkgrel=1
-        pkgdesc="An event management system developed and used by NJUPT SAST"
-        arch=(x86_64)
-        url="https://github.com/NJUPT-SAST-CPP/sast-evento"
-        license=(MIT)
-        depends=(qt6-base)
-        provides=(sast-evento)
-        conflicts=(sast-evento)
-        replaces=(sast-evento-appimage)
-        package() {
-          install -Dm755 "\$srcdir/../../../build/src/Release/sast-evento" "\$pkgdir/usr/bin/sast-evento"
-          install -Dm755 "\$srcdir/../../../build/src/Tray/Release/sast-evento-tray" "\$pkgdir/usr/bin/sast-evento-tray"
-          install -Dm644 "\$srcdir/../../../build/3rdpart/sast-link-cxx-sdk/Release/libsast-link.so" "\$pkgdir/usr/lib/libsast-link.so"
-          install -Dm644 "\$srcdir/../../../build/3rdpart/sast-link-cxx-sdk/src/details/Release/libsast-link_details.so" "\$pkgdir/usr/lib/libsast-link_details.so"
-          install -Dm644 "\$srcdir/../../../build/_deps/slint-build/libslint_cpp.so" "\$pkgdir/usr/lib/libslint_cpp.so"
-          install -Dm644 "\$srcdir/../../../ui/assets/image/icon/evento.png" "\$pkgdir/usr/share/pixmaps/evento.png"
-          install -Dm644 "\$srcdir/../../../sast-evento.desktop" "\$pkgdir/usr/share/applications/sast-evento.desktop"
+        # Hack: fix install name for `libslint_cpp.so` on macOS
+        if ('${{ matrix.rid }}'.StartsWith('macos-')) {
+          # Slint did not set the install dir to `@rpath` when used via FetchContent.
+          # Do some hack to fix it when packaging.
+          # https://github.com/slint-ui/slint/blob/461632717a3ffdd1f9e75cfb7cbfce0763dc0129/api/cpp/CMakeLists.txt#L145
+          
+          $loadCmdsForLibSlint = otool -l ./installed/libslint_cpp.dylib
+          $idPattern = '\s*cmd\s+LC_ID_DYLIB\s*cmdsize\s+\d+\s*name\s+([^\(\r\n]*?)\s+\(offset \d+\)'
+          $idMatched = [regex]::Matches($loadCmdsForLibSlint, $idPattern)[0]
+          if ($idMatched) {
+            $oldId = $idMatched.Groups[1].Value
+            echo "Old LC_ID_DYLIB for libslint_cpp.dylib is '$oldId'"
+            echo "Fixing it to '@rpath/libslint_cpp.dylib'"
+            install_name_tool -id '@rpath/libslint_cpp.dylib' ./installed/libslint_cpp.dylib
+            install_name_tool -change $oldId '@rpath/libslint_cpp.dylib' ./installed/sast-evento
+          }
         }
-        EOF
 
-    - name: Package for pacman
-      if: matrix.rid == 'linux-x64' 
-      uses: 2m/arch-pkgbuild-builder@v1.21
-      with:
-        target: 'pkgbuild'
-        pkgname: build-aux/sast-evento-bin/
-        
-    - uses: actions/upload-artifact@v4
-      if: startsWith(matrix.rid, 'win-')
-      with:
-        name: sast-evento-${{ github.ref_name }}-${{ matrix.rid }}.exe
-        path: dist
+        # Remove unnecessary files
+        Set-Location ./installed
+        Remove-Item -Force -Recurse ./lib
+        Remove-Item -Force -Recurse ./include
+        Remove-Item -Force slint-compiler*
+        Remove-Item -Force *.lib
+        Remove-Item -Force *.a
+        Set-Location ..
 
-    - uses: actions/upload-artifact@v4
-      if:  matrix.rid == 'linux-x64'
-      with:
-        name: sast-evento-${{ github.ref_name }}-${{ matrix.rid }}.deb
-        path: sast-evento.deb
+        # Archive the files
+        if ('${{ runner.os }}' -eq 'Windows') {
+          Compress-Archive -Path ./installed/* -DestinationPath ./files.zip
+        } else {
+          tar -czf ./files.tar.gz -C ./installed .
+        }
 
-    - uses: actions/upload-artifact@v4
-      if: matrix.rid == 'linux-x64'
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
-        name: sast-evento-bin-${{ github.ref_name }}-x86_64.pkg.tar.zst
-        path: build-aux/sast-evento-bin/sast-evento*
+        name: files-${{ matrix.rid }}
+        path: ${{ runner.os != 'Windows' && './files.tar.gz' || './files.zip' }}
+
+  package-win:
+    name: Package ${{ matrix.rid }} (Inno Setup)
+    runs-on: windows-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, win-arm64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Extract files
+      id: extract
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        Expand-Archive -Path ./files.zip -DestinationPath ./files
+        $version = Get-Content -Path ./files/sast-evento-version.txt
+        Write-Output "version=$version" >> $Env:GITHUB_OUTPUT
 
     - name: Inno Setup
-      if: startsWith(matrix.rid, 'win-')
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
       with:
-        path: ./action-cli/InstallerScript.iss
-        options: /O+
+        path: ./deploy/win-installer.iss
+        options: /O+ /dMyAppVersion=${{ steps.extract.outputs.version }}
 
-    - name: Upload Windows Release
-      if: startsWith(matrix.rid, 'win-')
-      uses: svenstaro/upload-release-action@v2
+    - name: Upload installer
+      uses: actions/upload-artifact@v4
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./action-cli/installer.exe
-        asset_name: sast-evento-${{ github.ref_name }}-${{ matrix.rid }}.exe
-        tag: ${{ github.ref }}
-        overwrite: true 
+        name: installer-${{ matrix.rid }}
+        path: ./deploy/installer.exe
 
-    - name: Upload Linux Release (deb)
-      if: matrix.rid == 'linux-x64'
-      uses: svenstaro/upload-release-action@v2
+  deb-package:
+    name: Package ${{ matrix.rid }} (deb)
+    runs-on: ubuntu-24.04
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: sast-evento.deb
-        asset_name: sast-evento-${{ github.ref_name }}-x86_64.deb
-        tag: ${{ github.ref }}
-        overwrite: true 
+          submodules: false
 
-    - name: Upload Linux Release (pacman)
-      if: matrix.rid == 'linux-x64'
-      uses: svenstaro/upload-release-action@v2
+    - name: Download artifact
+      uses: actions/download-artifact@v4
       with:
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
-        file: ./build-aux/sast-evento-bin/sast-evento-bin-${{ github.ref_name }}-1-x86_64.pkg.tar.zst
-        tag: ${{ github.ref }}
-        overwrite: true 
+        name: files-${{ matrix.rid }}
+
+    - name: Extract files
+      shell: bash
+      run: |
+        mkdir -p ./files
+        tar -xzf ./files.tar.gz -C ./files
+
+    - name: Package
+      shell: bash
+      run: |
+        bash ./deploy/create-deb.sh ./files
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: deb-${{ matrix.rid }}
+        path: ./sast-evento.deb
+
+  pacman-package:
+    name: Package ${{ matrix.rid }} (pacman)
+    runs-on: ubuntu-24.04
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Package
+      shell: bash
+      run: |
+        mv ./files.tar.gz ./deploy/pacman/files.tar.gz
+        cp ./ui/assets/image/icon/evento.svg ./deploy/pacman/icon.svg
+        cat | docker run -i --rm -v $(pwd)/deploy/pacman:/pkg -w /pkg archlinux/archlinux:base-devel /bin/bash -e << EOF
+          useradd build -m
+          passwd -d build
+          printf 'build ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+          chown -R build:build .
+          sudo -u build makepkg -f --nodeps --noconfirm
+        EOF
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: pacman-${{ matrix.rid }}
+        path: ./deploy/pacman/*.pkg.tar.zst
+
+  macos-package:
+    name: Package ${{ matrix.rid }} (dmg)
+    runs-on: macos-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [macos-arm64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Extract files
+      shell: bash
+      run: |
+        mkdir -p ./files
+        tar -xzf ./files.tar.gz -C ./files
+
+    - name: Construct macOS app bundle
+      shell: bash
+      run: |
+        bash ./deploy/create-mac-app.sh ./files './sast-evento.app'
+
+    - name: Package
+      uses: L-Super/create-dmg-actons@v1
+      with:
+        dmg_name: 'sast-evento'
+        src_dir: './sast-evento.app'
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: dmg-${{ matrix.rid }}
+        path: ./sast-evento.dmg

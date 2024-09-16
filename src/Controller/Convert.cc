@@ -1,11 +1,6 @@
-#pragma once
-
-#include <Infrastructure/Network/ResponseStruct.h>
-#include <app.h>
-#include <memory>
+#include <Controller/Convert.h>
+#include <chrono>
 #include <spdlog/spdlog.h>
-#include <string>
-#include <vector>
 
 namespace evento::convert {
 
@@ -67,7 +62,7 @@ slint::SharedString convertTimeRange(const std::string& startTimeStr,
     return slint::SharedString{startStr + " - " + endStr.substr(6)};
 }
 
-inline slint::SharedString firstUnicode(const std::string& str) {
+slint::SharedString firstUnicode(const std::string& str) {
     if (str.empty()) {
         return " ";
     }
@@ -97,11 +92,7 @@ inline slint::SharedString firstUnicode(const std::string& str) {
 
 } // namespace details
 
-inline auto from(const auto& obj) {
-    return obj;
-}
-
-inline EventStruct from(const EventEntity& entity) {
+EventStruct from(const EventEntity& entity) {
     return {
         .id = entity.id,
         .summary = slint::SharedString(entity.summary),
@@ -118,7 +109,7 @@ inline EventStruct from(const EventEntity& entity) {
     };
 }
 
-inline std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEntity>& list) {
+std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEntity>& list) {
     std::vector<EventStruct> model;
     model.reserve(list.size());
     for (auto& entity : list) {
@@ -127,7 +118,7 @@ inline std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<E
     return std::make_shared<slint::VectorModel<EventStruct>>(model);
 }
 
-inline ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl) {
+ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl) {
     return {.avatar = slint::Image::load_from_path(avatar.string().c_str()),
             .html_url = slint::SharedString(htmlUrl)};
 }
