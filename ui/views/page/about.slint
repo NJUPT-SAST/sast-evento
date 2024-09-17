@@ -3,7 +3,7 @@ import { Page, Empty, ContentDialog } from "../../components/index.slint";
 import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { SLink } from "../../modules/surrealism-ui/index.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
-import { Button, ButtonType, LoadingAnimation } from "../../components/index.slint";
+import { Button, ButtonType, LoadingAnimation, StyledText } from "../../components/index.slint";
 
 export enum Status {
     Normal,
@@ -61,7 +61,6 @@ component Avatar inherits Rectangle {
     height: avatar-size;
     border-radius: self.width / 2;
     clip: true;
-
     Image {
         height: root.height;
         width: root.width;
@@ -75,6 +74,16 @@ component Avatar inherits Rectangle {
             parent.clicked();
         }
     }
+}
+
+component Link inherits StyledText {
+    callback clicked <=> area.clicked;
+    area := TouchArea {
+        mouse-cursor: pointer;
+    }
+
+    on-surface: area.has-hover ? Token.color.primary : Token.color.on-surface;
+    is-underline: area.has-hover ? true : false;
 }
 
 export component AboutPage inherits Page {
@@ -203,10 +212,9 @@ export component AboutPage inherits Page {
                             vertical-alignment: center;
                         }
 
-                        SLink {
-                            text: "https: //evento.sast.fun";
-                            font-size: Token.font.body.large.size;
-                            font-weight: Token.font.body.large.weight;
+                        Link {
+                            text: "https://evento.sast.fun";
+                            font: Token.font.body.large;
                             clicked => {
                                 AboutPageBridge.open-web("https://evento.sast.fun");
                             }
@@ -225,10 +233,9 @@ export component AboutPage inherits Page {
                             vertical-alignment: center;
                         }
 
-                        SLink {
+                        Link {
                             text: "https://github.com/NJUPT-SAST/sast-evento";
-                            font-size: Token.font.body.large.size;
-                            font-weight: Token.font.body.large.weight;
+                            font: Token.font.body.large;
                             clicked => {
                                 AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento");
                             }
@@ -341,12 +348,10 @@ export component AboutPage inherits Page {
                             AboutPageBridge.load-contributors();
                         }
                     }
-
                     if AboutPageBridge.contributors-status == Status.Loading: LoadingAnimation {
                         color: Token.color.on-surface;
                         height: 40px;
                     }
-
                     if AboutPageBridge.contributors-status == Status.Normal: ScrollView {
                         height: 60px;
                         HorizontalLayout {
