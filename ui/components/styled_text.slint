@@ -1,17 +1,15 @@
-import { StateLayer } from "state_layer.slint";
-import { Token, MdElevationData, MdFontData } from "../global.slint";
-import { LoadingAnimation } from "animation.slint";
+import { Token, MdFontData } from "../global.slint";
 import { Empty } from "view_base.slint";
 
 export component StyledText {
     // option
     // basic
-    in property <string> text:"123123123123";
+    in property <string> text;
     in property is-italic <=> _content.font-italic;
     in property vertical-alignment <=> _content.vertical-alignment;
     in property horizontal-alignment <=> _content.horizontal-alignment;
     // style
-    in property <bool> is-underline: true;
+    in property <bool> is-underline;
     in property <bool> is-strike-through;
     in property <length> line-width: 1px;
     in property <MdFontData> font;
