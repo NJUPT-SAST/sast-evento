@@ -14,7 +14,7 @@ export enum ButtonType{
  * a general button matching MD3 common button requirement.
  * ref: https://m3.material.io/components/buttons/overview
  * 
- * support general item as icon, max size: 18px*18px, just add as a child element.
+ * support general item as icon, just add as a child element.
  * 
  * types:
  * - elevated
@@ -29,6 +29,7 @@ export component Button {
     in property <ButtonType> type: text;
     in property <bool> disable;
     in property <string> content: "No Content";
+    in property <MdFontData> font: Token.font.body.large;
     in property <bool> have-icon: false;
     in property <color> elevated-surface: Token.color.surface-container-low;
     in property <color> elevated-on-surface: Token.color.primary;
@@ -39,6 +40,7 @@ export component Button {
     in property <color> outlined-on-surface: Token.color.primary;
     in property <color> outlined-outline: Token.color.outline;
     in property <color> text-on-surface: Token.color.primary;
+    in property <length> icon-size: 18px;
     // out
     out property <color> surface;
     out property <color> on-surface;
@@ -46,9 +48,7 @@ export component Button {
     out property <MdElevationData> elevation: Token.elevation.level0;
     // implement
     private property <color> disable-color: Token.color.on-surface;
-    private property <MdFontData> font: Token.font.body.large;
     private property <length> max-radius: 20px;
-    private property <length> icon-size: 18px;
     private property <length> default-padding: 24px;
     private property <length> icon-padding: 16px;
     private property <length> default-spacing: 8px;
