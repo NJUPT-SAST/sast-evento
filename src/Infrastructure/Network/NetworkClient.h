@@ -101,6 +101,10 @@ public:
 
     Task<Result<std::filesystem::path>> getFile(urls::url_view url);
 
+    void clearCache();
+
+    std::string getTotalCacheSizeFormatString();
+
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists
     std::optional<std::string> tokenBytes;

@@ -120,4 +120,13 @@ bool CacheManager::saveToDisk(std::string const& data, fs::path const& path) {
     return false;
 }
 
+void CacheManager::clear() {
+    _cacheList.clear();
+    _cacheMap.clear();
+    _currentCacheSize = 0;
+    if (auto dir = cacheDir()) {
+        fs::remove_all(*dir);
+    }
+}
+
 } // namespace evento

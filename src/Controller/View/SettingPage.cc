@@ -1,4 +1,5 @@
 #include <Controller/View/SettingPage.h>
+#include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Utils/Config.h>
 
 EVENTO_UI_START
@@ -58,6 +59,23 @@ void SettingPage::onCreate() {
         setting.insert_or_assign("theme", self->get_theme_index());
         evento::settings.theme = self->get_theme_index();
     });
+
+    self->on_clear_cache([&self = *this]() {
+        networkClient()->clearCache();
+        self->set_cache_size(slint::SharedString(networkClient()->getTotalCacheSizeFormatString()));
+    });
+}
+
+void SettingPage::onShow() {
+    auto& self = *this;
+
+    self->set_language_index(evento::settings.language);
+    self->set_minimal_to_tray(evento::settings.minimalToTray);
+    self->set_notice_begin(evento::settings.noticeBegin);
+    self->set_notice_end(evento::settings.noticeEnd);
+    self->set_theme_index(evento::settings.theme);
+
+    self->set_cache_size(slint::SharedString(networkClient()->getTotalCacheSizeFormatString()));
 }
 
 EVENTO_UI_END

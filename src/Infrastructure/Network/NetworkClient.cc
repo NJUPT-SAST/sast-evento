@@ -6,6 +6,7 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/url/param.hpp>
+#include <cstdint>
 #include <filesystem>
 #include <initializer_list>
 #include <memory>
@@ -477,6 +478,31 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
         co_return Err(Error(Error::Data, "save file failed"));
     }
     co_return Ok(path);
+}
+
+void NetworkClient::clearCache() {
+    _cacheManager->clear();
+}
+
+std::string NetworkClient::getTotalCacheSizeFormatString() {
+    if (auto dir = _cacheManager->cacheDir()) {
+        std::uintmax_t size = 0;
+        for (const auto& file : std::filesystem::directory_iterator(*dir)) {
+            size += file.file_size();
+        }
+
+        if (size < 1024) {
+            return std::format("{}B", size);
+        } else if (size < 1024 * 1024) {
+            return std::format("{:.2f}KiB", static_cast<double>(size) / 1024);
+        } else if (size < 1024 * 1024 * 1024) {
+            return std::format("{:.2f}MiB", static_cast<double>(size) / 1024 / 1024);
+        } else {
+            return std::format("{:.2f}GiB", static_cast<double>(size) / 1024 / 1024 / 1024);
+        }
+    }
+
+    return "0B";
 }
 
 urls::url NetworkClient::githubEndpoint(std::string_view endpoint) {
