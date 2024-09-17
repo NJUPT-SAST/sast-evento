@@ -6,61 +6,84 @@
   SAST Evento
 </h1>
 <p align="center">
-  NJUPT SAST C++ 组 SoC 项目
+A cross-platform desktop client based on Slint
 </p>
 
 <p align="center">
+    <img src="https://img.shields.io/badge/language-C%2B%2B20-yellow.svg">
+    <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgreen.svg">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg">
-    <img src="https://img.shields.io/badge/gui-slint-blueviolet">
-    <img src="https://img.shields.io/badge/lang-C%2B%2B20-yellow.svg">
-    <img src="https://img.shields.io/badge/platform-windows%20%7C%20macos%20%7C%20linux-lightgreen.svg">
 </p>
 
-## 关于
+<p align="center">
+  <a href="https://slint.dev">
+      <img alt="#MadeWithSlint" src="https://raw.githubusercontent.com/slint-ui/slint/master/logo//MadeWithSlint-logo-light.svg" height="60">
+  </a>
+</p>
 
-这个仓库包含了 SAST C++ 组 2024 年 Summer of Code 的任务和项目。
+<p align="center">
+    English | <a href="./doc/README_zh.md">简体中文</a>
+</p>
 
-## 简介
+## Brief
 
-SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程中一般都会遇到下面的问题：
-- 活动信息收集仍然通过传统的共享表格，效率低
-- 活动时间安排冲突需要手动排查、活动场地冲突也要手动排查
-- 活动计划表虽然模板一样，但是每周都需要人手动更新，没法自动生成
-- 同学们活动没有的反馈不高，活动完的收获没法量化
-- 活动的质量没有比较好的反馈
+SAST Evento is an event management system for SAST. During our activities, we often encounter the following problems:
+- The collection of event information is still done through traditional shared spreadsheets, which is inefficient.
+- Manual investigation is required to resolve conflicts in event scheduling and venue availability.
+- The event schedule template needs to be manually updated every week and cannot be generated automatically.
+- The participation and feedback from students are not high, and the achievements of the events cannot be quantified.
+- There is a lack of quality feedback for the events.
 
-针对上面的问题，我们决定 SoC 期间制作一个活动辅助系统帮助部长和讲师们更加顺畅地完成日常活动，减少沟通负担。
+To address these issues, we have decided to develop an event assistance system during the SoC period to help department heads and instructors smoothly manage their daily activities and reduce communication burden.
 
-本项目是 SAST Evento 的跨平台桌面客户端版本。
+This project is the desktop client version of SAST Evento.
 
-## License
+## Platform Support
 
-项目基于 [MIT License](./LICENSE) 发布
+| Platform           | Status                   | Instruction                     |
+| ------------------ | ------------------------ | ------------------------------- |
+| Windows x64        | ✅                        |
+| Windows arm64      | :heavy_exclamation_mark: | Application cannot run normally |
+| macOS arm64        | ✅                        |
+| macOS x64          | :x:                      | No packaging plan available     |
+| Linux x64 (pacman) | ✅                        |
+| Linux x64 (deb)    | ✅                        |
+| Linux x64 (rpm)    | :x:                      | No packaging plan available     |
+| Linux x64 (nix)    | :x:                      | No packaging plan available     |
+| Linux arm64        | :x:                      | No packaging plan available     |
 
-## 参与开发
+## Development
 
-### 先决条件
+### Prerequisites
 
-- 支持 C++20 或更高标准的编译器
-- CMake 3.15 或更高版本
-- vcpkg 包管理器
-- Rust 工具链
-- Qt 6.x (`Qt6::Widgets` & `Qt6::Network`)
+- Compiler that supports C++20 or higher standard
+- CMake 3.21 or higher version
+- vcpkg package manager
+- Rust toolchain
 
-### 克隆
+For Linux, you must install Qt6 dependencies:
+
+```bash
+# For Arch Linux
+sudo pacman -S qt6-base
+# For Ubuntu
+sudo apt install qt6-base-dev
+```
+
+### Clone
 
 ```bash
 git clone --recursive https://github.com/NJUPT-SAST/sast-evento.git
 ```
 
-注意：本项目使用了子模块，所以请确保使用 `--recursive` 参数来克隆仓库，或者在克隆后执行以下命令：
+Note: This project uses submodules, so make sure to clone the repository with the `--recursive` flag, or execute the following command after cloning:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-### 提交检查 Hook
-本项目使用 [pre-commit](https://pre-commit.com/) 来进行提交检查，以确保代码风格一致性。请先安装 pre-commit 工具：
+### Commit Check Hook
+This project uses [pre-commit](https://pre-commit.com/) for commit checks to ensure code style consistency. Please install the pre-commit tool first:
 ```bash
 # For Arch Linux
 sudo pacman -S pre-commit
@@ -68,30 +91,30 @@ sudo pacman -S pre-commit
 pipx install pre-commit
 ```
 
-然后在克隆项目后执行以下命令安装 pre-commit 钩子：
+Then, after cloning the project, execute the following command to install the pre-commit hook:
 
 ```bash
 pre-commit install
 ```
 
 > [!TIP]  
-> 如果您认为工具提供的结果不可靠，可使用 `git commit --no-verify` 临时跳过提交检查。
+> If you find the results provided by the tool unreliable, you can temporarily skip the commit check by using `git commit --no-verify`.
 
-### 构建
+### Build
 > [!TIP]  
-> 我们建议使用 VScode 打开和编辑项目。我们特别保留 `.vscode` 文件夹用于基本设置和扩展。
+> We recommend using VScode to open and edit the project. We have reserved the `.vscode` folder for basic settings and extensions.
 
-本项目使用 CMake Presets 来快速配置和构建项目，所需命令行如下：
+This project uses CMake Presets for quick configuration and building. The required command line is as follows:
 
 ```bash
-# 对于 Windows 平台，请保证编译工具集相关环境变量已经配置
-# 您可以使用 `vcpkg env` 命令进入正确设置环境变量的 shell
+# For Windows platform, make sure the compilation toolset-related environment variables are configured
+# You can use the `vcpkg env` command to enter a shell with the correct environment variables set
 cmake --preset native
-# 根据需要，可换用 `native-debug`, `native-release` 或 `native-relwithdebinfo` 预设
+# Depending on your needs, you can use `native-debug`, `native-release`, or `native-relwithdebinfo` preset
 cmake --build --preset native
 ```
 
-### 项目依赖
+### Project Dependencies
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)
 - [Boost.Process](https://github.com/boostorg/process)
