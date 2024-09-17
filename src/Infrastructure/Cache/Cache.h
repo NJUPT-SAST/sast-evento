@@ -41,6 +41,8 @@ public:
 
     std::optional<CacheEntry> get(std::string const& key);
 
+    void clear();
+
     static constexpr size_t MAX_CACHE_SIZE = 64 * 1024 * 1024;
 
 private:
