@@ -45,25 +45,26 @@ void AboutPage::loadContributors() {
             }
 
             auto contributors = result.unwrap();
-            self.contributors.clear();
+            self._contributors.clear();
             auto total = contributors.size();
 
-            for (int i = 0; i < contributors.size(); ++i) {
+            for (auto const& contributor : contributors) {
                 executor()->asyncExecute(
-                    networkClient()->getFile(contributors[i].avatar_url),
-                    [&self = *this, i, total, htmlUrl = contributors[i].html_url](
+                    networkClient()->getFile(contributor.avatar_url),
+                    [&self = *this, &contributor, total, htmlUrl = contributor.html_url](
                         Result<std::filesystem::path> result) {
                         if (result.isErr()) {
                             spdlog::warn("download avatar failed: {}", result.unwrapErr().what());
+                            self._contributors.emplace_back(evento::convert::from("", htmlUrl));
                         } else {
-                            self.contributors.emplace_back(
+                            self._contributors.emplace_back(
                                 evento::convert::from(result.unwrap(), htmlUrl));
                         }
 
-                        if (i == total - 1) {
+                        if (self._contributors.size() == total) {
                             self->set_contributors(
                                 std::make_shared<slint::VectorModel<ContributorStruct>>(
-                                    self.contributors));
+                                    self._contributors));
                             self->set_contributors_status(Status::Normal);
                         }
                     });
