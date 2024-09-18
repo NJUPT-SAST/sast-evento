@@ -18,7 +18,7 @@ private:
     void loadContributors();
     void checkUpdate();
 
-    std::vector<ContributorStruct> contributors;
+    std::vector<ContributorStruct> _contributors;
 };
 
 EVENTO_UI_END
