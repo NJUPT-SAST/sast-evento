@@ -155,7 +155,7 @@ export component EventCardGroup inherits VerticalLayout {
         property <int> start-idx: row-idx * 3;
         height: root.item-height;
         spacing: horizontal-spacing;
-        alignment: space-around;
+        alignment: start;
         for idx in root.row-indexes(start-idx): EventCard {
             event: root.model[idx];
             width: parent.width / 3 - horizontal-spacing * 2 / 3;

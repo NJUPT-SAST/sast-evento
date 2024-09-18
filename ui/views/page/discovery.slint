@@ -8,22 +8,7 @@ import { Token } from "../../global.slint";
 import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
 import { HorizontalBox, ScrollView } from "std-widgets.slint";
 
-export global DiscoveryPageBridge { 
-    // callbacks
-}
-
-export component DiscoveryPage inherits Page {
-    /*  demo code for generating corresponding C++ code correctly
-        remove this when EventCard&EventCardGroup is truly used
-        otherwise "Convert.h/Convert.cc" will fail to compile    */
-
-    // TODO: implement Discovery
-    // optional
-    background := Empty { }
-    
-    //BEGIN debug data
-
-    in property <int> event_num;
+export global DiscoveryPageBridge {
     in property <[EventStruct]> event_list: [
         {
             id: 1,
@@ -74,22 +59,6 @@ export component DiscoveryPage inherits Page {
             description: "组内授课"
         },
         {
-            id: 7,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 8,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
             id: 9,
             summary-abbr: "软",
             summary: "软件研发部 Web组授课",
@@ -130,99 +99,66 @@ export component DiscoveryPage inherits Page {
             description: "组内授课"
         }
     ];
-    //END   debug data
+    in property <[image]> slides: [
+        EventoImageToken.image.display.event.default[0],
+        EventoImageToken.image.display.event.default[1],
+        EventoImageToken.image.display.event.default[2],
+    ];
+}
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-    }
-
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-
-            Rectangle {
+export component DiscoveryPage inherits Page {
+    ScrollView {
+        height: root.height;
+        width: root.width;
+        
+        VerticalLayout {
+            padding: 50px;
+            spacing: 15px;
+            SCarousel {
                 width: 100%;
-                height: 100%;
+                height: root.height * 0.5;
+                fold-height: root.height * 0.5;
+                active: 3;
+                focus-main: true;
+                fit: cover;
+                sources: DiscoveryPageBridge.slides;
+            }
 
-                ScrollView {
-                    height: root.height;
-                    width: root.width;
+            Text {
+                color: Token.color.inverse-surface;
+                font-size: Token.font.title.large.size;
+                font-weight: Token.font.label.large.weight;
+                text: " 正在进行的活动";
+            }
 
-                    VerticalLayout {
-                        // calculate actual block size
-
-                    // idx = row * block_col_num + col
-                    //        |                     |
-                    //     y/height              x/width
-                    
-                    SCarousel {
-                        width: 100%;
-                        height: root.height * 0.5;
-                        fold-height: root.height * 0.5;
-                        active: 3;
-                        focus-main: true;
-                        fit: contain;
-                        sources: [
-                            EventoImageToken.image.display.event.default[0],
-                            EventoImageToken.image.display.event.default[0],
-                            EventoImageToken.image.display.event.default[0],
-                        ];
+            in property <[EventStruct]> current_event_list: DiscoveryPageBridge.event_list;
+            in property <int> current_event_row_num: floor(current_event_list.length / 3) * 3 == current_event_list.length ? current_event_list.length / 3 : floor(current_event_list.length / 3) + 1;
+            Rectangle {
+                height: current_event_row_num * 188px + 20px * (current_event_row_num - 1);
+                EventCardGroup {
+                    model: DiscoveryPageBridge.event_list;
+                    item-clicked(event-struct) => {
+                        debug("id: " + event-struct.id + " title: " + event-struct.summary);
                     }
-                    
-                    Rectangle {
-                        height: 40px;
-                        width: 100%;
-                        Text {
-                            color: Token.color.inverse-surface;
-                            font-size: Token.font.title.large.size;
-                            font-weight: Token.font.label.large.weight;
-                            text: "正在进行的活动";
-                        }
-                    }
+                }
+            }
 
-                    in property <[EventStruct]> current_event_list: event_list;
-                    in property <int> current_event_row_num: floor(current_event_list.length / 3) * 3 == current_event_list.length ? current_event_list.length / 3 : floor(current_event_list.length / 3) + 1;
-                    
-                    Rectangle {
-                        height: current_event_row_num * 188px + 20px * (current_event_row_num - 1);
-                        EventCardGroup {
-                            model: event_list;
-                            item-clicked(event-struct) => {
-                                debug("id: " + event-struct.id + " title: " + event-struct.summary);
-                            }
-                        }
-                    }
+            Text {
+                color: Token.color.inverse-surface;
+                font-size: Token.font.title.large.size;
+                font-weight: Token.font.label.large.weight;
+                text: " 最新的活动";
+            }
 
-                    Rectangle {
-                        height: 40px;
-                        width: 100%;
-                        Text {
-                            color: Token.color.inverse-surface;
-                            font-size: Token.font.title.large.size;
-                            font-weight: Token.font.label.large.weight;
-                            text: "最新的活动";
-                        }
+            in property <[EventStruct]> newest_event_list: DiscoveryPageBridge.event_list;
+            in property <int> newest_event_row_num: floor(newest_event_list.length / 3) * 3 == newest_event_list.length ? newest_event_list.length / 3 : floor(newest_event_list.length / 3) + 1;
+            Rectangle {
+                height: newest_event_row_num * 188px + 20px * (newest_event_row_num - 1);
+                EventCardGroup {
+                    model: DiscoveryPageBridge.event_list;
+                    item-clicked(event-struct) => {
+                        debug("id: " + event-struct.id + " title: " + event-struct.summary);
                     }
-
-                    in property <[EventStruct]> newest_event_list: event_list;
-                    in property <int> newest_event_row_num: floor(newest_event_list.length / 3) * 3 == newest_event_list.length ? newest_event_list.length / 3 : floor(newest_event_list.length / 3) + 1;
-                    
-                    Rectangle {
-                        height: newest_event_row_num * 188px + 20px * (newest_event_row_num - 1);
-                        EventCardGroup {
-                            model: event_list;
-                            item-clicked(event-struct) => {
-                                debug("id: " + event-struct.id + " title: " + event-struct.summary);
-                            }
-                        }
-                    }
-
                 }
             }
         }
