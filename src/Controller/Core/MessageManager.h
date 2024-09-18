@@ -14,9 +14,6 @@ class MessageManager : private GlobalAgent<MessageManagerBridge> {
     UiBridge& bridge;
     std::string logOrigin = "MessageManager";
 
-    bool isMessageShow = false;
-    const static inline auto animationLength = std::chrono::milliseconds(200);
-
 public:
     MessageManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
     MessageManager(MessageManager&) = delete;

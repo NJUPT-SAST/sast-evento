@@ -38,6 +38,9 @@ struct EventoDisplayCollection {
     evento: image,
     evento-bg: image,
     avatar: image,
+    event: {
+        default: [image],
+    },
 }
 
 struct EventoImageCollection {
@@ -96,22 +99,29 @@ export global EventoImageToken {
         }),
         evento-bg: @image-url("./display/evento/evento_bg.png"),
         avatar: @image-url("./display/avatar/avatar_1.svg"),
+        event: {
+            default: [
+                @image-url("./display/event/default_1.png"),
+                @image-url("./display/event/default_2.png"),
+                @image-url("./display/event/default_3.png"),
+            ],
+        },
     };
 }
 
 // colorize animation example
-component Example {
-    property <bool> is;
-    Button {
-        y: - self.height;
-        clicked => {
-            is = !is;
-        }
-    }
+// component Example {
+//     property <bool> is;
+//     Button {
+//         y: - self.height;
+//         clicked => {
+//             is = !is;
+//         }
+//     }
 
-    Image {
-        source: EventoImageToken.image.icon.category;
-        colorize: is ? black : blue;
-        animate colorize { duration: 1s; }
-    }
-}
+//     Image {
+//         source: EventoImageToken.image.icon.category;
+//         colorize: is ? black : blue;
+//         animate colorize { duration: 1s; }
+//     }
+// }
