@@ -11,7 +11,7 @@ export component StateLayer {
     height: 100%;
     width: 100%;
     _body := Rectangle {
-        background: color == rgba(0,0,0,0) ? background : color;
+        background: color == rgba(0,0,0,0) ? parent.background : color;
         opacity: 0;
         animate opacity {
             duration: 100ms;
@@ -38,15 +38,15 @@ export component StateLayer {
     ]
 }
 
-component Test {
-    StateLayer {
-        width: 100%;
-        height: 100%;
-        background: red;
-        is-hover: area.has-hover;
-        is-press: area.pressed;
-        // disable: true;
-    }
+// component Test {
+//     StateLayer {
+//         width: 100%;
+//         height: 100%;
+//         background: red;
+//         is-hover: area.has-hover;
+//         is-press: area.pressed;
+//         // disable: true;
+//     }
 
-    area := TouchArea { }
-}
+//     area := TouchArea { }
+// }

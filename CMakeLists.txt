@@ -7,20 +7,28 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.cmake/)
 include(Version)
 
-if(APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
-endif()
-
 if (POLICY CMP0167)
   cmake_policy(SET CMP0167 OLD)
 endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
-option(EVENTO_EMBED_RESOURCES OFF "Request slint embed resources")
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
 
-if(APPLE)
+if (WIN32)
+  set(VERSION_RC_PATH ${CMAKE_SOURCE_DIR}/sast-evento.rc)
+  configure_file(
+      ${CMAKE_SOURCE_DIR}/.cmake/version_exe.rc.in
+      ${VERSION_RC_PATH}
+  )
+  configure_file(
+      ${CMAKE_SOURCE_DIR}/.cmake/InstallerScript.iss.in
+      ${CMAKE_SOURCE_DIR}/action-cli/InstallerScript.iss
+  )
+  set(WIN32_MANIFEST_PATH ${CMAKE_SOURCE_DIR}/app.manifest)
+endif()
+
+if (APPLE)
   set(MACOSX_BUNDLE_GUI_IDENTIFIER ${IDENTIFIER})
   set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
   set(MACOSX_BUNDLE_COPYRIGHT ${COPYRIGHT})
@@ -53,7 +61,7 @@ endif (NOT Slint_FOUND)
 
 # find vcpkg-installed
 find_package(spdlog REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system url beast)
+find_package(Boost REQUIRED COMPONENTS system url beast process)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(PkgConfig REQUIRED)

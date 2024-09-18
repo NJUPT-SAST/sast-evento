@@ -7,7 +7,7 @@ export global MenuOverlayBridge {
     in-out property <bool> is-show: false;
     in-out property <string> user-name:"用户名";
     in-out property <string> user-signature: "个性签名";
-    in-out property <image> user-avatar: Token.image.display.avatar[0];
+    in-out property <image> user-avatar: Token.image.display.avatar;
     callback open-link-web();
 }
 
@@ -16,7 +16,7 @@ component MenuItem inherits Rectangle {
     in property <string> label;
     in property <color> label-color: Token.color.on-surface;
     callback clicked <=> area.clicked;
-    height: 36px;
+    height: 46px;
     preferred-width: 100%;
     padding: 5px;
     border-radius: self.height / 2;
@@ -34,12 +34,13 @@ component MenuItem inherits Rectangle {
     content := HorizontalLayout {
         spacing: 8px;
         padding: 8px;
+        alignment: start;
         Image {
-            horizontal-alignment: center;
+            padding-top: 5px;
+            horizontal-alignment: left;
             vertical-alignment: center;
-            width: 20px;
-            height: self.width;
             source: root.icon;
+            image-fit: ImageFit.preserve;
             colorize: label-color;
         }
 
@@ -55,8 +56,8 @@ component MenuItem inherits Rectangle {
 
 component Divider inherits Rectangle {
     width: 90%;
-    height: 2px;
-    background: Token.color.outline;
+    height: 1px;
+    background: Token.color.outline-variant;
 }
 
 component Avatar inherits Rectangle {
@@ -196,7 +197,7 @@ export component MenuOverlay inherits Overlay {
                 label: "纪念卡";
                 clicked => {
                     // NOTE: Unsupport
-                    MessageManager.show-message("功能还在开发中，咕咕咕 😣", MessageType.Info);
+                    MessageManager.show-message("功能还在开发中，咕咕咕 😣", MessageType.info);
                 }
             }
             if AccountManager.is-login:Divider { }

@@ -1,0 +1,101 @@
+import { SCard } from "../modules/surrealism-ui/index.slint";
+import { Token } from "../global.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Button, ButtonType } from "button.slint";
+
+// Basic dialog without icon. See: https://m3.material.io/components/dialogs/specs#9a8c226b-19fa-4d6b-894e-e7d5ca9203e8
+
+component Title-Text inherits Text {
+    in property <string> content;
+    text: content;
+    font-size: Token.font.title.large.size;
+    font-weight: Token.font.title.large.weight;
+    color: Token.color.on-surface;
+    height: self.preferred-height;
+    wrap: TextWrap.no-wrap;
+    overflow: TextOverflow.elide;
+}
+
+export component ContentDialog inherits Window {
+    max-width: 560px * 2;
+    min-width: 280px * 2;
+    padding-bottom: 0;
+    padding-top: 0;
+    padding-left: 0;
+    padding-right: 0;
+    opacity: 1;
+    visible: is-show;
+    z: 1000;
+    //theme
+    in-out property <bool> is-show: false;
+    // dialog
+    in property <string> dialog-title: "Dialog";
+    in property <string> confirm-btn-text: "Confirm";
+    in property <string> cancel-btn-text: "Cancel";
+    //function
+    public function open() {
+        self.is-show = true;
+    }
+    public function close() {
+        self.is-show = false;
+    }
+    callback confirm();
+    callback cancel();
+    mask := SCard {
+        z: 100;
+        height: 100%;
+        width: 100%;
+        drop-shadow-blur: 0;
+        drop-shadow-offset-x: 0;
+        drop-shadow-offset-y: 0;
+        opacity: 0.5;
+    }
+
+    area := SCard {
+        z: 101;
+        height: root.height / 2;
+        width: root.width / 2;
+        border-radius: 28px;
+        border-color: Token.color.surface-container-high;
+        background: Token.color.surface;
+        VerticalLayout {
+            padding: 24px;
+            title := Title-Text {
+                content: dialog-title;
+            }
+
+            Rectangle {
+                height: 16px;
+            }
+
+            @children
+
+            Rectangle {
+                height: 24px;
+            }
+
+            button := HorizontalLayout {
+                spacing: 8px;
+                height: self.preferred-height;
+                alignment: end;
+                Button {
+                    type: text;
+                    content: confirm-btn-text;
+                    text-on-surface: Token.color.primary;
+                    clicked => {
+                        root.confirm();
+                    }
+                }
+
+                Button {
+                    type: text;
+                    content: cancel-btn-text;
+                    text-on-surface: Token.color.secondary;
+                    clicked => {
+                        root.cancel();
+                    }
+                }
+            }
+        }
+    }
+}

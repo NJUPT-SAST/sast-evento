@@ -49,7 +49,7 @@ public:
     // same as Slint hide();
     void hide();
     // called from other thread (for tray)
-    [[deprecated("no tray in project now")]] void exit();
+    void exit();
 
     bool inEventLoop() const;
 

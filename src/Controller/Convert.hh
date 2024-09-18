@@ -11,8 +11,8 @@ namespace evento::convert {
 
 namespace details {
 
-slint::SharedString convertTimeRange(const std::string& startTimeStr,
-                                     const std::string& endTimeStr) {
+inline slint::SharedString convertTimeRange(const std::string& startTimeStr,
+                                            const std::string& endTimeStr) {
     std::istringstream ssStart(startTimeStr);
     std::istringstream ssEnd(endTimeStr);
     std::chrono::sys_seconds startTp, endTp;
@@ -58,7 +58,7 @@ slint::SharedString convertTimeRange(const std::string& startTimeStr,
     return slint::SharedString{startStr + " - " + endStr.substr(6)};
 }
 
-slint::SharedString firstUnicode(const std::string& str) {
+inline slint::SharedString firstUnicode(const std::string& str) {
     if (str.empty()) {
         return " ";
     }
@@ -88,14 +88,11 @@ slint::SharedString firstUnicode(const std::string& str) {
 
 } // namespace details
 
-using EventEntityList = std::vector<EventEntity>;
-using EventStructModel = std::shared_ptr<slint::VectorModel<EventStruct>>;
-
-auto from(const auto& obj) {
+inline auto from(const auto& obj) {
     return obj;
 }
 
-EventStruct from(const EventEntity& entity) {
+inline EventStruct from(const EventEntity& entity) {
     return {
         .id = entity.id,
         .summary = slint::SharedString(entity.summary),
@@ -112,13 +109,18 @@ EventStruct from(const EventEntity& entity) {
     };
 }
 
-EventStructModel from(const EventEntityList& list) {
+inline std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEntity>& list) {
     std::vector<EventStruct> model;
     model.reserve(list.size());
     for (auto& entity : list) {
         model.push_back(from(entity));
     }
     return std::make_shared<slint::VectorModel<EventStruct>>(model);
+}
+
+inline ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl) {
+    return {.avatar = slint::Image::load_from_path(avatar.string().c_str()),
+            .html_url = slint::SharedString(htmlUrl)};
 }
 
 } // namespace evento::convert

@@ -6,9 +6,6 @@
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/http/dynamic_body.hpp>
-#include <boost/beast/http/message.hpp>
-#include <boost/beast/http/verb.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/url/url.hpp>
 #include <chrono>
@@ -48,7 +45,6 @@ public:
 private:
     net::ssl::context& _ctx;
     std::chrono::seconds _timeout; // respective timeout of ssl handshake & http
-    beast::flat_buffer _buffer;    // http buffer is used for reading and must be persisted
 };
 
 } // namespace evento
