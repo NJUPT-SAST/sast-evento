@@ -6,6 +6,7 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/url/param.hpp>
+#include <boost/url/url_view.hpp>
 #include <cstdint>
 #include <filesystem>
 #include <initializer_list>
@@ -444,8 +445,9 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
     co_return Ok(entity);
 }
 
-Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
-    http::request<http::string_body> req{http::verb::get, url.path(), 11};
+Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url) {
+    auto view = urls::url_view(url);
+    http::request<http::string_body> req{http::verb::get, view.path(), 11};
     // use cache first
     auto cacheDir = CacheManager::cacheDir();
     if (!cacheDir) {
@@ -461,12 +463,12 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
         }
     }
 
-    req.set(http::field::host, url.host_name());
+    req.set(http::field::host, view.host_name());
     req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
     req.set(http::field::accept, "*/*");
 
     // if cache not exists, download file
-    auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+    auto reply = co_await _httpsAccessManager->makeReply(view.host(), req);
     if (reply.isErr())
         co_return Err(reply.unwrapErr());
 

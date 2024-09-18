@@ -106,7 +106,7 @@ public:
 
     Task<Result<ReleaseEntity>> getLatestRelease();
 
-    Task<Result<std::filesystem::path>> getFile(urls::url_view url);
+    Task<Result<std::filesystem::path>> getFile(std::string url);
 
     void clearCache();
 
