@@ -31,7 +31,7 @@ bool CacheManager::isExpired(const CacheEntry& entry) {
 
 std::optional<std::filesystem::path> CacheManager::cacheDir() {
     fs::path cacheFileDir;
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef PLATFORM_WINDOWS
     auto localAppData = std::getenv("LOCALAPPDATA");
     if (localAppData == nullptr) {
         spdlog::warn("LOCALAPPDATA environment variable not found");
@@ -39,7 +39,7 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     }
     cacheFileDir = fs::path(localAppData) / "Programs" / "evento";
 
-#elif __linux__
+#elif defined(PLATFORM_LINUX)
     auto xdgCacheHome = std::getenv("XDG_CACHE_HOME");
     if (xdgCacheHome == nullptr) {
         auto home = std::getenv("HOME");
@@ -51,7 +51,7 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     } else {
         cacheFileDir = fs::path(xdgCacheHome) / "evento";
     }
-#elif __APPLE__
+#elif defined(PLATFORM_APPLE)
     auto home = std::getenv("HOME");
     if (home == nullptr) {
         spdlog::warn("HOME environment variable not found");

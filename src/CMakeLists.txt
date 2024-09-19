@@ -19,11 +19,20 @@ endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
+if(WIN32)
+  set(PLATFORM PLATFORM_WINDOWS)
+elseif(APPLE)
+  set(PLATFORM PLATFORM_APPLE)
+elseif(LINUX)
+  set(PLATFORM PLATFORM_LINUX)
+endif()
+
 # definitions for Logger
 target_compile_definitions(${PROJECT_NAME}
-  PUBLIC
+  PRIVATE
     $<$<CONFIG:Debug>:EVENTO_DEBUG>
     $<$<CONFIG:Release>:EVENTO_RELEASE>
+    ${PLATFORM}
 )
 
 target_link_libraries(${PROJECT_NAME}
