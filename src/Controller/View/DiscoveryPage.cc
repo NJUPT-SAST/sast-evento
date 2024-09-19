@@ -1,9 +1,8 @@
 #include "Controller/AsyncExecutor.hh"
-#include "Controller/Convert.hh"
+#include "Controller/Convert.h"
 #include "Controller/Core/ViewManager.h"
 #include "Controller/UiBridge.h"
 #include "Infrastructure/Network/NetworkClient.h"
-#include "app.h"
 #include <Controller/View/DiscoveryPage.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <spdlog/spdlog.h>
