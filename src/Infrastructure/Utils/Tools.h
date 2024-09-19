@@ -11,14 +11,14 @@ namespace urls = boost::urls;
 inline void openBrowser(urls::url_view url) {
     using namespace std::string_literals;
     std::string url_str = "\""s + url.data() + "\"";
-#ifdef __linux__
+#ifdef PLATFORM_LINUX
     auto command = "xdg-open " + url_str;
-#elif defined(_WIN32) || defined(_WIN64)
+#elif defined(PLATFORM_WINDOWS)
     auto command = "start \"\" " + url_str;
-#elif defined(__APPLE__)
+#elif defined(PLATFORM_APPLE)
     auto command = "open " + url_str;
 #else
-    spdlog::error("unsupported os");
+#error "Unsupported platform"
 #endif
 
     std::thread t([command]() {
