@@ -1,8 +1,8 @@
-add_executable(${PROJECT_NAME})
+add_executable(${PROJECT_NAME} ${VERSION_RC_PATH})
 
-file(GLOB_RECURSE SOURCES *.cc *.h *.hpp)
+file(GLOB_RECURSE SOURCES Controller/*.cc Infrastructure/*.cc)
 
-target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} main.cc)
 
 # hide cmdline in Release Mode for MSVC
 if (MSVC)
@@ -20,9 +20,10 @@ endif()
 
 slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
 
-if(EVENTO_EMBED_RESOURCES)
+if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
+  message("Embedding resources in the executable")
   set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
-endif(EVENTO_EMBED_RESOURCES)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
@@ -40,6 +41,7 @@ target_link_libraries(${PROJECT_NAME}
     Boost::system
     Boost::url
     Boost::beast
+    Boost::process
     OpenSSL::Crypto
     OpenSSL::SSL
     nlohmann_json::nlohmann_json
@@ -53,3 +55,5 @@ target_link_libraries(${PROJECT_NAME}
 if (WIN32)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
 endif()
+
+add_subdirectory(Tray)

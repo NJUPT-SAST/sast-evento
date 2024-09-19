@@ -1,6 +1,7 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page, Button } from "../../components/index.slint";
 import { Switch, ComboBox, ScrollView } from "std-widgets.slint";
+import { MessageManager, MessageType } from "../../logic/index.slint";
 
 export global SettingPageBridge {
     in-out property <int> language-index: 0;
@@ -8,25 +9,24 @@ export global SettingPageBridge {
     in-out property <bool> notice-begin: false;
     in-out property <bool> notice-end: false;
     in-out property <bool> minimal-to-tray: false;
-
+    in property <string> cache-size: "0B";
     public function change-theme() {
         if (theme-index == 1) {
             Token.set-display-mode(ColorScheme.light);
         } else if (theme-index == 2) {
             Token.set-display-mode(ColorScheme.dark);
-        } else {
-            Token.set-display-mode(ColorScheme.unknown);
         }
     }
-
     callback language-changed();
     callback theme-changed();
     callback notice-begin-changed();
     callback notice-end-changed();
     callback minimal-to-tray-changed();
+    callback clear-cache();
 }
 
-component SettingItem {
+component SettingItem inherits Rectangle {
+    height: 40px;
     in property <string> name;
     in property <bool> supported: true;
     HorizontalLayout {
@@ -51,26 +51,42 @@ component Divider inherits Rectangle {
 
 export component SettingPage inherits Page {
     ScrollView {
+        TouchArea {
+            pointer-event(e) => {
+                if (e.button == PointerEventButton.left) {
+                    theme-box.clear-focus();
+                    language-box.clear-focus();
+                }
+            }
+        }
+
         VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
-            spacing: 15px;
+            spacing: 10px;
             Text {
                 text: "设置";
                 font-size: Token.font.display.medium.size;
                 font-weight: Token.font.display.medium.weight;
             }
 
+            Rectangle {
+                height: 5px;
+            }
+
             Divider { }
 
             SettingItem {
                 name: "主题";
-                ComboBox {
+                theme-box := ComboBox {
                     width: 200px;
                     model: ["跟随系统", "浅色", "深色"];
                     current-index <=> SettingPageBridge.theme-index;
                     selected => {
                         SettingPageBridge.change-theme();
+                        if (SettingPageBridge.theme-index == 0) {
+                            MessageManager.show-message("下次启动时生效", MessageType.info);
+                        }
                         SettingPageBridge.theme-changed();
                     }
                 }
@@ -79,7 +95,7 @@ export component SettingPage inherits Page {
             SettingItem {
                 name: "语言";
                 supported: false;
-                ComboBox {
+                language-box := ComboBox {
                     width: 200px;
                     enabled: false;
                     model: ["简体中文", "繁體中文", "English"];
@@ -93,10 +109,8 @@ export component SettingPage inherits Page {
             Divider { }
 
             SettingItem {
-                supported: false;
                 name: "活动开始前提醒";
                 Switch {
-                    enabled: false;
                     checked <=> SettingPageBridge.notice-begin;
                     toggled => {
                         SettingPageBridge.notice-begin-changed();
@@ -105,10 +119,8 @@ export component SettingPage inherits Page {
             }
 
             SettingItem {
-                supported: false;
                 name: "活动结束后提醒反馈";
                 Switch {
-                    enabled: false;
                     checked <=> SettingPageBridge.notice-end;
                     toggled => {
                         SettingPageBridge.notice-end-changed();
@@ -117,13 +129,24 @@ export component SettingPage inherits Page {
             }
 
             SettingItem {
-                supported: false;
                 name: "关闭窗口后最小化到托盘";
                 Switch {
-                    enabled: false;
                     checked <=> SettingPageBridge.minimal-to-tray;
                     toggled => {
                         SettingPageBridge.minimal-to-tray-changed();
+                    }
+                }
+            }
+
+            Divider { }
+
+            SettingItem {
+                name: "磁盘缓存：" + SettingPageBridge.cache-size;
+                Button {
+                    content: "清除缓存";
+                    clicked => {
+                        SettingPageBridge.clear-cache();
+                        MessageManager.show-message("缓存已清除", MessageType.success);
                     }
                 }
             }

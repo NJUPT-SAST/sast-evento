@@ -13,10 +13,10 @@ ViewManager::ViewManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& 
     , bridge(bridge) {
     auto& self = *this;
 
-    self->on_navigate_to([this](ViewName newView) { return navigateTo(newView); });
-    self->on_clean_navigate_to([this](ViewName newView) { return cleanNavigateTo(newView); });
-    self->on_replace_navigate_to([this](ViewName newView) { return replaceNavigateTo(newView); });
-    self->on_prior_view([this]() { return priorView(); });
+    self->on_navigate_to([this](ViewName newView) { navigateTo(newView); });
+    self->on_clean_navigate_to([this](ViewName newView) { cleanNavigateTo(newView); });
+    self->on_replace_navigate_to([this](ViewName newView) { replaceNavigateTo(newView); });
+    self->on_prior_view([this]() { priorView(); });
 
     self->on_is_show([&self](ViewName target) {
         // used to trigger re-calculate
@@ -33,7 +33,7 @@ void ViewManager::initStack(ViewName newView, std::any data) {
     static bool scheduleSync = false;
     if (!scheduleSync) {
         scheduleSync = true;
-        slint::invoke_from_event_loop([this] { return syncViewVisibility(); });
+        slint::invoke_from_event_loop([this] { syncViewVisibility(); });
     }
 }
 

@@ -15,25 +15,32 @@ export component Card inherits Rectangle {
     clip: true;
     background: surface;
     border-radius: 12px;
+    drop-shadow-blur: 4px;
+
+    animate drop-shadow-color, drop-shadow-offset-y { duration: 200ms; }
 
     states [
         ripple when touch-area.pressed: {
             drop-shadow-color: Token.color.surface;
-            drop-shadow-blur: 0px;
             drop-shadow-offset-y: 0px;
             animate-circle.radius: root.width * 1.1;
+            animate-circle.opacity: 1;
             in {
-                animate drop-shadow-color, drop-shadow-blur, drop-shadow-offset-y, animate-circle.radius { duration: 200ms; }
+                animate animate-circle.radius {
+                    duration: 1s;
+                    easing: ease-in;
+                }
+                animate animate-circle.opacity { duration: 100ms; }
             }
             out {
-                animate drop-shadow-color, drop-shadow-blur, drop-shadow-offset-y, animate-circle.radius { duration: 200ms; }
+                animate animate-circle.radius, animate-circle.opacity { duration: 200ms; }
             }
         }
         origin when !touch-area.pressed: {
             drop-shadow-color: touch-area.has-hover ? #070707ce : Token.color.surface;
-            drop-shadow-blur: touch-area.has-hover ? 4px : 0px;
             drop-shadow-offset-y: touch-area.has-hover ? 2px : 0px;
-            animate-circle.radius: 0px;
+            animate-circle.radius: 6px;
+            animate-circle.opacity: 0;
         }
     ]
 
@@ -51,7 +58,6 @@ export component Card inherits Rectangle {
         in-out property <length> center-y;
         center-x: touch-area.pressed-x;
         center-y: touch-area.pressed-y;
-        radius: 0px;
         x: center-x - radius;
         y: center-y - radius;
         width: radius * 2;

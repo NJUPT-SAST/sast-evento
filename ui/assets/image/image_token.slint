@@ -1,5 +1,5 @@
 import { Palette, Button } from "std-widgets.slint";
-import { EventoStyleToken } from "../../logic/index.slint";
+import { MdStyleToken } from "../../logic/md_style_token.slint";
 
 struct ImgPair {
     light: image,
@@ -31,24 +31,13 @@ struct EventoIconCollection {
     tree-list: image,
     account-box: image,
     pentagon: image,
+    check-circle: image,
 }
 
 struct EventoDisplayCollection {
     evento: image,
     evento-bg: image,
-    avatar: [image],
-    event: {
-        default: [image],
-        union: [image],
-        cpp: [image],
-        csharp: [image],
-        frontend: [image],
-        backend: [image],
-        game: [image],
-        lambda: [image],
-        python: [image],
-    },
-    no_image: image,
+    avatar: image,
 }
 
 struct EventoImageCollection {
@@ -62,7 +51,7 @@ export global EventoImageToken {
         display: display,
     };
     pure function switcher(img: ImgPair) -> image {
-        return EventoStyleToken.is-darkmode ? img.dark : img.light;
+        return MdStyleToken.is-darkmode ? img.dark : img.light;
     }
     //
     // icon used as small image in button, navbar and so on
@@ -89,13 +78,14 @@ export global EventoImageToken {
         schedule: @image-url("./icon/schedule.svg"),
         setting: @image-url("./icon/setting.svg"),
         star-empty: @image-url("./icon/star-empty.svg"),
-        star-full: @image-url("./icon/star-fill.svg"),
+        star-full: @image-url("./icon/star-full.svg"),
         tag: @image-url("./icon/tag.svg"),
         time: @image-url("./icon/time.svg"),
         topic: @image-url("./icon/topic.svg"),
         tree-list: @image-url("./icon/tree-list.svg"),
         account-box: @image-url("./icon/account-box-outline.svg"),
         pentagon: @image-url("./icon/pentagon.svg"),
+        check-circle: @image-url("./icon/check-circle.svg"),
     };
     // display used as images bigger than icon
     // most display image won't change according to darkmode switch
@@ -105,76 +95,6 @@ export global EventoImageToken {
             dark: @image-url("./display/evento/evento_dark.png"),
         }),
         evento-bg: @image-url("./display/evento/evento_bg.png"),
-        avatar: [
-            @image-url("./display/avatar/avatar_1.svg"),
-            @image-url("./display/avatar/avatar_2.svg"),
-            @image-url("./display/avatar/avatar_3.svg"),
-            @image-url("./display/avatar/avatar_4.svg"),
-            @image-url("./display/avatar/avatar_5.svg"),
-            @image-url("./display/avatar/avatar_6.svg"),
-            @image-url("./display/avatar/avatar_7.svg"),
-            @image-url("./display/avatar/avatar_8.svg"),
-            @image-url("./display/avatar/avatar_9.svg"),
-            @image-url("./display/avatar/avatar_10.svg"),
-            @image-url("./display/avatar/avatar_11.svg"),
-            @image-url("./display/avatar/avatar_12.svg"),
-        ],
-        event: {
-            default: [
-                @image-url("./display/event/default_1.png"),
-                @image-url("./display/event/default_2.png"),
-                @image-url("./display/event/default_3.png"),
-            ],
-            union: [
-                @image-url("./display/event/union_1.png"),
-                @image-url("./display/event/union_2.png"),
-            ],
-            cpp: [
-                @image-url("./display/event/cpp_1.svg"),
-                @image-url("./display/event/cpp_2.png"),
-                @image-url("./display/event/cpp_3.png"),
-            ],
-            csharp: [
-                @image-url("./display/event/csharp_1.png"),
-            ],
-            frontend: [
-                @image-url("./display/event/frontend_1.png"),
-                @image-url("./display/event/frontend_2.png"),
-                @image-url("./display/event/frontend_3.png"),
-            ],
-            backend: [
-                @image-url("./display/event/backend_1.png"),
-            ],
-            game: [
-                @image-url("./display/event/game_1.svg"),
-                @image-url("./display/event/game_2.jpg"),
-                @image-url("./display/event/game_3.jpg"),
-            ],
-            lambda: [
-                @image-url("./display/event/lambda_1.png"),
-                @image-url("./display/event/lambda_2.png"),
-            ],
-            python: [
-                @image-url("./display/event/python_1.png"),
-            ],
-        },
-        no_image: @image-url("./display/no_image.png"),
+        avatar: @image-url("./display/avatar/avatar_1.svg"),
     };
-}
-
-// colorize animation example
-component Example {
-    property <bool> is;
-    Button {
-        y: - self.height;
-        clicked => {
-            is = !is;
-        }
-    }
-
-    Image {
-        source: EventoImageToken.image.icon.category;
-        colorize: is ? black : blue;
-        animate colorize { duration: 1s; }
-    }
 }

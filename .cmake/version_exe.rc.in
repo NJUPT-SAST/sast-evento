@@ -1,0 +1,34 @@
+1 VERSIONINFO
+ FILEVERSION ${PROJECT_VERSION}
+ PRODUCTVERSION ${PROJECT_VERSION}
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080404b0"
+        BEGIN
+            VALUE "CompanyName", "NJUPT - Students' Association for Science and Technology"
+            VALUE "FileDescription", "SAST Evento"
+            VALUE "FileVersion", "${PROJECT_VERSION}"
+            VALUE "InternalName", "${PROJECT_NAME}"
+            VALUE "LegalCopyright", "Copyright (C) 2024 NJUPT-SAST. All rights reserved."
+            VALUE "OriginalFilename", "${PROJECT_NAME}.exe"
+            VALUE "ProductName", "${PROJECT_NAME}"
+            VALUE "ProductVersion", "${PROJECT_VERSION}"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x804, 1200
+    END
+END
+
+1 ICON DISCARDABLE "ui/assets/image/icon/app.ico"

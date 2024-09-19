@@ -9,7 +9,6 @@ EVENTO_UI_START
 class DetailPage : public BasicView, private GlobalAgent<DetailPageBridge> {
 public:
     DetailPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
-    DetailPage(DetailPage&) = delete;
 
 private:
     void onCreate() override;

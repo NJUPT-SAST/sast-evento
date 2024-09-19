@@ -1,31 +1,369 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page, Empty, ContentDialog } from "../../components/index.slint";
+import { AboutSlint, ScrollView } from "std-widgets.slint";
+import { MessageManager, MessageType } from "../../logic/index.slint";
+import { Button, ButtonType, LoadingAnimation, StyledText } from "../../components/index.slint";
 
-export global AboutPageBridge { }
+export enum Status {
+    Normal,
+    Loading,
+    Error,
+}
 
-export component AboutPage inherits Page {
-    // TODO: implement About
-    // optional
-    background := Empty { }
+export struct ContributorStruct {
+    avatar: image,
+    html-url: string,
+}
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
+export global AboutPageBridge {
+    in property <string> version:"v0.0.0-00000000";
+    in property <string> update-log: "";
+    in property <Status> contributors-status: Status.Normal;
+    in property <Status> check-update-status: Status.Normal;
+    in property <[ContributorStruct]> contributors: [];
+    in-out property <bool> show-popup: false;
+    callback check-update();
+    callback load-contributors();
+    callback open-web(string);
+}
+
+component Dependence inherits Rectangle {
+    in property <string> content;
+    height: 18px;
+    width: text.preferred-width + 9px;
+    border-width: 1px;
+    border-color: Token.color.outline;
+    border-radius: 9px;
+    background: transparent;
+    text := Text {
+        vertical-alignment: center;
+        horizontal-alignment: center;
+        text: parent.content;
+        font-size: Token.font.label.large.size;
+        font-weight: Token.font.label.large.weight;
+        color: Token.color.on-surface;
+    }
+}
+
+component Divider inherits Rectangle {
+    background: Token.color.outline-variant;
+    width: 90%;
+    height: 1px;
+}
+
+component Avatar inherits Rectangle {
+    in property <length> avatar-size: 40px;
+    in property <image> avatar;
+    in property <ImageFit> image-fit: ImageFit.contain;
+    callback clicked();
+    width: avatar-size;
+    height: avatar-size;
+    border-radius: self.width / 2;
+    clip: true;
+    Image {
+        height: root.height;
+        width: root.width;
+        source: avatar;
+        image-fit: root.image-fit;
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
+    TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            parent.clicked();
+        }
+    }
+}
+
+component Link inherits StyledText {
+    callback clicked <=> area.clicked;
+    area := TouchArea {
+        mouse-cursor: pointer;
+    }
+
+    on-surface: area.has-hover ? Token.color.primary : Token.color.on-surface;
+    is-underline: area.has-hover ? true : false;
+}
+
+export component AboutPage inherits Page {
+    popup := ContentDialog {
+        z: 999;
+        width: root.width;
+        height: root.height;
+        dialog-title: "更新日志";
+        confirm-btn-text: "更新";
+        cancel-btn-text: "取消";
+        is-show <=> AboutPageBridge.show-popup;
+        ScrollView {
+            VerticalLayout {
+                text := Text {
+                    width: 100%;
+                    text: AboutPageBridge.update-log;
+                    font-size: Token.font.body.large.size;
+                    font-weight: Token.font.body.large.weight;
+                    color: Token.color.on-surface;
+                    wrap: TextWrap.char-wrap;
+                }
+            }
+        }
+
+        confirm => {
+            AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/releases/latest");
+            popup.close();
+        }
+        cancel => {
+            popup.close();
+        }
+    }
+
+    ScrollView {
+        verticallayout := VerticalLayout {
+            alignment: LayoutAlignment.start;
+            padding: 50px;
+            spacing: 20px;
             Text {
-                text: "关于页面\n  ";
+                text: "关于";
+                font-size: Token.font.display.medium.size;
+                font-weight: Token.font.display.medium.weight;
+            }
+
+            HorizontalLayout {
+                alignment: center;
+                Image {
+                    width: 220px;
+                    image-fit: contain;
+                    source: Token.image.display.evento;
+                }
+
+                AboutSlint {
+                    height: 100px;
+                }
+            }
+
+            Rectangle {
+                border-radius: 8px;
+                border-width: 1px;
+                border-color: Token.color.outline;
+                VerticalLayout {
+                    padding: 20px;
+                    spacing: 12px;
+                    HorizontalLayout {
+                        alignment: space-between;
+                        Text {
+                            text: "版本信息 " + AboutPageBridge.version;
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+
+                        Button {
+                            have-icon: AboutPageBridge.check-update-status == Status.Loading;
+                            type: ButtonType.text;
+                            content: "检查更新";
+                            LoadingAnimation {
+                                color: parent.on-surface;
+                            }
+
+                            clicked => {
+                                AboutPageBridge.check-update();
+                            }
+                        }
+                    }
+
+                    Divider { }
+
+                    HorizontalLayout {
+                        alignment: space-between;
+                        Text {
+                            text: "漏洞报告 / 功能建议";
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+
+                        Button {
+                            type: ButtonType.text;
+                            content: "GitHub Issues";
+                            clicked => {
+                                AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/issues")
+                            }
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                border-radius: 8px;
+                border-width: 1px;
+                border-color: Token.color.outline;
+                VerticalLayout {
+                    padding: 20px;
+                    spacing: 15px;
+                    HorizontalLayout {
+                        alignment: space-between;
+                        Text {
+                            text: "网页端";
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+
+                        Link {
+                            text: "https://evento.sast.fun";
+                            font: Token.font.body.large;
+                            clicked => {
+                                AboutPageBridge.open-web("https://evento.sast.fun");
+                            }
+                        }
+                    }
+
+                    Divider { }
+
+                    HorizontalLayout {
+                        alignment: space-between;
+                        Text {
+                            text: "GitHub 仓库";
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+
+                        Link {
+                            text: "https://github.com/NJUPT-SAST/sast-evento";
+                            font: Token.font.body.large;
+                            clicked => {
+                                AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento");
+                            }
+                        }
+                    }
+
+                    Divider { }
+
+                    VerticalLayout {
+                        spacing: 10px;
+                        Text {
+                            text: "项目依赖";
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+
+                        Rectangle {
+                            clip: true;
+                            ScrollView {
+                                HorizontalLayout {
+                                    spacing: 12px;
+                                    Dependence {
+                                        content: "Boost.Beast";
+                                    }
+
+                                    Dependence {
+                                        content: "Boost.Url";
+                                    }
+
+                                    Dependence {
+                                        content: "Boost.Process";
+                                    }
+
+                                    Dependence {
+                                        content: "OpenSSL";
+                                    }
+
+                                    Dependence {
+                                        content: "Slint";
+                                    }
+
+                                    Dependence {
+                                        content: "Qt6";
+                                    }
+
+                                    Dependence {
+                                        content: "toml++";
+                                    }
+
+                                    Dependence {
+                                        content: "nlohmann-json";
+                                    }
+
+                                    Dependence {
+                                        content: "spdlog";
+                                    }
+
+                                    Dependence {
+                                        content: "keychain";
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Divider { }
+
+                    HorizontalLayout {
+                        alignment: space-between;
+                        Text {
+                            text: "开源协议";
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+
+                        Text {
+                            text: "MIT license Copyright (c) 2024 NJUPT-SAST";
+                            font-size: Token.font.body.large.size;
+                            font-weight: Token.font.body.large.weight;
+                            color: Token.color.on-surface;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                border-radius: 8px;
+                border-width: 1px;
+                border-color: Token.color.outline;
+                VerticalLayout {
+                    padding: 20px;
+                    spacing: 15px;
+                    Text {
+                        text: "贡献者";
+                        font-size: Token.font.body.large.size;
+                        font-weight: Token.font.body.large.weight;
+                        color: Token.color.on-surface;
+                        vertical-alignment: center;
+                    }
+
+                    if AboutPageBridge.contributors-status == Status.Error: Button {
+                        type: ButtonType.text;
+                        content: "重新加载";
+                        clicked => {
+                            AboutPageBridge.load-contributors();
+                        }
+                    }
+                    if AboutPageBridge.contributors-status == Status.Loading: LoadingAnimation {
+                        color: Token.color.on-surface;
+                        height: 40px;
+                    }
+                    if AboutPageBridge.contributors-status == Status.Normal: ScrollView {
+                        height: 60px;
+                        HorizontalLayout {
+                            spacing: 15px;
+                            for contributor in AboutPageBridge.contributors: Avatar {
+                                avatar: contributor.avatar;
+                                clicked => {
+                                    AboutPageBridge.open-web(contributor.html-url);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }

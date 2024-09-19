@@ -24,8 +24,8 @@ export component EventCard inherits Card {
             abbr-text := Text {
                 color: root.inverse-on-surface;
                 text: event.summary-abbr;
-                font-size: Token.font.label.small.size;
-                font-weight: Token.font.label.small.weight;
+                font-size: Token.font.label.large.size;
+                font-weight: Token.font.label.large.weight;
             }
         }
 
@@ -58,8 +58,8 @@ export component EventCard inherits Card {
             color: root.inverse-surface;
             text: event.summary;
             wrap: word-wrap;
-            font-size: Token.font.body.large.size;
-            font-weight: Token.font.headline.large.weight;
+            font-size: Token.font.title.large.size;
+            font-weight: Token.font.title.large.weight;
         }
     }
 
@@ -79,7 +79,7 @@ export component EventCard inherits Card {
                 }
 
                 time-text := Text {
-                    font-size: Token.font.label.small.size;
+                    font-size: Token.font.label.large.size;
                     text: event.time;
                     width: parent.width - time-icon.width - parent.spacing;
                     overflow: elide;
@@ -99,7 +99,7 @@ export component EventCard inherits Card {
                 }
 
                 location-text := Text {
-                    font-size: Token.font.label.small.size;
+                    font-size: Token.font.label.large.size;
                     text: event.location;
                     width: parent.width - location-icon.width - parent.spacing;
                     overflow: elide;
@@ -119,7 +119,7 @@ export component EventCard inherits Card {
                 }
 
                 description-text := Text {
-                    font-size: Token.font.label.small.size;
+                    font-size: Token.font.label.large.size;
                     text: event.description;
                     width: parent.width - description-icon.width - parent.spacing;
                     overflow: elide;
@@ -129,16 +129,13 @@ export component EventCard inherits Card {
     }
 }
 
-export component EventCardGroup inherits Rectangle {
+export component EventCardGroup inherits VerticalLayout {
     in-out property <[EventStruct]> model;
     in-out property <length> horizontal-spacing: 20px;
     in-out property <length> vertical-spacing: 20px;
-    in-out property <length> item-width: 303px;
     out property <length> item-height: 188px;
-    property <int> row-count: floor(model.length / 3) * 3 == model.length ? model.length / 3 : floor(model.length / 3) + 1;
+    out property <int> row-count: floor(model.length / 3) * 3 == model.length ? model.length / 3 : floor(model.length / 3) + 1;
     callback item-clicked(EventStruct);
-    width: item-width * 3 + horizontal-spacing * 4;
-    height: item-height * 3 + vertical-spacing * (row-count + 1);
 
     function row-indexes(start-idx: int) -> [int] {
         if start-idx + 1 < root.model.length {
@@ -151,24 +148,19 @@ export component EventCardGroup inherits Rectangle {
         return [start-idx];
     }
 
-    VerticalLayout {
-        width: 100%;
-        height: 100%;
-        alignment: center;
-        spacing: root.vertical-spacing;
-        for row-idx in row-count: HorizontalLayout {
-            property <int> start-idx: row-idx * 3;
-            width: 100%;
-            height: root.item-height;
-            alignment: start;
-            padding: (self.width - self.spacing * 2 - root.item-width * 3) / 2;
-            spacing: root.horizontal-spacing;
-            for idx in root.row-indexes(start-idx): EventCard {
-                event: root.model[idx];
-                width: root.item-width;
-                clicked => {
-                    root.item-clicked(self.event);
-                }
+    alignment: start;
+    padding: 5px;
+    spacing: vertical-spacing;
+    for row-idx in row-count: HorizontalLayout {
+        property <int> start-idx: row-idx * 3;
+        height: root.item-height;
+        spacing: horizontal-spacing;
+        alignment: space-around;
+        for idx in root.row-indexes(start-idx): EventCard {
+            event: root.model[idx];
+            width: parent.width / 3 - horizontal-spacing * 2 / 3;
+            clicked => {
+                root.item-clicked(self.event);
             }
         }
     }
