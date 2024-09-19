@@ -1,10 +1,11 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page, Button } from "../../components/index.slint";
 import { SCard,STimeLine,STimeLineItem } from "../../modules/surrealism-ui/index.slint";
 import {SStar,SButton} from "../../modules/surrealism-ui/index.slint";
 import { Card } from "../../components/card.slint";
 import { SPagination } from "../../modules/surrealism-ui/index.slint";
 import {Themes,UseIcons} from "../../modules/surrealism-ui/use/index.slint";
+import { ScrollView, LineEdit } from "std-widgets.slint";
 export global HistoryPageBridge { }
 
 component CommentItem {
@@ -21,22 +22,9 @@ component CommentItem {
 
         HorizontalLayout {
             spacing: 8px;
-            Rectangle {
-                width: 450px;
-                height: 75px;
-                border-radius: 10px;
-                border-color: grey;
-                border-width: 1px;
-                TextInput {
-                    text <=> context;
-                    font-size: 16px;
-                    padding: 8px;
-                }
-            }
+            LineEdit { }
 
-            SButton {
-                height: 75px;
-                width: 75px;
+            Button {
                 text: "评价";
                 font-size: Token.font.label.medium.size;
                 font-weight: Token.font.label.medium.weight;
@@ -49,113 +37,141 @@ component CommentItem {
 }
 
 component DividerVirtical inherits Rectangle {
-    width: 1px;
-    height: 100px;
-    background: Token.color.outline-variant;
+    width: 8px;
+    height: 100%;
+    Rectangle {
+        x: 2px;
+        width: 4px;
+        height: 90%;
+        border-radius: 2px;
+        background: Token.color.primary-container;
+        Rectangle {
+            y: parent.height / 2 - 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: Token.color.on-primary-container;
+        }
+    }
+}
+
+component EventCard inherits Rectangle {
+    height: 80px;
+    HorizontalLayout {
+        spacing: 5px;
+        Rectangle {
+            width: 20%;
+            Text { }
+        }
+
+        DividerVirtical { }
+
+        Card {
+            height: 100%;
+        }
+    }
 }
 
 export component HistoryPage inherits Page {
-    // TODO: implement History
-    // optional
-    //background := Empty { }
+    ScrollView {
+        VerticalLayout {
+            padding: 50px;
+            spacing: 15px;
+            Text {
+                text: "历史活动";
+                font-size: Token.font.headline.medium.size;
+                font-weight: Token.font.headline.medium.weight;
+                color: Token.color.outline;
+            }
 
-    body := VerticalLayout {
-        padding: 16px;
-        //padding-top: 30px;
-        spacing: 8px;
-        Text {
-            text: "历史活动";
-            font-size: Token.font.headline.medium.size;
-            font-weight: Token.font.headline.medium.weight;
-        }
-
-        STimeLineItem {
-            // width: parent.width;
+            STimeLineItem {
+                // width: parent.width;
             height: root.height / 4;
-            date: "2024.7.24 101中区 15:30-17:30";
-            Card {
-                height: parent.center-height();
-                width: parent.center-width();
-                HorizontalLayout {
-                    padding: 8px;
-                    spacing: 8px;
-                    Rectangle {
-                        width: 100px;
-                        height: 100px;
-                        border-radius: 5px;
-                        background: Token.color.surface-container;
-                    }
-
-                    VerticalLayout {
-                        width: 680px;
+                date: "2024.7.24 101中区 15:30-17:30";
+                Card {
+                    height: parent.center-height();
+                    width: parent.center-width();
+                    HorizontalLayout {
                         padding: 8px;
-                        Text {
-                            horizontal-alignment: TextHorizontalAlignment.left;
-                            vertical-alignment: TextVerticalAlignment.top;
-                            text: "活动名称：软件研发部C++组授课";
-                            overflow: elide;
-                            font-size: Token.font.headline.small.size;
-                            font-weight: Token.font.headline.small.weight;
-                            color: Token.color.on-surface;
+                        spacing: 8px;
+                        Rectangle {
+                            width: 100px;
+                            height: 100px;
+                            border-radius: 5px;
+                            background: Token.color.surface-container;
                         }
 
-                        Text {
-                            horizontal-alignment: TextHorizontalAlignment.left;
-                            text: "活动介绍";
-                            overflow: elide;
-                            font-size: Token.font.label.medium.size;
-                            font-weight: Token.font.label.medium.weight;
-                            color: Token.color.on-surface;
+                        VerticalLayout {
+                            width: 680px;
+                            padding: 8px;
+                            Text {
+                                horizontal-alignment: TextHorizontalAlignment.left;
+                                vertical-alignment: TextVerticalAlignment.top;
+                                text: "活动名称：软件研发部C++组授课";
+                                overflow: elide;
+                                font-size: Token.font.headline.small.size;
+                                font-weight: Token.font.headline.small.weight;
+                                color: Token.color.on-surface;
+                            }
+
+                            Text {
+                                horizontal-alignment: TextHorizontalAlignment.left;
+                                text: "活动介绍";
+                                overflow: elide;
+                                font-size: Token.font.label.medium.size;
+                                font-weight: Token.font.label.medium.weight;
+                                color: Token.color.on-surface;
+                            }
                         }
+
+                        DividerVirtical { }
+
+                        CommentItem { }
                     }
+                }
 
-                    DividerVirtical { }
-
-                    CommentItem { }
+                clicked(is_active) => {
+                    debug(is-active);
+                    self.active = !self.active;
                 }
             }
 
-            clicked(is_active) => {
-                debug(is-active);
-                self.active = !self.active;
-            }
-        }
-
-        STimeLineItem {
-            // width: parent.width;
+            STimeLineItem {
+                // width: parent.width;
             height: root.height / 4;
-            date: "2024.7.24 101中区 15:30-17:30";
-            Card {
-                height: parent.center-height();
-                width: parent.center-width();
+                date: "2024.7.24 101中区 15:30-17:30";
+                Card {
+                    height: parent.center-height();
+                    width: parent.center-width();
+                }
+
+                clicked(is_active) => {
+                    debug(is-active);
+                    self.active = !self.active;
+                }
             }
 
-            clicked(is_active) => {
-                debug(is-active);
-                self.active = !self.active;
-            }
-        }
-
-        STimeLineItem {
-            // width: parent.width;
+            STimeLineItem {
+                // width: parent.width;
             height: root.height / 4;
-            date: "2024.7.24 101中区 15:30-17:30";
-            Card {
-                height: parent.center-height();
-                width: parent.center-width();
+                date: "2024.7.24 101中区 15:30-17:30";
+                Card {
+                    height: parent.center-height();
+                    width: parent.center-width();
+                }
+
+                clicked(is_active) => {
+                    debug(is-active);
+                    self.active = !self.active;
+                }
             }
 
-            clicked(is_active) => {
-                debug(is-active);
-                self.active = !self.active;
-            }
-        }
-
-        Empty {
-            a := SPagination {
-                page-size: 10;
-                total: 100;
-                visible-range: 6;
+            Empty {
+                a := SPagination {
+                    page-size: 10;
+                    total: 100;
+                    visible-range: 6;
+                }
             }
         }
     }
