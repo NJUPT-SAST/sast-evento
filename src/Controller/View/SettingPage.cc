@@ -6,19 +6,7 @@ EVENTO_UI_START
 
 SettingPage::SettingPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge)
     : BasicView(bridge)
-    , GlobalAgent(uiEntry) {
-    auto& self = *this;
-
-    const auto [languageIdx, minimalToTray, noticeBegin, noticeEnd, themeIdx] = evento::settings;
-
-    self->set_language_index(languageIdx);
-    self->set_minimal_to_tray(minimalToTray);
-    self->set_notice_begin(noticeBegin);
-    self->set_notice_end(noticeEnd);
-    self->set_theme_index(themeIdx);
-
-    self->invoke_change_theme();
-}
+    , GlobalAgent(uiEntry) {}
 
 void SettingPage::onCreate() {
     auto& self = *this;

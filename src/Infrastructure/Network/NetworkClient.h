@@ -112,10 +112,6 @@ public:
 
     std::string getTotalCacheSizeFormatString();
 
-    void clearCache();
-
-    std::string getTotalCacheSizeFormatString();
-
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists
     std::optional<std::string> tokenBytes;
