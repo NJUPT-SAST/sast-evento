@@ -9,8 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6Widgets CONFIG REQUIRED)
-find_package(Qt6Network CONFIG REQUIRED)
+find_package(Qt6 REQUIRED Widgets Network)
 
 set(PROJECT_SOURCES
     main.cc

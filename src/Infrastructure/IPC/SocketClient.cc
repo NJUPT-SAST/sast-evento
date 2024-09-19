@@ -39,7 +39,7 @@ void SocketClient::startTray() {
 #ifdef EVENTO_DEBUG
     trayPath /= "../Tray/Debug";
 #endif
-#ifdef _WIN32
+#ifdef PLATFORM_WINDOWS
     trayPath /= "sast-evento-tray.exe";
 #else
     trayPath /= "sast-evento-tray";

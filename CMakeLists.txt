@@ -20,10 +20,6 @@ project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
 
-if (MSVC)
-  set(SLINT_BACKEND "winit" CACHE STRING "Slint backend" FORCE)
-endif()
-
 if (WIN32)
   # Target Windows 7
   add_definitions(-D_WIN32_WINNT=0x0601)
