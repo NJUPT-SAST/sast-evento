@@ -1,7 +1,37 @@
 import { Token } from "../../global.slint";
+import { ScrollView } from "std-widgets.slint";
 import { Page, Empty } from "../../components/index.slint";
+import { STimeLine, STimeLineItem } from "../../modules/surrealism-ui/src/timeline/index.slint";
+import { SCard } from "../../modules/surrealism-ui/src/card/index.slint";
+import {SLink} from "../../modules/surrealism-ui/src/link/index.slint";
+import { SDivider } from "../../modules/surrealism-ui/src/divider/index.slint";
+import { SText } from "../../modules/surrealism-ui/src/text/index.slint";
+import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
+import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
+import { SResult} from "../../modules/surrealism-ui/src/result/index.slint";
+import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
+import { ViewManager } from "../../logic/index.slint";
+import { LineEdit, VerticalBox } from "std-widgets.slint";
+import { EventCard, EventCardGroup} from "../../components/index.slint";
+import { EventStruct, EventState } from "../../components/index.slint";
 
-export global MyEventPageBridge { }
+export global MyEventPageBridge {
+//
+    in-out property <bool> is_click : false;
+    in-out property <[int]> id;
+
+    in-out property <[EventStruct]> event;
+
+    pure callback get-code(string)->bool;
+    pure callback show-mess(int,string)->string;
+//
+    pure callback return-array-sub()->[int];
+    pure callback return-num-sub()->int;
+    pure callback return-array-start()->[int];
+    pure callback return-num-end()->int;
+    
+
+}
 
 export component MyEventPage inherits Page {
     // TODO: implement MyEvent
@@ -30,3 +60,301 @@ export component MyEventPage inherits Page {
         }
     }
 }
+// export component result-success inherits Window {
+//     property <bool> is_show : false;
+//     visible: false;
+//     x: 500px;
+//     y: 200px;
+//     width: 200px;
+//     height: 300px;
+//     SResult {
+//         text: "签到成功";
+//         result-type: Success;
+//         btn-text: "点击返回";
+//         clicked => {parent.close()}
+//     }
+
+//     public function open() {
+//         self.is_show = true;
+//     }
+//     public function close() {
+//         self.is_show = false;
+//     }
+// }
+
+// export component result-fail inherits Window {
+//     property <bool> is_show : false;
+//     visible: false;
+//     x: 500px;
+//     y: 200px;
+//     width: 200px;
+//     height: 300px;
+//     SResult {
+//         text: "抱歉,密码错误"+"\n"+"签到失败";
+//         result-type: Error;
+//         btn-text: "点击返回";
+//         clicked => {parent.close()}
+//     }
+
+//     public function open() {
+//         self.is_show = true;
+//     }
+//     public function close() {
+//         self.is_show = false;
+//     }
+// }
+
+// export component CodeGet inherits Window {
+//     width: 200px;
+//     height: 90px;
+//     property <bool> is_show : false;
+//     property <bool> is-check-in : false;
+//     visible: is_show;
+//     code-txt := LineEdit {
+//         width: 150px;
+//         height: 40px;
+//         placeholder-text: "Enter code here";
+//         font-size: 12px;
+//     }
+//     SButton{
+//         x: (parent.x)+40px;
+//         y: (parent.y)+65px;
+//         width: 30px;
+//         height: 20px;
+//         text: "";
+//         background: Token.color.surface;
+//         border-color: Token.color.primary-container;
+//         Text {
+//             text: "确认";
+//             font-size: 10px;
+//             color: Token.color.on-surface;
+//         }
+//         clicked => {parent.close();parent.judge(code-txt.text);}
+//     }
+//     SButton{
+//         x: (parent.x)+75px;
+//         y: (parent.y)+65px;
+//         width: 30px;
+//         height: 20px;
+//         text: "";
+//         background: Token.color.surface;
+//         border-color: Token.color.primary-container;
+//         Text {
+//             text: "取消";
+//             font-size: 10px;
+//             color: Token.color.on-surface;
+//         }
+//         clicked => {parent.close();code-txt.text="";}
+//     }
+//     success := result-success{}
+//     fail := result-fail{}
+//     public function open() {
+//         self.is_show = true;
+//     }
+//     public function close() {
+//         self.is_show = false;
+//     }
+//     //检查code
+//     public function judge(code:string) {
+//         is-check-in = MyEventPageBridge.get-code(code-txt.text);
+//         if(is-check-in){
+//             success.open();
+//         }else{
+//             fail.open();
+//         }
+//     }
+// }
+// //查看更多
+// export component ForMore inherits SLink {
+//     theme: Dark;
+//     text: "查看更多";
+//     font-size: 20px;
+//     clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
+// }
+
+// // 签到按钮
+// component SignButton inherits SButton{
+//     in-out property <int> s-id : 0;
+//     width: 40px;
+//     height: 20px;
+//     background: Token.color.surface;
+//     border-color: Token.color.outline;
+//     font-color: Token.color.on-surface;
+//     text: "签到";
+//     property <bool> active : true;
+//     clicked => {active = !active}
+//     states [
+//         active when  !active : {
+//             text : "取消";
+//         }
+//         inactive when active: {
+//             text : "签到";
+//         } 
+//     ]
+// }
+// // 评价按钮
+// component ReviewButton inherits SButton {
+//     width: 40px;
+//     height: 20px;
+//     property <string> txt : "评价";
+//     text: txt;
+//     background: Token.color.surface;
+//     border-color: Token.color.outline;
+//     font-color: Token.color.on-surface;
+//     clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
+// }
+// export component SignCard{
+//     get := CodeGet{ 
+//         x: (parent.x)+80px;
+//     }
+//     SignButton {
+//         x: (parent.width)*0.75 + parent.x;
+//         clicked => {
+//             get.open();
+//         }
+//     }
+// }
+
+// export component ReviewCard{
+//     ReviewButton {
+//         x: parent.x+(parent.width)*0.75;
+//     }
+// }
+
+// component MyEventCard inherits EventCard {
+//     in-out property <int> count: -1;
+// }
+// export component MyEventPage inherits Page {
+
+//     // ScrollView {
+//         background := Empty { }
+
+//         layout := Empty{}
+
+//         body := Empty {
+//             x: 0;
+//             y: 0;
+//             width: 100%;
+//             height: 100%;
+//                 //subscribe板块
+//                 sub := Empty {  
+//                     x: root.x;
+//                     y: root.y;
+//                     height: 100%;
+//                     width: 48%;
+//                     txt-s := SText {
+//                         x: parent.x;
+//                         y: parent.y;
+//                         text: "已报名:";
+//                         font-size: 25px;
+//                         font-weight: 30;
+//                         color: Token.color.on-surface;
+//                     }
+//                     for index in MyEventPageBridge.return-array-sub(): Rectangle {
+//                         MyEventCard {
+//                             count: MyEventPageBridge.get-num("subscribe");
+//                             width: sub.width;
+//                             height: 110px;
+//                             x: txt-s.x;
+//                             y: txt-s.y+35px+self.count*self.height*1.05;
+//                             event: {
+//                                 id: MyEventPageBridge.get-event-id(self.count,"subscribe"),
+//                                 summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","summary"),
+//                                 summary-abbr: "软",
+//                                 time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","time"),
+//                                 location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","location"),
+//                                 description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","description")
+//                             };
+//                             SignCard {}
+//                         }
+//                     }
+//                 }
+//                 //active板块
+//                 active := Empty{
+//                     x: root.x+sub.width*1.01;
+//                     y: root.y;
+//                     height: 50%;
+//                     width: 48%;
+//                     txt-a := SText{
+//                         x: parent.x;
+//                         y: parent.y;
+//                         text: "进行中:";
+//                         font-size: 25px;
+//                         font-weight: 30;
+//                         color: Token.color.on-surface;
+//                     }
+//                     for index in MyEventPageBridge.return-array-start(): Rectangle {
+//                         MyEventCard {
+//                             count: MyEventPageBridge.get-num("active");
+//                             width: active.width;
+//                             height: 110px;
+//                             x: txt-a.x;
+//                             y: txt-a.y+35px+self.count*self.height*1.05;
+//                             event: {
+//                                 id: MyEventPageBridge.get-event-id(self.count,"active"),
+//                                 summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","summary"),
+//                                 summary-abbr: "软",
+//                                 time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","time"),
+//                                 location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","location"),
+//                                 description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","description")
+//                             };
+//                         }
+//                     }
+//                 }
+//                 //end板块
+//                 end := Empty{
+//                     x: active.x;
+//                     y: active.y+active.height*1.01;
+//                     height: 24%;
+//                     width: 48%;
+//                     txt-e := SText{
+//                         x: parent.x;
+//                         y: parent.y;
+//                         text: "已结束:";
+//                         font-size: 25px;
+//                         font-weight: 30;
+//                         color: Token.color.on-surface;
+//                     }
+//                     link := ForMore {
+//                         x: txt-e.x;
+//                         y: txt-e.y;
+//                     }
+//                     MyEventCard {
+//                         count: 0; //本页面只展示一个活动
+//                         width: end.width;
+//                         height: 110px;
+//                         x: link.x;
+//                         y: link.y+30px;
+//                         event: {
+//                             id: MyEventPageBridge.get-event-id(self.count,"end"),
+//                             summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","summary"),
+//                             summary-abbr: "软",
+//                             time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","time"),
+//                             location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","location"),
+//                             description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","description")
+//                         };
+//                         ReviewCard {}
+//                     }
+//                 }
+//                 //cancel板块（只提供了标题）
+//                 cancel := Empty{
+//                     x: end.x;
+//                     y: end.y+end.height*1.01;
+//                     height: 24%;
+//                     width: 48%;
+//                     txt-c := SText{
+//                         x: parent.x;
+//                         y: parent.y;
+//                         text: "已取消:";
+//                         font-size: 25px;
+//                         font-weight: 30;
+//                         color: Token.color.on-surface;
+//                     }
+//                 }
+            
+//             placeholder := Rectangle {
+//                 border-width: 4px;
+//             }
+//         }
+//     //}
+// }
