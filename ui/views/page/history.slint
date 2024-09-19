@@ -6,12 +6,54 @@ import { Card } from "../../components/card.slint";
 import { SPagination } from "../../modules/surrealism-ui/index.slint";
 import {Themes,UseIcons} from "../../modules/surrealism-ui/use/index.slint";
 import { ScrollView, LineEdit } from "std-widgets.slint";
-export global HistoryPageBridge { }
+
+export struct HistroyEventStruct {
+    id: int,
+    date-time: string,
+    title: string,
+    description: string,
+}
+
+export global HistoryPageBridge {
+    in property <[HistroyEventStruct]> events:[
+        {
+            id:1,
+            date-time:"2024.7.24",
+            title: "软件研发部C++组授课", 
+            description:"软件研发部C++组授课",
+        },
+        {
+            id:1,
+            date-time:"2024.7.24",
+            title: "软件研发部C++组授课", 
+            description:"软件研发部C++组授课",
+        },
+        {
+            id:1,
+            date-time:"2024.7.24",
+            title: "软件研发部C++组授课", 
+            description:"软件研发部C++组授课",
+        },
+        {
+            id:1,
+            date-time:"2024.7.24",
+            title: "软件研发部C++组授课", 
+            description:"软件研发部C++组授课",
+        },
+        {
+            id:1,
+            date-time:"2024.7.24",
+            title: "软件研发部C++组授课", 
+            description:"软件研发部C++组授课",
+        },
+    ];
+}
 
 component CommentItem {
     property <string> context;
     property <bool> reviewed;
     property <bool> editing;
+    callback comment-clicked();
     VerticalLayout {
         spacing: 8px;
         SStar {
@@ -30,7 +72,7 @@ component CommentItem {
                 content: "评价";
                 type: ButtonType.filled-tonal;
                 clicked => {
-                    // TODO: implement review
+                    comment-clicked();
                 }
             }
         }
@@ -39,7 +81,6 @@ component CommentItem {
 
 component DividerVirtical inherits Rectangle {
     width: 8px;
-    height: 100%;
     Rectangle {
         x: 2px;
         width: 4px;
@@ -56,15 +97,19 @@ component DividerVirtical inherits Rectangle {
     }
 }
 
-component HistoryCard inherits Rectangle {
+component HistoryCard {
     height: 100px;
     in property <string> date-time;
     in property <string> title;
-    in property <string> department;
     in property <string> description;
+    in property <int> id;
+    callback event-clicked(int);
+    callback comment-clicked(int);
     HorizontalLayout {
         spacing: 5px;
+        height: 100px;
         Rectangle {
+            height: 100px;
             Text {
                 text: date-time;
                 font-size: Token.font.body.large.size;
@@ -75,15 +120,19 @@ component HistoryCard inherits Rectangle {
             }
         }
 
-        DividerVirtical { }
+        DividerVirtical {
+            height: 100px;
+        }
 
         Card {
-            height: root.height;
+            height: 100px;
             width: 90%;
-            clicked() => {
+            clicked => {
+                root.event-clicked(id);
             }
             HorizontalLayout {
                 padding: 5px;
+                padding-right: 15px;
                 spacing: 8px;
                 VerticalLayout {
                     Text {
@@ -106,6 +155,9 @@ component HistoryCard inherits Rectangle {
 
                 CommentItem {
                     width: 40%;
+                    comment-clicked => {
+                        root.comment-clicked(id);
+                    }
                 }
             }
         }
@@ -113,44 +165,30 @@ component HistoryCard inherits Rectangle {
 }
 
 export component HistoryPage inherits Page {
-    ScrollView {
-        VerticalLayout {
-            padding: 50px;
-            spacing: 15px;
-            Text {
-                text: "历史活动";
-                font-size: Token.font.headline.medium.size;
-                font-weight: Token.font.headline.medium.weight;
-                color: Token.color.outline;
-            }
+    VerticalLayout {
+        padding: 50px;
+        spacing: 15px;
+        Text {
+            text: "历史活动";
+            font-size: Token.font.headline.medium.size;
+            font-weight: Token.font.headline.medium.weight;
+        }
 
+        ScrollView {
             VerticalLayout {
-                spacing: 5px;
-                HistoryCard {
-                    date-time: "2024.7.24";
-                    title: "软件研发部C++组授课";
-                    description: "软件研发部C++组授课";
-                }
-
-                HistoryCard {
-                    date-time: "2024.7.24";
-                    title: "软件研发部C++组授课";
-                    description: "软件研发部C++组授课";
-                }
-
-                HistoryCard {
-                    date-time: "2024.7.24";
-                    title: "软件研发部C++组授课";
-                    description: "软件研发部C++组授课";
-                }
-
-                HistoryCard {
-                    date-time: "2024.7.24";
-                    title: "软件研发部C++组授课";
-                    description: "软件研发部C++组授课";
+                spacing: 10px;
+                padding: 5px;
+                for event in HistoryPageBridge.events: HistoryCard {
+                    id: event.id;
+                    date-time: event.date-time;
+                    title: event.title;
+                    description: event.description;
                 }
             }
+        }
 
+        Rectangle {
+            height: 20px;
             SPagination {
                 page-size: 10;
                 total: 100;
