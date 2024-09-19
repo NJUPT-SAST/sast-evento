@@ -1,116 +1,29 @@
-import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
-import { EventCard, EventCardGroup } from "../../components/event_card.slint";
+import { Page } from "../../components/index.slint";
+import { EventCardGroup } from "../../components/event_card.slint";
 import { EventStruct } from "../../components/event_struct.slint";
 import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { Token } from "../../global.slint";
-import { DefaultSCarouselProps } from "../../modules/surrealism-ui/themes/src/carousel.slint";
-import { HorizontalBox, ScrollView } from "std-widgets.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Button, ButtonType, LoadingAnimation, PageState } from "../../components/index.slint";
 
 export global DiscoveryPageBridge {
-    in property <[EventStruct]> event_list: [
-        {
-            id: 1,
-            summary-abbr: "软",
-            summary: "软件研发部 C++组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 2,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 3,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 4,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 5,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 6,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 9,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 10,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 11,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 12,
-            summary-abbr: "软",
-            summary: "软件研发部 Web组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        },
-        {
-            id: 13,
-            summary-abbr: "软",
-            summary: "软件研发部 C#组授课",
-            time: "09.30 14:30 - 09.30 15:30",
-            location: "仙林校区 大学生活动中心101",
-            description: "组内授课"
-        }
-    ];
+    in property <PageState> active-events-state: PageState.normal;
+    in property <PageState> latest-events-state: PageState.normal;
+    in property <[EventStruct]> active-events: [];
+    in property <[EventStruct]> latest-events: [];
     in property <[image]> slides: [
         EventoImageToken.image.display.event.default[0],
         EventoImageToken.image.display.event.default[1],
         EventoImageToken.image.display.event.default[2],
     ];
+    callback load-active-events();
+    callback load-latest-events();
+    callback navigate-to-detail(EventStruct);
 }
 
 export component DiscoveryPage inherits Page {
     ScrollView {
-        height: root.height;
-        width: root.width;
-        
         VerticalLayout {
             padding: 50px;
             spacing: 15px;
@@ -128,17 +41,29 @@ export component DiscoveryPage inherits Page {
                 color: Token.color.inverse-surface;
                 font-size: Token.font.title.large.size;
                 font-weight: Token.font.label.large.weight;
-                text: " 正在进行的活动";
+                text: "  正在进行的活动";
             }
 
-            in property <[EventStruct]> current_event_list: DiscoveryPageBridge.event_list;
-            in property <int> current_event_row_num: floor(current_event_list.length / 3) * 3 == current_event_list.length ? current_event_list.length / 3 : floor(current_event_list.length / 3) + 1;
-            Rectangle {
-                height: current_event_row_num * 188px + 20px * (current_event_row_num - 1);
-                EventCardGroup {
-                    model: DiscoveryPageBridge.event_list;
+            if DiscoveryPageBridge.active-events-state == PageState.error: Button {
+                type: ButtonType.text;
+                font: Token.font.title.large;
+                content: "重新加载";
+                clicked => {
+                    DiscoveryPageBridge.load-active-events();
+                }
+            }
+
+            if DiscoveryPageBridge.active-events-state == PageState.loading: LoadingAnimation {
+                color: Token.color.on-surface;
+                height: 40px;
+            }
+
+            if DiscoveryPageBridge.active-events-state == PageState.normal: Rectangle {
+                height: (active-cards.item-height + active-cards.vertical-spacing) * active-cards.row-count;
+                active-cards := EventCardGroup {
+                    model: DiscoveryPageBridge.active-events;
                     item-clicked(event-struct) => {
-                        debug("id: " + event-struct.id + " title: " + event-struct.summary);
+                        DiscoveryPageBridge.navigate-to-detail(event-struct);
                     }
                 }
             }
@@ -147,17 +72,29 @@ export component DiscoveryPage inherits Page {
                 color: Token.color.inverse-surface;
                 font-size: Token.font.title.large.size;
                 font-weight: Token.font.label.large.weight;
-                text: " 最新的活动";
+                text: "  最新的活动";
             }
 
-            in property <[EventStruct]> newest_event_list: DiscoveryPageBridge.event_list;
-            in property <int> newest_event_row_num: floor(newest_event_list.length / 3) * 3 == newest_event_list.length ? newest_event_list.length / 3 : floor(newest_event_list.length / 3) + 1;
-            Rectangle {
-                height: newest_event_row_num * 188px + 20px * (newest_event_row_num - 1);
-                EventCardGroup {
-                    model: DiscoveryPageBridge.event_list;
+            if DiscoveryPageBridge.latest-events-state == PageState.error: Button {
+                type: ButtonType.text;
+                font: Token.font.title.large;
+                content: "重新加载";
+                clicked => {
+                    DiscoveryPageBridge.load-latest-events();
+                }
+            }
+
+            if DiscoveryPageBridge.latest-events-state == PageState.loading: LoadingAnimation {
+                color: Token.color.on-surface;
+                height: 40px;
+            }
+
+            if DiscoveryPageBridge.latest-events-state == PageState.normal: Rectangle {
+                height: (latest-cards.item-height + latest-cards.vertical-spacing) * latest-cards.row-count;
+                latest-cards := EventCardGroup {
+                    model: DiscoveryPageBridge.latest-events;
                     item-clicked(event-struct) => {
-                        debug("id: " + event-struct.id + " title: " + event-struct.summary);
+                        DiscoveryPageBridge.navigate-to-detail(event-struct);
                     }
                 }
             }

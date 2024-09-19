@@ -12,6 +12,10 @@ public:
 
 private:
     void onCreate() override;
+    void onShow() override;
+
+    void loadActiveEvents();
+    void loadLatestEvents();
 };
 
 EVENTO_UI_END
