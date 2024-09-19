@@ -22,7 +22,7 @@ namespace evento {
 namespace details {
 
 const std::filesystem::path configDir =
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef PLATFORM_WINDOWS
     std::filesystem::path(std::getenv("APPDATA")) / "Local" / "NJUPT-SAST-C++" / "SAST-Evento";
 #else
     std::filesystem::path(std::getenv("HOME")) / ".config" / "NJUPT-SAST-C++" / "SAST-Evento";

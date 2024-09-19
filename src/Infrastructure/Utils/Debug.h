@@ -416,7 +416,7 @@
 #define DEBUG_STEPPING_HAS_TERMIOS 1
 #endif
 #endif
-#if defined(_WIN32)
+#ifdef PLATFORM_WINDOWS
 #if __has_include(<conio.h>)
 #include <conio.h>
 #define DEBUG_STEPPING_HAS_GETCH 1
