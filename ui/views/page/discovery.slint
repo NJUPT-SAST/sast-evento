@@ -37,19 +37,30 @@ export component DiscoveryPage inherits Page {
                 sources: DiscoveryPageBridge.slides;
             }
 
-            Text {
+            if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.active-events.length == 0 && DiscoveryPageBridge.latest-events.length == 0: Text {
+                color: Token.color.inverse-surface;
+                font-size: Token.font.title.large.size;
+                font-weight: Token.font.label.large.weight;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                text: "暂时还没有活动哦";
+            }
+
+            if DiscoveryPageBridge.active-events.length != 0 || DiscoveryPageBridge.active-events-state != PageState.normal: Text {
                 color: Token.color.inverse-surface;
                 font-size: Token.font.title.large.size;
                 font-weight: Token.font.label.large.weight;
                 text: "  正在进行的活动";
             }
 
-            if DiscoveryPageBridge.active-events-state == PageState.error: Button {
-                type: ButtonType.text;
-                font: Token.font.title.large;
-                content: "重新加载";
-                clicked => {
-                    DiscoveryPageBridge.load-active-events();
+            if DiscoveryPageBridge.active-events-state == PageState.error: Rectangle {
+                Button {
+                    type: ButtonType.text;
+                    font: Token.font.title.large;
+                    content: "重新加载";
+                    clicked => {
+                        DiscoveryPageBridge.load-active-events();
+                    }
                 }
             }
 
@@ -58,7 +69,7 @@ export component DiscoveryPage inherits Page {
                 height: 40px;
             }
 
-            if DiscoveryPageBridge.active-events-state == PageState.normal: Rectangle {
+            if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.active-events.length != 0: Rectangle {
                 height: (active-cards.item-height + active-cards.vertical-spacing) * active-cards.row-count;
                 active-cards := EventCardGroup {
                     model: DiscoveryPageBridge.active-events;
@@ -68,19 +79,21 @@ export component DiscoveryPage inherits Page {
                 }
             }
 
-            Text {
+            if DiscoveryPageBridge.latest-events.length != 0 || DiscoveryPageBridge.latest-events-state != PageState.normal: Text {
                 color: Token.color.inverse-surface;
                 font-size: Token.font.title.large.size;
                 font-weight: Token.font.label.large.weight;
                 text: "  最新的活动";
             }
 
-            if DiscoveryPageBridge.latest-events-state == PageState.error: Button {
-                type: ButtonType.text;
-                font: Token.font.title.large;
-                content: "重新加载";
-                clicked => {
-                    DiscoveryPageBridge.load-latest-events();
+            if DiscoveryPageBridge.latest-events-state == PageState.error: Rectangle {
+                Button {
+                    type: ButtonType.text;
+                    font: Token.font.title.large;
+                    content: "重新加载";
+                    clicked => {
+                        DiscoveryPageBridge.load-latest-events();
+                    }
                 }
             }
 
@@ -89,7 +102,7 @@ export component DiscoveryPage inherits Page {
                 height: 40px;
             }
 
-            if DiscoveryPageBridge.latest-events-state == PageState.normal: Rectangle {
+            if DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.latest-events.length != 0: Rectangle {
                 height: (latest-cards.item-height + latest-cards.vertical-spacing) * latest-cards.row-count;
                 latest-cards := EventCardGroup {
                     model: DiscoveryPageBridge.latest-events;
