@@ -1,5 +1,5 @@
 import { Token } from "../../global.slint";
-import { Page, Button } from "../../components/index.slint";
+import { Page, Button, ButtonType } from "../../components/index.slint";
 import { SCard,STimeLine,STimeLineItem } from "../../modules/surrealism-ui/index.slint";
 import {SStar,SButton} from "../../modules/surrealism-ui/index.slint";
 import { Card } from "../../components/card.slint";
@@ -12,9 +12,8 @@ component CommentItem {
     property <string> context;
     property <bool> reviewed;
     property <bool> editing;
-    content := VerticalLayout {
+    VerticalLayout {
         spacing: 8px;
-        padding: 8px;
         SStar {
             score: 3;
             theme: Dark;
@@ -22,12 +21,14 @@ component CommentItem {
 
         HorizontalLayout {
             spacing: 8px;
-            LineEdit { }
+            LineEdit {
+                width: 80%;
+                height: 40px;
+            }
 
             Button {
-                text: "评价";
-                font-size: Token.font.label.medium.size;
-                font-weight: Token.font.label.medium.weight;
+                content: "评价";
+                type: ButtonType.filled-tonal;
                 clicked => {
                     // TODO: implement review
                 }
@@ -55,19 +56,58 @@ component DividerVirtical inherits Rectangle {
     }
 }
 
-component EventCard inherits Rectangle {
-    height: 80px;
+component HistoryCard inherits Rectangle {
+    height: 100px;
+    in property <string> date-time;
+    in property <string> title;
+    in property <string> department;
+    in property <string> description;
     HorizontalLayout {
         spacing: 5px;
         Rectangle {
-            width: 20%;
-            Text { }
+            Text {
+                text: date-time;
+                font-size: Token.font.body.large.size;
+                font-weight: Token.font.body.large.weight;
+                color: Token.color.outline;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
         }
 
         DividerVirtical { }
 
         Card {
-            height: 100%;
+            height: root.height;
+            width: 90%;
+            clicked() => {
+            }
+            HorizontalLayout {
+                padding: 5px;
+                spacing: 8px;
+                VerticalLayout {
+                    Text {
+                        horizontal-alignment: TextHorizontalAlignment.left;
+                        vertical-alignment: TextVerticalAlignment.top;
+                        text: title;
+                        overflow: elide;
+                        font-size: Token.font.headline.small.size;
+                        font-weight: Token.font.headline.small.weight;
+                        color: Token.color.on-surface;
+                    }
+
+                    Text {
+                        font-size: Token.font.label.large.size;
+                        text: description;
+                        overflow: elide;
+                        color: Token.color.on-surface;
+                    }
+                }
+
+                CommentItem {
+                    width: 40%;
+                }
+            }
         }
     }
 }
@@ -84,94 +124,37 @@ export component HistoryPage inherits Page {
                 color: Token.color.outline;
             }
 
-            STimeLineItem {
-                // width: parent.width;
-            height: root.height / 4;
-                date: "2024.7.24 101中区 15:30-17:30";
-                Card {
-                    height: parent.center-height();
-                    width: parent.center-width();
-                    HorizontalLayout {
-                        padding: 8px;
-                        spacing: 8px;
-                        Rectangle {
-                            width: 100px;
-                            height: 100px;
-                            border-radius: 5px;
-                            background: Token.color.surface-container;
-                        }
-
-                        VerticalLayout {
-                            width: 680px;
-                            padding: 8px;
-                            Text {
-                                horizontal-alignment: TextHorizontalAlignment.left;
-                                vertical-alignment: TextVerticalAlignment.top;
-                                text: "活动名称：软件研发部C++组授课";
-                                overflow: elide;
-                                font-size: Token.font.headline.small.size;
-                                font-weight: Token.font.headline.small.weight;
-                                color: Token.color.on-surface;
-                            }
-
-                            Text {
-                                horizontal-alignment: TextHorizontalAlignment.left;
-                                text: "活动介绍";
-                                overflow: elide;
-                                font-size: Token.font.label.medium.size;
-                                font-weight: Token.font.label.medium.weight;
-                                color: Token.color.on-surface;
-                            }
-                        }
-
-                        DividerVirtical { }
-
-                        CommentItem { }
-                    }
+            VerticalLayout {
+                spacing: 5px;
+                HistoryCard {
+                    date-time: "2024.7.24";
+                    title: "软件研发部C++组授课";
+                    description: "软件研发部C++组授课";
                 }
 
-                clicked(is_active) => {
-                    debug(is-active);
-                    self.active = !self.active;
+                HistoryCard {
+                    date-time: "2024.7.24";
+                    title: "软件研发部C++组授课";
+                    description: "软件研发部C++组授课";
+                }
+
+                HistoryCard {
+                    date-time: "2024.7.24";
+                    title: "软件研发部C++组授课";
+                    description: "软件研发部C++组授课";
+                }
+
+                HistoryCard {
+                    date-time: "2024.7.24";
+                    title: "软件研发部C++组授课";
+                    description: "软件研发部C++组授课";
                 }
             }
 
-            STimeLineItem {
-                // width: parent.width;
-            height: root.height / 4;
-                date: "2024.7.24 101中区 15:30-17:30";
-                Card {
-                    height: parent.center-height();
-                    width: parent.center-width();
-                }
-
-                clicked(is_active) => {
-                    debug(is-active);
-                    self.active = !self.active;
-                }
-            }
-
-            STimeLineItem {
-                // width: parent.width;
-            height: root.height / 4;
-                date: "2024.7.24 101中区 15:30-17:30";
-                Card {
-                    height: parent.center-height();
-                    width: parent.center-width();
-                }
-
-                clicked(is_active) => {
-                    debug(is-active);
-                    self.active = !self.active;
-                }
-            }
-
-            Empty {
-                a := SPagination {
-                    page-size: 10;
-                    total: 100;
-                    visible-range: 6;
-                }
+            SPagination {
+                page-size: 10;
+                total: 100;
+                visible-range: 6;
             }
         }
     }
