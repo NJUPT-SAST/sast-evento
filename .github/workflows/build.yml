@@ -134,7 +134,7 @@ jobs:
         }
 
         cmake --preset native @additionalConfigureArgs
-        cmake --build --preset native-release -j6
+        cmake --build --preset native-release -j3
 
     - name: Archive files
       shell: pwsh
