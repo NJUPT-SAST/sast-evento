@@ -55,8 +55,7 @@ export component DiscoveryPage inherits Page {
 
             if DiscoveryPageBridge.active-events-state == PageState.error: Rectangle {
                 Button {
-                    type: ButtonType.text;
-                    font: Token.font.title.large;
+                    type: ButtonType.filled-tonal;
                     content: "重新加载";
                     clicked => {
                         DiscoveryPageBridge.load-active-events();
@@ -88,8 +87,7 @@ export component DiscoveryPage inherits Page {
 
             if DiscoveryPageBridge.latest-events-state == PageState.error: Rectangle {
                 Button {
-                    type: ButtonType.text;
-                    font: Token.font.title.large;
+                    type: ButtonType.filled-tonal;
                     content: "重新加载";
                     clicked => {
                         DiscoveryPageBridge.load-latest-events();
