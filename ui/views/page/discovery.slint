@@ -5,14 +5,16 @@ import { SCarousel } from "../../modules/surrealism-ui/index.slint";
 import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { Token } from "../../global.slint";
 import { ScrollView } from "std-widgets.slint";
-import { Button, ButtonType, LoadingAnimation, PageState } from "../../components/index.slint";
+import { Button, ButtonType, LoadingAnimation, PageState, Empty } from "../../components/index.slint";
 
 export global DiscoveryPageBridge {
+    in-out property <int> image-index: 0;
+    in-out property <bool> image-manually-changed: false;
     in property <PageState> active-events-state: PageState.normal;
     in property <PageState> latest-events-state: PageState.normal;
     in property <[EventStruct]> active-events: [];
     in property <[EventStruct]> latest-events: [];
-    in property <[image]> slides: [
+    in property <[image]> carousel-source: [
         EventoImageToken.image.display.event.default[0],
         EventoImageToken.image.display.event.default[1],
         EventoImageToken.image.display.event.default[2],
@@ -22,19 +24,76 @@ export global DiscoveryPageBridge {
     callback navigate-to-detail(EventStruct);
 }
 
+export component ImageCarousel inherits Rectangle {
+    in property <[image]> sources;
+    in-out property <int> current-index: 0;
+    in-out property <bool> image-manually-changed: false;
+    border-radius: 12px;
+    clip: true;
+
+    HorizontalLayout {
+        x: -(current-index * root.width);
+        animate x {
+            duration: 300ms;
+            easing: ease-in;
+        }
+        for src in sources: Image {
+            width: root.width;
+            height: root.height;
+            image-fit: cover;
+            source: src;
+        }
+    }
+
+    VerticalLayout {
+        Empty {
+            height: root.height - 24px;
+        }
+
+        HorizontalLayout {
+            alignment: center;
+            spacing: 24px;
+            for index in sources.length: Rectangle {
+                z: 1;
+                width: 12px;
+                height: self.width;
+                border-radius: self.width / 2;
+                background: root.current-index == index ? #CAC4D0 : #79747E;
+                animate background {
+                    duration: 100ms;
+                    easing: ease-in;
+                }
+                TouchArea {
+                    width: 100%;
+                    height: 100%;
+                    clicked => {
+                        current-index = index;
+                        image-manually-changed = true;
+                    }
+                }
+            }
+        }
+    }
+
+    // ensure image-switching animation works fine
+    LoadingAnimation {
+        z: -1;
+        color: Token.color.on-surface;
+        height: 40px;
+    }
+}
+
 export component DiscoveryPage inherits Page {
     ScrollView {
         VerticalLayout {
             padding: 50px;
             spacing: 15px;
-            SCarousel {
+            ImageCarousel {
                 width: 100%;
                 height: root.height * 0.5;
-                fold-height: root.height * 0.5;
-                active: 3;
-                focus-main: true;
-                fit: cover;
-                sources: DiscoveryPageBridge.slides;
+                current-index <=> DiscoveryPageBridge.image-index;
+                image-manually-changed <=> DiscoveryPageBridge.image-manually-changed;
+                sources: DiscoveryPageBridge.carousel-source;
             }
 
             if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.active-events.length == 0 && DiscoveryPageBridge.latest-events.length == 0: Text {

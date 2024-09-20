@@ -5,6 +5,7 @@
 #include "Infrastructure/Network/NetworkClient.h"
 #include <Controller/View/DiscoveryPage.h>
 #include <Infrastructure/Network/ResponseStruct.h>
+#include <chrono>
 #include <spdlog/spdlog.h>
 
 EVENTO_UI_START
@@ -26,6 +27,7 @@ void DiscoveryPage::onCreate() {
 void DiscoveryPage::onShow() {
     loadActiveEvents();
     loadLatestEvents();
+    imageAutoSlide();
 }
 
 void DiscoveryPage::loadActiveEvents() {
@@ -60,6 +62,25 @@ void DiscoveryPage::loadLatestEvents() {
                                  self->set_latest_events_state(PageState::Normal);
                                  self->set_latest_events(convert::from(eventQueryRes.elements));
                              });
+}
+
+void DiscoveryPage::imageAutoSlide() {
+    executor()->asyncExecute([]() -> Task<void> { co_return; },
+                             [&self = *this]() {
+                                 int cntIndex = self->get_image_index();
+                                 bool manuallyChanged = self->get_image_manually_changed();
+                                 if (!manuallyChanged) {
+                                     if (cntIndex == self->get_carousel_source()->row_count() - 1) {
+                                         self->set_image_index(0);
+                                         return;
+                                     }
+                                     self->set_image_index(cntIndex + 1);
+                                 } else {
+                                     self->set_image_manually_changed(false);
+                                 }
+                             },
+                             std::chrono::milliseconds(5000),
+                             AsyncExecutor::Periodic | AsyncExecutor::Delay);
 }
 
 EVENTO_UI_END
