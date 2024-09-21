@@ -12,6 +12,12 @@ public:
 
 private:
     void onCreate() override;
+    void onShow() override;
+
+    void loadActiveEvents();
+    void loadLatestEvents();
+    void loadHomeSlides();
+    void slidesAutoRotation();
 };
 
 EVENTO_UI_END

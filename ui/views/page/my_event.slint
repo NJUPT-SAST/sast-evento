@@ -22,14 +22,13 @@ export global MyEventPageBridge {
 
     in-out property <[EventStruct]> event;
 
-    pure callback get-code(string)->bool;
-    pure callback show-mess(int,string)->string;
+    pure callback get-code(string,int)->bool;
+    pure callback show-mess(string);
 //
     pure callback return-array-sub()->[int];
     pure callback return-num-sub()->int;
     pure callback return-array-start()->[int];
     pure callback return-num-end()->int;
-    
 
 }
 

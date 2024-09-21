@@ -1,4 +1,5 @@
 #include "Controller/AsyncExecutor.hh"
+#include "Controller/Convert.h"
 #include "Infrastructure/Network/NetworkClient.h"
 #include "Infrastructure/Utils/Result.h"
 #include "app.h"
@@ -7,7 +8,6 @@
 #include <Controller/View/MyEventPage.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <memory>
-#include <vector>
 
 EVENTO_UI_START
 
@@ -22,12 +22,12 @@ void MyEventPage::onCreate() {
 void MyEventPage::onShow() {
     auto& self = *this;
     // show event when the page is shown
-    
+    self->on_show_mess([this](slint::SharedString part){get_events(part);});
     //if click button , check code
-    
+    self->on_get_code([this](slint::SharedString code,int id){check_code(code, id);});
 };
 
-evento::EventQueryRes MyEventPage::get_events(slint::SharedString part){
+void MyEventPage::get_events(slint::SharedString part){
     auto& self = *this;
     evento::EventQueryRes eventlists;
     if (part == slint::SharedString("active")) {
@@ -62,12 +62,11 @@ evento::EventQueryRes MyEventPage::get_events(slint::SharedString part){
         id_model.push_back(element.id);
     }
     self->set_id(std::make_shared<slint::VectorModel<int>>(id_model));
-    slint::VectorModel<EventEntity> event_model;
+    slint::VectorModel<EventStruct> event_model;
     for (auto & element : eventlists.elements) {
-        event_model.push_back(element);
+        event_model.push_back(convert::from(element));
     }
     self->set_event(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
-    return eventlists;
 }
 
 // ToDo implement this function about eventIde

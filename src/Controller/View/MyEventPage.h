@@ -11,14 +11,14 @@ EVENTO_UI_START
 class MyEventPage : public BasicView, private GlobalAgent<MyEventPageBridge> {
 public:
     MyEventPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
-    //get info
-    evento::EventQueryRes get_events(slint::SharedString part);
+
 private:
     void onCreate() override;
     void onShow() override;
 
     bool check_code(slint::SharedString code, int id);
-    
+    //get info
+    void get_events(slint::SharedString part);
 };
 
 EVENTO_UI_END

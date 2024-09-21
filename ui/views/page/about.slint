@@ -1,14 +1,10 @@
 import { Token } from "../../global.slint";
-import { Page, Empty, ContentDialog } from "../../components/index.slint";
+import { Page, Empty, ContentDialog, PageState } from "../../components/index.slint";
 import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
 import { Button, ButtonType, LoadingAnimation, StyledText } from "../../components/index.slint";
-
-export enum Status {
-    Normal,
-    Loading,
-    Error,
-}
+import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
+import { UseIcons } from "../../modules/surrealism-ui/use/src/icon.slint";
 
 export struct ContributorStruct {
     avatar: image,
@@ -18,8 +14,8 @@ export struct ContributorStruct {
 export global AboutPageBridge {
     in property <string> version:"v0.0.0-00000000";
     in property <string> update-log: "";
-    in property <Status> contributors-status: Status.Normal;
-    in property <Status> check-update-status: Status.Normal;
+    in property <PageState> contributors-status: PageState.normal;
+    in property <PageState> check-update-status: PageState.normal;
     in property <[ContributorStruct]> contributors: [];
     in-out property <bool> show-popup: false;
     callback check-update();
@@ -75,14 +71,28 @@ component Avatar inherits Rectangle {
     }
 }
 
-component Link inherits StyledText {
+component Link {
+    in property text <=> content.text;
+    in property font <=> content.font;
     callback clicked <=> area.clicked;
-    area := TouchArea {
-        mouse-cursor: pointer;
-    }
 
-    on-surface: area.has-hover ? Token.color.primary : Token.color.on-surface;
-    is-underline: area.has-hover ? true : false;
+    HorizontalLayout {
+        spacing: 5px;
+        Icon {
+            source: UseIcons.icons.Share;
+            height: 15px;
+            width: 15px;
+            colorize: area.has-hover ? Token.color.primary : Token.color.on-surface;
+        }
+
+        content := StyledText {
+            on-surface: area.has-hover ? Token.color.primary : Token.color.on-surface;
+            is-underline: area.has-hover ? true : false;
+            area := TouchArea {
+                mouse-cursor: pointer;
+            }
+        }
+    }
 }
 
 export component AboutPage inherits Page {
@@ -158,7 +168,7 @@ export component AboutPage inherits Page {
                         }
 
                         Button {
-                            have-icon: AboutPageBridge.check-update-status == Status.Loading;
+                            have-icon: AboutPageBridge.check-update-status == PageState.loading;
                             type: ButtonType.text;
                             content: "检查更新";
                             LoadingAnimation {
@@ -340,18 +350,20 @@ export component AboutPage inherits Page {
                         vertical-alignment: center;
                     }
 
-                    if AboutPageBridge.contributors-status == Status.Error: Button {
-                        type: ButtonType.text;
-                        content: "重新加载";
-                        clicked => {
-                            AboutPageBridge.load-contributors();
+                    if AboutPageBridge.contributors-status == PageState.error: Rectangle {
+                        Button {
+                            type: ButtonType.filled-tonal;
+                            content: "重新加载";
+                            clicked => {
+                                AboutPageBridge.load-contributors();
+                            }
                         }
                     }
-                    if AboutPageBridge.contributors-status == Status.Loading: LoadingAnimation {
+                    if AboutPageBridge.contributors-status == PageState.loading: LoadingAnimation {
                         color: Token.color.on-surface;
                         height: 40px;
                     }
-                    if AboutPageBridge.contributors-status == Status.Normal: ScrollView {
+                    if AboutPageBridge.contributors-status == PageState.normal: ScrollView {
                         height: 60px;
                         HorizontalLayout {
                             spacing: 15px;

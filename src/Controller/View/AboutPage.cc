@@ -1,3 +1,4 @@
+#include "app.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
@@ -8,7 +9,6 @@
 #include <Infrastructure/Utils/Tools.h>
 #include <Version.h>
 #include <filesystem>
-#include <memory>
 #include <spdlog/spdlog.h>
 
 EVENTO_UI_START
@@ -33,12 +33,12 @@ void AboutPage::onShow() {
 void AboutPage::loadContributors() {
     auto& self = *this;
 
-    self->set_contributors_status(Status::Loading);
+    self->set_contributors_status(PageState::Loading);
 
     executor()->asyncExecute(
         networkClient()->getContributors(), [&self = *this, this](Result<ContributorList> result) {
             if (result.isErr()) {
-                self->set_contributors_status(Status::Error);
+                self->set_contributors_status(PageState::Error);
                 self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
                                                             MessageType::Error);
                 return;
@@ -65,7 +65,7 @@ void AboutPage::loadContributors() {
                             self->set_contributors(
                                 std::make_shared<slint::VectorModel<ContributorStruct>>(
                                     self._contributors));
-                            self->set_contributors_status(Status::Normal);
+                            self->set_contributors_status(PageState::Normal);
                         }
                     });
             }
@@ -75,12 +75,12 @@ void AboutPage::loadContributors() {
 void AboutPage::checkUpdate() {
     auto& self = *this;
 
-    self->set_check_update_status(Status::Loading);
+    self->set_check_update_status(PageState::Loading);
 
     executor()->asyncExecute(
         networkClient()->getLatestRelease(), [&self = *this](Result<ReleaseEntity> result) {
             if (result.isErr()) {
-                self->set_check_update_status(Status::Normal);
+                self->set_check_update_status(PageState::Normal);
                 self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
                                                             MessageType::Error);
                 return;
@@ -88,7 +88,7 @@ void AboutPage::checkUpdate() {
 
             auto entity = result.unwrap();
 
-            self->set_check_update_status(Status::Normal);
+            self->set_check_update_status(PageState::Normal);
 
             if (std::string_view(VERSION_SEMANTIC).starts_with(entity.tag_name)) {
                 self.bridge.getMessageManager().showMessage("已是最新版本");
