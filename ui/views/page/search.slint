@@ -103,6 +103,15 @@ export component SearchPage inherits Page {
                     }
                 }
 
+                if SearchPageBridge.list-state == PageState.normal && SearchPageBridge.events-state == PageState.normal && SearchPageBridge.event-model.length == 0: Rectangle {
+                    Text {
+                        text: "这个部门还没有活动哦";
+                        font-size: Token.font.body.large.size;
+                        font-weight: Token.font.body.large.weight;
+                        color: Token.color.outline;
+                    }
+                }
+
                 if SearchPageBridge.events-state == PageState.loading: Rectangle {
                     LoadingAnimation {
                         width: 40px;

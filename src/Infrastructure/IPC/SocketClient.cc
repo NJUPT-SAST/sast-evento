@@ -69,7 +69,9 @@ void SocketClient::startTray() {
 }
 
 void SocketClient::exitTray() {
-    net::co_spawn(_socket->get_executor(), send("EXIT"), net::detached);
+    if (_socket) {
+        net::co_spawn(_socket->get_executor(), send("EXIT"), net::detached);
+    }
 }
 
 void SocketClient::showOrUpdateMessage(int messageId,

@@ -1,12 +1,16 @@
 #pragma once
 
+#include <chrono>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <toml++/toml.h>
 
 /*
-[account.<user-id>]
+[account]
+user-id = <string>
 expire = <date-time>
 
 [setting]
@@ -32,13 +36,18 @@ const std::filesystem::path configDir =
 
 inline toml::table config;
 
-inline struct Setting {
+inline struct {
     int language;
     bool minimalToTray;
     bool noticeBegin;
     bool noticeEnd;
     int theme;
 } settings;
+
+inline struct {
+    std::string userId;
+    toml::date_time expire;
+} account;
 
 static void loadSetting() {
     if (!config.contains("setting")) {
@@ -71,6 +80,21 @@ static void loadAccount() {
     if (!config.contains("account")) {
         config.insert("account", toml::table{});
     }
+    auto& account = config["account"].ref<toml::table>();
+
+    auto userId = account["user-id"].value_or(std::string{""});
+
+    auto cntTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto cntTm = *std::localtime(&cntTime);
+
+    auto expire = account["expire"].value_or(
+        toml::date_time{toml::date{cntTm.tm_year + 1900, cntTm.tm_mon + 1, cntTm.tm_mday},
+                        toml::time{cntTm.tm_hour, cntTm.tm_min, cntTm.tm_sec}});
+
+    evento::account = {
+        .userId = userId,
+        .expire = expire,
+    };
 }
 
 inline void initConfig() {

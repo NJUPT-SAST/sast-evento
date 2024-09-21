@@ -70,6 +70,8 @@ sudo pacman -S qt6-base
 sudo apt install qt6-base-dev
 ```
 
+对于 macOS 和 Windows 平台，您可以从官方网站安装 Qt6；您也可以使用 vcpkg 从源码构建 Qt6 以保证静态链接到可执行文件，这需要开启 `-DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg` 构建选项。
+
 ### 克隆
 
 ```bash

@@ -224,7 +224,7 @@ jobs:
         name: installer-${{ matrix.rid }}
         path: ./deploy/installer.exe
 
-  deb-package:
+  package-deb:
     name: Package ${{ matrix.rid }} (deb)
     runs-on: ubuntu-24.04
     needs: build
@@ -260,7 +260,7 @@ jobs:
         name: deb-${{ matrix.rid }}
         path: ./sast-evento.deb
 
-  pacman-package:
+  package-pacman:
     name: Package ${{ matrix.rid }} (pacman)
     runs-on: ubuntu-24.04
     needs: build
@@ -291,6 +291,7 @@ jobs:
           chown -R build:build .
           sudo -u build makepkg -f --nodeps --noconfirm
         EOF
+        rm ./deploy/pacman/*-debug-*.pkg.tar.zst
 
     - name: Upload package
       uses: actions/upload-artifact@v4
@@ -298,7 +299,7 @@ jobs:
         name: pacman-${{ matrix.rid }}
         path: ./deploy/pacman/*.pkg.tar.zst
 
-  macos-package:
+  package-macos:
     name: Package ${{ matrix.rid }} (dmg)
     runs-on: macos-latest
     needs: build
@@ -329,7 +330,7 @@ jobs:
         bash ./deploy/create-mac-app.sh ./files './sast-evento.app'
 
     - name: Package
-      uses: L-Super/create-dmg-actons@v1
+      uses: L-Super/create-dmg-actions@v1
       with:
         dmg_name: 'sast-evento'
         src_dir: './sast-evento.app'
@@ -339,3 +340,38 @@ jobs:
       with:
         name: dmg-${{ matrix.rid }}
         path: ./sast-evento.dmg
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    needs:
+      - package-win
+      - package-deb
+      - package-pacman
+      - package-macos
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Organize artifacts
+        shell: pwsh
+        run: |
+          Set-Location ./artifacts
+          Remove-Item -Force -Recurse ./files-*
+          Get-ChildItem -Directory -Path . | ForEach-Object {
+              Write-Host "Compressing $($_.Name)"
+              $dirPath = $_.FullName
+              $zipPath = "$dirPath.zip"
+              Compress-Archive -Path $dirPath -DestinationPath $zipPath
+              Remove-Item -Path $dirPath -Recurse
+          }
+
+      - name: Release (GitHub)
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ./artifacts/*
+          allowUpdates: true
+          draft: false
+          omitBody: true

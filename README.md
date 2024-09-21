@@ -61,7 +61,7 @@ This project is the desktop client version of SAST Evento.
 - vcpkg package manager
 - Rust toolchain
 
-For Linux, you must install Qt6 dependencies:
+For Linux platforms, you also need to install the Qt6 base library:
 
 ```bash
 # For Arch Linux
@@ -69,6 +69,8 @@ sudo pacman -S qt6-base
 # For Ubuntu
 sudo apt install qt6-base-dev
 ```
+
+For macOS and Windows platforms, you can install Qt6 from the official website; alternatively, you can use vcpkg to build Qt6 from source to ensure static linking to the executable, which requires enabling the `-DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg` build option.
 
 ### Clone
 

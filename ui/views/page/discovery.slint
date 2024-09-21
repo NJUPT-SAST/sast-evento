@@ -1,67 +1,177 @@
-import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page } from "../../components/index.slint";
 import { EventCardGroup } from "../../components/event_card.slint";
+import { EventStruct } from "../../components/event_struct.slint";
+import { SCarousel } from "../../modules/surrealism-ui/index.slint";
+import { EventoImageToken } from "../../assets/image/image_token.slint";
+import { Token } from "../../global.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Button, ButtonType, LoadingAnimation, PageState, Empty } from "../../components/index.slint";
 
-export global DiscoveryPageBridge { }
+export global DiscoveryPageBridge {
+    in-out property <int> image-index: 0;
+    in-out property <bool> image-manually-changed: false;
+    in property <PageState> active-events-state: PageState.normal;
+    in property <PageState> latest-events-state: PageState.normal;
+    in property <[EventStruct]> active-events: [];
+    in property <[EventStruct]> latest-events: [];
+    in property <[image]> carousel-source: [
+        EventoImageToken.image.display.event.default[0],
+        EventoImageToken.image.display.event.default[1],
+        EventoImageToken.image.display.event.default[2],
+    ];
+    callback load-active-events();
+    callback load-latest-events();
+    callback navigate-to-detail(EventStruct);
+}
 
-export component DiscoveryPage inherits Page {
-    /*  demo code for generating corresponding C++ code correctly
-        remove this when EventCard&EventCardGroup is truly used
-        otherwise "Convert.h/Convert.cc" will fail to compile    */
-    EventCardGroup {
-        model: [
-            {
-                id: 1,
-                summary-abbr: "软",
-                summary: "软件研发部 C++组授课",
-                time: "09.30 14:30 - 09.30 15:30",
-                location: "仙林校区 大学生活动中心101",
-                description: "组内授课"
-            },
-            {
-                id: 2,
-                summary-abbr: "软",
-                summary: "软件研发部 Web组授课",
-                time: "09.30 14:30 - 09.30 15:30",
-                location: "仙林校区 大学生活动中心101",
-                description: "组内授课"
-            },
-            {
-                id: 3,
-                summary-abbr: "软",
-                summary: "软件研发部 C#组授课",
-                time: "09.30 14:30 - 09.30 15:30",
-                location: "仙林校区 大学生活动中心101",
-                description: "组内授课"
-            }
-        ];
-        item-clicked(event-struct) => {
-            debug("id: " + event-struct.id + " title: " + event-struct.summary);
+export component ImageCarousel inherits Rectangle {
+    in property <[image]> sources;
+    in-out property <int> current-index: 0;
+    in-out property <bool> image-manually-changed: false;
+    border-radius: 12px;
+    clip: true;
+
+    HorizontalLayout {
+        x: -(current-index * root.width);
+        animate x {
+            duration: 300ms;
+            easing: ease-in;
+        }
+        for src in sources: Image {
+            width: root.width;
+            height: root.height;
+            image-fit: cover;
+            source: src;
         }
     }
 
-    // TODO: implement Discovery
-    // optional
-    background := Empty { }
+    VerticalLayout {
+        Empty {
+            height: root.height - 24px;
+        }
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
+        HorizontalLayout {
+            alignment: center;
+            spacing: 24px;
+            for index in sources.length: Rectangle {
+                z: 1;
+                width: 12px;
+                height: self.width;
+                border-radius: self.width / 2;
+                background: root.current-index == index ? #CAC4D0 : #79747E;
+                animate background {
+                    duration: 100ms;
+                    easing: ease-in;
+                }
+                TouchArea {
+                    width: 100%;
+                    height: 100%;
+                    clicked => {
+                        current-index = index;
+                        image-manually-changed = true;
+                    }
+                }
+            }
+        }
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "活动广场（用于发现活动）\n  进行中、未开始\n  （需要跳转到历史活动页面，需要多考虑一下）";
+    // ensure image-switching animation works fine
+    LoadingAnimation {
+        z: -1;
+        color: Token.color.on-surface;
+        height: 40px;
+    }
+}
+
+export component DiscoveryPage inherits Page {
+    ScrollView {
+        VerticalLayout {
+            padding: 50px;
+            padding-top: 10px;
+            spacing: 15px;
+            ImageCarousel {
+                width: 100%;
+                height: root.height * 0.5;
+                current-index <=> DiscoveryPageBridge.image-index;
+                image-manually-changed <=> DiscoveryPageBridge.image-manually-changed;
+                sources: DiscoveryPageBridge.carousel-source;
+            }
+
+            if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.active-events.length == 0 && DiscoveryPageBridge.latest-events.length == 0: Text {
+                color: Token.color.inverse-surface;
+                font-size: Token.font.title.large.size;
+                font-weight: Token.font.label.large.weight;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+                text: "暂时还没有活动哦";
+            }
+
+            if DiscoveryPageBridge.active-events.length != 0 || DiscoveryPageBridge.active-events-state != PageState.normal: Text {
+                color: Token.color.inverse-surface;
+                font-size: Token.font.title.large.size;
+                font-weight: Token.font.label.large.weight;
+                text: "  正在进行的活动";
+            }
+
+            Rectangle {
+                if DiscoveryPageBridge.active-events-state == PageState.error: Rectangle {
+                    Button {
+                        type: ButtonType.filled-tonal;
+                        content: "重新加载";
+                        clicked => {
+                            DiscoveryPageBridge.load-active-events();
+                        }
+                    }
+                }
+
+                if DiscoveryPageBridge.active-events-state == PageState.loading: LoadingAnimation {
+                    color: Token.color.on-surface;
+                    height: 40px;
+                }
+            }
+
+            if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.active-events.length != 0: Rectangle {
+                height: (active-cards.item-height + active-cards.vertical-spacing) * active-cards.row-count;
+                active-cards := EventCardGroup {
+                    model: DiscoveryPageBridge.active-events;
+                    item-clicked(event-struct) => {
+                        DiscoveryPageBridge.navigate-to-detail(event-struct);
+                    }
+                }
+            }
+
+            if DiscoveryPageBridge.latest-events.length != 0 || DiscoveryPageBridge.latest-events-state != PageState.normal: Text {
+                color: Token.color.inverse-surface;
+                font-size: Token.font.title.large.size;
+                font-weight: Token.font.label.large.weight;
+                text: "  最新的活动";
+            }
+
+            Rectangle {
+                if DiscoveryPageBridge.latest-events-state == PageState.error: Rectangle {
+                    Button {
+                        type: ButtonType.filled-tonal;
+                        content: "重新加载";
+                        clicked => {
+                            DiscoveryPageBridge.load-latest-events();
+                        }
+                    }
+                }
+
+                if DiscoveryPageBridge.latest-events-state == PageState.loading: LoadingAnimation {
+                    color: Token.color.on-surface;
+                    height: 40px;
+                }
+            }
+
+            if DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.latest-events.length != 0: Rectangle {
+                height: (latest-cards.item-height + latest-cards.vertical-spacing) * latest-cards.row-count;
+                latest-cards := EventCardGroup {
+                    model: DiscoveryPageBridge.latest-events;
+                    item-clicked(event-struct) => {
+                        DiscoveryPageBridge.navigate-to-detail(event-struct);
+                    }
+                }
             }
         }
     }
