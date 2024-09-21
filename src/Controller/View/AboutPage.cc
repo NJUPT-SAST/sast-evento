@@ -1,4 +1,5 @@
 #include <Controller/AsyncExecutor.hh>
+#include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
 #include <Controller/View/AboutPage.h>
 #include <Infrastructure/Network/NetworkClient.h>
@@ -8,6 +9,7 @@
 #include <Version.h>
 #include <filesystem>
 #include <memory>
+#include <spdlog/spdlog.h>
 
 EVENTO_UI_START
 
@@ -43,26 +45,29 @@ void AboutPage::loadContributors() {
             }
 
             auto contributors = result.unwrap();
-            self.avatars.resize(contributors.size());
+            self._contributors.clear();
+            auto total = contributors.size();
 
-            for (int i = 0; i < contributors.size(); ++i) {
-                executor()
-                    ->asyncExecute(networkClient()->getFile(contributors[i].avatar_url),
-                                   [&self = *this, i](Result<std::filesystem::path> result) {
-                                       if (result.isErr()) {
-                                           self.avatars[i] = slint::Image();
-                                       } else {
-                                           self.avatars[i] = slint::Image::load_from_path(
-                                               result.unwrap().string().c_str());
-                                       }
+            for (auto const& contributor : contributors) {
+                executor()->asyncExecute(
+                    networkClient()->getFile(contributor.avatar_url),
+                    [&self = *this, &contributor, total, htmlUrl = contributor.html_url](
+                        Result<std::filesystem::path> result) {
+                        if (result.isErr()) {
+                            spdlog::warn("download avatar failed: {}", result.unwrapErr().what());
+                            self._contributors.emplace_back(evento::convert::from("", htmlUrl));
+                        } else {
+                            self._contributors.emplace_back(
+                                evento::convert::from(result.unwrap(), htmlUrl));
+                        }
 
-                                       if (i == self.avatars.size() - 1) {
-                                           self->set_contributors(
-                                               std::make_shared<slint::VectorModel<slint::Image>>(
-                                                   self.avatars));
-                                           self->set_contributors_status(Status::Normal);
-                                       }
-                                   });
+                        if (self._contributors.size() == total) {
+                            self->set_contributors(
+                                std::make_shared<slint::VectorModel<ContributorStruct>>(
+                                    self._contributors));
+                            self->set_contributors_status(Status::Normal);
+                        }
+                    });
             }
         });
 }

@@ -1,0 +1,46 @@
+import { Token, MdFontData } from "../global.slint";
+import { Empty } from "view_base.slint";
+
+export component StyledText {
+    // option
+    // basic
+    in property <string> text;
+    in property is-italic <=> _content.font-italic;
+    in property vertical-alignment <=> _content.vertical-alignment;
+    in property horizontal-alignment <=> _content.horizontal-alignment;
+    // style
+    in property <bool> is-underline;
+    in property <bool> is-strike-through;
+    in property <length> line-width: 1px;
+    in property <MdFontData> font;
+    in property <color> on-surface: Token.color.on-surface;
+    in property <color> underline-color: on-surface;
+    // implement
+    vertical-stretch: 0;
+    horizontal-stretch: 0;
+    _body := Empty {
+        _content := Text {
+            text: text;
+            font-size: font.size;
+            font-weight: font.weight;
+            color: on-surface;
+        }
+
+        _line := Rectangle {
+            height: 0px;
+            background: underline-color;
+        }
+
+        @children
+    }
+
+    states [
+        underline when is-underline: {
+            _line.y: _content.y + _content.height;
+            _line.height: line-width;
+        }
+        strike-through when is-strike-through: {
+            _line.height: line-width;
+        }
+    ]
+}

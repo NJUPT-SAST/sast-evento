@@ -2,7 +2,6 @@
 
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
-#include <Controller/Core/UiBase.h>
 
 EVENTO_UI_START
 
@@ -12,6 +11,16 @@ public:
 
 private:
     void onCreate() override;
+
+    void onShow() override;
+
+    void loadDepartmentList();
+
+    void loadDepartmentEvents(int page);
+
+    void search(std::string const& keyword);
+
+    std::vector<slint::SharedString> departments;
 };
 
 EVENTO_UI_END

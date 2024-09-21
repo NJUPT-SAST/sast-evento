@@ -6,6 +6,8 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/url/param.hpp>
+#include <boost/url/url_view.hpp>
+#include <cstdint>
 #include <filesystem>
 #include <initializer_list>
 #include <memory>
@@ -20,9 +22,26 @@ static const std::string GITHUB_API_GATEWAY = "https://api.github.com/repos";
 constexpr const char MIME_JSON[] = "application/json";
 constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencoded";
 
+static std::string firstDateTimeOfWeek() {
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    auto tm = std::localtime(&time);
+
+    // Find the start of the week (Monday)
+    int daysSinceMonday = (tm->tm_wday + 6) % 7;
+    auto startOfWeek = now - std::chrono::hours(24 * daysSinceMonday);
+
+    // Format the date
+    std::stringstream ss;
+    auto startOfWeekTime = std::chrono::system_clock::to_time_t(startOfWeek);
+    ss << std::put_time(std::gmtime(&startOfWeekTime), "%Y-%m-%dT%H:%M:%S.000Z");
+    return ss.str();
+}
+
 NetworkClient::NetworkClient(net::ssl::context& ctx)
     : _ctx(ctx)
-    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true)) {}
+    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true))
+    , _cacheManager(std::make_unique<CacheManager>()) {}
 
 NetworkClient* NetworkClient::getInstance() {
     static ssl::context ctx(ssl::context::sslv23);
@@ -31,7 +50,7 @@ NetworkClient* NetworkClient::getInstance() {
     return &s_instance;
 }
 
-Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(const std::string& code) {
+Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(std::string code) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
                                                       endpoint("/login/link"),
                                                       {{"code", code}, {"type", "0"}});
@@ -63,7 +82,7 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
     co_return Ok(entity);
 }
-Task<Result<void>> NetworkClient::refreshAccessToken(std::string const& refreshToken) {
+Task<Result<void>> NetworkClient::refreshAccessToken(std::string refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
                                                       endpoint("/refresh-token"),
                                                       {{"refreshtoken", refreshToken}});
@@ -143,10 +162,7 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
 }
 
 Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
-    std::string const& larkDepartment,
-    int page,
-    int size,
-    std::chrono::steady_clock::duration cacheTtl) {
+    std::string larkDepartment, int page, int size, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
@@ -229,9 +245,7 @@ Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(
     co_return Ok(entity);
 }
 
-Task<Result<bool>> NetworkClient::addUserFeedback(int eventId,
-                                                  int rating,
-                                                  std::string const& content) {
+Task<Result<bool>> NetworkClient::addUserFeedback(int eventId, int rating, std::string content) {
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/feedback", eventId),
@@ -242,7 +256,7 @@ Task<Result<bool>> NetworkClient::addUserFeedback(int eventId,
     co_return Ok(true);
 }
 
-Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string const& code) {
+Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/check-in", eventId), {{"code", code}}));
@@ -271,8 +285,7 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     co_return Err(Error(Error::Data, "response data type error"));
 }
 
-Task<Result<bool>> NetworkClient::subscribeDepartment(std::string const& larkDepartment,
-                                                      bool subscribe) {
+Task<Result<bool>> NetworkClient::subscribeDepartment(std::string larkDepartment, bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
@@ -288,16 +301,16 @@ Task<Result<bool>> NetworkClient::subscribeDepartment(std::string const& larkDep
     co_return Err(Error(Error::Data, "response data type error"));
 }
 
-Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent(
+Task<Result<EventQueryRes>> NetworkClient::getParticipatedEvent(
     std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/participated"),
-                                                      {},
+                                                      endpoint("/v2/client/event/query"),
+                                                      {{"isCheckedIn", "true"}},
                                                       cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    EventEntityList entity;
+    EventQueryRes entity;
     try {
         nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
@@ -307,16 +320,18 @@ Task<Result<EventEntityList>> NetworkClient::getParticipatedEvent(
     co_return Ok(entity);
 }
 
-Task<Result<EventEntityList>> NetworkClient::getSubscribedEvent(
+Task<Result<EventQueryRes>> NetworkClient::getSubscribedEvent(
     std::chrono::steady_clock::duration cacheTtl) {
+    auto startTime = firstDateTimeOfWeek();
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/subscribed"),
-                                                      {},
+                                                      endpoint("/v2/client/event/query"),
+                                                      {{"isSubscribed", "true"},
+                                                       {"start", startTime}},
                                                       cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    EventEntityList entity;
+    EventQueryRes entity;
     try {
         nlohmann::from_json(result.unwrap(), entity);
     } catch (const nlohmann::json::exception& e) {
@@ -430,8 +445,9 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
     co_return Ok(entity);
 }
 
-Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
-    http::request<http::string_body> req{http::verb::get, url.path(), 11};
+Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url) {
+    auto view = urls::url_view(url);
+    http::request<http::string_body> req{http::verb::get, view.path(), 11};
     // use cache first
     auto cacheDir = CacheManager::cacheDir();
     if (!cacheDir) {
@@ -447,12 +463,12 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
         }
     }
 
-    req.set(http::field::host, url.host_name());
+    req.set(http::field::host, view.host_name());
     req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
     req.set(http::field::accept, "*/*");
 
     // if cache not exists, download file
-    auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+    auto reply = co_await _httpsAccessManager->makeReply(view.host(), req);
     if (reply.isErr())
         co_return Err(reply.unwrapErr());
 
@@ -476,6 +492,31 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(urls::url_view url) {
         co_return Err(Error(Error::Data, "save file failed"));
     }
     co_return Ok(path);
+}
+
+void NetworkClient::clearCache() {
+    _cacheManager->clear();
+}
+
+std::string NetworkClient::getTotalCacheSizeFormatString() {
+    if (auto dir = _cacheManager->cacheDir()) {
+        std::uintmax_t size = 0;
+        for (const auto& file : std::filesystem::directory_iterator(*dir)) {
+            size += file.file_size();
+        }
+
+        if (size < 1024) {
+            return std::format("{}B", size);
+        } else if (size < 1024 * 1024) {
+            return std::format("{:.2f}KiB", static_cast<double>(size) / 1024);
+        } else if (size < 1024 * 1024 * 1024) {
+            return std::format("{:.2f}MiB", static_cast<double>(size) / 1024 / 1024);
+        } else {
+            return std::format("{:.2f}GiB", static_cast<double>(size) / 1024 / 1024 / 1024);
+        }
+    }
+
+    return "0B";
 }
 
 urls::url NetworkClient::githubEndpoint(std::string_view endpoint) {

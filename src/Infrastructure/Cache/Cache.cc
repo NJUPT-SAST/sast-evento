@@ -31,7 +31,7 @@ bool CacheManager::isExpired(const CacheEntry& entry) {
 
 std::optional<std::filesystem::path> CacheManager::cacheDir() {
     fs::path cacheFileDir;
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef PLATFORM_WINDOWS
     auto localAppData = std::getenv("LOCALAPPDATA");
     if (localAppData == nullptr) {
         spdlog::warn("LOCALAPPDATA environment variable not found");
@@ -39,7 +39,7 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     }
     cacheFileDir = fs::path(localAppData) / "Programs" / "evento";
 
-#elif __linux__
+#elif defined(PLATFORM_LINUX)
     auto xdgCacheHome = std::getenv("XDG_CACHE_HOME");
     if (xdgCacheHome == nullptr) {
         auto home = std::getenv("HOME");
@@ -51,7 +51,7 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     } else {
         cacheFileDir = fs::path(xdgCacheHome) / "evento";
     }
-#elif __APPLE__
+#elif defined(PLATFORM_APPLE)
     auto home = std::getenv("HOME");
     if (home == nullptr) {
         spdlog::warn("HOME environment variable not found");
@@ -90,16 +90,23 @@ void CacheManager::insert(const std::string& key, const CacheEntry& entry) {
 }
 
 std::optional<CacheEntry> CacheManager::get(std::string const& key) {
-    if (isExpired(_cacheMap[key]->second)) {
+    if (_cacheMap.empty()) {
+        return std::nullopt;
+    }
+
+    auto it = _cacheMap.find(key);
+
+    if (it == _cacheMap.end()) {
+        return std::nullopt;
+    }
+
+    if (isExpired(it->second->second)) {
         _currentCacheSize -= _cacheMap[key]->second.size;
         _cacheList.erase(_cacheMap[key]);
         _cacheMap.erase(key);
         return std::nullopt;
     }
-    auto it = _cacheMap.find(key);
-    if (it == _cacheMap.end()) {
-        return std::nullopt;
-    }
+
     return it->second->second;
 }
 
@@ -111,6 +118,15 @@ bool CacheManager::saveToDisk(std::string const& data, fs::path const& path) {
     }
     spdlog::warn("Failed to save cache to disk: {}", path.string());
     return false;
+}
+
+void CacheManager::clear() {
+    _cacheList.clear();
+    _cacheMap.clear();
+    _currentCacheSize = 0;
+    if (auto dir = cacheDir()) {
+        fs::remove_all(*dir);
+    }
 }
 
 } // namespace evento

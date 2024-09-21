@@ -45,7 +45,6 @@ public:
 private:
     net::ssl::context& _ctx;
     std::chrono::seconds _timeout; // respective timeout of ssl handshake & http
-    beast::flat_buffer _buffer;    // http buffer is used for reading and must be persisted
 };
 
 } // namespace evento

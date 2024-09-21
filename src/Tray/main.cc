@@ -6,11 +6,20 @@
 #include <qobjectdefs.h>
 #include <qsystemtrayicon.h>
 
+#ifdef __APPLE__
+#include <Carbon/Carbon.h>
+#endif
+
 void exitApp() {
     QApplication::exit();
 }
 
 int main(int argc, char* argv[]) {
+#ifdef __APPLE__
+    ProcessSerialNumber psn = {0, kCurrentProcess};
+    TransformProcessType(&psn, kProcessTransformToUIElementApplication);
+#endif
+
     QApplication app(argc, argv);
 
     TcpServer server;

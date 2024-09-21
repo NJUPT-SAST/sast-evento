@@ -171,7 +171,7 @@ private:
                            this](const boost::system::error_code& ec) {
             if (!ec) {
                 // ensure timer is captured
-                timer.get();
+                [[maybe_unused]] auto _timer_got = timer.get();
                 net::co_spawn(_ioc, func(), [callback](std::exception_ptr e) {
                     if (!e) {
                         slint::invoke_from_event_loop(callback);

@@ -1,37 +1,41 @@
-#pragma once
-
-#include <Infrastructure/Network/ResponseStruct.h>
-#include <app.h>
-#include <memory>
+#include <Controller/Convert.h>
+#include <chrono>
 #include <spdlog/spdlog.h>
-#include <string>
-#include <vector>
 
 namespace evento::convert {
 
 namespace details {
 
+inline time_t parseIso8601Utc(const char* date) {
+    struct tm tt = {0};
+    double seconds;
+    if (sscanf(date,
+               "%04d-%02d-%02dT%02d:%02d:%lfZ",
+               &tt.tm_year,
+               &tt.tm_mon,
+               &tt.tm_mday,
+               &tt.tm_hour,
+               &tt.tm_min,
+               &seconds)
+        != 6)
+        return -1;
+    tt.tm_sec = (int) seconds;
+    tt.tm_mon -= 1;
+    tt.tm_year -= 1900;
+    tt.tm_isdst = -1;
+#ifdef _MSC_VER
+    return _mkgmtime(&tt);
+#else
+    return timegm(&tt);
+#endif
+}
+
 slint::SharedString convertTimeRange(const std::string& startTimeStr,
                                      const std::string& endTimeStr) {
-    std::istringstream ssStart(startTimeStr);
-    std::istringstream ssEnd(endTimeStr);
-    std::chrono::sys_seconds startTp, endTp;
-
-    ssStart >> std::chrono::parse("%Y-%m-%dT%H:%M:%SZ", startTp);
-    if (ssStart.fail()) {
-        spdlog::warn("Failed to parse start-time string: {}", startTimeStr);
-        return " ";
-    }
-    ssEnd >> std::chrono::parse("%Y-%m-%dT%H:%M:%SZ", endTp);
-    if (ssEnd.fail()) {
-        spdlog::warn("Failed to parse end-time string: {}", endTimeStr);
-        return " ";
-    }
-
-    auto startTimer = std::chrono::system_clock::to_time_t(startTp);
+    auto startTimer = parseIso8601Utc(startTimeStr.c_str());
     auto startDate = *std::gmtime(&startTimer);
 
-    auto endTimer = std::chrono::system_clock::to_time_t(endTp);
+    auto endTimer = parseIso8601Utc(endTimeStr.c_str());
     auto endDate = *std::gmtime(&endTimer);
 
     std::string startStr = std::format("{:02}.{:02} {:02}:{:02}",
@@ -88,13 +92,6 @@ slint::SharedString firstUnicode(const std::string& str) {
 
 } // namespace details
 
-using EventEntityList = std::vector<EventEntity>;
-using EventStructModel = std::shared_ptr<slint::VectorModel<EventStruct>>;
-
-auto from(const auto& obj) {
-    return obj;
-}
-
 EventStruct from(const EventEntity& entity) {
     return {
         .id = entity.id,
@@ -112,13 +109,18 @@ EventStruct from(const EventEntity& entity) {
     };
 }
 
-EventStructModel from(const EventEntityList& list) {
+std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEntity>& list) {
     std::vector<EventStruct> model;
     model.reserve(list.size());
     for (auto& entity : list) {
         model.push_back(from(entity));
     }
     return std::make_shared<slint::VectorModel<EventStruct>>(model);
+}
+
+ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl) {
+    return {.avatar = slint::Image::load_from_path(avatar.string().c_str()),
+            .html_url = slint::SharedString(htmlUrl)};
 }
 
 } // namespace evento::convert

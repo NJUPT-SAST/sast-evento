@@ -1,10 +1,8 @@
 import { Token } from "../../global.slint";
 import { Page, Empty, ContentDialog } from "../../components/index.slint";
 import { AboutSlint, ScrollView } from "std-widgets.slint";
-import { SLink } from "../../modules/surrealism-ui/index.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
-import { Button, ButtonType, LoadingAnimation } from "../../components/index.slint";
-import { Avatar } from "../../modules/surrealism-ui/src/avatar/avatar.slint";
+import { Button, ButtonType, LoadingAnimation, StyledText } from "../../components/index.slint";
 
 export enum Status {
     Normal,
@@ -12,12 +10,17 @@ export enum Status {
     Error,
 }
 
+export struct ContributorStruct {
+    avatar: image,
+    html-url: string,
+}
+
 export global AboutPageBridge {
     in property <string> version:"v0.0.0-00000000";
     in property <string> update-log: "";
     in property <Status> contributors-status: Status.Normal;
     in property <Status> check-update-status: Status.Normal;
-    in property <[image]> contributors: [];
+    in property <[ContributorStruct]> contributors: [];
     in-out property <bool> show-popup: false;
     callback check-update();
     callback load-contributors();
@@ -46,6 +49,40 @@ component Divider inherits Rectangle {
     background: Token.color.outline-variant;
     width: 90%;
     height: 1px;
+}
+
+component Avatar inherits Rectangle {
+    in property <length> avatar-size: 40px;
+    in property <image> avatar;
+    in property <ImageFit> image-fit: ImageFit.contain;
+    callback clicked();
+    width: avatar-size;
+    height: avatar-size;
+    border-radius: self.width / 2;
+    clip: true;
+    Image {
+        height: root.height;
+        width: root.width;
+        source: avatar;
+        image-fit: root.image-fit;
+    }
+
+    TouchArea {
+        mouse-cursor: MouseCursor.pointer;
+        clicked => {
+            parent.clicked();
+        }
+    }
+}
+
+component Link inherits StyledText {
+    callback clicked <=> area.clicked;
+    area := TouchArea {
+        mouse-cursor: pointer;
+    }
+
+    on-surface: area.has-hover ? Token.color.primary : Token.color.on-surface;
+    is-underline: area.has-hover ? true : false;
 }
 
 export component AboutPage inherits Page {
@@ -174,10 +211,9 @@ export component AboutPage inherits Page {
                             vertical-alignment: center;
                         }
 
-                        SLink {
-                            text: "https: //evento.sast.fun";
-                            font-size: Token.font.body.large.size;
-                            font-weight: Token.font.body.large.weight;
+                        Link {
+                            text: "https://evento.sast.fun";
+                            font: Token.font.body.large;
                             clicked => {
                                 AboutPageBridge.open-web("https://evento.sast.fun");
                             }
@@ -196,10 +232,9 @@ export component AboutPage inherits Page {
                             vertical-alignment: center;
                         }
 
-                        SLink {
+                        Link {
                             text: "https://github.com/NJUPT-SAST/sast-evento";
-                            font-size: Token.font.body.large.size;
-                            font-weight: Token.font.body.large.weight;
+                            font: Token.font.body.large;
                             clicked => {
                                 AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento");
                             }
@@ -312,22 +347,19 @@ export component AboutPage inherits Page {
                             AboutPageBridge.load-contributors();
                         }
                     }
-
                     if AboutPageBridge.contributors-status == Status.Loading: LoadingAnimation {
                         color: Token.color.on-surface;
                         height: 40px;
                     }
-
                     if AboutPageBridge.contributors-status == Status.Normal: ScrollView {
                         height: 60px;
                         HorizontalLayout {
                             spacing: 15px;
-                            for img in AboutPageBridge.contributors: Avatar {
-                                avatar-size: 40px;
-                                height: 40px;
-                                width: 40px;
-                                image-fit: ImageFit.contain;
-                                avatar: img;
+                            for contributor in AboutPageBridge.contributors: Avatar {
+                                avatar: contributor.avatar;
+                                clicked => {
+                                    AboutPageBridge.open-web(contributor.html-url);
+                                }
                             }
                         }
                     }

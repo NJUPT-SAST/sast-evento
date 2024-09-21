@@ -10,6 +10,7 @@
 #include <boost/asio/this_coro.hpp>
 #include <boost/asio/use_awaitable.hpp>
 #include <boost/asio/write.hpp>
+#include <boost/dll.hpp>
 #include <boost/process.hpp>
 #include <boost/system/detail/error_code.hpp>
 #include <chrono>
@@ -34,21 +35,24 @@ SocketClient::~SocketClient() {
 
 void SocketClient::startTray() {
     bp::ipstream pipe;
-    boost::filesystem::path trayPath = boost::filesystem::current_path().parent_path();
-#if defined(EVENTO_DEBUG)
-#ifdef _WIN32
-    trayPath /= "Tray/Debug/sast-evento-tray.exe";
-#else
-    trayPath /= "Tray/Debug/sast-evento-tray";
+    boost::filesystem::path trayPath = boost::dll::program_location().parent_path();
+#ifdef EVENTO_DEBUG
+    trayPath /= "../Tray/Debug";
 #endif
+#ifdef PLATFORM_WINDOWS
+    trayPath /= "sast-evento-tray.exe";
 #else
-#ifdef _WIN32
-    trayPath = "sast-evento-tray.exe";
-#else
-    trayPath = "/usr/bin/sast-evento-tray";
+    trayPath /= "sast-evento-tray";
 #endif
-#endif
-    bp::child tray(trayPath, bp::std_out > pipe, bp::std_err > bp::null);
+
+    std::error_code ec;
+    bp::child tray(trayPath, bp::std_out > pipe, bp::std_err > bp::null, ec);
+    if (ec) {
+        spdlog::error("Failed to start tray: file = {}, reason = {}",
+                      trayPath.string(),
+                      ec.message());
+        return;
+    }
 
     std::string line;
     if (!pipe || !std::getline(pipe, line) || line.empty()) {
