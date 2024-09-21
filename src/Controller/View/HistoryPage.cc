@@ -24,6 +24,10 @@ void HistoryPage::onCreate() {
     self->on_comment([this](int eventId, int rating, slint::SharedString content) {
         feedbackEvent(eventId, rating, content.data());
     });
+    self->on_navigate_to_detail([this](EventStruct eventStruct) {
+        spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
+        bridge.getViewManager().navigateTo(ViewName::DetailPage, eventStruct);
+    });
 }
 
 void HistoryPage::onShow() {

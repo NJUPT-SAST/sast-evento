@@ -156,21 +156,24 @@ export component HistoryPage inherits Page {
             font-weight: Token.font.headline.medium.weight;
         }
 
-        if HistoryPageBridge.state == PageState.loading: Rectangle {
-            LoadingAnimation {
-                width: 40px;
-                height: 40px;
+        Rectangle {
+            if HistoryPageBridge.state == PageState.loading: Rectangle {
+                LoadingAnimation {
+                    width: 40px;
+                    height: 40px;
+                }
             }
-        }
-        if HistoryPageBridge.state == PageState.error: Rectangle {
-            Button {
-                type: ButtonType.filled-tonal;
-                content: "重新加载";
-                clicked => {
-                    HistoryPageBridge.load-events(HistoryPageBridge.current-page-index, HistoryPageBridge.page-size);
+            if HistoryPageBridge.state == PageState.error: Rectangle {
+                Button {
+                    type: ButtonType.filled-tonal;
+                    content: "重新加载";
+                    clicked => {
+                        HistoryPageBridge.load-events(HistoryPageBridge.current-page-index, HistoryPageBridge.page-size);
+                    }
                 }
             }
         }
+
         if HistoryPageBridge.state == PageState.normal: ScrollView {
             VerticalLayout {
                 spacing: 10px;
