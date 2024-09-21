@@ -1,4 +1,3 @@
-#include "app.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
@@ -7,7 +6,6 @@
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <ranges>
 #include <slint.h>
-#include <slint_string.h>
 #include <spdlog/spdlog.h>
 
 EVENTO_UI_START
@@ -59,26 +57,22 @@ void HistoryPage::loadHistoryEvents(int page, int size) {
 
             auto trans = [](const auto& e) { return e.id; };
             for (const auto& eventId : res.elements | std::views::transform(trans)) {
-                executor()
-                    ->asyncExecute(networkClient()->getUserFeedback(eventId, 0min),
-                                   [&self = *this,
-                                    feedbackSize](Result<std::optional<FeedbackEntity>> result) {
-                                       if (result.isErr()) {
-                                           spdlog::warn("feedback load failed: {}",
-                                                        result.unwrapErr().what());
-                                           self.feedbacks.emplace_back(false, false, 0, "");
-                                           return;
-                                       }
+                executor()->asyncExecute(
+                    networkClient()->getUserFeedback(eventId, 0min),
+                    [&self = *this, feedbackSize](Result<std::optional<FeedbackEntity>> result) {
+                        if (result.isErr()) {
+                            spdlog::warn("feedback load failed: {}", result.unwrapErr().what());
+                            self.feedbacks.emplace_back(false, false, 0, "");
+                        } else {
+                            self.feedbacks.emplace_back(convert::from(result.unwrap()));
+                        }
 
-                                       self.feedbacks.emplace_back(convert::from(result.unwrap()));
-
-                                       if (self.feedbacks.size() == feedbackSize) {
-                                           self->set_feedbacks(
-                                               std::make_shared<slint::VectorModel<FeedbackStruct>>(
-                                                   self.feedbacks));
-                                           self->set_state(PageState::Normal);
-                                       }
-                                   });
+                        if (self.feedbacks.size() == feedbackSize) {
+                            self->set_feedbacks(std::make_shared<slint::VectorModel<FeedbackStruct>>(
+                                self.feedbacks));
+                            self->set_state(PageState::Normal);
+                        }
+                    });
             }
         });
 }
