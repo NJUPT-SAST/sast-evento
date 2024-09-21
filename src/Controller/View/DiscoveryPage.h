@@ -16,7 +16,8 @@ private:
 
     void loadActiveEvents();
     void loadLatestEvents();
-    void imageAutoSlide();
+    void loadHomeSlides();
+    void slidesAutoRotation();
 };
 
 EVENTO_UI_END

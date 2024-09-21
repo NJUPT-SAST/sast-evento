@@ -22,12 +22,13 @@ void DiscoveryPage::onCreate() {
         spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
         bridge.getViewManager().navigateTo(ViewName::DetailPage, eventStruct);
     });
+    slidesAutoRotation();
 }
 
 void DiscoveryPage::onShow() {
     loadActiveEvents();
     loadLatestEvents();
-    imageAutoSlide();
+    loadHomeSlides();
 }
 
 void DiscoveryPage::loadActiveEvents() {
@@ -64,7 +65,33 @@ void DiscoveryPage::loadLatestEvents() {
                              });
 }
 
-void DiscoveryPage::imageAutoSlide() {
+void DiscoveryPage::loadHomeSlides() {
+    auto& self = *this;
+    executor()->asyncExecute(
+        networkClient()->getHomeSlide(10min), [&self = *this, this](Result<SlideEntityList> result) {
+            if (result.isErr()) {
+                return;
+            }
+            auto list = result.unwrap();
+            auto total = std::min(static_cast<std::size_t>(3), list.size());
+            for (int i = 0; i < total; ++i) {
+                executor()->asyncExecute(networkClient()->getFile(list[i].url),
+                                         [&self = *this, i](Result<std::filesystem::path> result) {
+                                             if (result.isErr()) {
+                                                 spdlog::warn("image load failed: {}",
+                                                              result.unwrapErr().what());
+                                                 return;
+                                             }
+                                             self->get_carousel_source()->set_row_data(
+                                                 i,
+                                                 slint::Image::load_from_path(
+                                                     result.unwrap().string().c_str()));
+                                         });
+            }
+        });
+}
+
+void DiscoveryPage::slidesAutoRotation() {
     executor()->asyncExecute([]() -> Task<void> { co_return; },
                              [&self = *this]() {
                                  int cntIndex = self->get_image_index();
