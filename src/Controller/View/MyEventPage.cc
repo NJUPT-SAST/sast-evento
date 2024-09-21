@@ -30,6 +30,9 @@ void MyEventPage::onShow() {
 void MyEventPage::get_events(slint::SharedString part){
     auto& self = *this;
     evento::EventQueryRes eventlists;
+    slint::VectorModel<int> id_model;
+    slint::VectorModel<EventStruct> event_model;
+    int num = 0;
     if (part == slint::SharedString("active")) {
         evento::executor()->asyncExecute(networkClient()->getActiveEventList(), [&](Result<evento::EventQueryRes> list){
         if (list.isOk()){
@@ -47,6 +50,10 @@ void MyEventPage::get_events(slint::SharedString part){
             return ;
         }
     });
+        for(auto & element : eventlists.elements) {
+            id_model.push_back(element.id);
+        }
+        self->set_id(std::make_shared<slint::VectorModel<int>>(id_model));
     }
     else if (part == slint::SharedString("end")) {
         evento::executor()->asyncExecute(networkClient()->getParticipatedEvent(), [&](Result<EventQueryRes> list){
@@ -57,19 +64,22 @@ void MyEventPage::get_events(slint::SharedString part){
         }
     });
     }
-    slint::VectorModel<int> id_model;
-    for(auto & element : eventlists.elements) {
-        id_model.push_back(element.id);
-    }
-    self->set_id(std::make_shared<slint::VectorModel<int>>(id_model));
-    slint::VectorModel<EventStruct> event_model;
+    num = (int)eventlists.elements.size();
     for (auto & element : eventlists.elements) {
         event_model.push_back(convert::from(element));
     }
-    self->set_event(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
+    if (part == "subscriptions") {
+    self->set_event_sub(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
+    self->set_num_sub(num);
+    }else if (part == "end") {
+    self->set_event_end(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
+    self->set_num_end(num);
+    }else if (part == "active") {
+    self->set_event_active(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
+    self->set_num_active(num);
+    }
 }
 
-// ToDo implement this function about eventIde
 bool MyEventPage::check_code(slint::SharedString code, int id) {
     auto& self = *this;
     bool is_check_in = false;
