@@ -88,7 +88,8 @@ void HistoryPage::feedbackEvent(int eventId, int rating, std::string content) {
                                                                            MessageType::Error);
                                return;
                            }
-                           if (result.unwrap()) {
+                           auto success = result.unwrap();
+                           if (success) {
                                self.bridge.getMessageManager().showMessage("反馈成功",
                                                                            MessageType::Success);
                            } else {
