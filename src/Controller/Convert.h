@@ -23,4 +23,6 @@ std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEnt
 
 ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl);
 
+FeedbackStruct from(const std::optional<FeedbackEntity>& entity);
+
 } // namespace evento::convert

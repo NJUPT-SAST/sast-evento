@@ -1,8 +1,10 @@
 #pragma once
 
+#include "app.h"
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
+#include <vector>
 
 EVENTO_UI_START
 
@@ -12,6 +14,14 @@ public:
 
 private:
     void onCreate() override;
+
+    void onShow() override;
+
+    void loadHistoryEvents(int page, int size);
+
+    void feedbackEvent(int eventId, int rating, std::string content);
+
+    std::vector<FeedbackStruct> feedbacks;
 };
 
 EVENTO_UI_END

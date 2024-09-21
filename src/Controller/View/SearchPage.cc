@@ -80,7 +80,7 @@ void SearchPage::loadDepartmentEvents(int page) {
 
     executor()->asyncExecute(
         networkClient()->getDepartmentEventList(std::string(self->get_current_department().text),
-                                                page,
+                                                page + 1,
                                                 self->get_page_size()),
         [&self = *this](Result<EventQueryRes> result) {
             if (result.isErr()) {
