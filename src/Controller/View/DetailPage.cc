@@ -1,3 +1,4 @@
+#include "app.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
@@ -30,7 +31,9 @@ void DetailPage::onShow() {
     auto& self = *this;
     self->set_event_model(self.bridge.getViewManager().getData<EventStruct>());
     loadEvent();
-    loadFeedback();
+    if (self->get_event_model().state == EventState::Completed) {
+        loadFeedback();
+    }
 }
 
 void DetailPage::loadEvent() {
