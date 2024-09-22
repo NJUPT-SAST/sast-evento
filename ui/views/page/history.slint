@@ -1,14 +1,7 @@
 import { Token } from "../../global.slint";
-import { Page, Button, EventStruct, ButtonType,PageState, LoadingAnimation, Card } from "../../components/index.slint";
+import { Page, Button, EventStruct, ButtonType, PageState, LoadingAnimation, Card, FeedbackStruct } from "../../components/index.slint";
 import { SStar, SPagination } from "../../modules/surrealism-ui/index.slint";
 import { ScrollView, LineEdit } from "std-widgets.slint";
-
-export struct FeedbackStruct {
-    success: bool,
-    has-feedbacked: bool,
-    rate: int,
-    content: string,
-}
 
 export global HistoryPageBridge {
     in property <[EventStruct]> events;
@@ -38,8 +31,9 @@ component CommentItem {
             line-edit := LineEdit {
                 width: 80%;
                 height: 40px;
+                font-size: Token.font.body.large.size;
                 text: feedback.content;
-                placeholder-text: "对本次活动有什么想说的？";
+                placeholder-text: "参与完本次活动，有什么想说的吗，快告诉我们吧";
                 enabled: !feedback.has-feedbacked;
             }
 

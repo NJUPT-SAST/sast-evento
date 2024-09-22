@@ -69,6 +69,8 @@ public:
         int size = 10,
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
+    Task<Result<EventQueryRes>> getEventById(int eventId);
+
     Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params,
                                              std::chrono::steady_clock::duration cacheTtl = 1min);
 

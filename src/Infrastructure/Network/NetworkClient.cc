@@ -184,6 +184,25 @@ Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     co_return Ok(entity);
 }
 
+Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"id", std::to_string(eventId)}}),
+                                                      {},
+                                                      0min);
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventQueryRes entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
 Task<Result<EventQueryRes>> NetworkClient::getEventList(
     std::initializer_list<urls::param> params, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
