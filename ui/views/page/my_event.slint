@@ -31,39 +31,7 @@ export global MyEventPageBridge {
     pure callback get-code(string,int)->bool;
     pure callback show-mess(string);
 //
-    pure callback return-array-sub()->[int];
-    pure callback return-num-sub()->int;
-    pure callback return-array-start()->[int];
-    pure callback return-num-end()->int;
 }
-
-// export component MyEventPage inherits Page {
-//     // TODO: implement MyEvent
-//     // optional
-//     background := Empty { }
-
-//     layout := VerticalLayout {
-//         visible: false;
-//         x: 0;
-//         y: 0;
-//         width: 100%;
-//         height: 100%;
-//     }
-
-//     body := Empty {
-//         x: 0;
-//         y: 0;
-//         width: 100%;
-//         height: 100%;
-//         placeholder := Rectangle {
-//             border-width: 4px;
-//             border-color: red;
-//             Text {
-//                 text: "活动日程（我的活动）\n  未开始、进行中、已结束";
-//             }
-//         }
-//     }
-// }
 
 export component result-success inherits Window {
     property <bool> is_show : false;
@@ -114,6 +82,7 @@ export component CodeGet inherits Window {
     height: 90px;
     property <bool> is_show : false;
     property <bool> is-check-in : false;
+    in-out property <int> id : 0;
     visible: is_show;
     code-txt := LineEdit {
         width: 150px;
@@ -161,7 +130,7 @@ export component CodeGet inherits Window {
     }
     //检查code
     public function judge(code:string) {
-        is-check-in = MyEventPageBridge.get-code(code-txt.text,MyEventPageBridge.code_id);
+        is-check-in = MyEventPageBridge.get-code(code-txt.text,id);
         if(is-check-in){
             success.open();
         }else{
@@ -209,15 +178,7 @@ component ReviewButton inherits SButton {
     clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
 }
 export component SignCard{
-    get := CodeGet{ 
-        x: (parent.x)+80px;
-    }
-    SignButton {
-        x: (parent.width)*0.75 + parent.x;
-        clicked => {
-            get.open();
-        }
-    }
+    @children
 }
 
 export component ReviewCard{
@@ -227,7 +188,7 @@ export component ReviewCard{
 }
 
 component MyEventCard inherits EventCard {
-    in-out property <int> count: -1;
+    in-out property <int> count: 0;
 }
 
 component Button-refresh inherits SButton{
@@ -240,11 +201,6 @@ component Button-refresh inherits SButton{
     background: Token.color.surface;
 }
 export component MyEventPage inherits Page {
-
-    // ScrollView {
-        background := Empty { }
-
-        layout := Empty{}
 
         body := Empty {
             x: 0;
@@ -272,10 +228,9 @@ export component MyEventPage inherits Page {
                         font-weight: 30;
                         color: Token.color.on-surface;
                     }
-                    for index in MyEventPageBridge.return-array-sub(): Rectangle {
-                        MyEventCard {
-                            //count: MyEventPageBridge.;
-                            count: 0;
+                    for index in MyEventPageBridge.event_sub.length: Rectangle {
+                        card := MyEventCard {
+                            count: index;
                             width: sub.width;
                             height: 110px;
                             x: txt-s.x;
@@ -288,7 +243,18 @@ export component MyEventPage inherits Page {
                                 location: MyEventPageBridge.event_sub[self.count].location,
                                 description: MyEventPageBridge.event_sub[self.count].description
                             };
-                            SignCard {}
+                            SignCard {
+                                get := CodeGet{ 
+                                    x: (parent.x)+80px;
+                                    id: MyEventPageBridge.id[card.count];
+                                }
+                                SignButton {
+                                    x: (parent.width)*0.75 + parent.x;
+                                    clicked => {
+                                        get.open();
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -306,9 +272,9 @@ export component MyEventPage inherits Page {
                         font-weight: 30;
                         color: Token.color.on-surface;
                     }
-                    for index in MyEventPageBridge.return-array-start(): Rectangle {
+                    for index in MyEventPageBridge.event_sub.length: Rectangle {
                         MyEventCard {
-                            count: 0;
+                            count: index;
                             width: active.width;
                             height: 110px;
                             x: txt-a.x;
@@ -379,5 +345,4 @@ export component MyEventPage inherits Page {
                 border-width: 4px;
             }
         }
-    //}
 }
