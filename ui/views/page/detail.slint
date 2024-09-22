@@ -1,8 +1,7 @@
 import { Token } from "../../global.slint";
 import { Page, Empty, Button, EventStruct, EventState, FeedbackStruct, ContentDialog, PageState, LoadingAnimation } from "../../components/index.slint";
-import { VerticalBox, LineEdit, ScrollView, TextEdit } from "std-widgets.slint";
+import { VerticalBox, LineEdit, ScrollView } from "std-widgets.slint";
 import { SStar} from "../../modules/surrealism-ui/index.slint";
-
 
 export global DetailPageBridge {
     callback load-event();
@@ -10,21 +9,8 @@ export global DetailPageBridge {
     callback feedback(int, string);
     callback check-in(string);
     callback subscribe(bool);
-    in property <EventStruct> event-model: {
-        id: 1,
-        summary: "软件研发部 C++组授课12314321232432",
-        summary-abbr: "软",
-        description: "软件研发部 C++组授课",
-        time: "9月1日 14:00-15:00",
-        location: "大学生活动中心 101中区",
-        tag: "C++",
-        larkMeetingRoomName: "大学生活动中心 101中区",
-        larkDepartmentName: "C++组",
-        state: EventState.Active,
-        is-subscribed: false,
-        is-checkIn: false
-    };
-    in property <FeedbackStruct> feedback-model: { rate: 5, content: "这次活动很棒", has-feedbacked: false };
+    in property <EventStruct> event-model;
+    in property <FeedbackStruct> feedback-model;
     in property <PageState> state: normal;
     in property <PageState> feedback-state: normal;
     in property <PageState> subscribe-state: normal;
@@ -162,21 +148,19 @@ export component DetailPage inherits Page {
 
                 EventInfoBlock { }
 
-                Rectangle {
-                    if DetailPageBridge.state == PageState.loading: Rectangle {
-                        LoadingAnimation {
-                            width: 40px;
-                            height: 40px;
-                        }
+                if DetailPageBridge.state == PageState.loading: Rectangle {
+                    LoadingAnimation {
+                        width: 40px;
+                        height: 40px;
                     }
+                }
 
-                    if DetailPageBridge.state == PageState.error: Rectangle {
-                        Button {
-                            type: filled-tonal;
-                            content: "重新加载";
-                            clicked => {
-                                DetailPageBridge.load-feedback();
-                            }
+                if DetailPageBridge.state == PageState.error: Rectangle {
+                    Button {
+                        type: filled-tonal;
+                        content: "重新加载";
+                        clicked => {
+                            DetailPageBridge.load-feedback();
                         }
                     }
                 }

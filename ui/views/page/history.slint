@@ -1,7 +1,7 @@
 import { Token } from "../../global.slint";
 import { Page, Button, EventStruct, ButtonType, PageState, LoadingAnimation, Card, FeedbackStruct } from "../../components/index.slint";
 import { SStar, SPagination } from "../../modules/surrealism-ui/index.slint";
-import { ScrollView, TextEdit } from "std-widgets.slint";
+import { ScrollView, LineEdit } from "std-widgets.slint";
 
 export global HistoryPageBridge {
     in property <[EventStruct]> events;
@@ -28,7 +28,7 @@ component CommentItem {
 
         HorizontalLayout {
             spacing: 8px;
-            line-edit := TextEdit {
+            line-edit := LineEdit {
                 width: 80%;
                 height: 40px;
                 font-size: Token.font.body.large.size;
