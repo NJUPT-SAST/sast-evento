@@ -12,7 +12,7 @@
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build",
             "installDir": "${sourceDir}/build/install/${presetName}",
-            "toolchainFile": "D:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
         },
         {
             "name": "native",
