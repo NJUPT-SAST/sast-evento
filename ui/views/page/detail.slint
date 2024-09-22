@@ -7,7 +7,7 @@ import { SStar} from "../../modules/surrealism-ui/index.slint";
 export global DetailPageBridge {
     callback load-event();
     callback load-feedback();
-    callback feedback(int, int, string);
+    callback feedback(int, string);
     callback check-in(string);
     callback subscribe(bool);
     in property <EventStruct> event-model: {
@@ -25,7 +25,9 @@ export global DetailPageBridge {
         is-checkIn: false
     };
     in property <FeedbackStruct> feedback-model: { rate: 5, content: "这次活动很棒", has-feedbacked: false };
-    in property <PageState> state;
+    in property <PageState> state: normal;
+    in property <PageState> feedback-state: normal;
+    in property <PageState> subscribe-state: normal;
 }
 
 component IconText {
@@ -36,6 +38,7 @@ component IconText {
         alignment: start;
         Image {
             source: root.icon;
+            width: 18px;
         }
 
         Text {
@@ -128,7 +131,7 @@ export component DetailPage inherits Page {
         cancel-btn-text: "取消";
 
         confirm => {
-            debug("confirm ", text-edit.text);
+            DetailPageBridge.check-in(text-edit.text);
             dialog.close();
         }
 
@@ -193,11 +196,11 @@ export component DetailPage inherits Page {
                             font-weight: Token.font.title.large.weight;
                         }
 
-                        SStar {
+                        star := SStar {
                             score: DetailPageBridge.feedback-model.rate;
                         }
 
-                        LineEdit {
+                        content := LineEdit {
                             font-size: Token.font.body.large.size;
                             placeholder-text: "参与完本次活动，有什么想说的吗，快告诉我们吧";
                             text: DetailPageBridge.feedback-model.content;
@@ -209,6 +212,14 @@ export component DetailPage inherits Page {
                                 type: filled-tonal;
                                 content: "提交";
                                 disable: DetailPageBridge.feedback-model.rate == 0 || DetailPageBridge.feedback-model.has-feedbacked;
+                                have-icon: DetailPageBridge.feedback-state == PageState.loading;
+                                LoadingAnimation {
+                                    color: Token.color.on-surface;
+                                }
+
+                                clicked => {
+                                    DetailPageBridge.feedback(star.score, content.text);
+                                }
                             }
                         }
                     }
@@ -221,9 +232,17 @@ export component DetailPage inherits Page {
             HorizontalLayout {
                 spacing: 20px;
                 Button {
+                    have-icon: DetailPageBridge.subscribe-state == PageState.loading;
                     type: filled;
                     content: DetailPageBridge.event-model.is-subscribed ? "取消报名" : "报名";            
-          disable: DetailPageBridge.event-model.state != EventState.SigningUp;
+                    disable: DetailPageBridge.event-model.state != EventState.SigningUp;
+                    LoadingAnimation {
+                        color: Token.color.on-surface;
+                    }
+
+                    clicked => {
+                        DetailPageBridge.subscribe(!DetailPageBridge.event-model.is-subscribed);
+                    }
                 }
 
                 Button {
