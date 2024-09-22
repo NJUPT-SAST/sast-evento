@@ -142,7 +142,7 @@ export component CodeGet inherits Window {
 export component ForMore inherits SLink {
     theme: Dark;
     text: "查看更多";
-    font-size: 20px;
+    font-size: 15px;
     clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
 }
 
@@ -192,23 +192,24 @@ component MyEventCard inherits EventCard {
 }
 
 component Button-refresh inherits SButton{
-    width: 40px;
+    width: 60px;
     height: 30px;
     text: "";
     Text {
         text: "刷新页面";
+        font-size: 10px;
     }
     background: Token.color.surface;
+    border-color: Token.color.surface-container-highest;
 }
 export component MyEventPage inherits Page {
-
         body := Empty {
             x: 0;
             y: 0;
             width: 100%;
             height: 100%;
             Button-refresh {
-                x: 800px;
+                x: active.x + 50px;
                 y: 10px;
                 clicked => {MyEventPageBridge.show-mess("subscriptions");
                             MyEventPageBridge.show-mess("active");
@@ -218,8 +219,8 @@ export component MyEventPage inherits Page {
                 sub := Empty {  
                     x: root.x;
                     y: root.y;
-                    height: 100%;
-                    width: 48%;
+                    height: root.height*0.9;
+                    width: root.width*0.45;
                     txt-s := SText {
                         x: parent.x;
                         y: parent.y;
@@ -228,30 +229,36 @@ export component MyEventPage inherits Page {
                         font-weight: 30;
                         color: Token.color.on-surface;
                     }
-                    for index in MyEventPageBridge.event_sub.length: Rectangle {
-                        card := MyEventCard {
-                            count: index;
-                            width: sub.width;
-                            height: 110px;
-                            x: txt-s.x;
-                            y: txt-s.y+35px+self.count*self.height*1.05;
-                            event: {
-                                id: MyEventPageBridge.event_sub[self.count].id,
-                                summary: MyEventPageBridge.event_sub[self.count].summary,
-                                summary-abbr: "软",
-                                time: MyEventPageBridge.event_sub[self.count].time,
-                                location: MyEventPageBridge.event_sub[self.count].location,
-                                description: MyEventPageBridge.event_sub[self.count].description
-                            };
-                            SignCard {
-                                get := CodeGet{ 
-                                    x: (parent.x)+80px;
-                                    id: card.event.id;
-                                }
-                                SignButton {
-                                    x: (parent.width)*0.75 + parent.x;
-                                    clicked => {
-                                        get.open();
+                    s1 := ScrollView {
+                        x: root.x;
+                        y: root.y+10px;
+                        width: sub.width;
+                        height: sub.height;
+                        viewport-height: sub.height*1.5;
+                        viewport-width: sub.width;
+                        for index in MyEventPageBridge.event_sub.length: Rectangle {
+                            card := MyEventCard {
+                                count: index;
+                                width: s1.width*0.9;
+                                height: 90px;
+                                event: {
+                                    id: MyEventPageBridge.event_sub[self.count].id,
+                                    summary: MyEventPageBridge.event_sub[self.count].summary,
+                                    summary-abbr: "软",
+                                    time: MyEventPageBridge.event_sub[self.count].time,
+                                    location: MyEventPageBridge.event_sub[self.count].location,
+                                    description: MyEventPageBridge.event_sub[self.count].description
+                                };
+                                SignCard {
+                                    get := CodeGet{ 
+                                        x: (parent.x)+80px;
+                                        id: card.event.id;
+                                    }
+                                    SignButton {
+                                        x: (parent.width)*0.75 + parent.x;
+                                        clicked => {
+                                            get.open();
+                                        }
                                     }
                                 }
                             }
@@ -260,10 +267,10 @@ export component MyEventPage inherits Page {
                 }
                 //active板块
                 active := Empty{
-                    x: root.x+sub.width;
+                    x: root.x+sub.width/2;
                     y: root.y;
-                    height: 50%;
-                    width: 48%;
+                    height: root.height*0.5;
+                    width: root.width*0.45;
                     txt-a := SText{
                         x: parent.x;
                         y: parent.y;
@@ -272,28 +279,34 @@ export component MyEventPage inherits Page {
                         font-weight: 30;
                         color: Token.color.on-surface;
                     }
-                    for index in MyEventPageBridge.event_sub.length: Rectangle {
-                        MyEventCard {
-                            count: index;
-                            width: active.width;
-                            height: 110px;
-                            x: txt-a.x;
-                            y: txt-a.y+35px+self.count*self.height*1.05;
-                            event: {
-                                id: MyEventPageBridge.event_active[self.count].id,
-                                summary: MyEventPageBridge.event_active[self.count].summary,
-                                summary-abbr: "软",
-                                time: MyEventPageBridge.event_active[self.count].time,
-                                location: MyEventPageBridge.event_active[self.count].location,
-                                description: MyEventPageBridge.event_active[self.count].description
-                            };
+                    s2 := ScrollView {
+                        x: active.x;
+                        y: active.y+10px;
+                        width: sub.width;
+                        height: sub.height*0.5;
+                        viewport-height: active.height*1.5;
+                        viewport-width: active.width;
+                        for index in MyEventPageBridge.event_sub.length: Rectangle {
+                            MyEventCard {
+                                count: index;
+                                width: s2.width*0.9;
+                                height: 90px;
+                                event: {
+                                    id: MyEventPageBridge.event_active[self.count].id,
+                                    summary: MyEventPageBridge.event_active[self.count].summary,
+                                    summary-abbr: "软",
+                                    time: MyEventPageBridge.event_active[self.count].time,
+                                    location: MyEventPageBridge.event_active[self.count].location,
+                                    description: MyEventPageBridge.event_active[self.count].description
+                                };
+                            }
                         }
                     }
                 }
                 //end板块
                 end := Empty{
                     x: active.x;
-                    y: active.y+active.height*1.01;
+                    y: active.y+active.height/2;
                     height: 24%;
                     width: 48%;
                     txt-e := SText{
@@ -305,15 +318,16 @@ export component MyEventPage inherits Page {
                         color: Token.color.on-surface;
                     }
                     link := ForMore {
-                        x: txt-e.x;
+                        width: 100px;
+                        x: txt-e.x+100px;
                         y: txt-e.y;
                     }
                     MyEventCard {
                         count: 0; //本页面只展示一个活动
-                        width: end.width;
-                        height: 110px;
-                        x: link.x;
-                        y: link.y+30px;
+                        width: end.width*0.9;
+                        height: 90px;
+                        x: end.x;
+                        y: end.y+30px;
                         event: {
                             id: MyEventPageBridge.event_end[0].id,
                             summary: MyEventPageBridge.event_end[0].summary,
@@ -323,21 +337,6 @@ export component MyEventPage inherits Page {
                             description: MyEventPageBridge.event_end[0].description
                         };
                         ReviewCard {}
-                    }
-                }
-                //cancel板块（只提供了标题）
-                cancel := Empty{
-                    x: end.x;
-                    y: end.y+end.height*1.01;
-                    height: 24%;
-                    width: 48%;
-                    txt-c := SText{
-                        x: parent.x;
-                        y: parent.y;
-                        text: "已取消:";
-                        font-size: 25px;
-                        font-weight: 30;
-                        color: Token.color.on-surface;
                     }
                 }
             
