@@ -1,229 +1,239 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
-import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
-import { VerticalBox, HorizontalBox, LineEdit, TextEdit, ScrollView } from "std-widgets.slint";
-import { SIcon, SCatalog, SStar, SButton } from "../../modules/surrealism-ui/index.slint";
-import { TimeLine } from "../../modules/surrealism-ui/src/timeline/timeline.slint";
+import { Page, Empty, Button, EventStruct, EventState, FeedbackStruct, ContentDialog, PageState, LoadingAnimation } from "../../components/index.slint";
+import { VerticalBox, LineEdit, ScrollView, TextEdit } from "std-widgets.slint";
+import { SStar} from "../../modules/surrealism-ui/index.slint";
 
 
 export global DetailPageBridge {
-    callback get-event-info();
-    callback name();
-    in-out property <string> event-name: "软件研发部 C++组授课";
-    in-out property <string> event-status: "报名中";
-    in-out property <[{icon: image, text: string}]> event-model: [
-        { icon: Token.image.icon.time, text: "9月1日 14:00-15:00" },
-        { icon: Token.image.icon.locate, text: "大学生活动中心 101中区" },
-        { icon: Token.image.icon.department, text: "C++组" },
-        { icon: Token.image.icon.category, text: "软研授课" },
-        { icon: Token.image.icon.tag, text: "C++" },
-        { icon: Token.image.icon.topic, text: "输入输出流" },
-    ];
-}
-
-component CommentBlock {
-    in-out property <string> comment_text;
-    Rectangle {
-        border-radius: 20px;
-        background: Token.color.surface-container;
-        Text {
-            x: 20px;
-            y: 10px;
-            text: "反馈";
-            horizontal-alignment: TextHorizontalAlignment.center;
-            vertical-alignment: TextVerticalAlignment.center;
-        }
-
-        Rectangle {
-            x: 20px;
-            y: 47px;
-            height: parent.height - self.y - self.x;
-            width: parent.width - 2 * self.x;
-            border-radius: 10px;
-            background: Token.color.surface-container-high;
-            TextEdit {
-                visible: self.height > 40px ? true : false;
-                enabled: true;
-                font-size: 16px;
-                wrap: char-wrap;
-                horizontal-alignment: TextHorizontalAlignment.left;
-                opacity: 1;
-                x: 10px;
-                y: 10px;
-                width: parent.width - 2 * self.x;
-                height: btn.y - 5px - self.y;
-                placeholder-text: "请评价一下吧";
-            }
-
-            Text {
-                visible: self.height > 40px ? false : true;
-                x: 10px;
-                y: 10px;
-                width: parent.width - 2 * self.x;
-                height: btn.y - 5px - self.y;
-                text: "显示不下了啦QAQ";
-                font-size: 16px;
-            }
-
-            btn := SButton {
-                text: "提交";
-                width: 60px;
-                height: 20px;
-                x: parent.width - self.width - 12px;
-                y: parent.height - self.height - 12px;
-            }
-
-            SStar {
-                score: 3;
-                width: 100px;
-                height: btn.height;
-                x: btn.x - self.width - 12px;
-                y: btn.y;
-            }
-        }
-    }
+    callback load-event();
+    callback load-feedback();
+    callback feedback(int, int, string);
+    callback check-in(string);
+    callback subscribe(bool);
+    in property <EventStruct> event-model: {
+        id: 1,
+        summary: "软件研发部 C++组授课12314321232432",
+        summary-abbr: "软",
+        description: "软件研发部 C++组授课",
+        time: "9月1日 14:00-15:00",
+        location: "大学生活动中心 101中区",
+        tag: "C++",
+        larkMeetingRoomName: "大学生活动中心 101中区",
+        larkDepartmentName: "C++组",
+        state: EventState.Active,
+        is-subscribed: false,
+        is-checkIn: false
+    };
+    in property <FeedbackStruct> feedback-model: { rate: 5, content: "这次活动很棒", has-feedbacked: false };
+    in property <PageState> state;
 }
 
 component IconText {
     in property <image> icon;
     in property <string> text;
     HorizontalLayout {
-        spacing: root.width * 5%;
-        icon := Image {
-            height: min(root.height, root.width);
-            width: self.height;
+        spacing: 5px;
+        alignment: start;
+        Image {
             source: root.icon;
         }
 
         Text {
-            height: root.height;
-            width: root.width - parent.spacing - icon.width;
             text: root.text;
             vertical-alignment: TextVerticalAlignment.center;
             font-size: 16px;
+            wrap: TextWrap.char-wrap;
         }
     }
 }
 
 component HighlightBlock {
-    in property <string> text: "Test content";
-    Rectangle {
-        width: root.width;
-        height: 40px;
+    pure function state-to-text(state: EventState) -> string {
+        if (state == EventState.SigningUp) {
+            return "报名中";
+        } else if (state == EventState.Active) {
+            return "进行中";
+        } else if (state == EventState.Completed) {
+            return "已结束";
+        } else if (state == EventState.Cancelled) {
+            return "已取消";
+        } else {
+            return "未知状态";
+        }
+    }
+    in property <EventState> state;
+    HorizontalLayout {
+        spacing: 10px;
         Rectangle {
-            x: 0px;
-            y: 0px;
             width: 7px;
-            height: 100%;
             background: Token.color.primary;
         }
 
         Text {
-            x: 20px;
-            y: 0px;
-            width: parent.width - self.x;
-            height: 100%;
-            text: root.text;
-            font-size: 30px;
+            text: state-to-text(root.state);
+            font-size: Token.font.title.large.size;
+            font-weight: Token.font.title.large.weight;
+            vertical-alignment: center;
         }
     }
 }
 
 component EventInfoBlock {
-    // in property <[{icon: image, text: string}]> model: [
-    //     { icon: Token.image.icon.time, text: "9月1日 14:00-15:00" },
-    //     { icon: Token.image.icon.locate, text: "大学生活动中心 101中区" },
-    //     { icon: Token.image.icon.department, text: "C++组" },
-    //     { icon: Token.image.icon.category, text: "软研授课" },
-    //     { icon: Token.image.icon.tag, text: "C++" },
-    //     { icon: Token.image.icon.topic, text: "输入输出流" },
-    // ];
     VerticalLayout {
-        x: 0px;
-        y: 10px;
         spacing: 10px;
-        for data in DetailPageBridge.event-model: repeated-icontext := IconText {
-            width: parent.width;
-            height: (parent.height - parent.y - (DetailPageBridge.event-model.length - 1) * parent.spacing) / DetailPageBridge.event-model.length;
-            visible: true;
-            x: 0px;
-            text: data.text;
-            icon: data.icon;
+        IconText {
+            icon: Token.image.icon.time;
+            text: DetailPageBridge.event-model.time;
+        }
+
+        IconText {
+            icon: Token.image.icon.locate;
+            text: DetailPageBridge.event-model.location;
+        }
+
+        IconText {
+            icon: Token.image.icon.department;
+            text: DetailPageBridge.event-model.larkDepartmentName;
+        }
+
+        IconText {
+            icon: Token.image.icon.tag;
+            text: DetailPageBridge.event-model.tag;
+        }
+
+        IconText {
+            icon: Token.image.icon.topic;
+            text: DetailPageBridge.event-model.description;
         }
     }
 }
 
 export component DetailPage inherits Page {
-    // TODO: implement Detail
-    // optional
-    background := Empty { }
-
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
+    property <bool> able-to-feedback: DetailPageBridge.state == PageState.normal && DetailPageBridge.event-model.is-checkIn && DetailPageBridge.event-model.state == EventState.Completed;
+    dialog := ContentDialog {
         width: 100%;
         height: 100%;
+        is-show: false;
+        dialog-title: "签到";
+
+        text-edit := LineEdit {
+            width: 100%;
+            height: 58px;
+            font-size: Token.font.body.large.size;
+            placeholder-text: "请输入签到码";
+            horizontal-alignment: center;
+        }
+
+        confirm-btn-text: "签到";
+        cancel-btn-text: "取消";
+
+        confirm => {
+            debug("confirm ", text-edit.text);
+            dialog.close();
+        }
+
+        cancel => {
+            dialog.close();
+        }
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
+    VerticalLayout {
+        padding: 50px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        spacing: 30px;
+        Text {
+            text: DetailPageBridge.event-model.summary;
+            font-size: Token.font.display.medium.size;
+            font-weight: Token.font.display.medium.weight;
+            wrap: TextWrap.char-wrap;
+        }
+
         ScrollView {
-            y: 20px;
-            width: parent.width;
-            height: parent.height - 100px;
             VerticalLayout {
-                x: 40px;
-                width: parent.width - 2 * self.x;
                 spacing: 20px;
-                Text {
-                    width: parent.width;
-                    height: 50px;
-                    text: DetailPageBridge.event-name;
-                    font-size: 35px;
-                }
-
                 HighlightBlock {
-                    width: parent.width;
                     height: 35px;
-                    text: DetailPageBridge.event-status;
+                    state: DetailPageBridge.event-model.state;
                 }
 
-                EventInfoBlock {
-                    width: parent.width;
-                    height: 200px;
+                EventInfoBlock { }
+
+                Rectangle {
+                    if DetailPageBridge.state == PageState.loading: Rectangle {
+                        LoadingAnimation {
+                            width: 40px;
+                            height: 40px;
+                        }
+                    }
+
+                    if DetailPageBridge.state == PageState.error: Rectangle {
+                        Button {
+                            type: filled-tonal;
+                            content: "重新加载";
+                            clicked => {
+                                DetailPageBridge.load-feedback();
+                            }
+                        }
+                    }
                 }
 
-                CommentBlock {
-                    x: 10px;
-                    width: parent.width - 2 * self.x;
-                    height: 280px;
+                if able-to-feedback: Rectangle {
+                    width: 80%;
+                    height: 1px;
+                    background: Token.color.outline-variant;
+                }
+
+                if able-to-feedback: Rectangle {
+                    VerticalLayout {
+                        spacing: 10px;
+                        Text {
+                            text: "反馈";
+                            font-size: Token.font.title.large.size;
+                            font-weight: Token.font.title.large.weight;
+                        }
+
+                        SStar {
+                            score: DetailPageBridge.feedback-model.rate;
+                        }
+
+                        LineEdit {
+                            font-size: Token.font.body.large.size;
+                            placeholder-text: "参与完本次活动，有什么想说的吗，快告诉我们吧";
+                            text: DetailPageBridge.feedback-model.content;
+                        }
+
+                        HorizontalLayout {
+                            alignment: end;
+                            Button {
+                                type: filled-tonal;
+                                content: "提交";
+                                disable: DetailPageBridge.feedback-model.rate == 0 || DetailPageBridge.feedback-model.has-feedbacked;
+                            }
+                        }
+                    }
                 }
             }
         }
 
         Rectangle {
-            y: parent.height - 60px;
-            width: parent.width;
             height: 40px;
-            // background: Token.color.primary-container;
-            SButton {
-                x: 20px;
-                y: 0px;
-                width: 120px;
-                height: parent.height;
-                text: "报名";
-            }
+            HorizontalLayout {
+                spacing: 20px;
+                Button {
+                    type: filled;
+                    content: DetailPageBridge.event-model.is-subscribed ? "取消报名" : "报名";            
+          disable: DetailPageBridge.event-model.state != EventState.SigningUp;
+                }
 
-            SButton {
-                x: 160px;
-                y: 0px;
-                width: 120px;
-                height: parent.height;
-                text: "签到";
+                Button {
+                    type: filled;
+                    content: DetailPageBridge.event-model.is-checkIn ? "已签到" : "签到";
+                    disable: DetailPageBridge.event-model.is-checkIn || DetailPageBridge.event-model.state == EventState.Completed || DetailPageBridge.event-model.state == EventState.Cancelled;
+                    clicked => {
+                        dialog.open();
+                    }
+                }
             }
         }
     }
