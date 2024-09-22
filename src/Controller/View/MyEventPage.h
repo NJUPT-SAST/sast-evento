@@ -15,13 +15,9 @@ public:
 private:
     void onCreate() override;
     void onShow() override;
-<<<<<<< HEAD
 
-    bool check_code(slint::SharedString code, int id);
-    //get info
     void get_events(slint::SharedString part);
-=======
->>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
+    bool check_code(slint::SharedString code, int id);
 };
 
 EVENTO_UI_END
