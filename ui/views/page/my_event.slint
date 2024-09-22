@@ -13,6 +13,7 @@ import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
 import { ViewManager } from "../../logic/index.slint";
 import { LineEdit, VerticalBox } from "std-widgets.slint";
 import { EventCard, EventCardGroup} from "../../components/index.slint";
+<<<<<<< HEAD
 import { EventStruct, EventState} from "../../components/index.slint";
 
 export global MyEventPageBridge {
@@ -33,6 +34,34 @@ export global MyEventPageBridge {
 //
 }
 
+=======
+import { EventStruct, EventState } from "../../components/index.slint";
+
+export global MyEventPageBridge {
+    in-out property <[EventStruct]> info-sub;
+    in-out property <[EventStruct]> info-start;
+    in-out property <[EventStruct]> info-end;
+    in-out property <string> event-code : "";
+    in-out property <int> sub-event-num : 0;
+    in-out property <int> start-event-num : 0;
+    in-out property <int> id : 1;
+
+    pure callback return-array-sub()->[int];
+    pure callback return-num-sub()->int;
+    pure callback return-array-start()->[int];
+    pure callback return-num-end()->int;
+
+    callback get-code(string);
+    pure callback get-event-id(int,string)->int;
+    callback back-event-id(int)->int;
+    callback is-check-in()->bool;
+
+    pure callback show-mess(int,string,string)->string;
+
+    pure callback get-num(string)->int;
+}
+
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
 export component result-success inherits Window {
     property <bool> is_show : false;
     visible: false;
@@ -81,8 +110,11 @@ export component CodeGet inherits Window {
     width: 200px;
     height: 90px;
     property <bool> is_show : false;
+<<<<<<< HEAD
     property <bool> is-check-in : false;
     in-out property <int> id : 0;
+=======
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
     visible: is_show;
     code-txt := LineEdit {
         width: 150px;
@@ -130,6 +162,7 @@ export component CodeGet inherits Window {
     }
     //检查code
     public function judge(code:string) {
+<<<<<<< HEAD
         is-check-in = MyEventPageBridge.get-code(code-txt.text,id);
         if(is-check-in){
             success.open();
@@ -180,6 +213,67 @@ component ReviewButton inherits SButton {
 export component SignCard{
     @children
 }
+=======
+        MyEventPageBridge.get-code(code-txt.text);
+        if(MyEventPageBridge.is-check-in()){
+            success.open();
+        }else{
+            fail.open();
+        }
+
+    }
+}
+//查看更多
+export component ForMore inherits SLink {
+    theme: Dark;
+    text: "查看更多";
+    font-size: 20px;
+    clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
+}
+
+// 签到按钮
+component SignButton inherits SButton{
+    in-out property <int> s-id : 0;
+    width: 40px;
+    height: 20px;
+    background: Token.color.surface;
+    border-color: Token.color.outline;
+    font-color: Token.color.on-surface;
+    text: "签到";
+    property <bool> active : true;
+    clicked => {active = !active}
+    states [
+        active when  !active : {
+            text : "取消";
+        }
+        inactive when active: {
+            text : "签到";
+        } 
+    ]
+}
+// 评价按钮
+component ReviewButton inherits SButton {
+    width: 40px;
+    height: 20px;
+    property <string> txt : "评价";
+    text: txt;
+    background: Token.color.surface;
+    border-color: Token.color.outline;
+    font-color: Token.color.on-surface;
+    clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
+}
+export component SignCard{
+    get := CodeGet{ 
+        x: (parent.x)+80px;
+    }
+    SignButton {
+        x: (parent.width)*0.75 + parent.x;
+        clicked => {
+            get.open();
+        }
+    }
+}
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
 
 export component ReviewCard{
     ReviewButton {
@@ -188,6 +282,7 @@ export component ReviewCard{
 }
 
 component MyEventCard inherits EventCard {
+<<<<<<< HEAD
     in-out property <int> count: 0;
 }
 
@@ -203,11 +298,23 @@ component Button-refresh inherits SButton{
     border-color: Token.color.surface-container-highest;
 }
 export component MyEventPage inherits Page {
+=======
+    in-out property <int> count: -1;
+}
+export component MyEventPage inherits Page {
+
+    // ScrollView {
+        background := Empty { }
+
+        layout := Empty{}
+
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
         body := Empty {
             x: 0;
             y: 0;
             width: 100%;
             height: 100%;
+<<<<<<< HEAD
             Button-refresh {
                 x: active.x + 50px;
                 y: 10px;
@@ -215,12 +322,19 @@ export component MyEventPage inherits Page {
                             MyEventPageBridge.show-mess("active");
                             MyEventPageBridge.show-mess("end")}
             }
+=======
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                 //subscribe板块
                 sub := Empty {  
                     x: root.x;
                     y: root.y;
+<<<<<<< HEAD
                     height: root.height*0.9;
                     width: root.width*0.45;
+=======
+                    height: 100%;
+                    width: 48%;
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                     txt-s := SText {
                         x: parent.x;
                         y: parent.y;
@@ -229,6 +343,7 @@ export component MyEventPage inherits Page {
                         font-weight: 30;
                         color: Token.color.on-surface;
                     }
+<<<<<<< HEAD
                     s1 := ScrollView {
                         x: root.x;
                         y: root.y+10px;
@@ -262,15 +377,40 @@ export component MyEventPage inherits Page {
                                     }
                                 }
                             }
+=======
+                    for index in MyEventPageBridge.return-array-sub(): Rectangle {
+                        MyEventCard {
+                            count: MyEventPageBridge.get-num("subscribe");
+                            width: sub.width;
+                            height: 110px;
+                            x: txt-s.x;
+                            y: txt-s.y+35px+self.count*self.height*1.05;
+                            event: {
+                                id: MyEventPageBridge.get-event-id(self.count,"subscribe"),
+                                summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","summary"),
+                                summary-abbr: "软",
+                                time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","time"),
+                                location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","location"),
+                                description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"subscribe"),"subscribe","description")
+                            };
+                            SignCard {}
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                         }
                     }
                 }
                 //active板块
                 active := Empty{
+<<<<<<< HEAD
                     x: root.x+sub.width/2;
                     y: root.y;
                     height: root.height*0.5;
                     width: root.width*0.45;
+=======
+                    x: root.x+sub.width*1.01;
+                    y: root.y;
+                    height: 50%;
+                    width: 48%;
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                     txt-a := SText{
                         x: parent.x;
                         y: parent.y;
@@ -279,6 +419,7 @@ export component MyEventPage inherits Page {
                         font-weight: 30;
                         color: Token.color.on-surface;
                     }
+<<<<<<< HEAD
                     s2 := ScrollView {
                         x: active.x;
                         y: active.y+10px;
@@ -300,13 +441,34 @@ export component MyEventPage inherits Page {
                                     description: MyEventPageBridge.event_active[self.count].description
                                 };
                             }
+=======
+                    for index in MyEventPageBridge.return-array-start(): Rectangle {
+                        MyEventCard {
+                            count: MyEventPageBridge.get-num("active");
+                            width: active.width;
+                            height: 110px;
+                            x: txt-a.x;
+                            y: txt-a.y+35px+self.count*self.height*1.05;
+                            event: {
+                                id: MyEventPageBridge.get-event-id(self.count,"active"),
+                                summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","summary"),
+                                summary-abbr: "软",
+                                time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","time"),
+                                location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","location"),
+                                description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"active"),"active","description")
+                            };
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                         }
                     }
                 }
                 //end板块
                 end := Empty{
                     x: active.x;
+<<<<<<< HEAD
                     y: active.y+active.height/2;
+=======
+                    y: active.y+active.height*1.01;
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                     height: 24%;
                     width: 48%;
                     txt-e := SText{
@@ -318,12 +480,17 @@ export component MyEventPage inherits Page {
                         color: Token.color.on-surface;
                     }
                     link := ForMore {
+<<<<<<< HEAD
                         width: 100px;
                         x: txt-e.x+100px;
+=======
+                        x: txt-e.x;
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                         y: txt-e.y;
                     }
                     MyEventCard {
                         count: 0; //本页面只展示一个活动
+<<<<<<< HEAD
                         width: end.width*0.9;
                         height: 90px;
                         x: end.x;
@@ -335,13 +502,48 @@ export component MyEventPage inherits Page {
                             time: MyEventPageBridge.event_end[0].time,
                             location: MyEventPageBridge.event_end[0].location,
                             description: MyEventPageBridge.event_end[0].description
+=======
+                        width: end.width;
+                        height: 110px;
+                        x: link.x;
+                        y: link.y+30px;
+                        event: {
+                            id: MyEventPageBridge.get-event-id(self.count,"end"),
+                            summary: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","summary"),
+                            summary-abbr: "软",
+                            time: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","time"),
+                            location: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","location"),
+                            description: MyEventPageBridge.show-mess(MyEventPageBridge.get-event-id(self.count,"end"),"end","description")
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
                         };
                         ReviewCard {}
                     }
                 }
+<<<<<<< HEAD
+=======
+                //cancel板块（只提供了标题）
+                cancel := Empty{
+                    x: end.x;
+                    y: end.y+end.height*1.01;
+                    height: 24%;
+                    width: 48%;
+                    txt-c := SText{
+                        x: parent.x;
+                        y: parent.y;
+                        text: "已取消:";
+                        font-size: 25px;
+                        font-weight: 30;
+                        color: Token.color.on-surface;
+                    }
+                }
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
             
             placeholder := Rectangle {
                 border-width: 4px;
             }
         }
+<<<<<<< HEAD
+=======
+    //}
+>>>>>>> ce4a2495d1ca609be509b7dccab8eb2ffae07bd5
 }
