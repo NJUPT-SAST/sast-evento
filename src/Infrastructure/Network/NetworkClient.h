@@ -44,23 +44,27 @@ public:
     NetworkClient(const NetworkClient&) = delete;
     NetworkClient& operator=(const NetworkClient&) = delete;
 
-    Task<Result<LoginResEntity>> loginViaSastLink(std::string const& code);
+    Task<Result<LoginResEntity>> loginViaSastLink(std::string code);
 
     Task<Result<UserInfoEntity>> getUserInfo();
 
-    Task<Result<void>> refreshAccessToken(std::string const& refreshToken);
+    Task<Result<void>> refreshAccessToken(std::string refreshToken);
 
+    // active: true
     Task<Result<EventQueryRes>> getActiveEventList(
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
+    // start: now
     Task<Result<EventQueryRes>> getLatestEventList(
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
+    // end: now
     Task<Result<EventQueryRes>> getHistoryEventList(
         int page, int size = 10, std::chrono::steady_clock::duration cacheTtl = 1min);
 
+    // larkDepartmentName: larkDepartment
     Task<Result<EventQueryRes>> getDepartmentEventList(
-        std::string const& larkDepartment,
+        std::string larkDepartment,
         int page,
         int size = 10,
         std::chrono::steady_clock::duration cacheTtl = 1min);
@@ -73,18 +77,21 @@ public:
     Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(
         int eventId, std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string const& content);
+    Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string content);
 
-    Task<Result<bool>> checkInEvent(int eventId, std::string const& code);
+    Task<Result<bool>> checkInEvent(int eventId, std::string code);
 
     Task<Result<bool>> subscribeEvent(int eventId, bool subscribe);
 
-    Task<Result<bool>> subscribeDepartment(std::string const& larkDepartment, bool subscribe);
+    Task<Result<bool>> subscribeDepartment(std::string larkDepartment, bool subscribe);
 
-    Task<Result<EventEntityList>> getParticipatedEvent(
+    // isCheckedIn: true
+    Task<Result<EventQueryRes>> getParticipatedEvent(
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventEntityList>> getSubscribedEvent(
+    // isSubscribed: true
+    // start: first date of this week
+    Task<Result<EventQueryRes>> getSubscribedEvent(
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<SlideEntityList>> getHomeSlide(std::chrono::steady_clock::duration cacheTtl = 1min);
@@ -99,7 +106,11 @@ public:
 
     Task<Result<ReleaseEntity>> getLatestRelease();
 
-    Task<Result<std::filesystem::path>> getFile(urls::url_view url);
+    Task<Result<std::filesystem::path>> getFile(std::string url);
+
+    void clearCache();
+
+    std::string getTotalCacheSizeFormatString();
 
     // access token
     // NOTE: `AUTOMATICALLY` added to request header if exists
@@ -159,6 +170,8 @@ private:
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
                              std::initializer_list<urls::param> const& params = {}) {
+        spdlog::info("Requesting: {}", url.data());
+
         auto req = Api::makeRequest(verb, url, std::nullopt, params);
         auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
         if (reply.isErr())

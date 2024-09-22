@@ -1,21 +1,40 @@
 name: Build
 # Complete packaging in the future
 
-on: 
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
   workflow_dispatch:
 
+permissions: write-all
+
 jobs:
-  job:
-    name: ${{ matrix.os }}
-    # The CMake configure and build commands are platform agnostic and should work equally
-    # well on Windows or Mac.  You can convert this to a matrix build if you need
-    # cross-platform coverage.
-    # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
+  build:
+    name: Build ${{ matrix.rid }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-24.04, windows-latest]
-        # how to use macos ???
+        rid: [linux-x64, win-x64, win-arm64, macos-arm64]
+        include:
+        - rid: linux-x64
+          rust_target: x86_64-unknown-linux-gnu
+          os: ubuntu-24.04
+          qt_arch: gcc_64
+        - rid: win-x64
+          msvc_arch: x64
+          rust_target: x86_64-pc-windows-msvc
+          vcpkg_target_triplet: 'x64-windows-static'
+          os: windows-latest
+        - rid: win-arm64
+          msvc_arch: arm64
+          rust_target: aarch64-pc-windows-msvc
+          vcpkg_target_triplet: 'arm64-windows-static'
+          os: windows-latest
+        - rid: macos-arm64
+          rust_target: aarch64-apple-darwin
+          os: macos-latest
 
     steps:
     - name: Checkout repository
@@ -24,16 +43,41 @@ jobs:
           submodules: recursive
 
     - name: Set up GCC
-      if: matrix.os == 'ubuntu-24.04'
-      uses: egor-tensin/setup-gcc@v1
+      if: startsWith(matrix.rid, 'linux-')
+      uses: egor-tensin/setup-gcc@v1.3
       with:
         version: 14
         platform: x64
+
+    - name: Setup toolchains for building Qt
+      if: ${{ !matrix.qt_arch }}
+      shell: pwsh
+      run: | 
+        if (Get-Command apt-get -ErrorAction SilentlyContinue) {
+          $deps = 'autoconf', 'automake', 'autoconf-archive', '^libxcb.*-dev',
+            'libx11-xcb-dev', 'libxrender-dev', 'libxi-dev',
+            'libxkbcommon-dev', 'libxkbcommon-x11-dev',
+            'libglu1-mesa-dev', 'libegl1-mesa-dev'
+          sudo apt-get update
+          sudo apt-get install -y @deps
+        } elseif (Get-Command brew -ErrorAction SilentlyContinue) {
+          $deps = 'autoconf', 'automake', 'autoconf-archive', 'libtool'
+          brew install @deps
+        }
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4
+      if: matrix.qt_arch
+      with:
+        version: '6.6.3'
+        arch: ${{ matrix.qt_arch }}
+        cache: true
 
     - name: Setup Rust toolchain
       uses: moonrepo/setup-rust@v1
       with:
         channel: stable
+        targets: ${{ matrix.rust_target }}
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -46,7 +90,7 @@ jobs:
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-        key: corrosion-${{ runner.os }}
+        key: corrosion-${{ matrix.rid }}
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest
@@ -57,8 +101,277 @@ jobs:
         vcpkgConfigurationJsonGlob: 'vcpkg-configuration.json'
         vcpkgJsonGlob: 'vcpkg.json'
 
-    - name: Build with CMake
-      uses: lukka/run-cmake@v10
+    - name: Build
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        $rid = '${{ matrix.rid }}'
+        $vcpkgTargetTriplet = '${{ matrix.vcpkg_target_triplet }}'
+        $qtArch = '${{ matrix.qt_arch }}'
+        $additionalConfigureArgs = @()
+        if ($rid.StartsWith('win-')) {
+          $vsPath = &(Join-Path ${env:ProgramFiles(x86)} "\Microsoft Visual Studio\Installer\vswhere.exe") -property installationpath
+          Import-Module (Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
+          Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments '-arch=${{ matrix.msvc_arch }} -host_arch=x64'
+          $additionalConfigureArgs += '-DPKG_CONFIG_EXECUTABLE:FILEPATH=./build/vcpkg_installed/x64-windows/tools/pkgconf/pkgconf.exe'
+        }
+        if ($vcpkgTargetTriplet) {
+          $additionalConfigureArgs += "-DVCPKG_TARGET_TRIPLET:STRING=$vcpkgTargetTriplet"
+        }
+        if (-not $qtArch) {
+          $additionalConfigureArgs += "-DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg"
+        }
+        $additionalConfigureArgs += "-DRust_CARGO_TARGET=${{ matrix.rust_target }}"
+
+        # Install as portable software
+        $additionalConfigureArgs += '-DCMAKE_INSTALL_LIBDIR=.'
+        $additionalConfigureArgs += '-DCMAKE_INSTALL_BINDIR=.'
+        if ($rid.StartsWith('linux-')) {
+          $additionalConfigureArgs += '-DCMAKE_INSTALL_RPATH=$ORIGIN'
+        }
+        if ($rid.StartsWith('macos-')) {
+          $additionalConfigureArgs += '-DCMAKE_INSTALL_RPATH=@loader_path'
+        }
+
+        cmake --preset native @additionalConfigureArgs
+        cmake --build --preset native-release -j3
+
+    - name: Archive files
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+
+        # Install the built files
+        cmake --install ./build --prefix ./installed
+
+        # Hack: fix install name for `libslint_cpp.so` on macOS
+        if ('${{ matrix.rid }}'.StartsWith('macos-')) {
+          # Slint did not set the install dir to `@rpath` when used via FetchContent.
+          # Do some hack to fix it when packaging.
+          # https://github.com/slint-ui/slint/blob/461632717a3ffdd1f9e75cfb7cbfce0763dc0129/api/cpp/CMakeLists.txt#L145
+          
+          $loadCmdsForLibSlint = otool -l ./installed/libslint_cpp.dylib
+          $idPattern = '\s*cmd\s+LC_ID_DYLIB\s*cmdsize\s+\d+\s*name\s+([^\(\r\n]*?)\s+\(offset \d+\)'
+          $idMatched = [regex]::Matches($loadCmdsForLibSlint, $idPattern)[0]
+          if ($idMatched) {
+            $oldId = $idMatched.Groups[1].Value
+            echo "Old LC_ID_DYLIB for libslint_cpp.dylib is '$oldId'"
+            echo "Fixing it to '@rpath/libslint_cpp.dylib'"
+            install_name_tool -id '@rpath/libslint_cpp.dylib' ./installed/libslint_cpp.dylib
+            install_name_tool -change $oldId '@rpath/libslint_cpp.dylib' ./installed/sast-evento
+          }
+        }
+
+        # Remove unnecessary files
+        Set-Location ./installed
+        Remove-Item -Force -Recurse ./lib
+        Remove-Item -Force -Recurse ./include
+        Remove-Item -Force slint-compiler*
+        Remove-Item -Force *.lib
+        Remove-Item -Force *.a
+        Set-Location ..
+
+        # Archive the files
+        if ('${{ runner.os }}' -eq 'Windows') {
+          Compress-Archive -Path ./installed/* -DestinationPath ./files.zip
+        } else {
+          tar -czf ./files.tar.gz -C ./installed .
+        }
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
       with:
-        configurePreset: 'native'
-        buildPreset: 'native-release'
+        name: files-${{ matrix.rid }}
+        path: ${{ runner.os != 'Windows' && './files.tar.gz' || './files.zip' }}
+
+  package-win:
+    name: Package ${{ matrix.rid }} (Inno Setup)
+    runs-on: windows-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [win-x64, win-arm64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Extract files
+      id: extract
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+        Expand-Archive -Path ./files.zip -DestinationPath ./files
+        $version = Get-Content -Path ./files/sast-evento-version.txt
+        Write-Output "version=$version" >> $Env:GITHUB_OUTPUT
+
+    - name: Inno Setup
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+      with:
+        path: ./deploy/win-installer.iss
+        options: /O+ /dMyAppVersion=${{ steps.extract.outputs.version }}
+
+    - name: Upload installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: installer-${{ matrix.rid }}
+        path: ./deploy/installer.exe
+
+  package-deb:
+    name: Package ${{ matrix.rid }} (deb)
+    runs-on: ubuntu-24.04
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Extract files
+      shell: bash
+      run: |
+        mkdir -p ./files
+        tar -xzf ./files.tar.gz -C ./files
+
+    - name: Package
+      shell: bash
+      run: |
+        bash ./deploy/create-deb.sh ./files
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: deb-${{ matrix.rid }}
+        path: ./sast-evento.deb
+
+  package-pacman:
+    name: Package ${{ matrix.rid }} (pacman)
+    runs-on: ubuntu-24.04
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Package
+      shell: bash
+      run: |
+        mv ./files.tar.gz ./deploy/pacman/files.tar.gz
+        cp ./ui/assets/image/icon/evento.svg ./deploy/pacman/icon.svg
+        cat | docker run -i --rm -v $(pwd)/deploy/pacman:/pkg -w /pkg archlinux/archlinux:base-devel /bin/bash -e << EOF
+          useradd build -m
+          passwd -d build
+          printf 'build ALL=(ALL) ALL\n' | tee -a /etc/sudoers
+          chown -R build:build .
+          sudo -u build makepkg -f --nodeps --noconfirm
+        EOF
+        rm ./deploy/pacman/*-debug-*.pkg.tar.zst
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: pacman-${{ matrix.rid }}
+        path: ./deploy/pacman/*.pkg.tar.zst
+
+  package-macos:
+    name: Package ${{ matrix.rid }} (dmg)
+    runs-on: macos-latest
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [macos-arm64]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+          submodules: false
+
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: files-${{ matrix.rid }}
+
+    - name: Extract files
+      shell: bash
+      run: |
+        mkdir -p ./files
+        tar -xzf ./files.tar.gz -C ./files
+
+    - name: Construct macOS app bundle
+      shell: bash
+      run: |
+        bash ./deploy/create-mac-app.sh ./files './sast-evento.app'
+
+    - name: Package
+      uses: L-Super/create-dmg-actions@v1
+      with:
+        dmg_name: 'sast-evento'
+        src_dir: './sast-evento.app'
+
+    - name: Upload package
+      uses: actions/upload-artifact@v4
+      with:
+        name: dmg-${{ matrix.rid }}
+        path: ./sast-evento.dmg
+
+  publish-release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    needs:
+      - package-win
+      - package-deb
+      - package-pacman
+      - package-macos
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Organize artifacts
+        shell: pwsh
+        run: |
+          Set-Location ./artifacts
+          Remove-Item -Force -Recurse ./files-*
+          Get-ChildItem -Directory -Path . | ForEach-Object {
+              Write-Host "Compressing $($_.Name)"
+              $dirPath = $_.FullName
+              $zipPath = "$dirPath.zip"
+              Compress-Archive -Path $dirPath -DestinationPath $zipPath
+              Remove-Item -Path $dirPath -Recurse
+          }
+
+      - name: Release (GitHub)
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: ./artifacts/*
+          allowUpdates: true
+          draft: false
+          omitBody: true

@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>img/evento.svg</file>
+        <file>img/evento.png</file>
     </qresource>
 </RCC>

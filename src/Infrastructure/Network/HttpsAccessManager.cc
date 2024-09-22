@@ -60,8 +60,10 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     // Declare a container to hold the response
     http::response<http::dynamic_body> res;
 
+    beast::flat_buffer buffer;
+
     // Receive the HTTP response
-    co_await http::async_read(stream, _buffer, res);
+    co_await http::async_read(stream, buffer, res);
 
     beast::get_lowest_layer(stream).expires_after(_timeout);
 

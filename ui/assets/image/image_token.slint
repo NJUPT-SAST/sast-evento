@@ -37,11 +37,10 @@ struct EventoIconCollection {
 struct EventoDisplayCollection {
     evento: image,
     evento-bg: image,
-    avatar: [image],
+    avatar: image,
     event: {
         default: [image],
     },
-    no_image: image,
 }
 
 struct EventoImageCollection {
@@ -99,20 +98,7 @@ export global EventoImageToken {
             dark: @image-url("./display/evento/evento_dark.png"),
         }),
         evento-bg: @image-url("./display/evento/evento_bg.png"),
-        avatar: [
-            @image-url("./display/avatar/avatar_1.svg"),
-            @image-url("./display/avatar/avatar_2.svg"),
-            @image-url("./display/avatar/avatar_3.svg"),
-            @image-url("./display/avatar/avatar_4.svg"),
-            @image-url("./display/avatar/avatar_5.svg"),
-            @image-url("./display/avatar/avatar_6.svg"),
-            @image-url("./display/avatar/avatar_7.svg"),
-            @image-url("./display/avatar/avatar_8.svg"),
-            @image-url("./display/avatar/avatar_9.svg"),
-            @image-url("./display/avatar/avatar_10.svg"),
-            @image-url("./display/avatar/avatar_11.svg"),
-            @image-url("./display/avatar/avatar_12.svg"),
-        ],
+        avatar: @image-url("./display/avatar/avatar_1.svg"),
         event: {
             default: [
                 @image-url("./display/event/default_1.png"),
@@ -120,23 +106,5 @@ export global EventoImageToken {
                 @image-url("./display/event/default_3.png"),
             ],
         },
-        no_image: @image-url("./display/no_image.png"),
     };
-}
-
-// colorize animation example
-component Example {
-    property <bool> is;
-    Button {
-        y: - self.height;
-        clicked => {
-            is = !is;
-        }
-    }
-
-    Image {
-        source: EventoImageToken.image.icon.category;
-        colorize: is ? black : blue;
-        animate colorize { duration: 1s; }
-    }
 }

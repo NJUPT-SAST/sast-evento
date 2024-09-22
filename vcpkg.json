@@ -3,16 +3,38 @@
     "dependencies": [
         "boost-system",
         "boost-beast",
+        "boost-dll",
         "boost-url",
         "boost-process",
         "openssl",
         "nlohmann-json",
         "spdlog",
         "tomlplusplus",
-        "pkgconf",
+        {
+            "name": "pkgconf",
+            "host": true
+        },
         {
             "name": "libsecret",
             "platform": "!(windows | uwp | osx)"
         }
-    ]
+    ],
+    "features": {
+        "qt-from-vcpkg": {
+            "description": "Use Qt from vcpkg",
+            "dependencies": [
+                {
+                    "name": "qtbase",
+                    "default-features": false,
+                    "features": [
+                        "default-features",
+                        "network",
+                        "opengl",
+                        "png",
+                        "widgets"
+                    ]
+                }
+            ]
+        }
+    }
 }

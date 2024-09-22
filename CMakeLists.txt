@@ -4,12 +4,13 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# MSVC Runtime Library Selection
+if (VCPKG_TARGET_TRIPLET MATCHES "-windows-static$")
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/.cmake/)
 include(Version)
-
-if(APPLE)
-  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
-endif()
 
 if (POLICY CMP0167)
   cmake_policy(SET CMP0167 OLD)
@@ -17,22 +18,18 @@ endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
-option(EVENTO_EMBED_RESOURCES OFF "Request slint embed resources")
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
 
-if(APPLE)
-  set(MACOSX_BUNDLE_GUI_IDENTIFIER ${IDENTIFIER})
-  set(MACOSX_BUNDLE_BUNDLE_NAME ${PROJECT_NAME})
-  set(MACOSX_BUNDLE_COPYRIGHT ${COPYRIGHT})
+if (WIN32)
+  # Target Windows 7
+  add_definitions(-D_WIN32_WINNT=0x0601)
 
-  set(MACOSX_BUNDLE_SHORT_VERSION_STRING ${spectral_VERSION})
-  set(MACOSX_BUNDLE_BUNDLE_VERSION ${spectral_VERSION})
-
-  set(ICON_NAME "app.icns")
-  set(${PROJECT_NAME}_MAC_ICON "${CMAKE_SOURCE_DIR}/ui/assets/image/icon/${ICON_NAME}")
-  set(MACOSX_BUNDLE_ICON_FILE ${ICON_NAME})
-  set_property(SOURCE "${${PROJECT_NAME}_MAC_ICON}" PROPERTY
-      MACOSX_PACKAGE_LOCATION Resources)
+  set(VERSION_RC_PATH ${CMAKE_SOURCE_DIR}/sast-evento.rc)
+  configure_file(
+      ${CMAKE_SOURCE_DIR}/.cmake/version_exe.rc.in
+      ${VERSION_RC_PATH}
+  )
+  set(WIN32_MANIFEST_PATH ${CMAKE_SOURCE_DIR}/app.manifest)
 endif()
 
 # find Slint
@@ -76,6 +73,9 @@ add_subdirectory(3rdpart/keychain)
 set(BUILD_SHARED_LIBS ON)
 
 # install
+file(WRITE ${CMAKE_BINARY_DIR}/sast-evento-version.txt ${VERSION_SEMANTIC})
+install(FILES ${CMAKE_BINARY_DIR}/sast-evento-version.txt DESTINATION .)
+install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION .)
 install(TARGETS ${PROJECT_NAME}
   BUNDLE DESTINATION .
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

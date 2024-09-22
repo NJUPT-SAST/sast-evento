@@ -76,7 +76,7 @@ jobs:
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
       with:
-        version: 6.6.2
+        version: 6.6.3
         arch: gcc_64
         cache: true
         cache-key-prefix: ${{ runner.os }}-qt
@@ -98,7 +98,7 @@ jobs:
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-        key: corrosion-${{ runner.os }}-qt
+        key: corrosion-linux-x64
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest
@@ -121,6 +121,7 @@ jobs:
       with:
         configurePreset: 'native'
         buildPreset: 'native'
+        buildPresetAdditionalArgs: "['-j3']"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

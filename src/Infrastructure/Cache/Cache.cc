@@ -21,10 +21,8 @@ std::string CacheManager::generateKey(http::verb verb,
     return key;
 }
 
-std::string CacheManager::generateFilename(urls::url_view url) {
-    auto name = std::to_string(std::hash<std::string>{}(url.data()));
-    auto extension = url.path().substr(url.path().find_last_of('.'));
-    return name + extension;
+std::string CacheManager::generateStem(urls::url_view url) {
+    return std::to_string(std::hash<std::string>{}(url.data()));
 }
 
 bool CacheManager::isExpired(const CacheEntry& entry) {
@@ -33,7 +31,7 @@ bool CacheManager::isExpired(const CacheEntry& entry) {
 
 std::optional<std::filesystem::path> CacheManager::cacheDir() {
     fs::path cacheFileDir;
-#if defined(_WIN32) || defined(_WIN64)
+#ifdef PLATFORM_WINDOWS
     auto localAppData = std::getenv("LOCALAPPDATA");
     if (localAppData == nullptr) {
         spdlog::warn("LOCALAPPDATA environment variable not found");
@@ -41,7 +39,7 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     }
     cacheFileDir = fs::path(localAppData) / "Programs" / "evento";
 
-#elif __linux__
+#elif defined(PLATFORM_LINUX)
     auto xdgCacheHome = std::getenv("XDG_CACHE_HOME");
     if (xdgCacheHome == nullptr) {
         auto home = std::getenv("HOME");
@@ -53,19 +51,20 @@ std::optional<std::filesystem::path> CacheManager::cacheDir() {
     } else {
         cacheFileDir = fs::path(xdgCacheHome) / "evento";
     }
-#elif __APPLE__
+#elif defined(PLATFORM_APPLE)
     auto home = std::getenv("HOME");
     if (home == nullptr) {
         spdlog::warn("HOME environment variable not found");
-        return;
+        return std::nullopt;
     }
     cacheFileDir = fs::path(home) / "Library" / "Caches" / "evento";
 #else
 #error "Unsupported platform"
 #endif
 
-    if (!fs::is_directory(cacheFileDir))
-        return std::nullopt;
+    if (!fs::exists(cacheFileDir) || !fs::is_directory(cacheFileDir)) {
+        fs::create_directory(cacheFileDir);
+    }
 
     return fs::absolute(cacheFileDir);
 }
@@ -91,21 +90,27 @@ void CacheManager::insert(const std::string& key, const CacheEntry& entry) {
 }
 
 std::optional<CacheEntry> CacheManager::get(std::string const& key) {
-    if (isExpired(_cacheMap[key]->second)) {
+    if (_cacheMap.empty()) {
+        return std::nullopt;
+    }
+
+    auto it = _cacheMap.find(key);
+
+    if (it == _cacheMap.end()) {
+        return std::nullopt;
+    }
+
+    if (isExpired(it->second->second)) {
         _currentCacheSize -= _cacheMap[key]->second.size;
         _cacheList.erase(_cacheMap[key]);
         _cacheMap.erase(key);
         return std::nullopt;
     }
-    auto it = _cacheMap.find(key);
-    if (it == _cacheMap.end()) {
-        return std::nullopt;
-    }
+
     return it->second->second;
 }
 
 bool CacheManager::saveToDisk(std::string const& data, fs::path const& path) {
-    fs::create_directories(path.parent_path());
     std::ofstream file(path, std::ios::binary);
     if (file.is_open()) {
         file << data;
@@ -113,6 +118,15 @@ bool CacheManager::saveToDisk(std::string const& data, fs::path const& path) {
     }
     spdlog::warn("Failed to save cache to disk: {}", path.string());
     return false;
+}
+
+void CacheManager::clear() {
+    _cacheList.clear();
+    _cacheMap.clear();
+    _currentCacheSize = 0;
+    if (auto dir = cacheDir()) {
+        fs::remove_all(*dir);
+    }
 }
 
 } // namespace evento

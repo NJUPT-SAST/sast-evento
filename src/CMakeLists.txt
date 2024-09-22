@@ -1,8 +1,8 @@
-add_executable(${PROJECT_NAME})
+add_executable(${PROJECT_NAME} ${VERSION_RC_PATH})
 
-file(GLOB_RECURSE SOURCES *.cc *.h *.hpp)
+file(GLOB_RECURSE SOURCES Controller/*.cc Infrastructure/*.cc)
 
-target_sources(${PROJECT_NAME} PRIVATE ${SOURCES})
+target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} main.cc)
 
 # hide cmdline in Release Mode for MSVC
 if (MSVC)
@@ -10,27 +10,29 @@ if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_HAS_CO_AWAIT)
 endif()
 
-if (APPLE)
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-  )
-endif()
-
 slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
 
-if(EVENTO_EMBED_RESOURCES)
+if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
+  message("Embedding resources in the executable")
   set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
-endif(EVENTO_EMBED_RESOURCES)
+endif()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
+if(WIN32)
+  set(PLATFORM PLATFORM_WINDOWS)
+elseif(APPLE)
+  set(PLATFORM PLATFORM_APPLE)
+elseif(LINUX)
+  set(PLATFORM PLATFORM_LINUX)
+endif()
+
 # definitions for Logger
 target_compile_definitions(${PROJECT_NAME}
-  PUBLIC
+  PRIVATE
     $<$<CONFIG:Debug>:EVENTO_DEBUG>
     $<$<CONFIG:Release>:EVENTO_RELEASE>
+    ${PLATFORM}
 )
 
 target_link_libraries(${PROJECT_NAME}

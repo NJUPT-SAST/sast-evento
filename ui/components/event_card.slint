@@ -134,7 +134,7 @@ export component EventCardGroup inherits VerticalLayout {
     in-out property <length> horizontal-spacing: 20px;
     in-out property <length> vertical-spacing: 20px;
     out property <length> item-height: 188px;
-    property <int> row-count: floor(model.length / 3) * 3 == model.length ? model.length / 3 : floor(model.length / 3) + 1;
+    out property <int> row-count: floor(model.length / 3) * 3 == model.length ? model.length / 3 : floor(model.length / 3) + 1;
     callback item-clicked(EventStruct);
 
     function row-indexes(start-idx: int) -> [int] {
@@ -155,7 +155,7 @@ export component EventCardGroup inherits VerticalLayout {
         property <int> start-idx: row-idx * 3;
         height: root.item-height;
         spacing: horizontal-spacing;
-        alignment: space-around;
+        alignment: start;
         for idx in root.row-indexes(start-idx): EventCard {
             event: root.model[idx];
             width: parent.width / 3 - horizontal-spacing * 2 / 3;

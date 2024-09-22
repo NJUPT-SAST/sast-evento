@@ -27,7 +27,7 @@ public:
                                    urls::url_view url,
                                    const std::initializer_list<urls::param>& params);
 
-    static std::string generateFilename(urls::url_view url);
+    static std::string generateStem(urls::url_view url);
 
     static std::optional<std::filesystem::path> cacheDir();
 
@@ -41,11 +41,14 @@ public:
 
     std::optional<CacheEntry> get(std::string const& key);
 
+    void clear();
+
     static constexpr size_t MAX_CACHE_SIZE = 64 * 1024 * 1024;
 
 private:
-    std::list<std::pair<std::string, CacheEntry>> _cacheList;
-    std::unordered_map<std::string, decltype(_cacheList.begin())> _cacheMap;
+    std::list<std::pair<std::string, CacheEntry>> _cacheList{};
+    std::unordered_map<std::string, std::list<std::pair<std::string, CacheEntry>>::iterator>
+        _cacheMap{};
     inline static std::size_t _currentCacheSize = 0;
 };
 
