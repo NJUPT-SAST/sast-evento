@@ -1,0 +1,90 @@
+{
+    "version": 8,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 21,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build",
+            "installDir": "${sourceDir}/build/install/${presetName}",
+            "toolchainFile": "D:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+        },
+        {
+            "name": "native",
+            "inherits": "base",
+            "displayName": "Native"
+        },
+        {
+            "name": "msvc",
+            "inherits": "base",
+            "hidden": true,
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "cl.exe",
+                "CMAKE_CXX_COMPILER": "cl.exe"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "msvc-x64",
+            "inherits": "msvc",
+            "displayName": "MSVC x64",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            }
+        },
+        {
+            "name": "msvc-x86",
+            "inherits": "msvc",
+            "displayName": "MSVC x86",
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            }
+        },
+        {
+            "name": "msvc-arm64",
+            "inherits": "msvc",
+            "displayName": "MSVC ARM64",
+            "architecture": {
+                "value": "arm64",
+                "strategy": "external"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "native",
+            "configurePreset": "native",
+            "displayName": "Ninja Multi-Config"
+        },
+        {
+            "name": "native-debug",
+            "inherits": "native",
+            "displayName": "Native Debug",
+            "configuration": "Debug"
+        },
+        {
+            "name": "native-release",
+            "inherits": "native",
+            "displayName": "Native Release",
+            "configuration": "Release"
+        },
+        {
+            "name": "native-relwithdebinfo",
+            "inherits": "native",
+            "displayName": "Native RelWithDebInfo",
+            "configuration": "RelWithDebInfo"
+        }
+    ],
+    "testPresets": []
+}
