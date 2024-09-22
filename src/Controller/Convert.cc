@@ -123,4 +123,18 @@ ContributorStruct from(const std::filesystem::path& avatar, const std::string& h
             .html_url = slint::SharedString(htmlUrl)};
 }
 
+FeedbackStruct from(const std::optional<FeedbackEntity>& entity) {
+    if (!entity)
+        return {.success = true,
+                .has_feedbacked = false,
+                .rate = 0,
+                .content = slint::SharedString("")};
+    return {
+        .success = true,
+        .has_feedbacked = true,
+        .rate = entity->rating,
+        .content = slint::SharedString(entity->feedback.value_or("")),
+    };
+}
+
 } // namespace evento::convert

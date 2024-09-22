@@ -28,7 +28,7 @@ export global MyEventPageBridge {
     in-out property <[EventStruct]> event_active : [];
     in-out property <[EventStruct]> event_end : [];
 
-    pure callback get-code(string,int)->bool;
+    callback get-code(string,int)->bool;
     pure callback show-mess(string);
 //
 }
@@ -192,8 +192,8 @@ component MyEventCard inherits EventCard {
 }
 
 component Button-refresh inherits SButton{
-    width: 60px;
-    height: 50px;
+    width: 40px;
+    height: 30px;
     text: "";
     Text {
         text: "刷新页面";
@@ -208,7 +208,7 @@ export component MyEventPage inherits Page {
             width: 100%;
             height: 100%;
             Button-refresh {
-                x: 10px;
+                x: 800px;
                 y: 10px;
                 clicked => {MyEventPageBridge.show-mess("subscriptions");
                             MyEventPageBridge.show-mess("active");
@@ -246,7 +246,7 @@ export component MyEventPage inherits Page {
                             SignCard {
                                 get := CodeGet{ 
                                     x: (parent.x)+80px;
-                                    id: MyEventPageBridge.id[card.count];
+                                    id: card.event.id;
                                 }
                                 SignButton {
                                     x: (parent.width)*0.75 + parent.x;
@@ -260,7 +260,7 @@ export component MyEventPage inherits Page {
                 }
                 //active板块
                 active := Empty{
-                    x: root.x+sub.width*1.01;
+                    x: root.x+sub.width;
                     y: root.y;
                     height: 50%;
                     width: 48%;

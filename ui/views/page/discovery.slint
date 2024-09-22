@@ -113,19 +113,21 @@ export component DiscoveryPage inherits Page {
                 text: "  正在进行的活动";
             }
 
-            if DiscoveryPageBridge.active-events-state == PageState.error: Rectangle {
-                Button {
-                    type: ButtonType.filled-tonal;
-                    content: "重新加载";
-                    clicked => {
-                        DiscoveryPageBridge.load-active-events();
+            Rectangle {
+                if DiscoveryPageBridge.active-events-state == PageState.error: Rectangle {
+                    Button {
+                        type: ButtonType.filled-tonal;
+                        content: "重新加载";
+                        clicked => {
+                            DiscoveryPageBridge.load-active-events();
+                        }
                     }
                 }
-            }
 
-            if DiscoveryPageBridge.active-events-state == PageState.loading: LoadingAnimation {
-                color: Token.color.on-surface;
-                height: 40px;
+                if DiscoveryPageBridge.active-events-state == PageState.loading: LoadingAnimation {
+                    color: Token.color.on-surface;
+                    height: 40px;
+                }
             }
 
             if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.active-events.length != 0: Rectangle {
@@ -145,19 +147,21 @@ export component DiscoveryPage inherits Page {
                 text: "  最新的活动";
             }
 
-            if DiscoveryPageBridge.latest-events-state == PageState.error: Rectangle {
-                Button {
-                    type: ButtonType.filled-tonal;
-                    content: "重新加载";
-                    clicked => {
-                        DiscoveryPageBridge.load-latest-events();
+            Rectangle {
+                if DiscoveryPageBridge.latest-events-state == PageState.error: Rectangle {
+                    Button {
+                        type: ButtonType.filled-tonal;
+                        content: "重新加载";
+                        clicked => {
+                            DiscoveryPageBridge.load-latest-events();
+                        }
                     }
                 }
-            }
 
-            if DiscoveryPageBridge.latest-events-state == PageState.loading: LoadingAnimation {
-                color: Token.color.on-surface;
-                height: 40px;
+                if DiscoveryPageBridge.latest-events-state == PageState.loading: LoadingAnimation {
+                    color: Token.color.on-surface;
+                    height: 40px;
+                }
             }
 
             if DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.latest-events.length != 0: Rectangle {

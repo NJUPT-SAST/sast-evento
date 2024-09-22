@@ -24,14 +24,12 @@ void MyEventPage::onShow() {
     // show event when the page is shown
     self->on_show_mess([this](slint::SharedString part){get_events(part);});
     //if click button , check code
-    self->on_get_code([this](slint::SharedString code,int id){check_code(code, id);});
+    self->on_get_code([this](slint::SharedString code,int id){return check_code(code, id);});
 };
 
 void MyEventPage::get_events(slint::SharedString part){
     auto& self = *this;
     evento::EventQueryRes eventlists;
-    slint::VectorModel<int> id_model;
-    slint::VectorModel<EventStruct> event_model;
     int num = 0;
     if (part == slint::SharedString("active")) {
         evento::executor()->asyncExecute(networkClient()->getActiveEventList(), [&](Result<evento::EventQueryRes> list){
@@ -50,10 +48,6 @@ void MyEventPage::get_events(slint::SharedString part){
             return ;
         }
     });
-        for(auto & element : eventlists.elements) {
-            id_model.push_back(element.id);
-        }
-        self->set_id(std::make_shared<slint::VectorModel<int>>(id_model));
     }
     else if (part == slint::SharedString("end")) {
         evento::executor()->asyncExecute(networkClient()->getParticipatedEvent(), [&](Result<EventQueryRes> list){
@@ -65,18 +59,15 @@ void MyEventPage::get_events(slint::SharedString part){
     });
     }
     num = (int)eventlists.elements.size();
-    for (auto & element : eventlists.elements) {
-        event_model.push_back(convert::from(element));
-    }
     if (part == "subscriptions") {
-    self->set_event_sub(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
     self->set_num_sub(num);
+    self->set_event_sub(convert::from(eventlists.elements));
     }else if (part == "end") {
-    self->set_event_end(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
     self->set_num_end(num);
+    self->set_event_end(convert::from(eventlists.elements));
     }else if (part == "active") {
-    self->set_event_active(std::make_shared<slint::VectorModel<EventStruct>>(event_model));
     self->set_num_active(num);
+    self->set_event_active(convert::from(eventlists.elements));
     }
 }
 
