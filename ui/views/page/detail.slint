@@ -9,6 +9,16 @@ import { TimeLine } from "../../modules/surrealism-ui/src/timeline/timeline.slin
 export global DetailPageBridge {
     callback get-event-info();
     callback name();
+    in-out property <string> event-name: "软件研发部 C++组授课";
+    in-out property <string> event-status: "报名中";
+    in-out property <[{icon: image, text: string}]> event-model: [
+        { icon: Token.image.icon.time, text: "9月1日 14:00-15:00" },
+        { icon: Token.image.icon.locate, text: "大学生活动中心 101中区" },
+        { icon: Token.image.icon.department, text: "C++组" },
+        { icon: Token.image.icon.category, text: "软研授课" },
+        { icon: Token.image.icon.tag, text: "C++" },
+        { icon: Token.image.icon.topic, text: "输入输出流" },
+    ];
 }
 
 component CommentBlock {
@@ -19,8 +29,6 @@ component CommentBlock {
         Text {
             x: 20px;
             y: 10px;
-            font-size: 23px;
-            height: 30px;
             text: "反馈";
             horizontal-alignment: TextHorizontalAlignment.center;
             vertical-alignment: TextVerticalAlignment.center;
@@ -97,22 +105,46 @@ component IconText {
     }
 }
 
+component HighlightBlock {
+    in property <string> text: "Test content";
+    Rectangle {
+        width: root.width;
+        height: 40px;
+        Rectangle {
+            x: 0px;
+            y: 0px;
+            width: 7px;
+            height: 100%;
+            background: Token.color.primary;
+        }
+
+        Text {
+            x: 20px;
+            y: 0px;
+            width: parent.width - self.x;
+            height: 100%;
+            text: root.text;
+            font-size: 30px;
+        }
+    }
+}
+
 component EventInfoBlock {
-    in property <[{icon: image, text: string}]> model: [
-        { icon: Token.image.icon.time, text: "9月1日 14:00-15:00" },
-        { icon: Token.image.icon.locate, text: "大学生活动中心 101中区" },
-        { icon: Token.image.icon.department, text: "C++组" },
-        { icon: Token.image.icon.category, text: "软研授课" },
-        { icon: Token.image.icon.tag, text: "C++" },
-        { icon: Token.image.icon.topic, text: "输入输出流" },
-    ];
+    // in property <[{icon: image, text: string}]> model: [
+    //     { icon: Token.image.icon.time, text: "9月1日 14:00-15:00" },
+    //     { icon: Token.image.icon.locate, text: "大学生活动中心 101中区" },
+    //     { icon: Token.image.icon.department, text: "C++组" },
+    //     { icon: Token.image.icon.category, text: "软研授课" },
+    //     { icon: Token.image.icon.tag, text: "C++" },
+    //     { icon: Token.image.icon.topic, text: "输入输出流" },
+    // ];
     VerticalLayout {
         x: 0px;
         y: 10px;
         spacing: 10px;
-        for data in root.model: repeated-icontext := IconText {
+        for data in DetailPageBridge.event-model: repeated-icontext := IconText {
             width: parent.width;
-            height: (parent.height - parent.y - (model.length - 1) * parent.spacing) / model.length;
+            height: (parent.height - parent.y - (DetailPageBridge.event-model.length - 1) * parent.spacing) / DetailPageBridge.event-model.length;
             visible: true;
             x: 0px;
             text: data.text;
@@ -150,15 +182,14 @@ export component DetailPage inherits Page {
                 Text {
                     width: parent.width;
                     height: 50px;
-                    text: "软件研发部 C++组授课";
+                    text: DetailPageBridge.event-name;
                     font-size: 35px;
                 }
 
-                Text {
+                HighlightBlock {
                     width: parent.width;
                     height: 35px;
-                    text: "报名中";
-                    font-size: 30px;
+                    text: DetailPageBridge.event-status;
                 }
 
                 EventInfoBlock {
