@@ -30,6 +30,7 @@ component CommentItem {
         star := SStar {
             score: feedback.rate;
             theme: Dark;
+            disabled: feedback.has-feedbacked;
         }
 
         HorizontalLayout {
@@ -38,12 +39,14 @@ component CommentItem {
                 width: 80%;
                 height: 40px;
                 text: feedback.content;
-                placeholder-text: "";
+                placeholder-text: "对本次活动有什么想说的？";
+                enabled: !feedback.has-feedbacked;
             }
 
             Button {
                 content: "评价";
                 type: ButtonType.filled-tonal;
+                disable: feedback.has-feedbacked || star.score == 0;
                 clicked => {
                     comment-clicked(star.score,line-edit.text);
                 }
