@@ -17,6 +17,10 @@
         {
             "name": "libsecret",
             "platform": "!(windows | uwp | osx)"
+        },
+        {
+            "name": "liburing",
+            "platform": "!(windows | uwp | osx)"
         }
     ],
     "features": {
