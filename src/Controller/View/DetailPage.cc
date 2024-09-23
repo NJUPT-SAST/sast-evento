@@ -87,7 +87,7 @@ void DetailPage::checkIn(int eventId, std::string checkInCode) {
             auto success = result.unwrap();
             if (success) {
                 auto model = self->get_event_model();
-                model.is_checkIn = true;
+                model.is_check_in = true;
                 self->set_event_model(model);
                 self.bridge.getMessageManager().showMessage("签到成功", MessageType::Success);
             } else {

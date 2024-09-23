@@ -98,7 +98,7 @@ component EventInfoBlock {
 }
 
 export component DetailPage inherits Page {
-    property <bool> able-to-feedback: DetailPageBridge.state == PageState.normal && DetailPageBridge.event-model.is-checkIn && DetailPageBridge.event-model.state == EventState.Completed;
+    property <bool> able-to-feedback: DetailPageBridge.state == PageState.normal && DetailPageBridge.event-model.is-check-in && DetailPageBridge.event-model.state == EventState.Completed;
     dialog := ContentDialog {
         width: 100%;
         height: 100%;
@@ -231,8 +231,8 @@ export component DetailPage inherits Page {
 
                 Button {
                     type: filled;
-                    content: DetailPageBridge.event-model.is-checkIn ? "已签到" : "签到";
-                    disable: DetailPageBridge.event-model.is-checkIn || DetailPageBridge.event-model.state == EventState.Completed || DetailPageBridge.event-model.state == EventState.Cancelled;
+                    content: DetailPageBridge.event-model.is-check-in ? "已签到" : "签到";
+                    disable: DetailPageBridge.event-model.is-check-in || DetailPageBridge.event-model.state == EventState.Completed || DetailPageBridge.event-model.state == EventState.Cancelled;
                     clicked => {
                         dialog.open();
                     }

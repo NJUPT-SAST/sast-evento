@@ -99,13 +99,15 @@ EventStruct from(const EventEntity& entity) {
         .summary_abbr = details::firstUnicode(entity.summary),
         .description = slint::SharedString(entity.description),
         .time = details::convertTimeRange(entity.start, entity.end),
-        .location = slint::SharedString(entity.location),
+        .location = slint::SharedString(std::format("{}{}{}",
+                                                    entity.location.value_or(""),
+                                                    entity.location.has_value() ? " " : "",
+                                                    entity.larkMeetingRoomName.value_or(""))),
         .tag = slint::SharedString(entity.tag),
-        .larkMeetingRoomName = slint::SharedString(entity.larkMeetingRoomName),
         .larkDepartmentName = slint::SharedString(entity.larkDepartmentName),
         .state = static_cast<EventState>(entity.state),
         .is_subscribed = entity.isSubscribed,
-        .is_checkIn = entity.isCheckedIn,
+        .is_check_in = entity.isCheckedIn,
     };
 }
 
