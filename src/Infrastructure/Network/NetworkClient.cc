@@ -1,10 +1,16 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
+#include <boost/asio/stream_file.hpp>
+#include <boost/asio/this_coro.hpp>
+#include <boost/asio/use_awaitable.hpp>
 #include <boost/beast/core/buffers_to_string.hpp>
+#include <boost/beast/core/file.hpp>
+#include <boost/beast/core/file_base.hpp>
 #include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
+#include <boost/system/detail/error_code.hpp>
 #include <boost/url/param.hpp>
 #include <boost/url/url_view.hpp>
 #include <cstdint>
@@ -464,21 +470,24 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
     co_return Ok(entity);
 }
 
-Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url) {
+Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url,
+                                                           std::optional<std::filesystem::path> dir,
+                                                           bool useCache) {
     auto view = urls::url_view(url);
     http::request<http::string_body> req{http::verb::get, view.path(), 11};
-    // use cache first
-    auto cacheDir = CacheManager::cacheDir();
-    if (!cacheDir) {
-        co_return Err(Error(Error::Data, "cache dir not found"));
+
+    if (!dir) {
+        co_return Err(Error(Error::Data, "directory not found"));
     }
 
     auto stem = CacheManager::generateStem(url);
 
-    std::filesystem::directory_iterator iter(*cacheDir);
-    for (const auto& file : iter) {
-        if (file.path().filename().stem().string() == stem) {
-            co_return Ok(std::filesystem::absolute(file.path()));
+    if (useCache) {
+        std::filesystem::directory_iterator iter(*dir);
+        for (const auto& file : iter) {
+            if (file.path().filename().stem().string() == stem) {
+                co_return Ok(std::filesystem::absolute(file.path()));
+            }
         }
     }
 
@@ -505,9 +514,9 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url) {
     auto value = type->value();
     stem += '.';
     stem += value.substr(value.find('/') + 1);
-    auto path = *cacheDir / stem;
+    auto path = *dir / stem;
 
-    if (!CacheManager::saveToDisk(beast::buffers_to_string(response.body().data()), path)) {
+    if (!co_await saveToDisk(beast::buffers_to_string(response.body().data()), path)) {
         co_return Err(Error(Error::Data, "save file failed"));
     }
     co_return Ok(path);
@@ -581,6 +590,27 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     auto data = res.contains("data") ? res["data"] : nlohmann::json::object();
 
     return Ok(data);
+}
+
+Task<bool> NetworkClient::saveToDisk(std::string const& data, std::filesystem::path const& path) {
+    net::stream_file file(co_await net::this_coro::executor,
+                          path.string().c_str(),
+                          net::stream_file::write_only | net::stream_file::create);
+    if (!file.is_open()) {
+        co_return false;
+    }
+
+    auto totalSize = data.size();
+    std::size_t bytesWritten = 0;
+    while (bytesWritten < totalSize) {
+        bytesWritten += co_await file.async_write_some(net::buffer(data.data() + bytesWritten,
+                                                                   totalSize - bytesWritten),
+                                                       net::use_awaitable);
+    }
+
+    file.close();
+
+    co_return true;
 }
 
 NetworkClient* networkClient() {

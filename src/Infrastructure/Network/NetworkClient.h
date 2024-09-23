@@ -108,7 +108,10 @@ public:
 
     Task<Result<ReleaseEntity>> getLatestRelease();
 
-    Task<Result<std::filesystem::path>> getFile(std::string url);
+    Task<Result<std::filesystem::path>> getFile(
+        std::string url,
+        std::optional<std::filesystem::path> dir = CacheManager::cacheDir(),
+        bool useCache = true);
 
     void clearCache();
 
@@ -200,6 +203,8 @@ private:
                                     std::initializer_list<urls::param> const& queryParams);
     //response handler for github api
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
+
+    static Task<bool> saveToDisk(std::string const& data, std::filesystem::path const& path);
 
 private:
     net::ssl::context& _ctx;
