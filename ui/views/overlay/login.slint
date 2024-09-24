@@ -67,7 +67,7 @@ export component LoginOverlay inherits Overlay {
                     type: ButtonType.filled;
                     width: 240px;
                     height: 55px;
-                    content: "使用 Link 登录";
+                    content: @tr("使用 Link 登录");
                     font: Token.font.headline.small;
                     have-icon: true;
                     icon-size: 32px;
@@ -88,7 +88,7 @@ export component LoginOverlay inherits Overlay {
             // TODO: guest login
             if false: _guest-button := Rectangle {
                 Button {
-                    content: "访客登录";
+                    content: @tr("访客登录");
                     font: Token.font.body.large;
                     have-icon: true;
                     icon-size: 30px;
@@ -118,7 +118,7 @@ export component LoginOverlay inherits Overlay {
                 vertical-stretch: 0.35;
                 _developer-label := Rectangle {
                     Text {
-                        text: "SAST-C++组开发";
+                        text: @tr("SAST.C++组开发");
                         font-size: Token.font.label.large.size;
                         font-weight: Token.font.label.large.weight;
                         color: Token.color.on-surface;

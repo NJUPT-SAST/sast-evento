@@ -50,6 +50,7 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<CONFIG:Debug>:EVENTO_DEBUG>
     $<$<CONFIG:Release>:EVENTO_RELEASE>
     ${PLATFORM}
+    LOCALE_DIR="${CMAKE_SOURCE_DIR}/ui/locale"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -67,6 +68,7 @@ target_link_libraries(${PROJECT_NAME}
     keychain
     Slint::Slint
     version::version
+    Intl::Intl
     ${URING_LIBRARIES}
 )
 

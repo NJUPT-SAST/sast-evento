@@ -89,21 +89,21 @@ export component DiscoveryPage inherits Page {
                 font-weight: Token.font.label.large.weight;
                 horizontal-alignment: center;
                 vertical-alignment: center;
-                text: "暂时还没有活动哦";
+                text: @tr("暂时还没有活动哦");
             }
 
             if DiscoveryPageBridge.active-events.length != 0 || DiscoveryPageBridge.active-events-state != PageState.normal: Text {
                 color: Token.color.inverse-surface;
                 font-size: Token.font.title.large.size;
                 font-weight: Token.font.label.large.weight;
-                text: "  正在进行的活动";
+                text: @tr("  正在进行的活动");
             }
 
             Rectangle {
                 if DiscoveryPageBridge.active-events-state == PageState.error: Rectangle {
                     Button {
                         type: ButtonType.filled-tonal;
-                        content: "重新加载";
+                        content: @tr("重新加载");
                         clicked => {
                             DiscoveryPageBridge.load-active-events();
                         }
@@ -130,14 +130,14 @@ export component DiscoveryPage inherits Page {
                 color: Token.color.inverse-surface;
                 font-size: Token.font.title.large.size;
                 font-weight: Token.font.label.large.weight;
-                text: "  最新的活动";
+                text: @tr("  最新的活动");
             }
 
             Rectangle {
                 if DiscoveryPageBridge.latest-events-state == PageState.error: Rectangle {
                     Button {
                         type: ButtonType.filled-tonal;
-                        content: "重新加载";
+                        content: @tr("重新加载");
                         clicked => {
                             DiscoveryPageBridge.load-latest-events();
                         }

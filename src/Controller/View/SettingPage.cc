@@ -11,9 +11,7 @@ SettingPage::SettingPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& 
 void SettingPage::onCreate() {
     auto& self = *this;
 
-    const auto [languageIdx, minimalToTray, noticeBegin, noticeEnd, themeIdx] = evento::settings;
-
-    self->set_language_index(languageIdx);
+    const auto [minimalToTray, noticeBegin, noticeEnd, themeIdx] = evento::settings;
     self->set_minimal_to_tray(minimalToTray);
     self->set_notice_begin(noticeBegin);
     self->set_notice_end(noticeEnd);
@@ -23,18 +21,11 @@ void SettingPage::onCreate() {
 
     config.insert_or_assign("setting",
                             toml::table{
-                                {"language", languageIdx},
                                 {"minimal-to-tray", minimalToTray},
                                 {"notice-begin", noticeBegin},
                                 {"notice-end", noticeEnd},
                                 {"theme", themeIdx},
                             });
-
-    self->on_language_changed([&self = *this]() {
-        auto& setting = config["setting"].ref<toml::table>();
-        setting.insert_or_assign("language", self->get_language_index());
-        evento::settings.language = self->get_language_index();
-    });
 
     self->on_minimal_to_tray_changed([&self = *this]() {
         auto& setting = config["setting"].ref<toml::table>();
@@ -69,7 +60,6 @@ void SettingPage::onCreate() {
 void SettingPage::onShow() {
     auto& self = *this;
 
-    self->set_language_index(evento::settings.language);
     self->set_minimal_to_tray(evento::settings.minimalToTray);
     self->set_notice_begin(evento::settings.noticeBegin);
     self->set_notice_end(evento::settings.noticeEnd);

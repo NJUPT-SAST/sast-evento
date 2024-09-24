@@ -4,6 +4,8 @@
 #include <Infrastructure/Utils/Logger.hh>
 #include <Version.h>
 #include <filesystem>
+#include <libintl.h>
+#include <locale>
 #include <spdlog/spdlog.h>
 
 int main(int argc, char** argv) {
@@ -12,6 +14,9 @@ int main(int argc, char** argv) {
                       .string());
     evento::initConfig();
     spdlog::info("SAST Evento version: v" VERSION_FULL);
+
+    bindtextdomain("sast-evento", LOCALE_DIR);
+    std::locale::global(std::locale(""));
 
     evento::UiBridge uiBridge(App::create());
 

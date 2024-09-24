@@ -45,3 +45,4 @@ CMakeUserPresets.json
 action-cli
 
 *.rc
+*.mo

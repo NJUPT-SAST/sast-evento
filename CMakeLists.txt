@@ -19,6 +19,7 @@ endif()
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
+set(SLINT_FEATURE_GETTEXT ON CACHE BOOL "Slint gettext feature" FORCE)
 
 if (WIN32)
   # Target Windows 7
@@ -53,6 +54,7 @@ find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system url beast process)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(Intl REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(tomlplusplus REQUIRED IMPORTED_TARGET tomlplusplus)
 
