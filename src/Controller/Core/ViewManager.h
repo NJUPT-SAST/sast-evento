@@ -64,11 +64,7 @@ public:
     template<typename T>
     T getData() {
         assert(!viewData.empty() && "no view data");
-        try {
-            return std::any_cast<T>(viewData.top());
-        } catch (const std::bad_any_cast& e) {
-            assert(false && "bad any cast");
-        }
+        return std::any_cast<T>(viewData.top());
     }
 
 private:
