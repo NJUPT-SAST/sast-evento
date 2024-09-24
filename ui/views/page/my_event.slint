@@ -142,7 +142,7 @@ export component CodeGet inherits Window {
 //查看更多
 export component ForMore inherits SLink {
     theme: Dark;
-    text: "查看更多";
+    @children
     font-size: 15px;
     clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
 }
@@ -321,7 +321,12 @@ export component MyEventPage inherits Page {
                     link := ForMore {
                         width: 100px;
                         x: txt-e.x+100px;
-                        y: txt-e.y;
+                        y: (txt-e.y)+5px;
+                        Text {
+                            text: "查看更多";
+                            font-size: 15px;
+                            color: Token.color.on-surface;
+                        }
                     }
                     MyEventCard {
                         count: 0; //本页面只展示一个活动
