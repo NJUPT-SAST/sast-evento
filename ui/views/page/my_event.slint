@@ -84,12 +84,15 @@ export component CodeGet inherits Window {
         property <bool> is-check-in : false;
         in-out property <int> id : 0;
         visible: is_show;
-        code-txt := LineEdit {
-            width: 150px;
-            height: 40px;
-            placeholder-text: "Enter code here";
-            font-size: 12px;
-        }
+        VerticalLayout {
+            code-txt := LineEdit {
+                width: 180px;
+                height: 40px;
+                placeholder-text: "Enter code here";
+                font-size: 12px;
+            }
+        HorizontalLayout {
+            spacing: 5px;
             SButton{
                 width: 30px;
                 height: 20px;
@@ -116,6 +119,8 @@ export component CodeGet inherits Window {
                 }
                 clicked => {root.close();code-txt.text="";}
             }
+        }
+    }
         success := result-success{}
         fail := result-fail{}
         public function open() {
