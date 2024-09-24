@@ -62,7 +62,7 @@ void HistoryPage::loadHistoryEvents(int page, int size) {
                     [&self = *this, feedbackSize](Result<std::optional<FeedbackEntity>> result) {
                         if (result.isErr()) {
                             spdlog::warn("feedback load failed: {}", result.unwrapErr().what());
-                            self.feedbacks.emplace_back(false, false, 0, "");
+                            self.feedbacks.emplace_back(FeedbackStruct{});
                         } else {
                             self.feedbacks.emplace_back(convert::from(result.unwrap()));
                         }
