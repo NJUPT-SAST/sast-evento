@@ -21,9 +21,9 @@ void MyEventPage::onCreate() {
 void MyEventPage::onShow() {
     auto& self = *this;
     // show event when the page is shown
-    self->on_show_mess([this](slint::SharedString part) { get_events(part); });
+    self->on_for_refresh_mess([this](slint::SharedString part) { get_events(part); });
     //if click button , check code
-    self->on_get_code([this](slint::SharedString code, int id) { return check_code(code, id); });
+    self->on_check_code([this](slint::SharedString code, int id) { return check_code(code, id); });
 };
 
 void MyEventPage::get_events(slint::SharedString part) {

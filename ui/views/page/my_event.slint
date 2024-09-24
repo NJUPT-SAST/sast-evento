@@ -28,8 +28,8 @@ export global MyEventPageBridge {
     in-out property <[EventStruct]> event_active : [];
     in-out property <[EventStruct]> event_end : [];
 
-    callback get-code(string,int)->bool;
-    pure callback show-mess(string);
+    callback check-code(string,int)->bool;
+    pure callback for-refresh-mess(string);
 //
 }
 
@@ -78,66 +78,62 @@ export component result-fail inherits Window {
 }
 
 export component CodeGet inherits Window {
-    width: 200px;
-    height: 90px;
-    property <bool> is_show : false;
-    property <bool> is-check-in : false;
-    in-out property <int> id : 0;
-    visible: is_show;
-    code-txt := LineEdit {
-        width: 150px;
-        height: 40px;
-        placeholder-text: "Enter code here";
-        font-size: 12px;
-    }
-    SButton{
-        x: (parent.x)+40px;
-        y: (parent.y)+65px;
-        width: 30px;
-        height: 20px;
-        text: "";
-        background: Token.color.surface;
-        border-color: Token.color.primary-container;
-        Text {
-            text: "确认";
-            font-size: 10px;
-            color: Token.color.on-surface;
+        width: 200px;
+        height: 90px;
+        property <bool> is_show : false;
+        property <bool> is-check-in : false;
+        in-out property <int> id : 0;
+        visible: is_show;
+        code-txt := LineEdit {
+            width: 150px;
+            height: 40px;
+            placeholder-text: "Enter code here";
+            font-size: 12px;
         }
-        clicked => {parent.close();parent.judge(code-txt.text);}
-    }
-    SButton{
-        x: (parent.x)+75px;
-        y: (parent.y)+65px;
-        width: 30px;
-        height: 20px;
-        text: "";
-        background: Token.color.surface;
-        border-color: Token.color.primary-container;
-        Text {
-            text: "取消";
-            font-size: 10px;
-            color: Token.color.on-surface;
+            SButton{
+                width: 30px;
+                height: 20px;
+                text: "";
+                background: Token.color.surface;
+                border-color: Token.color.primary-container;
+                Text {
+                    text: "确认";
+                    font-size: 10px;
+                    color: Token.color.on-surface;
+                }
+                clicked => {root.close();root.judge(code-txt.text);}
+            }
+            SButton{
+                width: 30px;
+                height: 20px;
+                text: "";
+                background: Token.color.surface;
+                border-color: Token.color.primary-container;
+                Text {
+                    text: "取消";
+                    font-size: 10px;
+                    color: Token.color.on-surface;
+                }
+                clicked => {root.close();code-txt.text="";}
+            }
+        success := result-success{}
+        fail := result-fail{}
+        public function open() {
+            self.is_show = true;
         }
-        clicked => {parent.close();code-txt.text="";}
-    }
-     success := result-success{}
-    fail := result-fail{}
-    public function open() {
-        self.is_show = true;
-    }
-    public function close() {
-        self.is_show = false;
-    }
-    //检查code
-    public function judge(code:string) {
-        is-check-in = MyEventPageBridge.get-code(code-txt.text,id);
-        if(is-check-in){
-            success.open();
-        }else{
-            fail.open();
+        public function close() {
+            self.is_show = false;
+        }
+        //检查code
+        public function judge(code:string) {
+            is-check-in = MyEventPageBridge.check-code(code-txt.text,id);
+            if(is-check-in){
+                success.open();
+            }else{
+                fail.open();
+            }
         }
     }
-}
 //查看更多
 export component ForMore inherits SLink {
     theme: Dark;
@@ -211,9 +207,9 @@ export component MyEventPage inherits Page {
             Button-refresh {
                 x: active.x + 50px;
                 y: 10px;
-                clicked => {MyEventPageBridge.show-mess("subscriptions");
-                            MyEventPageBridge.show-mess("active");
-                            MyEventPageBridge.show-mess("end")}
+                clicked => {MyEventPageBridge.for-refresh-mess("subscriptions");
+                            MyEventPageBridge.for-refresh-mess("active");
+                            MyEventPageBridge.for-refresh-mess("end")}
             }
                 //subscribe板块
                 sub := Empty {  
