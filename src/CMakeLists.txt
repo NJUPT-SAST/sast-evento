@@ -19,14 +19,22 @@ if (LINUX)
   set(URING_LIBRARIES ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/liburing.a)
 endif()
 
-slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
-
 if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
-  message("Embedding resources in the executable")
-  set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
+  set(SLINT_GENERATE_COMPILE_UNITS 1)
+  set(SLINT_RESOURCES_POLICY "embed-files")
+else()
+  message("Embedding resources in the executable")  
+  set(SLINT_GENERATE_COMPILE_UNITS 10)
+  set(SLINT_RESOURCES_POLICY "as-absolute-path")
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
+slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint 
+  COMPILATION_UNITS ${UI_UNITS}
+)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES ${SLINT_RESOURCES_POLICY})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(WIN32)
   set(PLATFORM PLATFORM_WINDOWS)
