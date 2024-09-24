@@ -12,6 +12,14 @@ public:
 
 private:
     void onCreate() override;
+
+    void onShow() override;
+
+    void loadEvent();
+    void loadFeedback();
+    void checkIn(int eventId, std::string checkInCode);
+    void subscribe(int eventId, bool subscribe);
+    void feedbackEvent(int eventId, int rate, std::string content);
 };
 
 EVENTO_UI_END

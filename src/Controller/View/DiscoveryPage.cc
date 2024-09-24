@@ -22,13 +22,18 @@ void DiscoveryPage::onCreate() {
         spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
         bridge.getViewManager().navigateTo(ViewName::DetailPage, eventStruct);
     });
-    slidesAutoRotation();
 }
 
 void DiscoveryPage::onShow() {
     loadActiveEvents();
     loadLatestEvents();
     loadHomeSlides();
+
+    static bool firstShow = true;
+    if (firstShow) {
+        firstShow = false;
+        slidesAutoRotation();
+    }
 }
 
 void DiscoveryPage::loadActiveEvents() {

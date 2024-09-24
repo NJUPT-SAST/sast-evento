@@ -134,7 +134,7 @@ jobs:
         }
 
         cmake --preset native @additionalConfigureArgs
-        cmake --build --preset native-release -j3
+        cmake --build --preset native-release
 
     - name: Archive files
       shell: pwsh
@@ -291,7 +291,7 @@ jobs:
           chown -R build:build .
           sudo -u build makepkg -f --nodeps --noconfirm
         EOF
-        rm ./deploy/pacman/*-debug-*.pkg.tar.zst
+        sudo rm ./deploy/pacman/*-debug-*.pkg.tar.zst
 
     - name: Upload package
       uses: actions/upload-artifact@v4

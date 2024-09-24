@@ -69,6 +69,8 @@ public:
         int size = 10,
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
+    Task<Result<EventQueryRes>> getEventById(int eventId);
+
     Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params,
                                              std::chrono::steady_clock::duration cacheTtl = 1min);
 
@@ -106,7 +108,10 @@ public:
 
     Task<Result<ReleaseEntity>> getLatestRelease();
 
-    Task<Result<std::filesystem::path>> getFile(std::string url);
+    Task<Result<std::filesystem::path>> getFile(
+        std::string url,
+        std::optional<std::filesystem::path> dir = CacheManager::cacheDir(),
+        bool useCache = true);
 
     void clearCache();
 
@@ -198,6 +203,8 @@ private:
                                     std::initializer_list<urls::param> const& queryParams);
     //response handler for github api
     static JsonResult handleResponse(http::response<http::dynamic_body> response);
+
+    static Task<bool> saveToDisk(std::string const& data, std::filesystem::path const& path);
 
 private:
     net::ssl::context& _ctx;

@@ -1,7 +1,6 @@
-import { Overlay, Empty, StateLayer } from "../../components/index.slint";
+import { Overlay, StateLayer } from "../../components/index.slint";
 import { ViewManager, ViewName, AccountManager, MessageType, MessageManager } from "../../logic/index.slint";
 import { Token } from "../../global.slint";
-import { ROOT-STYLES } from "../../modules/surrealism-ui/themes/index.slint";
 
 export global MenuOverlayBridge {
     in-out property <bool> is-show: false;
@@ -91,7 +90,7 @@ export component MenuOverlay inherits Overlay {
             }
             out {
                 animate content.x, shadow.opacity {
-                    duration: 200ms;
+                    duration: 400ms;
                     easing: ease-in-quart;
                 }
             }
@@ -101,11 +100,37 @@ export component MenuOverlay inherits Overlay {
             content.x: root.width;
         }
     ]
+    property <bool> navigate;
+    property <ViewName> view;
+    function fold() {
+        navigate = false;
+        MenuOverlayBridge.is-show = false;
+        timer.running = true;
+    }
+    function fold-then-navigate(view: ViewName) {
+        navigate = true;
+        self.view = view;
+        MenuOverlayBridge.is-show = false;
+        timer.running = true;
+    }
+
     shadow := Rectangle {
         background: Token.color.scrim;
         shadow-area := TouchArea {
             clicked => {
-                MenuOverlayBridge.is-show = false;
+                fold();
+            }
+        }
+    }
+
+    timer := Timer {
+        interval: 450ms;
+        running: false;
+        triggered => {
+            self.running = false;
+            if (navigate) {
+                ViewManager.replace-navigate-to(view);
+            } else {
                 ViewManager.prior-view();
             }
         }
@@ -188,8 +213,7 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.history;
                 label: "历史活动";
                 clicked => {
-                    MenuOverlayBridge.is-show = false;
-                    ViewManager.replace-navigate-to(ViewName.HistoryPage)
+                    fold-then-navigate(ViewName.HistoryPage);
                 }
             }
             if AccountManager.is-login:MenuItem {
@@ -205,8 +229,7 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.setting;
                 label: "设置";
                 clicked => {
-                    MenuOverlayBridge.is-show = false;
-                    ViewManager.replace-navigate-to(ViewName.SettingPage)
+                    fold-then-navigate(ViewName.SettingPage);
                 }
             }
 
@@ -214,8 +237,7 @@ export component MenuOverlay inherits Overlay {
                 icon: Token.image.icon.info;
                 label: "关于";
                 clicked => {
-                    MenuOverlayBridge.is-show = false;
-                    ViewManager.replace-navigate-to(ViewName.AboutPage)
+                    fold-then-navigate(ViewName.AboutPage);
                 }
             }
 
@@ -223,7 +245,7 @@ export component MenuOverlay inherits Overlay {
             if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.logout;
                 label: "退出登录";
-                label-color: ROOT-STYLES.sur-theme-colors.error.normal;
+                label-color: Token.color.error;
                 clicked => {
                     MenuOverlayBridge.is-show = false;
                     AccountManager.request-logout();

@@ -15,7 +15,7 @@ export global SearchPageBridge {
     callback filter-department(string);
     callback load-department-list();
     callback load-department-events(int);
-
+    callback navigate-to-detail(EventStruct);
     public function select(index: int) {
         current-department-index = index;
     }
@@ -97,8 +97,7 @@ export component SearchPage inherits Page {
                     cards := EventCardGroup {
                         model: SearchPageBridge.event-model;
                         item-clicked(event-struct) => {
-                            debug("id: " + event-struct.id + " title: " + event-struct.summary);
-                            // TODO: navigate to detail page
+                            SearchPageBridge.navigate-to-detail(event-struct);
                         }
                     }
                 }

@@ -1,7 +1,6 @@
 #include <Infrastructure/Cache/Cache.h>
 #include <filesystem>
 #include <format>
-#include <fstream>
 #include <functional>
 #include <optional>
 #include <spdlog/spdlog.h>
@@ -108,16 +107,6 @@ std::optional<CacheEntry> CacheManager::get(std::string const& key) {
     }
 
     return it->second->second;
-}
-
-bool CacheManager::saveToDisk(std::string const& data, fs::path const& path) {
-    std::ofstream file(path, std::ios::binary);
-    if (file.is_open()) {
-        file << data;
-        return true;
-    }
-    spdlog::warn("Failed to save cache to disk: {}", path.string());
-    return false;
 }
 
 void CacheManager::clear() {

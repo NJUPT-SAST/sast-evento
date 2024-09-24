@@ -1,31 +1,242 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page, Button, EventStruct, EventState, FeedbackStruct, ContentDialog, PageState, LoadingAnimation } from "../../components/index.slint";
+import { VerticalBox, LineEdit, ScrollView } from "std-widgets.slint";
+import { SStar} from "../../modules/surrealism-ui/index.slint";
 
-export global DetailPageBridge { }
+export global DetailPageBridge {
+    callback load-event();
+    callback load-feedback();
+    callback feedback(int, string);
+    callback check-in(string);
+    callback subscribe(bool);
+    in property <EventStruct> event-model;
+    in property <FeedbackStruct> feedback-model;
+    in property <PageState> state: normal;
+    in property <PageState> feedback-state: normal;
+    in property <PageState> subscribe-state: normal;
+}
+
+component IconText {
+    in property <image> icon;
+    in property <string> text;
+    HorizontalLayout {
+        spacing: 5px;
+        alignment: start;
+        Image {
+            source: root.icon;
+            width: 18px;
+        }
+
+        Text {
+            text: root.text;
+            vertical-alignment: TextVerticalAlignment.center;
+            font-size: 16px;
+            wrap: TextWrap.char-wrap;
+        }
+    }
+}
+
+component HighlightBlock {
+    pure function state-to-text(state: EventState) -> string {
+        if (state == EventState.SigningUp) {
+            return "报名中";
+        } else if (state == EventState.Active) {
+            return "进行中";
+        } else if (state == EventState.Completed) {
+            return "已结束";
+        } else if (state == EventState.Cancelled) {
+            return "已取消";
+        } else {
+            return "未知状态";
+        }
+    }
+    in property <EventState> state;
+    HorizontalLayout {
+        spacing: 10px;
+        Rectangle {
+            width: 7px;
+            background: Token.color.primary;
+        }
+
+        Text {
+            text: state-to-text(root.state);
+            font-size: Token.font.title.large.size;
+            font-weight: Token.font.title.large.weight;
+            vertical-alignment: center;
+        }
+    }
+}
+
+component EventInfoBlock {
+    VerticalLayout {
+        spacing: 10px;
+        IconText {
+            icon: Token.image.icon.time;
+            text: DetailPageBridge.event-model.time;
+        }
+
+        IconText {
+            icon: Token.image.icon.locate;
+            text: DetailPageBridge.event-model.location;
+        }
+
+        IconText {
+            icon: Token.image.icon.department;
+            text: DetailPageBridge.event-model.larkDepartmentName;
+        }
+
+        IconText {
+            icon: Token.image.icon.tag;
+            text: DetailPageBridge.event-model.tag;
+        }
+
+        IconText {
+            icon: Token.image.icon.topic;
+            text: DetailPageBridge.event-model.description;
+        }
+    }
+}
 
 export component DetailPage inherits Page {
-    // TODO: implement Detail
-    // optional
-    background := Empty { }
-
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
+    property <bool> able-to-feedback: DetailPageBridge.state == PageState.normal && DetailPageBridge.event-model.is-check-in && DetailPageBridge.event-model.state == EventState.Completed;
+    dialog := ContentDialog {
         width: 100%;
         height: 100%;
+        is-show: false;
+        dialog-title: "签到";
+
+        text-edit := LineEdit {
+            width: 100%;
+            height: 58px;
+            font-size: Token.font.body.large.size;
+            placeholder-text: "请输入签到码";
+            horizontal-alignment: center;
+        }
+
+        confirm-btn-text: "签到";
+        cancel-btn-text: "取消";
+
+        confirm => {
+            DetailPageBridge.check-in(text-edit.text);
+            dialog.close();
+        }
+
+        cancel => {
+            dialog.close();
+        }
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "活动的详细页面\n  参考设计稿";
+    VerticalLayout {
+        padding: 50px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        spacing: 30px;
+        Text {
+            text: DetailPageBridge.event-model.summary;
+            font-size: Token.font.display.medium.size;
+            font-weight: Token.font.display.medium.weight;
+            wrap: TextWrap.char-wrap;
+        }
+
+        ScrollView {
+            VerticalLayout {
+                spacing: 20px;
+                HighlightBlock {
+                    height: 35px;
+                    state: DetailPageBridge.event-model.state;
+                }
+
+                EventInfoBlock { }
+
+                if DetailPageBridge.state == PageState.loading: Rectangle {
+                    LoadingAnimation {
+                        width: 40px;
+                        height: 40px;
+                    }
+                }
+
+                if DetailPageBridge.state == PageState.error: Rectangle {
+                    Button {
+                        type: filled-tonal;
+                        content: "重新加载";
+                        clicked => {
+                            DetailPageBridge.load-feedback();
+                        }
+                    }
+                }
+
+                if able-to-feedback: Rectangle {
+                    width: 80%;
+                    height: 1px;
+                    background: Token.color.outline-variant;
+                }
+
+                if able-to-feedback: Rectangle {
+                    VerticalLayout {
+                        spacing: 10px;
+                        Text {
+                            text: "反馈";
+                            font-size: Token.font.title.large.size;
+                            font-weight: Token.font.title.large.weight;
+                        }
+
+                        star := SStar {
+                            score: DetailPageBridge.feedback-model.rate;
+                        }
+
+                        content := LineEdit {
+                            font-size: Token.font.body.large.size;
+                            placeholder-text: "参与完本次活动，有什么想说的吗，快告诉我们吧";
+                            text: DetailPageBridge.feedback-model.content;
+                        }
+
+                        HorizontalLayout {
+                            alignment: end;
+                            Button {
+                                type: filled-tonal;
+                                content: "提交";
+                                disable: DetailPageBridge.feedback-model.rate == 0 || DetailPageBridge.feedback-model.has-feedbacked;
+                                have-icon: DetailPageBridge.feedback-state == PageState.loading;
+                                LoadingAnimation {
+                                    color: Token.color.on-surface;
+                                }
+
+                                clicked => {
+                                    DetailPageBridge.feedback(star.score, content.text);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            height: 40px;
+            HorizontalLayout {
+                spacing: 20px;
+                Button {
+                    have-icon: DetailPageBridge.subscribe-state == PageState.loading;
+                    type: filled;
+                    content: DetailPageBridge.event-model.is-subscribed ? "取消报名" : "报名";            
+                    disable: DetailPageBridge.event-model.state != EventState.SigningUp;
+                    LoadingAnimation {
+                        color: Token.color.on-surface;
+                    }
+
+                    clicked => {
+                        DetailPageBridge.subscribe(!DetailPageBridge.event-model.is-subscribed);
+                    }
+                }
+
+                Button {
+                    type: filled;
+                    content: DetailPageBridge.event-model.is-check-in ? "已签到" : "签到";
+                    disable: DetailPageBridge.event-model.is-check-in || DetailPageBridge.event-model.state == EventState.Completed || DetailPageBridge.event-model.state == EventState.Cancelled;
+                    clicked => {
+                        dialog.open();
+                    }
+                }
             }
         }
     }
