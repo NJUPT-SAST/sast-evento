@@ -19,8 +19,6 @@ if (LINUX)
   set(URING_LIBRARIES ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/liburing.a)
 endif()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_HAS_FILE)
-
 slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
 
 if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")

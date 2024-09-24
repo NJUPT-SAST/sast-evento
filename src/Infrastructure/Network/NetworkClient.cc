@@ -1,6 +1,7 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
+#include <boost/asio/co_spawn.hpp>
 #include <boost/asio/stream_file.hpp>
 #include <boost/asio/this_coro.hpp>
 #include <boost/asio/use_awaitable.hpp>
@@ -19,6 +20,9 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
+#if defined(PLATFORM_APPLE)
+#include <fstream>
+#endif
 
 namespace evento {
 
@@ -593,6 +597,30 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
 }
 
 Task<bool> NetworkClient::saveToDisk(std::string const& data, std::filesystem::path const& path) {
+#if defined(PLATFORM_APPLE)
+
+    auto result = co_await net::co_spawn(
+        co_await net::this_coro::executor,
+        [data, path]() -> Task<bool> {
+            try {
+                std::ofstream file(path, std::ios::binary | std::ios::out | std::ios::trunc);
+                if (!file.is_open()) {
+                    spdlog::warn("Failed to open file: {}", path.string());
+                    co_return false;
+                }
+                file << data;
+                file.close();
+                co_return true;
+            } catch (std::exception const& e) {
+                spdlog::warn("Failed to save file: {}", e.what());
+                co_return false;
+            }
+        },
+        net::use_awaitable);
+    co_return result;
+
+#else
+
     net::stream_file file(co_await net::this_coro::executor,
                           path.string().c_str(),
                           net::stream_file::write_only | net::stream_file::create);
@@ -609,8 +637,9 @@ Task<bool> NetworkClient::saveToDisk(std::string const& data, std::filesystem::p
     }
 
     file.close();
-
     co_return true;
+
+#endif
 }
 
 NetworkClient* networkClient() {
