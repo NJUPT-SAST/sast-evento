@@ -1,353 +1,145 @@
 import { Token } from "../../global.slint";
 import { ScrollView } from "std-widgets.slint";
-import { Page, Empty } from "../../components/index.slint";
-import { STimeLine, STimeLineItem } from "../../modules/surrealism-ui/src/timeline/index.slint";
-import { SCard } from "../../modules/surrealism-ui/src/card/index.slint";
-import {SLink} from "../../modules/surrealism-ui/src/link/index.slint";
-import { SDivider } from "../../modules/surrealism-ui/src/divider/index.slint";
-import { SText } from "../../modules/surrealism-ui/src/text/index.slint";
-import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
-import {SButton} from "../../modules/surrealism-ui/src/button/index.slint";
-import { SResult} from "../../modules/surrealism-ui/src/result/index.slint";
-import { ViewManagerBridge, ViewName} from "../../logic/view_manager.slint";
-import { ViewManager } from "../../logic/index.slint";
-import { LineEdit, VerticalBox } from "std-widgets.slint";
-import { EventCard, EventCardGroup} from "../../components/index.slint";
-import { EventStruct, EventState} from "../../components/index.slint";
+import { Page, EventCard, EventStruct, PageStateLayer, PageState } from "../../components/index.slint";
 
 export global MyEventPageBridge {
-//
-    in-out property <bool> is_click : false;
-    in-out property <int> code_id : 0;
-    in-out property <[int]> id : [];
-    in-out property <int> num_sub : 0;
-    in-out property <int> num_active : 0;
-    in-out property <int> num_end : 0;
-    
-    in-out property <[EventStruct]> event_sub : [];
-    in-out property <[EventStruct]> event_active : [];
-    in-out property <[EventStruct]> event_end : [];
-
-    callback check-code(string,int)->bool;
-    pure callback for-refresh-mess(string);
-//
+    in property <[EventStruct]> not-started-model: [
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+    ];
+    in property <[EventStruct]> active-model: not-started-model;
+    in property <[EventStruct]> completed-model: not-started-model;
+    in property <PageState> state: PageState.normal;
+    in property <string> error-message;
+    callback load-events();
+    callback navigate-to-detail(EventStruct);
 }
 
-export component result-success inherits Window {
-    property <bool> is_show : false;
-    visible: false;
-    x: 500px;
-    y: 200px;
-    width: 200px;
-    height: 300px;
-    SResult {
-        text: "签到成功";
-        result-type: Success;
-        btn-text: "点击返回";
-        clicked => {parent.close()}
-    }
+component HighlightText {
+    in property <string> text;
+    HorizontalLayout {
+        spacing: 10px;
+        padding-left: 10px;
+        Rectangle {
+            width: 7px;
+            background: Token.color.primary;
+        }
 
-    public function open() {
-        self.is_show = true;
-    }
-    public function close() {
-        self.is_show = false;
-    }
-}
-
-export component result-fail inherits Window {
-    property <bool> is_show : false;
-    visible: false;
-    x: 500px;
-    y: 200px;
-    width: 200px;
-    height: 300px;
-    SResult {
-        text: "抱歉,密码错误"+"\n"+"签到失败";
-        result-type: Error;
-        btn-text: "点击返回";
-        clicked => {parent.close()}
-    }
-
-    public function open() {
-        self.is_show = true;
-    }
-    public function close() {
-        self.is_show = false;
-    }
-}
-
-export component CodeGet inherits Window {
-        width: 200px;
-        height: 90px;
-        property <bool> is_show : false;
-        property <bool> is-check-in : false;
-        in-out property <int> id : 0;
-        visible: is_show;
-        VerticalLayout {
-            code-txt := LineEdit {
-                width: 180px;
-                height: 40px;
-                placeholder-text: "Enter code here";
-                font-size: 12px;
-            }
-        HorizontalLayout {
-            spacing: 5px;
-            SButton{
-                width: 30px;
-                height: 20px;
-                text: "";
-                background: Token.color.surface;
-                border-color: Token.color.primary-container;
-                Text {
-                    text: "确认";
-                    font-size: 10px;
-                    color: Token.color.on-surface;
-                }
-                clicked => {root.close();root.judge(code-txt.text);}
-            }
-            SButton{
-                width: 30px;
-                height: 20px;
-                text: "";
-                background: Token.color.surface;
-                border-color: Token.color.primary-container;
-                Text {
-                    text: "取消";
-                    font-size: 10px;
-                    color: Token.color.on-surface;
-                }
-                clicked => {root.close();code-txt.text="";}
-            }
+        Text {
+            text: text;
+            font-size: Token.font.title.large.size;
+            font-weight: Token.font.title.large.weight;
+            vertical-alignment: center;
         }
     }
-        success := result-success{}
-        fail := result-fail{}
-        public function open() {
-            self.is_show = true;
-        }
-        public function close() {
-            self.is_show = false;
-        }
-        //检查code
-        public function judge(code:string) {
-            is-check-in = MyEventPageBridge.check-code(code-txt.text,id);
-            if(is-check-in){
-                success.open();
-            }else{
-                fail.open();
-            }
-        }
-    }
-//查看更多
-export component ForMore inherits SLink {
-    theme: Dark;
-    @children
-    font-size: 15px;
-    clicked => {ViewManager.navigate-to(ViewName.HistoryPage)}
 }
 
-// 签到按钮
-component SignButton inherits SButton{
-    in-out property <int> s-id : 0;
-    width: 40px;
-    height: 20px;
-    background: Token.color.surface;
-    border-color: Token.color.outline;
-    font-color: Token.color.on-surface;
-    text: "签到";
-    property <bool> active : true;
-    clicked => {active = !active}
-    states [
-        active when  !active : {
-            text : "取消";
-        }
-        inactive when active: {
-            text : "签到";
-        } 
-    ]
-}
-// 评价按钮
-component ReviewButton inherits SButton {
-    width: 40px;
-    height: 20px;
-    property <string> txt : "评价";
-    text: txt;
-    background: Token.color.surface;
-    border-color: Token.color.outline;
-    font-color: Token.color.on-surface;
-    clicked => {ViewManager.navigate-to(ViewName.DetailPage)}
-}
-export component SignCard{
-    @children
-}
-
-export component ReviewCard{
-    ReviewButton {
-        x: parent.x+(parent.width)*0.75;
-    }
-}
-
-component MyEventCard inherits EventCard {
-    in-out property <int> count: 0;
-}
-
-component Button-refresh inherits SButton{
-    width: 60px;
-    height: 30px;
-    text: "";
-    Text {
-        text: "刷新页面";
-        font-size: 10px;
-    }
-    background: Token.color.surface;
-    border-color: Token.color.surface-container-highest;
-}
 export component MyEventPage inherits Page {
-        body := Empty {
-            x: 0;
-            y: 0;
-            width: 100%;
-            height: 100%;
-            Button-refresh {
-                x: active.x + 50px;
-                y: 10px;
-                clicked => {MyEventPageBridge.for-refresh-mess("subscriptions");
-                            MyEventPageBridge.for-refresh-mess("active");
-                            MyEventPageBridge.for-refresh-mess("end")}
+    property <length> card-width: (self.width - 180px) / 3;
+
+    VerticalLayout {
+        padding: 50px;
+        spacing: 20px;
+        HorizontalLayout {
+            spacing: 40px;
+            HighlightText {
+                text: @tr("未开始");
             }
-                //subscribe板块
-                sub := Empty {  
-                    x: root.x;
-                    y: root.y;
-                    height: root.height*0.9;
-                    width: root.width*0.45;
-                    txt-s := SText {
-                        x: parent.x;
-                        y: parent.y;
-                        text: "已报名:";
-                        font-size: 25px;
-                        font-weight: 30;
-                        color: Token.color.on-surface;
-                    }
-                    s1 := ScrollView {
-                        x: root.x;
-                        y: root.y+10px;
-                        width: sub.width;
-                        height: sub.height;
-                        viewport-height: sub.height*1.5;
-                        viewport-width: sub.width;
-                        for index in MyEventPageBridge.event_sub.length: Rectangle {
-                            card := MyEventCard {
-                                count: index;
-                                width: s1.width*0.9;
-                                height: 90px;
-                                event: {
-                                    id: MyEventPageBridge.event_sub[self.count].id,
-                                    summary: MyEventPageBridge.event_sub[self.count].summary,
-                                    summary-abbr: "软",
-                                    time: MyEventPageBridge.event_sub[self.count].time,
-                                    location: MyEventPageBridge.event_sub[self.count].location,
-                                    description: MyEventPageBridge.event_sub[self.count].description
-                                };
-                                SignCard {
-                                    get := CodeGet{ 
-                                        x: (parent.x)+80px;
-                                        id: card.event.id;
-                                    }
-                                    SignButton {
-                                        x: (parent.width)*0.75 + parent.x;
-                                        clicked => {
-                                            get.open();
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                //active板块
-                active := Empty{
-                    x: root.x+sub.width/2;
-                    y: root.y;
-                    height: root.height*0.5;
-                    width: root.width*0.45;
-                    txt-a := SText{
-                        x: parent.x;
-                        y: parent.y;
-                        text: "进行中:";
-                        font-size: 25px;
-                        font-weight: 30;
-                        color: Token.color.on-surface;
-                    }
-                    s2 := ScrollView {
-                        x: active.x;
-                        y: active.y+10px;
-                        width: sub.width;
-                        height: sub.height*0.5;
-                        viewport-height: active.height*1.5;
-                        viewport-width: active.width;
-                        for index in MyEventPageBridge.event_sub.length: Rectangle {
-                            MyEventCard {
-                                count: index;
-                                width: s2.width*0.9;
-                                height: 90px;
-                                event: {
-                                    id: MyEventPageBridge.event_active[self.count].id,
-                                    summary: MyEventPageBridge.event_active[self.count].summary,
-                                    summary-abbr: "软",
-                                    time: MyEventPageBridge.event_active[self.count].time,
-                                    location: MyEventPageBridge.event_active[self.count].location,
-                                    description: MyEventPageBridge.event_active[self.count].description
-                                };
-                            }
-                        }
-                    }
-                }
-                //end板块
-                end := Empty{
-                    x: active.x;
-                    y: active.y+active.height/2;
-                    height: 24%;
-                    width: 48%;
-                    txt-e := SText{
-                        x: parent.x;
-                        y: parent.y;
-                        text: "已结束:";
-                        font-size: 25px;
-                        font-weight: 30;
-                        color: Token.color.on-surface;
-                    }
-                    link := ForMore {
-                        width: 100px;
-                        x: txt-e.x+100px;
-                        y: (txt-e.y)+5px;
-                        Text {
-                            text: "查看更多";
-                            font-size: 15px;
-                            color: Token.color.on-surface;
-                        }
-                    }
-                    MyEventCard {
-                        count: 0; //本页面只展示一个活动
-                        width: end.width*0.9;
-                        height: 90px;
-                        x: end.x;
-                        y: end.y+30px;
-                        event: {
-                            id: MyEventPageBridge.event_end[0].id,
-                            summary: MyEventPageBridge.event_end[0].summary,
-                            summary-abbr: "软",
-                            time: MyEventPageBridge.event_end[0].time,
-                            location: MyEventPageBridge.event_end[0].location,
-                            description: MyEventPageBridge.event_end[0].description
-                        };
-                        ReviewCard {}
-                    }
-                }
-            
-            placeholder := Rectangle {
-                border-width: 4px;
+
+            HighlightText {
+                text: @tr("进行中");
+            }
+
+            HighlightText {
+                text: @tr("已结束");
             }
         }
+
+        HorizontalLayout {
+            spacing: 20px;
+            ScrollView {
+                width: card-width + 20px;
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 20px;
+                    for event-data in MyEventPageBridge.not-started-model: EventCard {
+                        width: card-width;
+                        event: event-data;
+                        clicked => {
+                            MyEventPageBridge.navigate-to-detail(self.event);
+                        }
+                    }
+                }
+            }
+
+            ScrollView {
+                width: card-width + 20px;
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 20px;
+                    for event-data in MyEventPageBridge.active-model: EventCard {
+                        width: card-width;
+                        event: event-data;
+                        clicked => {
+                            MyEventPageBridge.navigate-to-detail(self.event);
+                        }
+                    }
+                }
+            }
+
+            ScrollView {
+                width: card-width + 20px;
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 20px;
+                    for event-data in MyEventPageBridge.completed-model: EventCard {
+                        width: card-width;
+                        event: event-data;
+                        clicked => {
+                            MyEventPageBridge.navigate-to-detail(self.event);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    PageStateLayer {
+        state: MyEventPageBridge.state;
+        error-message: MyEventPageBridge.error-message;
+        error-retry-message: @tr("重新加载");
+        error-retry => {
+            MyEventPageBridge.load-events();
+        }
+    }
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "slint_string.h"
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
@@ -14,10 +13,9 @@ public:
 
 private:
     void onCreate() override;
+    void onLogin() override;
     void onShow() override;
-
-    void get_events(slint::SharedString part);
-    bool check_code(slint::SharedString code, int id);
+    void loadSubscribedEvents();
 };
 
 EVENTO_UI_END
