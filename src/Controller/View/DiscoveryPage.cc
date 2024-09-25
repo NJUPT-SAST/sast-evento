@@ -1,11 +1,10 @@
-#include "Controller/AsyncExecutor.hh"
-#include "Controller/Convert.h"
-#include "Controller/Core/ViewManager.h"
-#include "Controller/UiBridge.h"
-#include "Infrastructure/Network/NetworkClient.h"
+#include <Controller/AsyncExecutor.hh>
+#include <Controller/Convert.h>
+#include <Controller/Core/ViewManager.h>
+#include <Controller/UiBridge.h>
 #include <Controller/View/DiscoveryPage.h>
+#include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
-#include <chrono>
 #include <spdlog/spdlog.h>
 
 EVENTO_UI_START
@@ -18,6 +17,7 @@ void DiscoveryPage::onCreate() {
     auto& self = *this;
     self->on_load_active_events([this] { loadActiveEvents(); });
     self->on_load_latest_events([this] { loadLatestEvents(); });
+    self->on_image_manually_changed([this] { timer.restart(); });
     self->on_navigate_to_detail([this](EventStruct eventStruct) {
         spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
         bridge.getViewManager().navigateTo(ViewName::DetailPage, eventStruct);
@@ -97,22 +97,10 @@ void DiscoveryPage::loadHomeSlides() {
 }
 
 void DiscoveryPage::slidesAutoRotation() {
-    executor()->asyncExecute([]() -> Task<void> { co_return; },
-                             [&self = *this]() {
-                                 int cntIndex = self->get_image_index();
-                                 bool manuallyChanged = self->get_image_manually_changed();
-                                 if (!manuallyChanged) {
-                                     if (cntIndex == self->get_carousel_source()->row_count() - 1) {
-                                         self->set_image_index(0);
-                                         return;
-                                     }
-                                     self->set_image_index(cntIndex + 1);
-                                 } else {
-                                     self->set_image_manually_changed(false);
-                                 }
-                             },
-                             std::chrono::milliseconds(5000),
-                             AsyncExecutor::Periodic | AsyncExecutor::Delay);
+    timer.start(slint::TimerMode::Repeated, 5s, [&self = *this] {
+        self->set_image_index((self->get_image_index() + 1)
+                              % static_cast<int>(self->get_carousel_source()->row_count()));
+    });
 }
 
 EVENTO_UI_END

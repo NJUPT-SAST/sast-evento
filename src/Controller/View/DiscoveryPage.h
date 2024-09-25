@@ -11,6 +11,7 @@ public:
     DiscoveryPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
 
 private:
+    slint::Timer timer;
     void onCreate() override;
     void onShow() override;
 

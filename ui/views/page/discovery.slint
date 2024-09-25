@@ -1,23 +1,18 @@
-import { Page } from "../../components/index.slint";
-import { EventCardGroup } from "../../components/event_card.slint";
-import { EventStruct } from "../../components/event_struct.slint";
-import { SCarousel } from "../../modules/surrealism-ui/index.slint";
-import { EventoImageToken } from "../../assets/image/image_token.slint";
 import { Token } from "../../global.slint";
 import { ScrollView } from "std-widgets.slint";
-import { Button, ButtonType, LoadingAnimation, PageState, Empty } from "../../components/index.slint";
+import { Button, ButtonType, LoadingAnimation, Page, PageState, Empty, EventStruct, EventCardGroup } from "../../components/index.slint";
 
 export global DiscoveryPageBridge {
     in-out property <int> image-index: 0;
-    in-out property <bool> image-manually-changed: false;
+    callback image-manually-changed;
     in property <PageState> active-events-state: PageState.normal;
     in property <PageState> latest-events-state: PageState.normal;
     in property <[EventStruct]> active-events: [];
     in property <[EventStruct]> latest-events: [];
     in property <[image]> carousel-source: [
-        EventoImageToken.image.display.event.default[0],
-        EventoImageToken.image.display.event.default[1],
-        EventoImageToken.image.display.event.default[2],
+        Token.image.display.event.default[0],
+        Token.image.display.event.default[1],
+        Token.image.display.event.default[2],
     ];
     callback load-active-events();
     callback load-latest-events();
@@ -27,7 +22,6 @@ export global DiscoveryPageBridge {
 export component ImageCarousel inherits Rectangle {
     in property <[image]> sources;
     in-out property <int> current-index: 0;
-    in-out property <bool> image-manually-changed: false;
     border-radius: 12px;
     clip: true;
 
@@ -68,18 +62,11 @@ export component ImageCarousel inherits Rectangle {
                     height: 100%;
                     clicked => {
                         current-index = index;
-                        image-manually-changed = true;
+                        DiscoveryPageBridge.image-manually-changed();
                     }
                 }
             }
         }
-    }
-
-    // ensure image-switching animation works fine
-    LoadingAnimation {
-        z: -1;
-        color: Token.color.on-surface;
-        height: 40px;
     }
 }
 
@@ -93,7 +80,6 @@ export component DiscoveryPage inherits Page {
                 width: 100%;
                 height: root.height * 0.5;
                 current-index <=> DiscoveryPageBridge.image-index;
-                image-manually-changed <=> DiscoveryPageBridge.image-manually-changed;
                 sources: DiscoveryPageBridge.carousel-source;
             }
 
