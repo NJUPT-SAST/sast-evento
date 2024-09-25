@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/dll.hpp>
 #include <chrono>
 #include <ctime>
 #include <filesystem>
@@ -39,11 +40,7 @@ const std::filesystem::path localePath =
 #ifdef EVENTO_DEBUG
     LOCALE_DIR;
 #else
-#ifdef PLATFORM_LINUX
-    std::filesystem::path("/usr/share/locale");
-#else
-    std::filesystem::current_path() / "locale";
-#endif // PLATFORM_LINUX
+    boost::dll::program_location().parent_path() / "locale";
 #endif // EVENTO_DEBUG
 
 inline struct Settings {

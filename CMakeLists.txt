@@ -64,6 +64,9 @@ if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/sast-link-cxx-sdk/CMakeLists
   message(FATAL_ERROR "Git submodule not found. Run `git submodule update --init` from the source tree to fetch the submodule contents.")
 endif()
 
+#i18n
+set(SOURCE_LOCALE_DIR "${CMAKE_SOURCE_DIR}/ui/locale")
+
 # source code
 add_subdirectory(src)
 # sast-link-sdk
@@ -78,6 +81,8 @@ set(BUILD_SHARED_LIBS ON)
 file(WRITE ${CMAKE_BINARY_DIR}/sast-evento-version.txt ${VERSION_SEMANTIC})
 install(FILES ${CMAKE_BINARY_DIR}/sast-evento-version.txt DESTINATION .)
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION .)
+install(FILES ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/en/LC_MESSAGES)
+install(FILES ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/zh/LC_MESSAGES)
 install(TARGETS ${PROJECT_NAME}
   BUNDLE DESTINATION .
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
