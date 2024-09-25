@@ -40,7 +40,7 @@ const std::filesystem::path localePath =
 #ifdef EVENTO_DEBUG
     LOCALE_DIR;
 #else
-    boost::dll::program_location().parent_path() / "locale";
+    std::filesystem::path{(boost::dll::program_location().parent_path() / "locale").string()};
 #endif // EVENTO_DEBUG
 
 inline struct Settings {

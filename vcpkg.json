@@ -10,6 +10,13 @@
         "nlohmann-json",
         "spdlog",
         "tomlplusplus",
+        {
+            "name": "gettext",
+            "features": [
+                "tools"
+            ],
+            "host": true
+        },
         "gettext-libintl",
         {
             "name": "pkgconf",

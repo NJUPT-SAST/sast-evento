@@ -64,7 +64,7 @@ if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/sast-link-cxx-sdk/CMakeLists
   message(FATAL_ERROR "Git submodule not found. Run `git submodule update --init` from the source tree to fetch the submodule contents.")
 endif()
 
-#i18n
+# i18n
 set(SOURCE_LOCALE_DIR "${CMAKE_SOURCE_DIR}/ui/locale")
 
 # source code
