@@ -77,4 +77,11 @@ if (WIN32)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
 endif()
 
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/ui/locale/en/LC_MESSAGES
+  COMMAND msgfmt ${CMAKE_SOURCE_DIR}/ui/locale/en.po -o ${CMAKE_SOURCE_DIR}/ui/locale/en/LC_MESSAGES/sast-evento.mo
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_SOURCE_DIR}/ui/locale/en/LC_MESSAGES
+  COMMAND msgfmt ${CMAKE_SOURCE_DIR}/ui/locale/zh.po -o ${CMAKE_SOURCE_DIR}/ui/locale/zh/LC_MESSAGES/sast-evento.mo
+)
+
 add_subdirectory(Tray)
