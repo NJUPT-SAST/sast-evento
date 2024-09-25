@@ -35,6 +35,17 @@ const std::filesystem::path configDir =
 
 inline toml::table config;
 
+const std::filesystem::path localePath =
+#ifdef EVENTO_DEBUG
+    LOCALE_DIR;
+#else
+#ifdef PLATFORM_LINUX
+    std::filesystem::path("/usr/share/locale");
+#else
+    std::filesystem::current_path() / "locale";
+#endif // PLATFORM_LINUX
+#endif // EVENTO_DEBUG
+
 inline struct Settings {
     bool minimalToTray;
     bool noticeBegin;

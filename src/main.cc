@@ -15,7 +15,7 @@ int main(int argc, char** argv) {
     evento::initConfig();
     spdlog::info("SAST Evento version: v" VERSION_FULL);
 
-    bindtextdomain("sast-evento", LOCALE_DIR);
+    bindtextdomain("sast-evento", evento::localePath.string().c_str());
     std::locale::global(std::locale(""));
 
     evento::UiBridge uiBridge(App::create());
