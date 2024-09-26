@@ -8,7 +8,14 @@ namespace evento {
 
 class Error {
 public:
-    enum Kind { Ssl = 0, Network, JsonDes, Data, Unknown, Timeout } kind;
+    enum Kind {
+        Ssl = 0,
+        Network,
+        JsonDes,
+        Data,
+        Unknown,
+        Timeout,
+    } kind;
 
     Error(Kind kind, std::string_view reason)
         : kind(kind)
@@ -18,9 +25,14 @@ public:
         : kind(kind)
         , _reason(_reasonMap[kind]) {}
 
-    Error(int code)
-        : kind(Unknown)
-        , _reason(_errorCodeMap.at(code)) {}
+    Error(unsigned int httpStatusCode)
+        : kind(Unknown) {
+        if (_httpStatusCodeMap.contains(httpStatusCode)) {
+            _reason = _httpStatusCodeMap[httpStatusCode];
+        } else {
+            _reason = _reasonMap[Kind::Network];
+        }
+    }
 
     [[nodiscard]] std::string what() const { return _reason; }
 
@@ -36,16 +48,14 @@ private:
                                                          "Unknown Error",
                                                          "Timeout error!"};
 
-    inline static std::unordered_map<int, std::string> _errorCodeMap = {
-        {100, "Continue"},
-        {200, "OK"},
-        {400, "Bad Request"},
-        {401, "Unauthorized"},
-        {403, "Forbidden"},
-        {404, "Not Found"},
-        {500, "Internal Server Error"},
-        {502, "Bad Gateway"},
-        {503, "Service Unavailable"},
+    inline static std::unordered_map<unsigned, std::string> _httpStatusCodeMap = {
+        {400u, "400 Bad Request"},
+        {401u, "401 Unauthorized"},
+        {403u, "403 Forbidden"},
+        {404u, "404 Not Found"},
+        {500u, "500 Internal Server Error"},
+        {502u, "502 Bad Gateway"},
+        {503u, "503 Service Unavailable"},
     };
 };
 
