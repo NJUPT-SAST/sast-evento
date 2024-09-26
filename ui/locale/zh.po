@@ -1,3 +1,4 @@
+# SPDX-FileCopyrightText: 2024 serein <serein207@qq.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
@@ -8,8 +9,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: en_GB\n"
+"Language: zh_CN\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 24.08.1\n"
 
 #: views/overlay/login.slint:70
 msgctxt "LoginOverlay"
@@ -46,7 +48,6 @@ msgctxt "MenuOverlay"
 msgid "纪念卡"
 msgstr "纪念卡"
 
-#. NOTE: Unsupport
 #: views/overlay/menu.slint:224
 msgctxt "MenuOverlay"
 msgid "功能还在开发中，咕咕咕 😣"
@@ -99,8 +100,8 @@ msgstr "检查更新"
 
 #: views/page/about.slint:189
 msgctxt "AboutPage"
-msgid "漏洞报告 / 功能建议"
-msgstr "漏洞报告 / 功能建议"
+msgid "漏洞报告"
+msgstr "漏洞报告"
 
 #: views/page/about.slint:217
 msgctxt "AboutPage"
@@ -152,67 +153,62 @@ msgctxt "DiscoveryPage"
 msgid "  最新的活动"
 msgstr "  最新的活动"
 
-#: views/page/setting.slint:68
+#: views/page/setting.slint:65
 msgctxt "SettingPage"
 msgid "设置"
 msgstr "设置"
 
-#: views/page/setting.slint:80
+#: views/page/setting.slint:77
 msgctxt "SettingPage"
 msgid "主题"
 msgstr "主题"
 
-#: views/page/setting.slint:83
+#: views/page/setting.slint:80
 msgctxt "SettingPage"
 msgid "跟随系统"
 msgstr "跟随系统"
 
-#: views/page/setting.slint:83
+#: views/page/setting.slint:80
 msgctxt "SettingPage"
 msgid "浅色"
 msgstr "浅色"
 
-#: views/page/setting.slint:83
+#: views/page/setting.slint:80
 msgctxt "SettingPage"
 msgid "深色"
 msgstr "深色"
 
-#: views/page/setting.slint:88
+#: views/page/setting.slint:85
 msgctxt "SettingPage"
 msgid "下次启动时生效"
 msgstr "下次启动时生效"
 
-#: views/page/setting.slint:96
-msgctxt "SettingPage"
-msgid "语言"
-msgstr "语言"
-
-#: views/page/setting.slint:110
+#: views/page/setting.slint:95
 msgctxt "SettingPage"
 msgid "活动开始前提醒"
 msgstr "活动开始前提醒"
 
-#: views/page/setting.slint:120
+#: views/page/setting.slint:105
 msgctxt "SettingPage"
 msgid "活动结束后提醒反馈"
 msgstr "活动结束后提醒反馈"
 
-#: views/page/setting.slint:130
+#: views/page/setting.slint:115
 msgctxt "SettingPage"
 msgid "关闭窗口后最小化到托盘"
 msgstr "关闭窗口后最小化到托盘"
 
-#: views/page/setting.slint:142
+#: views/page/setting.slint:127
 msgctxt "SettingPage"
 msgid "磁盘缓存："
 msgstr "磁盘缓存："
 
-#: views/page/setting.slint:144
+#: views/page/setting.slint:129
 msgctxt "SettingPage"
 msgid "清除缓存"
 msgstr "清除缓存"
 
-#: views/page/setting.slint:147
+#: views/page/setting.slint:132
 msgctxt "SettingPage"
 msgid "缓存已清除"
 msgstr "缓存已清除"

@@ -48,7 +48,6 @@ msgctxt "MenuOverlay"
 msgid "纪念卡"
 msgstr "Souvenir Card"
 
-#. NOTE: Unsupport
 #: views/overlay/menu.slint:224
 msgctxt "MenuOverlay"
 msgid "功能还在开发中，咕咕咕 😣"
@@ -82,7 +81,7 @@ msgstr "Update"
 #: views/page/about.slint:105
 msgctxt "AboutPage"
 msgid "取消"
-msgstr "Cacel"
+msgstr "Cancel"
 
 #: views/page/about.slint:135
 msgctxt "AboutPage"
@@ -101,7 +100,7 @@ msgstr "Check Update"
 
 #: views/page/about.slint:189
 msgctxt "AboutPage"
-msgid "漏洞报告 / 功能建议"
+msgid "漏洞报告"
 msgstr "Bugs Report"
 
 #: views/page/about.slint:217
@@ -142,7 +141,7 @@ msgstr "Nothing"
 #: views/page/discovery.slint:113
 msgctxt "DiscoveryPage"
 msgid "  正在进行的活动"
-msgstr "   Active Events"
+msgstr "  Active Events"
 
 #: views/page/discovery.slint:120 views/page/discovery.slint:154
 msgctxt "DiscoveryPage"
@@ -152,72 +151,67 @@ msgstr "Reload"
 #: views/page/discovery.slint:147
 msgctxt "DiscoveryPage"
 msgid "  最新的活动"
-msgstr "   Latest Events"
+msgstr "  Latest Events"
 
-#: views/page/setting.slint:68
+#: views/page/setting.slint:65
 msgctxt "SettingPage"
 msgid "设置"
 msgstr "Setting"
 
-#: views/page/setting.slint:80
+#: views/page/setting.slint:77
 msgctxt "SettingPage"
 msgid "主题"
 msgstr "Theme"
 
-#: views/page/setting.slint:83
+#: views/page/setting.slint:80
 msgctxt "SettingPage"
 msgid "跟随系统"
 msgstr "Follow System"
 
-#: views/page/setting.slint:83
+#: views/page/setting.slint:80
 msgctxt "SettingPage"
 msgid "浅色"
 msgstr "Light"
 
-#: views/page/setting.slint:83
+#: views/page/setting.slint:80
 msgctxt "SettingPage"
 msgid "深色"
 msgstr "Dark"
 
-#: views/page/setting.slint:88
+#: views/page/setting.slint:85
 msgctxt "SettingPage"
 msgid "下次启动时生效"
 msgstr "It will take effect on next startup"
 
-#: views/page/setting.slint:96
-msgctxt "SettingPage"
-msgid "语言"
-msgstr "Language"
-
-#: views/page/setting.slint:112
+#: views/page/setting.slint:95
 msgctxt "SettingPage"
 msgid "活动开始前提醒"
 msgstr "Remind before event"
 
-#: views/page/setting.slint:122
+#: views/page/setting.slint:105
 msgctxt "SettingPage"
 msgid "活动结束后提醒反馈"
 msgstr "Remind after event"
 
-#: views/page/setting.slint:132
+#: views/page/setting.slint:115
 msgctxt "SettingPage"
 msgid "关闭窗口后最小化到托盘"
 msgstr "Minimal to Tray"
 
-#: views/page/setting.slint:144
+#: views/page/setting.slint:127
 msgctxt "SettingPage"
 msgid "磁盘缓存："
 msgstr "Disk Cache: "
 
-#: views/page/setting.slint:146
+#: views/page/setting.slint:129
 msgctxt "SettingPage"
 msgid "清除缓存"
 msgstr "Clear"
 
-#: views/page/setting.slint:149
+#: views/page/setting.slint:132
 msgctxt "SettingPage"
 msgid "缓存已清除"
-msgstr "Cache has been cleard"
+msgstr "Cache has been cleared"
 
 #: views/page/detail.slint:42
 msgctxt "HighlightBlock"
@@ -273,7 +267,7 @@ msgstr "Feedback"
 #: views/page/detail.slint:189
 msgctxt "DetailPage"
 msgid "参与完本次活动，有什么想说的吗，快告诉我们吧"
-msgstr "What you wanna sugguest us"
+msgstr "What you wanna suggest us"
 
 #: views/page/detail.slint:197
 msgctxt "DetailPage"
@@ -298,7 +292,7 @@ msgstr "Checked In"
 #: views/page/history.slint:36
 msgctxt "CommentItem"
 msgid "参与完本次活动，有什么想说的吗，快告诉我们吧"
-msgstr "What you wanna sugguest us"
+msgstr "What you wanna suggest us"
 
 #: views/page/history.slint:41
 msgctxt "CommentItem"
