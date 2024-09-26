@@ -16,7 +16,8 @@ if (LINUX)
     BOOST_ASIO_HAS_IO_URING 
     BOOST_ASIO_DISABLE_EPOLL
   )
-  set(URING_LIBRARIES ${VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib/liburing.a)
+  find_library(URING_LIBRARY NAMES liburing.a REQUIRED)
+  message(STATUS "Found liburing: ${URING_LIBRARY}")
 endif()
 
 if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
@@ -69,7 +70,7 @@ target_link_libraries(${PROJECT_NAME}
     Slint::Slint
     version::version
     Intl::Intl
-    ${URING_LIBRARIES}
+    ${URING_LIBRARY}
 )
 
 # On Windows, copy the Slint DLL next to the application binary so that it's found.
