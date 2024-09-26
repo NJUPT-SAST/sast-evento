@@ -1,10 +1,17 @@
 #include "NetworkClient.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
+#include <boost/asio/co_spawn.hpp>
+#include <boost/asio/stream_file.hpp>
+#include <boost/asio/this_coro.hpp>
+#include <boost/asio/use_awaitable.hpp>
 #include <boost/beast/core/buffers_to_string.hpp>
+#include <boost/beast/core/file.hpp>
+#include <boost/beast/core/file_base.hpp>
 #include <boost/beast/http/field.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
+#include <boost/system/detail/error_code.hpp>
 #include <boost/url/param.hpp>
 #include <boost/url/url_view.hpp>
 #include <cstdint>
@@ -13,6 +20,9 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
+#if defined(PLATFORM_APPLE)
+#include <fstream>
+#endif
 
 namespace evento {
 
@@ -171,6 +181,25 @@ Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
                                                                  larkDepartment}}),
                                                       {},
                                                       cacheTtl);
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+
+    EventQueryRes entity;
+    try {
+        nlohmann::from_json(result.unwrap(), entity);
+    } catch (const nlohmann::json::exception& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+
+    co_return Ok(entity);
+}
+
+Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
+    auto result = co_await this->request<api::Evento>(http::verb::get,
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"id", std::to_string(eventId)}}),
+                                                      {},
+                                                      0min);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -445,21 +474,24 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
     co_return Ok(entity);
 }
 
-Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url) {
+Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url,
+                                                           std::optional<std::filesystem::path> dir,
+                                                           bool useCache) {
     auto view = urls::url_view(url);
     http::request<http::string_body> req{http::verb::get, view.path(), 11};
-    // use cache first
-    auto cacheDir = CacheManager::cacheDir();
-    if (!cacheDir) {
-        co_return Err(Error(Error::Data, "cache dir not found"));
+
+    if (!dir) {
+        co_return Err(Error(Error::Data, "directory not found"));
     }
 
     auto stem = CacheManager::generateStem(url);
 
-    std::filesystem::directory_iterator iter(*cacheDir);
-    for (const auto& file : iter) {
-        if (file.path().filename().stem().string() == stem) {
-            co_return Ok(std::filesystem::absolute(file.path()));
+    if (useCache) {
+        std::filesystem::directory_iterator iter(*dir);
+        for (const auto& file : iter) {
+            if (file.path().filename().stem().string() == stem) {
+                co_return Ok(std::filesystem::absolute(file.path()));
+            }
         }
     }
 
@@ -486,9 +518,9 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url) {
     auto value = type->value();
     stem += '.';
     stem += value.substr(value.find('/') + 1);
-    auto path = *cacheDir / stem;
+    auto path = *dir / stem;
 
-    if (!CacheManager::saveToDisk(beast::buffers_to_string(response.body().data()), path)) {
+    if (!co_await saveToDisk(beast::buffers_to_string(response.body().data()), path)) {
         co_return Err(Error(Error::Data, "save file failed"));
     }
     co_return Ok(path);
@@ -562,6 +594,52 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     auto data = res.contains("data") ? res["data"] : nlohmann::json::object();
 
     return Ok(data);
+}
+
+Task<bool> NetworkClient::saveToDisk(std::string const& data, std::filesystem::path const& path) {
+#if defined(PLATFORM_APPLE)
+
+    auto result = co_await net::co_spawn(
+        co_await net::this_coro::executor,
+        [data, path]() -> Task<bool> {
+            try {
+                std::ofstream file(path, std::ios::binary | std::ios::out | std::ios::trunc);
+                if (!file.is_open()) {
+                    spdlog::warn("Failed to open file: {}", path.string());
+                    co_return false;
+                }
+                file << data;
+                file.close();
+                co_return true;
+            } catch (std::exception const& e) {
+                spdlog::warn("Failed to save file: {}", e.what());
+                co_return false;
+            }
+        },
+        net::use_awaitable);
+    co_return result;
+
+#else
+
+    net::stream_file file(co_await net::this_coro::executor,
+                          path.string().c_str(),
+                          net::stream_file::write_only | net::stream_file::create);
+    if (!file.is_open()) {
+        co_return false;
+    }
+
+    auto totalSize = data.size();
+    std::size_t bytesWritten = 0;
+    while (bytesWritten < totalSize) {
+        bytesWritten += co_await file.async_write_some(net::buffer(data.data() + bytesWritten,
+                                                                   totalSize - bytesWritten),
+                                                       net::use_awaitable);
+    }
+
+    file.close();
+    co_return true;
+
+#endif
 }
 
 NetworkClient* networkClient() {

@@ -33,8 +33,6 @@ public:
 
     static bool isExpired(const CacheEntry& entry);
 
-    static bool saveToDisk(std::string const& data, std::filesystem::path const& path);
-
     void insert(const std::string& key, const CacheEntry& entry);
 
     static std::size_t currentCacheSize() { return _currentCacheSize; }

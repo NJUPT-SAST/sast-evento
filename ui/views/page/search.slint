@@ -15,7 +15,7 @@ export global SearchPageBridge {
     callback filter-department(string);
     callback load-department-list();
     callback load-department-events(int);
-
+    callback navigate-to-detail(EventStruct);
     public function select(index: int) {
         current-department-index = index;
     }
@@ -35,6 +35,7 @@ export component SearchPage inherits Page {
 
     HorizontalLayout {
         padding: 50px;
+        padding-top: 10px;
         spacing: 15px;
         VerticalLayout {
             spacing: 15px;
@@ -43,7 +44,7 @@ export component SearchPage inherits Page {
                     width: 260px;
                     height: 50px;
                     font-size: Token.font.body.large.size;
-                    placeholder-text: "在找什么部门呢";
+                    placeholder-text: @tr("在找什么部门呢");
                     enabled: SearchPageBridge.list-state == PageState.normal;
                     edited(keyword) => {
                         debug("search keyword: " + keyword);
@@ -65,7 +66,7 @@ export component SearchPage inherits Page {
             }
             if SearchPageBridge.list-state == PageState.error: Rectangle {
                 Button {
-                    text: "重新加载";
+                    text: @tr("重新加载");
                     clicked => {
                         SearchPageBridge.load-department-list();
                     }
@@ -97,15 +98,14 @@ export component SearchPage inherits Page {
                     cards := EventCardGroup {
                         model: SearchPageBridge.event-model;
                         item-clicked(event-struct) => {
-                            debug("id: " + event-struct.id + " title: " + event-struct.summary);
-                            // TODO: navigate to detail page
+                            SearchPageBridge.navigate-to-detail(event-struct);
                         }
                     }
                 }
 
                 if SearchPageBridge.list-state == PageState.normal && SearchPageBridge.events-state == PageState.normal && SearchPageBridge.event-model.length == 0: Rectangle {
                     Text {
-                        text: "这个部门还没有活动哦";
+                        text: @tr("这个部门还没有活动哦");
                         font-size: Token.font.body.large.size;
                         font-weight: Token.font.body.large.weight;
                         color: Token.color.outline;
@@ -121,7 +121,7 @@ export component SearchPage inherits Page {
 
                 if SearchPageBridge.events-state == PageState.error: Rectangle {
                     Button {
-                        text: "重新加载";
+                        text: @tr("重新加载");
                         clicked => {
                             SearchPageBridge.load-department-events(current-page-index);
                         }
@@ -130,7 +130,7 @@ export component SearchPage inherits Page {
 
                 if SearchPageBridge.list-state != PageState.normal || SearchPageBridge.event-model.length == 0: Rectangle {
                     Text {
-                        text: "什么都没有呢";
+                        text: @tr("什么都没有呢");
                         font-size: Token.font.body.large.size;
                         font-weight: Token.font.body.large.weight;
                         color: Token.color.outline;

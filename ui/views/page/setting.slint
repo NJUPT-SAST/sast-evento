@@ -4,11 +4,10 @@ import { Switch, ComboBox, ScrollView } from "std-widgets.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
 
 export global SettingPageBridge {
-    in-out property <int> language-index: 0;
-    in-out property <int> theme-index: 0;
-    in-out property <bool> notice-begin: false;
-    in-out property <bool> notice-end: false;
-    in-out property <bool> minimal-to-tray: false;
+    in-out property <int> theme-index;
+    in-out property <bool> notice-begin;
+    in-out property <bool> notice-end;
+    in-out property <bool> minimal-to-tray;
     in property <string> cache-size: "0B";
     public function change-theme() {
         if (theme-index == 1) {
@@ -17,7 +16,6 @@ export global SettingPageBridge {
             Token.set-display-mode(ColorScheme.dark);
         }
     }
-    callback language-changed();
     callback theme-changed();
     callback notice-begin-changed();
     callback notice-end-changed();
@@ -55,7 +53,6 @@ export component SettingPage inherits Page {
             pointer-event(e) => {
                 if (e.button == PointerEventButton.left) {
                     theme-box.clear-focus();
-                    language-box.clear-focus();
                 }
             }
         }
@@ -63,9 +60,10 @@ export component SettingPage inherits Page {
         VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
+            padding-top: 10px;
             spacing: 10px;
             Text {
-                text: "设置";
+                text: @tr("设置");
                 font-size: Token.font.display.medium.size;
                 font-weight: Token.font.display.medium.weight;
             }
@@ -77,31 +75,17 @@ export component SettingPage inherits Page {
             Divider { }
 
             SettingItem {
-                name: "主题";
+                name: @tr("主题");
                 theme-box := ComboBox {
                     width: 200px;
-                    model: ["跟随系统", "浅色", "深色"];
+                    model: [@tr("跟随系统"), @tr("浅色"), @tr("深色")];
                     current-index <=> SettingPageBridge.theme-index;
                     selected => {
                         SettingPageBridge.change-theme();
                         if (SettingPageBridge.theme-index == 0) {
-                            MessageManager.show-message("下次启动时生效", MessageType.info);
+                            MessageManager.show-message(@tr("下次启动时生效"), MessageType.info);
                         }
                         SettingPageBridge.theme-changed();
-                    }
-                }
-            }
-
-            SettingItem {
-                name: "语言";
-                supported: false;
-                language-box := ComboBox {
-                    width: 200px;
-                    enabled: false;
-                    model: ["简体中文", "繁體中文", "English"];
-                    current-index <=> SettingPageBridge.language-index;
-                    selected => {
-                        SettingPageBridge.language-changed();
                     }
                 }
             }
@@ -109,7 +93,7 @@ export component SettingPage inherits Page {
             Divider { }
 
             SettingItem {
-                name: "活动开始前提醒";
+                name: @tr("活动开始前提醒");
                 Switch {
                     checked <=> SettingPageBridge.notice-begin;
                     toggled => {
@@ -119,7 +103,7 @@ export component SettingPage inherits Page {
             }
 
             SettingItem {
-                name: "活动结束后提醒反馈";
+                name: @tr("活动结束后提醒反馈");
                 Switch {
                     checked <=> SettingPageBridge.notice-end;
                     toggled => {
@@ -129,7 +113,7 @@ export component SettingPage inherits Page {
             }
 
             SettingItem {
-                name: "关闭窗口后最小化到托盘";
+                name: @tr("关闭窗口后最小化到托盘");
                 Switch {
                     checked <=> SettingPageBridge.minimal-to-tray;
                     toggled => {
@@ -141,12 +125,12 @@ export component SettingPage inherits Page {
             Divider { }
 
             SettingItem {
-                name: "磁盘缓存：" + SettingPageBridge.cache-size;
+                name: @tr("磁盘缓存：") + SettingPageBridge.cache-size;
                 Button {
-                    content: "清除缓存";
+                    content: @tr("清除缓存");
                     clicked => {
                         SettingPageBridge.clear-cache();
-                        MessageManager.show-message("缓存已清除", MessageType.success);
+                        MessageManager.show-message(@tr("缓存已清除"), MessageType.success);
                     }
                 }
             }

@@ -1,16 +1,20 @@
 #pragma once
 
+#include <boost/dll.hpp>
+#include <chrono>
+#include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <spdlog/spdlog.h>
+#include <string>
 #include <toml++/toml.h>
 
 /*
-[account.<user-id>]
+[account]
+user-id = <string>
 expire = <date-time>
 
 [setting]
-language = <int>
 minimal-to-tray = <bool>
 notice-begin = <bool>
 notice-end = <bool>
@@ -32,13 +36,24 @@ const std::filesystem::path configDir =
 
 inline toml::table config;
 
-inline struct Setting {
-    int language;
+const std::filesystem::path localePath =
+#ifdef EVENTO_DEBUG
+    LOCALE_DIR;
+#else
+    std::filesystem::path{(boost::dll::program_location().parent_path() / "locale").string()};
+#endif // EVENTO_DEBUG
+
+inline struct Settings {
     bool minimalToTray;
     bool noticeBegin;
     bool noticeEnd;
     int theme;
 } settings;
+
+inline struct Account {
+    std::string userId;
+    toml::date_time expire;
+} account;
 
 static void loadSetting() {
     if (!config.contains("setting")) {
@@ -46,10 +61,6 @@ static void loadSetting() {
     }
     auto& setting = config["setting"].ref<toml::table>();
 
-    auto languageIdx = setting["language"].value_or(0);
-    if (languageIdx > 2) {
-        languageIdx = 0;
-    }
     auto themeIdx = setting["theme"].value_or(0);
     if (themeIdx > 2) {
         themeIdx = 0;
@@ -59,7 +70,6 @@ static void loadSetting() {
     auto minimalToTray = setting["minimal-to-tray"].value_or(false);
 
     evento::settings = {
-        .language = languageIdx,
         .minimalToTray = minimalToTray,
         .noticeBegin = noticeBegin,
         .noticeEnd = noticeEnd,
@@ -71,6 +81,21 @@ static void loadAccount() {
     if (!config.contains("account")) {
         config.insert("account", toml::table{});
     }
+    auto& account = config["account"].ref<toml::table>();
+
+    auto userId = account["user-id"].value_or(std::string{""});
+
+    auto cntTime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+    auto cntTm = *std::localtime(&cntTime);
+
+    auto expire = account["expire"].value_or(
+        toml::date_time{toml::date{cntTm.tm_year + 1900, cntTm.tm_mon + 1, cntTm.tm_mday},
+                        toml::time{cntTm.tm_hour, cntTm.tm_min, cntTm.tm_sec}});
+
+    evento::account = {
+        .userId = userId,
+        .expire = expire,
+    };
 }
 
 inline void initConfig() {

@@ -31,6 +31,10 @@ void SearchPage::onCreate() {
 
     self->on_load_department_list([&self = *this] { self.loadDepartmentList(); });
     self->on_load_department_events([&self = *this](int page) { self.loadDepartmentEvents(page); });
+    self->on_navigate_to_detail([this](EventStruct eventStruct) {
+        spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
+        bridge.getViewManager().navigateTo(ViewName::DetailPage, eventStruct);
+    });
 }
 
 void SearchPage::onShow() {
@@ -80,7 +84,7 @@ void SearchPage::loadDepartmentEvents(int page) {
 
     executor()->asyncExecute(
         networkClient()->getDepartmentEventList(std::string(self->get_current_department().text),
-                                                page,
+                                                page + 1,
                                                 self->get_page_size()),
         [&self = *this](Result<EventQueryRes> result) {
             if (result.isErr()) {

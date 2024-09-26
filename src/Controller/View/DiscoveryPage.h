@@ -11,11 +11,14 @@ public:
     DiscoveryPage(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
 
 private:
+    slint::Timer timer;
     void onCreate() override;
     void onShow() override;
 
     void loadActiveEvents();
     void loadLatestEvents();
+    void loadHomeSlides();
+    void slidesAutoRotation();
 };
 
 EVENTO_UI_END

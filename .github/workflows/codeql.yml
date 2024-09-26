@@ -121,7 +121,7 @@ jobs:
       with:
         configurePreset: 'native'
         buildPreset: 'native'
-        buildPresetAdditionalArgs: "['-j3']"
+        # buildPresetAdditionalArgs: "['-j3']"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

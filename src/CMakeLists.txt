@@ -4,20 +4,38 @@ file(GLOB_RECURSE SOURCES Controller/*.cc Infrastructure/*.cc)
 
 target_sources(${PROJECT_NAME} PRIVATE ${SOURCES} main.cc)
 
-# hide cmdline in Release Mode for MSVC
+# hide cli in Release Mode for MSVC
 if (MSVC)
   set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
   target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_HAS_CO_AWAIT)
 endif()
 
-slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint)
-
-if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
-  message("Embedding resources in the executable")
-  set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES embed-files)
+# use io_uring on Linux
+if (LINUX)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    BOOST_ASIO_HAS_IO_URING 
+    BOOST_ASIO_DISABLE_EPOLL
+  )
+  find_library(URING_LIBRARY NAMES liburing.a REQUIRED)
+  message(STATUS "Found liburing: ${URING_LIBRARY}")
 endif()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
+if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
+  set(SLINT_GENERATE_COMPILE_UNITS 1)
+  set(SLINT_RESOURCES_POLICY "embed-files")
+else()
+  message("Embedding resources in the executable")  
+  set(SLINT_GENERATE_COMPILE_UNITS 10)
+  set(SLINT_RESOURCES_POLICY "as-absolute-path")
+endif()
+
+slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint 
+  COMPILATION_UNITS ${UI_UNITS}
+)
+
+set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES ${SLINT_RESOURCES_POLICY})
+
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 if(WIN32)
   set(PLATFORM PLATFORM_WINDOWS)
@@ -33,6 +51,7 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<CONFIG:Debug>:EVENTO_DEBUG>
     $<$<CONFIG:Release>:EVENTO_RELEASE>
     ${PLATFORM}
+    LOCALE_DIR="${CMAKE_SOURCE_DIR}/ui/locale"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -50,11 +69,22 @@ target_link_libraries(${PROJECT_NAME}
     keychain
     Slint::Slint
     version::version
+    Intl::Intl
+    ${URING_LIBRARY}
 )
 
 # On Windows, copy the Slint DLL next to the application binary so that it's found.
 if (WIN32)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
 endif()
+
+find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES
+  COMMAND ${MSGFMT_EXECUTABLE} ${SOURCE_LOCALE_DIR}/en.po -o ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES
+  COMMAND ${MSGFMT_EXECUTABLE} ${SOURCE_LOCALE_DIR}/zh.po -o ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo
+)
 
 add_subdirectory(Tray)

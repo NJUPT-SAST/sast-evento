@@ -61,7 +61,7 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 - vcpkg 包管理器
 - Rust 工具链
 
-对于 Linux 平台，您还需要安装 Qt6 的基础库：
+对于 Linux 平台，我们建议您直接从包管理器安装 Qt6 基础库：
 
 ```bash
 # For Arch Linux
@@ -69,6 +69,8 @@ sudo pacman -S qt6-base
 # For Ubuntu
 sudo apt install qt6-base-dev
 ```
+
+对于 macOS 和 Windows 平台，您可以从官方网站安装 Qt6 以动态链接 Qt 到此项目；或者，您可以使用 vcpkg 从源代码构建 Qt6。
 
 ### 克隆
 
@@ -112,6 +114,18 @@ pre-commit install
 cmake --preset native
 # 根据需要，可换用 `native-debug`, `native-release` 或 `native-relwithdebinfo` 预设
 cmake --build --preset native
+```
+
+如果您使用 vcpkg 安装 Qt6，您需要在 CMake 命令中添加以下构建选项：
+
+```bash
+cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg 
+```
+
+对于 Windows 平台，您可以使用静态链接来避免一些奇怪的问题：
+
+```bash
+cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRIPLET=<x64 or arm64>-windows-static
 ```
 
 ### 项目依赖

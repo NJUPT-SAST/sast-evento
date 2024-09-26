@@ -45,12 +45,12 @@ This project is the desktop client version of SAST Evento.
 | Windows x64        | ✅                        |
 | Windows arm64      | :heavy_exclamation_mark: | Application cannot run normally |
 | macOS arm64        | ✅                        |
-| macOS x64          | :x:                      | No packaging plan available     |
+| macOS x64          | :x:                      | No packaging plan               |
 | Linux x64 (pacman) | ✅                        |
 | Linux x64 (deb)    | ✅                        |
-| Linux x64 (rpm)    | :x:                      | No packaging plan available     |
-| Linux x64 (nix)    | :x:                      | No packaging plan available     |
-| Linux arm64        | :x:                      | No packaging plan available     |
+| Linux x64 (rpm)    | :x:                      | No packaging plan               |
+| Linux x64 (nix)    | :x:                      | No packaging plan               |
+| Linux arm64        | :x:                      | No packaging plan               |
 
 ## Development
 
@@ -61,7 +61,7 @@ This project is the desktop client version of SAST Evento.
 - vcpkg package manager
 - Rust toolchain
 
-For Linux, you must install Qt6 dependencies:
+For Linux platforms, we recommend you install the Qt6 base library directly from the package manager:
 
 ```bash
 # For Arch Linux
@@ -69,6 +69,8 @@ sudo pacman -S qt6-base
 # For Ubuntu
 sudo apt install qt6-base-dev
 ```
+
+For macOS and Windows platforms, you can install Qt6 from the official website to dynamically link Qt to this project; Alternatively, you can use vcpkg to build Qt6 from source.
 
 ### Clone
 
@@ -112,6 +114,18 @@ This project uses CMake Presets for quick configuration and building. The requir
 cmake --preset native
 # Depending on your needs, you can use `native-debug`, `native-release`, or `native-relwithdebinfo` preset
 cmake --build --preset native
+```
+
+If you use vcpkg to install Qt6, you need to add the following build options to the CMake command:
+
+```bash
+cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg 
+```
+
+For Windows platform, you can use static linking to avoid some strange problems:
+
+```bash
+cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRIPLET=<x64 or arm64>-windows-static
 ```
 
 ### Project Dependencies

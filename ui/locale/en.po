@@ -1,0 +1,350 @@
+# SPDX-FileCopyrightText: 2024 serein <serein207@qq.com>
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2024-09-24 09:31+0000\n"
+"PO-Revision-Date: 2024-09-24 17:57+0800\n"
+"Last-Translator:  <serein207@qq.com>\n"
+"Language-Team: English (British) <(nothing)>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: en_GB\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 24.08.1\n"
+
+#: views/overlay/login.slint:70
+msgctxt "LoginOverlay"
+msgid "使用 Link 登录"
+msgstr "Login by Link"
+
+#: views/overlay/login.slint:91
+msgctxt "LoginOverlay"
+msgid "访客登录"
+msgstr "guest"
+
+#: views/overlay/login.slint:121
+msgctxt "LoginOverlay"
+msgid "SAST.C++组开发"
+msgstr "Developed by SAST.C++ Group"
+
+#: views/overlay/menu.slint:166
+msgctxt "MenuOverlay"
+msgid "请登录"
+msgstr "Please Login first"
+
+#: views/overlay/menu.slint:207
+msgctxt "MenuOverlay"
+msgid "个人资料"
+msgstr "Profile"
+
+#: views/overlay/menu.slint:214
+msgctxt "MenuOverlay"
+msgid "历史活动"
+msgstr "History"
+
+#: views/overlay/menu.slint:221
+msgctxt "MenuOverlay"
+msgid "纪念卡"
+msgstr "Souvenir Card"
+
+#: views/overlay/menu.slint:224
+msgctxt "MenuOverlay"
+msgid "功能还在开发中，咕咕咕 😣"
+msgstr "It's still in development"
+
+#: views/overlay/menu.slint:230
+msgctxt "MenuOverlay"
+msgid "设置"
+msgstr "Settings"
+
+#: views/overlay/menu.slint:238
+msgctxt "MenuOverlay"
+msgid "关于"
+msgstr "About"
+
+#: views/overlay/menu.slint:247
+msgctxt "MenuOverlay"
+msgid "退出登录"
+msgstr "Logout"
+
+#: views/page/about.slint:103
+msgctxt "AboutPage"
+msgid "更新日志"
+msgstr "Update Log"
+
+#: views/page/about.slint:104
+msgctxt "AboutPage"
+msgid "更新"
+msgstr "Update"
+
+#: views/page/about.slint:105
+msgctxt "AboutPage"
+msgid "取消"
+msgstr "Cancel"
+
+#: views/page/about.slint:135
+msgctxt "AboutPage"
+msgid "关于"
+msgstr "About"
+
+#: views/page/about.slint:163
+msgctxt "AboutPage"
+msgid "版本信息 "
+msgstr "Version Info "
+
+#: views/page/about.slint:173
+msgctxt "AboutPage"
+msgid "检查更新"
+msgstr "Check Update"
+
+#: views/page/about.slint:189
+msgctxt "AboutPage"
+msgid "漏洞报告"
+msgstr "Bugs Report"
+
+#: views/page/about.slint:217
+msgctxt "AboutPage"
+msgid "网页端"
+msgstr "Web Link"
+
+#: views/page/about.slint:238
+msgctxt "AboutPage"
+msgid "GitHub 仓库"
+msgstr "GitHub Repo"
+
+#: views/page/about.slint:259
+msgctxt "AboutPage"
+msgid "项目依赖"
+msgstr "Dependencies"
+
+#: views/page/about.slint:320
+msgctxt "AboutPage"
+msgid "开源协议"
+msgstr "Open Source License"
+
+#: views/page/about.slint:346
+msgctxt "AboutPage"
+msgid "贡献者"
+msgstr "Contributors"
+
+#: views/page/about.slint:356
+msgctxt "AboutPage"
+msgid "重新加载"
+msgstr "Reload"
+
+#: views/page/discovery.slint:106
+msgctxt "DiscoveryPage"
+msgid "暂时还没有活动哦"
+msgstr "Nothing"
+
+#: views/page/discovery.slint:113
+msgctxt "DiscoveryPage"
+msgid "  正在进行的活动"
+msgstr "  Active Events"
+
+#: views/page/discovery.slint:120 views/page/discovery.slint:154
+msgctxt "DiscoveryPage"
+msgid "重新加载"
+msgstr "Reload"
+
+#: views/page/discovery.slint:147
+msgctxt "DiscoveryPage"
+msgid "  最新的活动"
+msgstr "  Latest Events"
+
+#: views/page/setting.slint:65
+msgctxt "SettingPage"
+msgid "设置"
+msgstr "Settings"
+
+#: views/page/setting.slint:77
+msgctxt "SettingPage"
+msgid "主题"
+msgstr "Theme"
+
+#: views/page/setting.slint:80
+msgctxt "SettingPage"
+msgid "跟随系统"
+msgstr "Follow System"
+
+#: views/page/setting.slint:80
+msgctxt "SettingPage"
+msgid "浅色"
+msgstr "Light"
+
+#: views/page/setting.slint:80
+msgctxt "SettingPage"
+msgid "深色"
+msgstr "Dark"
+
+#: views/page/setting.slint:85
+msgctxt "SettingPage"
+msgid "下次启动时生效"
+msgstr "It will take effect on next startup"
+
+#: views/page/setting.slint:95
+msgctxt "SettingPage"
+msgid "活动开始前提醒"
+msgstr "Remind before event"
+
+#: views/page/setting.slint:105
+msgctxt "SettingPage"
+msgid "活动结束后提醒反馈"
+msgstr "Remind after event"
+
+#: views/page/setting.slint:115
+msgctxt "SettingPage"
+msgid "关闭窗口后最小化到托盘"
+msgstr "Minimal to Tray"
+
+#: views/page/setting.slint:127
+msgctxt "SettingPage"
+msgid "磁盘缓存："
+msgstr "Disk Cache: "
+
+#: views/page/setting.slint:129
+msgctxt "SettingPage"
+msgid "清除缓存"
+msgstr "Clear"
+
+#: views/page/setting.slint:132
+msgctxt "SettingPage"
+msgid "缓存已清除"
+msgstr "Cache has been cleared"
+
+#: views/page/detail.slint:42
+msgctxt "HighlightBlock"
+msgid "报名中"
+msgstr "Signing Up"
+
+#: views/page/detail.slint:44
+msgctxt "HighlightBlock"
+msgid "进行中"
+msgstr "Active"
+
+#: views/page/detail.slint:46
+msgctxt "HighlightBlock"
+msgid "已结束"
+msgstr "Finished"
+
+#: views/page/detail.slint:48
+msgctxt "HighlightBlock"
+msgid "已取消"
+msgstr "Cancelled"
+
+#: views/page/detail.slint:50
+msgctxt "HighlightBlock"
+msgid "未知状态"
+msgstr "UNKNOWN"
+
+#: views/page/detail.slint:106 views/page/detail.slint:116
+#: views/page/detail.slint:234
+msgctxt "DetailPage"
+msgid "签到"
+msgstr "Check In"
+
+#: views/page/detail.slint:112
+msgctxt "DetailPage"
+msgid "请输入签到码"
+msgstr "Enter the check-in code"
+
+#: views/page/detail.slint:117
+msgctxt "DetailPage"
+msgid "取消"
+msgstr "Cancel"
+
+#: views/page/detail.slint:161
+msgctxt "DetailPage"
+msgid "重新加载"
+msgstr "Reload"
+
+#: views/page/detail.slint:178
+msgctxt "DetailPage"
+msgid "反馈"
+msgstr "Feedback"
+
+#: views/page/detail.slint:189
+msgctxt "DetailPage"
+msgid "参与完本次活动，有什么想说的吗，快告诉我们吧"
+msgstr "What you wanna suggest us"
+
+#: views/page/detail.slint:197
+msgctxt "DetailPage"
+msgid "提交"
+msgstr "Submit"
+
+#: views/page/detail.slint:221
+msgctxt "DetailPage"
+msgid "取消报名"
+msgstr "Cancel Sign Up"
+
+#: views/page/detail.slint:221
+msgctxt "DetailPage"
+msgid "报名"
+msgstr "Sign Up"
+
+#: views/page/detail.slint:234
+msgctxt "DetailPage"
+msgid "已签到"
+msgstr "Checked In"
+
+#: views/page/history.slint:36
+msgctxt "CommentItem"
+msgid "参与完本次活动，有什么想说的吗，快告诉我们吧"
+msgstr "What you wanna suggest us"
+
+#: views/page/history.slint:41
+msgctxt "CommentItem"
+msgid "提交"
+msgstr "Submit"
+
+#: views/page/history.slint:52
+msgctxt "CommentItem"
+msgid "网络错误 X.X"
+msgstr "Network Error :("
+
+#: views/page/history.slint:148
+msgctxt "HistoryPage"
+msgid "历史活动"
+msgstr "History"
+
+#: views/page/history.slint:163
+msgctxt "HistoryPage"
+msgid "重新加载"
+msgstr "Reload"
+
+#: views/page/search.slint:46
+msgctxt "SearchPage"
+msgid "在找什么部门呢"
+msgstr "Search"
+
+#: views/page/search.slint:68 views/page/search.slint:123
+msgctxt "SearchPage"
+msgid "重新加载"
+msgstr "Reload"
+
+#: views/page/search.slint:107
+msgctxt "SearchPage"
+msgid "这个部门还没有活动哦"
+msgstr "Nothing"
+
+#: views/page/search.slint:132
+msgctxt "SearchPage"
+msgid "什么都没有呢"
+msgstr "Nothing"
+
+#: app.slint:232
+msgctxt "App"
+msgid "活动广场"
+msgstr "Plaza"
+
+#: app.slint:237
+msgctxt "App"
+msgid "部门活动"
+msgstr "Department"
+
+#: app.slint:242
+msgctxt "App"
+msgid "活动日程"
+msgstr "Schedule"

@@ -11,11 +11,23 @@
         "spdlog",
         "tomlplusplus",
         {
+            "name": "gettext",
+            "features": [
+                "tools"
+            ],
+            "host": true
+        },
+        "gettext-libintl",
+        {
             "name": "pkgconf",
             "host": true
         },
         {
             "name": "libsecret",
+            "platform": "!(windows | uwp | osx)"
+        },
+        {
+            "name": "liburing",
             "platform": "!(windows | uwp | osx)"
         }
     ],

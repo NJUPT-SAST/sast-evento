@@ -1,31 +1,205 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { Page, Button, EventStruct, ButtonType, PageState, LoadingAnimation, Card, FeedbackStruct } from "../../components/index.slint";
+import { SStar, SPagination } from "../../modules/surrealism-ui/index.slint";
+import { ScrollView, LineEdit } from "std-widgets.slint";
 
-export global HistoryPageBridge { }
+export global HistoryPageBridge {
+    in property <[EventStruct]> events;
+    in property <[FeedbackStruct]> feedbacks;
+    in property <PageState> state: normal;
+    in property <int> total: 0;
+    out property <int> page-size: 10;
+    in-out property <int> current-page-index: 0;
+    callback load-events(int, int);
+    callback navigate-to-detail(EventStruct);
+    callback comment(int, int, string);
+}
+
+component CommentItem {
+    in property <FeedbackStruct> feedback;
+    callback comment-clicked(int, string);
+    if feedback.success: VerticalLayout {
+        spacing: 8px;
+        star := SStar {
+            score: feedback.rate;
+            theme: Dark;
+            disabled: feedback.has-feedbacked;
+        }
+
+        HorizontalLayout {
+            spacing: 8px;
+            line-edit := LineEdit {
+                width: 80%;
+                height: 40px;
+                font-size: Token.font.body.large.size;
+                text: feedback.content;
+                placeholder-text: @tr("参与完本次活动，有什么想说的吗，快告诉我们吧");
+                enabled: !feedback.has-feedbacked;
+            }
+
+            Button {
+                content: @tr("提交");
+                type: ButtonType.filled-tonal;
+                disable: feedback.has-feedbacked || star.score == 0;
+                clicked => {
+                    comment-clicked(star.score,line-edit.text);
+                }
+            }
+        }
+    }
+    if !feedback.success: Rectangle {
+        Text {
+            text: @tr("网络错误 X.X");
+            font-size: Token.font.label.large.size;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
+}
+
+component DividerVirtical inherits Rectangle {
+    width: 8px;
+    Rectangle {
+        x: 2px;
+        width: 4px;
+        height: 90%;
+        border-radius: 2px;
+        background: Token.color.primary-container;
+        Rectangle {
+            y: parent.height / 2 - 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 4px;
+            background: Token.color.on-primary-container;
+        }
+    }
+}
+
+component HistoryCard {
+    height: 100px;
+    in property <EventStruct> data;
+    in property <FeedbackStruct> feedback;
+    callback event-clicked(EventStruct);
+    callback comment-clicked(int, int, string);
+    HorizontalLayout {
+        spacing: 5px;
+        height: 100px;
+        Rectangle {
+            height: 100px;
+            Text {
+                text: data.time + "\n" + data.location;
+                font-size: Token.font.body.large.size;
+                font-weight: Token.font.body.large.weight;
+                color: Token.color.outline;
+                horizontal-alignment: center;
+                vertical-alignment: center;
+            }
+        }
+
+        DividerVirtical {
+            height: 100px;
+        }
+
+        Card {
+            height: 100px;
+            width: 90%;
+            clicked => {
+                root.event-clicked(data);
+            }
+            HorizontalLayout {
+                padding: 5px;
+                padding-right: 15px;
+                spacing: 8px;
+                VerticalLayout {
+                    Text {
+                        horizontal-alignment: TextHorizontalAlignment.left;
+                        vertical-alignment: TextVerticalAlignment.top;
+                        text: data.summary;
+                        overflow: elide;
+                        font-size: Token.font.headline.small.size;
+                        font-weight: Token.font.headline.small.weight;
+                        color: Token.color.on-surface;
+                    }
+
+                    Text {
+                        font-size: Token.font.label.large.size;
+                        text: data.description;
+                        overflow: elide;
+                        color: Token.color.on-surface;
+                    }
+                }
+
+                CommentItem {
+                    width: 40%;
+                    comment-clicked(rate, content) => {
+                        root.comment-clicked(data.id, rate, content);
+                    }
+                }
+            }
+        }
+    }
+}
 
 export component HistoryPage inherits Page {
-    // TODO: implement History
-    // optional
-    background := Empty { }
+    VerticalLayout {
+        padding: 50px;
+        padding-top: 10px;
+        spacing: 15px;
+        Text {
+            text: @tr("历史活动");
+            font-size: Token.font.display.medium.size;
+            font-weight: Token.font.display.medium.weight;
+        }
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-    }
+        Rectangle {
+            if HistoryPageBridge.state == PageState.loading: Rectangle {
+                LoadingAnimation {
+                    width: 40px;
+                    height: 40px;
+                }
+            }
+            if HistoryPageBridge.state == PageState.error: Rectangle {
+                Button {
+                    type: ButtonType.filled-tonal;
+                    content: @tr("重新加载");
+                    clicked => {
+                        HistoryPageBridge.load-events(HistoryPageBridge.current-page-index, HistoryPageBridge.page-size);
+                    }
+                }
+            }
+        }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "历史活动（全部的）\n  ";
+        if HistoryPageBridge.state == PageState.normal: ScrollView {
+            VerticalLayout {
+                spacing: 10px;
+                padding: 5px;
+                for event[i] in HistoryPageBridge.events: HistoryCard {
+                    data: event;
+                    feedback: HistoryPageBridge.feedbacks[i];
+                    event-clicked => {
+                        HistoryPageBridge.navigate-to-detail(event);
+                    }
+                    comment-clicked(id, rate, content) => {
+                        HistoryPageBridge.comment(id, rate, content);
+                    }
+                }
+            }
+        }
+        if HistoryPageBridge.total > HistoryPageBridge.page-size: Rectangle {
+            height: 20px;
+            SPagination {
+                page-size: HistoryPageBridge.page-size;
+                total: HistoryPageBridge.total;
+                active <=> HistoryPageBridge.current-page-index;
+                pre => {
+                    HistoryPageBridge.load-events(HistoryPageBridge.current-page-index, HistoryPageBridge.page-size);
+                }
+                next => {
+                    HistoryPageBridge.load-events(HistoryPageBridge.current-page-index, HistoryPageBridge.page-size);
+                }
+                clicked => {
+                    HistoryPageBridge.load-events(HistoryPageBridge.current-page-index, HistoryPageBridge.page-size);
+                }
             }
         }
     }

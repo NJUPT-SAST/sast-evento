@@ -100,9 +100,9 @@ export component AboutPage inherits Page {
         z: 999;
         width: root.width;
         height: root.height;
-        dialog-title: "更新日志";
-        confirm-btn-text: "更新";
-        cancel-btn-text: "取消";
+        dialog-title: @tr("更新日志");
+        confirm-btn-text: @tr("更新");
+        cancel-btn-text: @tr("取消");
         is-show <=> AboutPageBridge.show-popup;
         ScrollView {
             VerticalLayout {
@@ -130,9 +130,10 @@ export component AboutPage inherits Page {
         verticallayout := VerticalLayout {
             alignment: LayoutAlignment.start;
             padding: 50px;
+            padding-top: 10px;
             spacing: 20px;
             Text {
-                text: "关于";
+                text: @tr("关于");
                 font-size: Token.font.display.medium.size;
                 font-weight: Token.font.display.medium.weight;
             }
@@ -160,7 +161,7 @@ export component AboutPage inherits Page {
                     HorizontalLayout {
                         alignment: space-between;
                         Text {
-                            text: "版本信息 " + AboutPageBridge.version;
+                            text: @tr("版本信息 ") + AboutPageBridge.version;
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -170,7 +171,7 @@ export component AboutPage inherits Page {
                         Button {
                             have-icon: AboutPageBridge.check-update-status == PageState.loading;
                             type: ButtonType.text;
-                            content: "检查更新";
+                            content: @tr("检查更新");
                             LoadingAnimation {
                                 color: parent.on-surface;
                             }
@@ -186,7 +187,7 @@ export component AboutPage inherits Page {
                     HorizontalLayout {
                         alignment: space-between;
                         Text {
-                            text: "漏洞报告 / 功能建议";
+                            text: @tr("漏洞报告");
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -214,7 +215,7 @@ export component AboutPage inherits Page {
                     HorizontalLayout {
                         alignment: space-between;
                         Text {
-                            text: "网页端";
+                            text: @tr("网页端");
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -235,7 +236,7 @@ export component AboutPage inherits Page {
                     HorizontalLayout {
                         alignment: space-between;
                         Text {
-                            text: "GitHub 仓库";
+                            text: @tr("GitHub 仓库");
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -256,7 +257,7 @@ export component AboutPage inherits Page {
                     VerticalLayout {
                         spacing: 10px;
                         Text {
-                            text: "项目依赖";
+                            text: @tr("项目依赖");
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -317,7 +318,7 @@ export component AboutPage inherits Page {
                     HorizontalLayout {
                         alignment: space-between;
                         Text {
-                            text: "开源协议";
+                            text: @tr("开源协议");
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -343,7 +344,7 @@ export component AboutPage inherits Page {
                     padding: 20px;
                     spacing: 15px;
                     Text {
-                        text: "贡献者";
+                        text: @tr("贡献者");
                         font-size: Token.font.body.large.size;
                         font-weight: Token.font.body.large.weight;
                         color: Token.color.on-surface;
@@ -353,7 +354,7 @@ export component AboutPage inherits Page {
                     if AboutPageBridge.contributors-status == PageState.error: Rectangle {
                         Button {
                             type: ButtonType.filled-tonal;
-                            content: "重新加载";
+                            content: @tr("重新加载");
                             clicked => {
                                 AboutPageBridge.load-contributors();
                             }

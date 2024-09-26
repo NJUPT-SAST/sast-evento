@@ -2,6 +2,7 @@
 #pragma once
 
 #include "EventState.h"
+#include "StdOptional.h" // IWYU pragma: keep
 #include <nlohmann/json.hpp>
 #include <string>
 namespace evento {
@@ -12,9 +13,9 @@ struct EventEntity {
     std::string description;
     std::string start;
     std::string end;
-    std::string location;
+    std::optional<std::string> location;
     std::string tag;
-    std::string larkMeetingRoomName;
+    std::optional<std::string> larkMeetingRoomName;
     std::string larkDepartmentName;
     State state;
     bool isSubscribed; // 已订阅
