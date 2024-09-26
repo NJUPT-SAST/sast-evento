@@ -1,5 +1,6 @@
 #include "HttpsAccessManager.h"
 #include <Infrastructure/Utils/Debug.h>
+#include <Infrastructure/Utils/Error.h>
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/as_tuple.hpp>
 #include <boost/asio/awaitable.hpp>
@@ -37,7 +38,14 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
 
     // Make the connection on the IP address we get from a lookup
-    co_await beast::get_lowest_layer(stream).async_connect(results);
+    try {
+        co_await beast::get_lowest_layer(stream).async_connect(results);
+    } catch (const boost::system::system_error& e) {
+        if (e.code() == net::error::timed_out) {
+            co_return Err(Error(Error::Timeout, "Connection timed out"));
+        }
+        co_return Err(Error(Error::Network, e.what()));
+    }
 
     // Set the timeout.
     beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
@@ -55,7 +63,14 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     beast::get_lowest_layer(stream).expires_after(_timeout);
 
     // Send the HTTP request to the remote host
-    co_await http::async_write(stream, req);
+    try {
+        co_await http::async_write(stream, req);
+    } catch (const boost::system::system_error& e) {
+        if (e.code() == net::error::timed_out) {
+            co_return Err(Error(Error::Timeout, "Write operation timed out"));
+        }
+        co_return Err(Error(Error::Network, e.what()));
+    }
 
     // Declare a container to hold the response
     http::response<http::dynamic_body> res;
@@ -63,8 +78,14 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     beast::flat_buffer buffer;
 
     // Receive the HTTP response
-    co_await http::async_read(stream, buffer, res);
-
+    try {
+        co_await http::async_read(stream, buffer, res);
+    } catch (const boost::system::system_error& e) {
+        if (e.code() == net::error::timed_out) {
+            co_return Err(Error(Error::Timeout, "Read operation timed out"));
+        }
+        co_return Err(Error(Error::Network, e.what()));
+    }
     beast::get_lowest_layer(stream).expires_after(_timeout);
 
     // Gracefully close the stream - do not threat every error as an exception!

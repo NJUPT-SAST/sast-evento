@@ -564,7 +564,7 @@ urls::url NetworkClient::githubEndpoint(std::string_view endpoint,
 
 JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> response) {
     if (response.result() != http::status::ok) {
-        return Err(Error(Error::Network, std::to_string(response.result_int())));
+        return Err(Error(response.result_int()));
     }
 
     nlohmann::basic_json<> res;
