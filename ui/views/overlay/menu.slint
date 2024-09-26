@@ -129,7 +129,8 @@ export component MenuOverlay inherits Overlay {
         triggered => {
             self.running = false;
             if (navigate) {
-                ViewManager.replace-navigate-to(view);
+                ViewManager.prior-view();
+                ViewManager.navigate-to(view);
             } else {
                 ViewManager.prior-view();
             }

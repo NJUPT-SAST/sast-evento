@@ -71,11 +71,11 @@ void ViewManager::cleanNavigateTo(ViewName newView, std::any data) {
 void ViewManager::replaceNavigateTo(ViewName newView, std::any data) {
     auto& self = *this;
     navAssert();
+
+    popView();
     if (newView == viewStack.top()) {
         return;
     }
-
-    popView();
     pushView(newView, std::move(data));
 
     syncViewVisibility();
