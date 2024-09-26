@@ -50,6 +50,7 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<CONFIG:Debug>:EVENTO_DEBUG>
     $<$<CONFIG:Release>:EVENTO_RELEASE>
     ${PLATFORM}
+    LOCALE_DIR="${CMAKE_SOURCE_DIR}/ui/locale"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -67,6 +68,7 @@ target_link_libraries(${PROJECT_NAME}
     keychain
     Slint::Slint
     version::version
+    Intl::Intl
     ${URING_LIBRARIES}
 )
 
@@ -74,5 +76,14 @@ target_link_libraries(${PROJECT_NAME}
 if (WIN32)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
 endif()
+
+find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES
+  COMMAND ${MSGFMT_EXECUTABLE} ${SOURCE_LOCALE_DIR}/en.po -o ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES
+  COMMAND ${MSGFMT_EXECUTABLE} ${SOURCE_LOCALE_DIR}/zh.po -o ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo
+)
 
 add_subdirectory(Tray)

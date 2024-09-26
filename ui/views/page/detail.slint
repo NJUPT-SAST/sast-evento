@@ -39,15 +39,15 @@ component IconText {
 component HighlightBlock {
     pure function state-to-text(state: EventState) -> string {
         if (state == EventState.SigningUp) {
-            return "报名中";
+            return @tr("报名中");
         } else if (state == EventState.Active) {
-            return "进行中";
+            return @tr("进行中");
         } else if (state == EventState.Completed) {
-            return "已结束";
+            return @tr("已结束");
         } else if (state == EventState.Cancelled) {
-            return "已取消";
+            return @tr("已取消");
         } else {
-            return "未知状态";
+            return @tr("未知状态");
         }
     }
     in property <EventState> state;
@@ -103,18 +103,18 @@ export component DetailPage inherits Page {
         width: 100%;
         height: 100%;
         is-show: false;
-        dialog-title: "签到";
+        dialog-title: @tr("签到");
 
         text-edit := LineEdit {
             width: 100%;
             height: 58px;
             font-size: Token.font.body.large.size;
-            placeholder-text: "请输入签到码";
+            placeholder-text: @tr("请输入签到码");
             horizontal-alignment: center;
         }
 
-        confirm-btn-text: "签到";
-        cancel-btn-text: "取消";
+        confirm-btn-text: @tr("签到");
+        cancel-btn-text: @tr("取消");
 
         confirm => {
             DetailPageBridge.check-in(text-edit.text);
@@ -158,7 +158,7 @@ export component DetailPage inherits Page {
                 if DetailPageBridge.state == PageState.error: Rectangle {
                     Button {
                         type: filled-tonal;
-                        content: "重新加载";
+                        content: @tr("重新加载");
                         clicked => {
                             DetailPageBridge.load-feedback();
                         }
@@ -175,7 +175,7 @@ export component DetailPage inherits Page {
                     VerticalLayout {
                         spacing: 10px;
                         Text {
-                            text: "反馈";
+                            text: @tr("反馈");
                             font-size: Token.font.title.large.size;
                             font-weight: Token.font.title.large.weight;
                         }
@@ -186,7 +186,7 @@ export component DetailPage inherits Page {
 
                         content := LineEdit {
                             font-size: Token.font.body.large.size;
-                            placeholder-text: "参与完本次活动，有什么想说的吗，快告诉我们吧";
+                            placeholder-text: @tr("参与完本次活动，有什么想说的吗，快告诉我们吧");
                             text: DetailPageBridge.feedback-model.content;
                         }
 
@@ -194,7 +194,7 @@ export component DetailPage inherits Page {
                             alignment: end;
                             Button {
                                 type: filled-tonal;
-                                content: "提交";
+                                content: @tr("提交");
                                 disable: DetailPageBridge.feedback-model.rate == 0 || DetailPageBridge.feedback-model.has-feedbacked;
                                 have-icon: DetailPageBridge.feedback-state == PageState.loading;
                                 LoadingAnimation {
@@ -218,7 +218,7 @@ export component DetailPage inherits Page {
                 Button {
                     have-icon: DetailPageBridge.subscribe-state == PageState.loading;
                     type: filled;
-                    content: DetailPageBridge.event-model.is-subscribed ? "取消报名" : "报名";            
+                    content: DetailPageBridge.event-model.is-subscribed ? @tr("取消报名") : @tr("报名");            
                     disable: DetailPageBridge.event-model.state != EventState.SigningUp;
                     LoadingAnimation {
                         color: Token.color.on-surface;
@@ -231,7 +231,7 @@ export component DetailPage inherits Page {
 
                 Button {
                     type: filled;
-                    content: DetailPageBridge.event-model.is-check-in ? "已签到" : "签到";
+                    content: DetailPageBridge.event-model.is-check-in ? @tr("已签到") : @tr("签到");
                     disable: DetailPageBridge.event-model.is-check-in || DetailPageBridge.event-model.state == EventState.Completed || DetailPageBridge.event-model.state == EventState.Cancelled;
                     clicked => {
                         dialog.open();

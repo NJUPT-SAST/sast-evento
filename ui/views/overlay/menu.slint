@@ -4,7 +4,7 @@ import { Token } from "../../global.slint";
 
 export global MenuOverlayBridge {
     in-out property <bool> is-show: false;
-    in-out property <string> user-name:"用户名";
+    in-out property <string> user-name: "用户名";
     in-out property <string> user-signature: "个性签名";
     in-out property <image> user-avatar: Token.image.display.avatar;
     callback open-link-web();
@@ -163,7 +163,7 @@ export component MenuOverlay inherits Overlay {
                         spacing: 5px;
                         padding-top: 5px;
                         if !AccountManager.is-login:Text {
-                            text: "请登录";
+                            text: @tr("请登录");
                             font-size: 40px;
                             font-weight: Token.font.title.large.weight;
                             color: Token.color.on-surface;
@@ -204,30 +204,30 @@ export component MenuOverlay inherits Overlay {
 
             if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.me;
-                label: "个人资料";
+                label: @tr("个人资料");
                 clicked => {
                     MenuOverlayBridge.open-link-web();
                 }
             }
             if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.history;
-                label: "历史活动";
+                label: @tr("历史活动");
                 clicked => {
                     fold-then-navigate(ViewName.HistoryPage);
                 }
             }
             if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.card;
-                label: "纪念卡";
+                label: @tr("纪念卡");
                 clicked => {
                     // NOTE: Unsupport
-                    MessageManager.show-message("功能还在开发中，咕咕咕 😣", MessageType.info);
+                    MessageManager.show-message(@tr("功能还在开发中，咕咕咕 😣"), MessageType.info);
                 }
             }
             if AccountManager.is-login:Divider { }
             MenuItem {
                 icon: Token.image.icon.setting;
-                label: "设置";
+                label: @tr("设置");
                 clicked => {
                     fold-then-navigate(ViewName.SettingPage);
                 }
@@ -235,7 +235,7 @@ export component MenuOverlay inherits Overlay {
 
             MenuItem {
                 icon: Token.image.icon.info;
-                label: "关于";
+                label: @tr("关于");
                 clicked => {
                     fold-then-navigate(ViewName.AboutPage);
                 }
@@ -244,7 +244,7 @@ export component MenuOverlay inherits Overlay {
             if AccountManager.is-login:Divider { }
             if AccountManager.is-login:MenuItem {
                 icon: Token.image.icon.logout;
-                label: "退出登录";
+                label: @tr("退出登录");
                 label-color: Token.color.error;
                 clicked => {
                     MenuOverlayBridge.is-show = false;

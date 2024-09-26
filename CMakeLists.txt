@@ -19,6 +19,7 @@ endif()
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
+set(SLINT_FEATURE_GETTEXT ON CACHE BOOL "Slint gettext feature" FORCE)
 
 if (WIN32)
   # Target Windows 7
@@ -53,6 +54,7 @@ find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system url beast process)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(Intl REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(tomlplusplus REQUIRED IMPORTED_TARGET tomlplusplus)
 
@@ -61,6 +63,9 @@ if (NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/sast-link-cxx-sdk/CMakeLists
     NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/3rdpart/keychain/CMakeLists.txt")
   message(FATAL_ERROR "Git submodule not found. Run `git submodule update --init` from the source tree to fetch the submodule contents.")
 endif()
+
+# i18n
+set(SOURCE_LOCALE_DIR "${CMAKE_SOURCE_DIR}/ui/locale")
 
 # source code
 add_subdirectory(src)
@@ -76,6 +81,8 @@ set(BUILD_SHARED_LIBS ON)
 file(WRITE ${CMAKE_BINARY_DIR}/sast-evento-version.txt ${VERSION_SEMANTIC})
 install(FILES ${CMAKE_BINARY_DIR}/sast-evento-version.txt DESTINATION .)
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION .)
+install(FILES ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/en/LC_MESSAGES)
+install(FILES ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/zh/LC_MESSAGES)
 install(TARGETS ${PROJECT_NAME}
   BUNDLE DESTINATION .
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}

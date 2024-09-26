@@ -40,8 +40,16 @@ CMakeUserPresets.json
 # CMake build directory
 /build
 /out
-/.vscode/settings.json
 
+# IDE settings
+.vscode/settings.json
+.idea
+.vs
+
+# Windows build output
 action-cli
-
 *.rc
+
+# i18n files
+*.mo
+*.pot

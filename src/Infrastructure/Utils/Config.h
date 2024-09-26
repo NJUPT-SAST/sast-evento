@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/dll.hpp>
 #include <chrono>
 #include <ctime>
 #include <filesystem>
@@ -14,7 +15,6 @@ user-id = <string>
 expire = <date-time>
 
 [setting]
-language = <int>
 minimal-to-tray = <bool>
 notice-begin = <bool>
 notice-end = <bool>
@@ -36,15 +36,21 @@ const std::filesystem::path configDir =
 
 inline toml::table config;
 
-inline struct {
-    int language;
+const std::filesystem::path localePath =
+#ifdef EVENTO_DEBUG
+    LOCALE_DIR;
+#else
+    std::filesystem::path{(boost::dll::program_location().parent_path() / "locale").string()};
+#endif // EVENTO_DEBUG
+
+inline struct Settings {
     bool minimalToTray;
     bool noticeBegin;
     bool noticeEnd;
     int theme;
 } settings;
 
-inline struct {
+inline struct Account {
     std::string userId;
     toml::date_time expire;
 } account;
@@ -55,10 +61,6 @@ static void loadSetting() {
     }
     auto& setting = config["setting"].ref<toml::table>();
 
-    auto languageIdx = setting["language"].value_or(0);
-    if (languageIdx > 2) {
-        languageIdx = 0;
-    }
     auto themeIdx = setting["theme"].value_or(0);
     if (themeIdx > 2) {
         themeIdx = 0;
@@ -68,7 +70,6 @@ static void loadSetting() {
     auto minimalToTray = setting["minimal-to-tray"].value_or(false);
 
     evento::settings = {
-        .language = languageIdx,
         .minimalToTray = minimalToTray,
         .noticeBegin = noticeBegin,
         .noticeEnd = noticeEnd,
