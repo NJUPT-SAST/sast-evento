@@ -25,7 +25,7 @@ public:
         std::shared_ptr<spdlog::sinks::stdout_color_sink_mt> stdoutSink
             = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
         _threadPool = std::make_shared<spdlog::details::thread_pool>(q_max_items, thread_count);
-        _asyncLogger = std::make_shared<spdlog::async_logger>("evento-logger",
+        _asyncLogger = std::make_shared<spdlog::async_logger>("evento",
                                                               spdlog::sinks_init_list{fileSink,
                                                                                       stdoutSink},
                                                               _threadPool);
