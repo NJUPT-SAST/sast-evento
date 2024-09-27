@@ -31,7 +31,7 @@ msgstr "Developed by SAST.C++ Group"
 #: views/overlay/menu.slint:166
 msgctxt "MenuOverlay"
 msgid "请登录"
-msgstr "Please Login first"
+msgstr "No Login"
 
 #: views/overlay/menu.slint:207
 msgctxt "MenuOverlay"
