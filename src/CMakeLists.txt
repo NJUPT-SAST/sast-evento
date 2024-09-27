@@ -10,7 +10,7 @@ if (MSVC)
   target_compile_definitions(${PROJECT_NAME} PRIVATE BOOST_ASIO_HAS_CO_AWAIT)
 endif()
 
-# use io_uring on Linux
+# use io_uring and intl on Linux
 if (LINUX)
   target_compile_definitions(${PROJECT_NAME} PRIVATE 
     BOOST_ASIO_HAS_IO_URING 
@@ -18,6 +18,8 @@ if (LINUX)
   )
   find_library(URING_LIBRARY NAMES liburing.a REQUIRED)
   message(STATUS "Found liburing: ${URING_LIBRARY}")
+  find_package(Intl REQUIRED)
+  set(INTL_LIBRARY Intl::Intl)
 endif()
 
 if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
@@ -51,7 +53,7 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<CONFIG:Debug>:EVENTO_DEBUG>
     $<$<CONFIG:Release>:EVENTO_RELEASE>
     ${PLATFORM}
-    LOCALE_DIR="${CMAKE_SOURCE_DIR}/ui/locale"
+    LOCALE_DIR="${SOURCE_LOCALE_DIR}"
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -69,7 +71,7 @@ target_link_libraries(${PROJECT_NAME}
     keychain
     Slint::Slint
     version::version
-    Intl::Intl
+    ${INTL_LIBRARY}
     ${URING_LIBRARY}
 )
 
@@ -78,13 +80,15 @@ if (WIN32)
   add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_RUNTIME_DLLS:${PROJECT_NAME}> $<TARGET_FILE_DIR:${PROJECT_NAME}> COMMAND_EXPAND_LISTS)
 endif()
 
-find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
-
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES
-  COMMAND ${MSGFMT_EXECUTABLE} ${SOURCE_LOCALE_DIR}/en.po -o ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES
-  COMMAND ${MSGFMT_EXECUTABLE} ${SOURCE_LOCALE_DIR}/zh.po -o ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo
-)
+if(LINUX)
+  find_program(MSGFMT_EXECUTABLE msgfmt REQUIRED)
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory en/LC_MESSAGES
+    COMMAND ${MSGFMT_EXECUTABLE} en.po -o en/LC_MESSAGES/sast-evento.mo
+    COMMAND ${CMAKE_COMMAND} -E make_directory zh/LC_MESSAGES
+    COMMAND ${MSGFMT_EXECUTABLE} zh.po -o zh/LC_MESSAGES/sast-evento.mo
+    WORKING_DIRECTORY ${SOURCE_LOCALE_DIR}
+  )
+endif()
 
 add_subdirectory(Tray)

@@ -4,9 +4,11 @@
 #include <Infrastructure/Utils/Logger.hh>
 #include <Version.h>
 #include <filesystem>
+#include <spdlog/spdlog.h>
+#ifdef PLATFORM_LINUX
 #include <libintl.h>
 #include <locale>
-#include <spdlog/spdlog.h>
+#endif
 
 int main(int argc, char** argv) {
     Logger logger(Logger::Level::debug,
@@ -15,8 +17,11 @@ int main(int argc, char** argv) {
     evento::initConfig();
     spdlog::info("SAST Evento version: v" VERSION_FULL);
 
+#ifdef PLATFORM_LINUX
     bindtextdomain("sast-evento", evento::localePath.string().c_str());
     std::locale::global(std::locale(""));
+    spdlog::info("locale: {}", std::locale::global(std::locale("")).name());
+#endif
 
     evento::UiBridge uiBridge(App::create());
 

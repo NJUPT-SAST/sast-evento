@@ -11,13 +11,17 @@
         "spdlog",
         "tomlplusplus",
         {
+            "name": "gettext-libintl",
+            "platform": "!(windows | uwp | osx)"
+        },
+        {
             "name": "gettext",
+            "platform": "!(windows | uwp | osx)",
             "features": [
                 "tools"
             ],
             "host": true
         },
-        "gettext-libintl",
         {
             "name": "pkgconf",
             "host": true

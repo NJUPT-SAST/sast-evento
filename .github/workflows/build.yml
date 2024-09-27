@@ -114,7 +114,6 @@ jobs:
           Import-Module (Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
           Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments '-arch=${{ matrix.msvc_arch }} -host_arch=x64'
           $additionalConfigureArgs += '-DPKG_CONFIG_EXECUTABLE:FILEPATH=./build/vcpkg_installed/x64-windows/tools/pkgconf/pkgconf.exe'
-          $additionalConfigureArgs += '-DMSGFMT_EXECUTABLE:FILEPATH=./build/vcpkg_installed/x64-windows/tools/gettext/bin/msgfmt.exe'
         }
         if ($vcpkgTargetTriplet) {
           $additionalConfigureArgs += "-DVCPKG_TARGET_TRIPLET:STRING=$vcpkgTargetTriplet"

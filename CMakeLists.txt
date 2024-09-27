@@ -54,7 +54,6 @@ find_package(spdlog REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system url beast process)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(Intl REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(tomlplusplus REQUIRED IMPORTED_TARGET tomlplusplus)
 
@@ -81,10 +80,12 @@ set(BUILD_SHARED_LIBS ON)
 file(WRITE ${CMAKE_BINARY_DIR}/sast-evento-version.txt ${VERSION_SEMANTIC})
 install(FILES ${CMAKE_BINARY_DIR}/sast-evento-version.txt DESTINATION .)
 install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION .)
-install(FILES ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/en/LC_MESSAGES)
-install(FILES ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/zh/LC_MESSAGES)
 install(TARGETS ${PROJECT_NAME}
   BUNDLE DESTINATION .
   LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+if(LINUX)
+  install(FILES ${SOURCE_LOCALE_DIR}/en/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/en/LC_MESSAGES)
+  install(FILES ${SOURCE_LOCALE_DIR}/zh/LC_MESSAGES/sast-evento.mo DESTINATION ./locale/zh/LC_MESSAGES)
+endif()
