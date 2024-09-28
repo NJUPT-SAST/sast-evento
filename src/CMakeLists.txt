@@ -14,7 +14,6 @@ endif()
 if (LINUX)
   target_compile_definitions(${PROJECT_NAME} PRIVATE 
     BOOST_ASIO_HAS_IO_URING 
-    BOOST_ASIO_DISABLE_EPOLL
   )
   find_library(URING_LIBRARY NAMES liburing.a REQUIRED)
   message(STATUS "Found liburing: ${URING_LIBRARY}")
