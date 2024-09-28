@@ -2,8 +2,8 @@
 
 #include <boost/url/url_view.hpp>
 #include <boost/url/urls.hpp>
-#include <spdlog/spdlog.h>
 #include <ctime>
+#include <spdlog/spdlog.h>
 
 namespace evento {
 

@@ -1,6 +1,6 @@
 #include <Controller/Convert.h>
-#include <spdlog/spdlog.h>
 #include <Infrastructure/Utils/Tools.h>
+#include <spdlog/spdlog.h>
 
 namespace evento::convert {
 
