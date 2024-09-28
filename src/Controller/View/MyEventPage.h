@@ -4,6 +4,7 @@
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
 #include <Infrastructure/Network/ResponseStruct.h>
+#include <Infrastructure/Utils/Result.h>
 
 EVENTO_UI_START
 
@@ -16,6 +17,7 @@ private:
     void onLogin() override;
     void onShow() override;
     void loadSubscribedEvents();
+    void refreshUiModel(Result<EventQueryRes> result);
 };
 
 EVENTO_UI_END

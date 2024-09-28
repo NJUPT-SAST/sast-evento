@@ -88,12 +88,13 @@ export component PageStateLayer {
                 font-size: Token.font.body.large.size;
                 font-weight: Token.font.body.large.weight;
                 color: Token.color.error;
+                vertical-alignment: center;
             }
         }
 
         Empty {
             Button {
-                type: filled;
+                type: filled-tonal;
                 content: error-retry-message;
                 clicked => {
                     root.error-retry();

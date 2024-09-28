@@ -22,7 +22,7 @@ public:
 
     void showOrUpdateMessage(int messageId,
                              std::string const& message,
-                             std::chrono::steady_clock::time_point const& time);
+                             std::chrono::system_clock::time_point const& time);
 
     void cancelMessage(int messageId);
 
