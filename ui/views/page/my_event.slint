@@ -1,32 +1,145 @@
 import { Token } from "../../global.slint";
-import { Page, Empty } from "../../components/index.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Page, EventCard, EventStruct, PageStateLayer, PageState } from "../../components/index.slint";
 
-export global MyEventPageBridge { }
+export global MyEventPageBridge {
+    in property <[EventStruct]> not-started-model: [
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+        {
+            id: 1,
+            summary: "软件研发部 C++组授课",
+            summary-abbr: "软",
+            time: "24.9.30 14:30 - 16:00",
+            description: "C++组授课",
+            location: "仙林校区 大活101",
+        },
+    ];
+    in property <[EventStruct]> active-model: not-started-model;
+    in property <[EventStruct]> completed-model: not-started-model;
+    in property <PageState> state: PageState.normal;
+    in property <string> error-message;
+    callback load-events();
+    callback navigate-to-detail(EventStruct);
+}
+
+component HighlightText {
+    in property <string> text;
+    HorizontalLayout {
+        spacing: 10px;
+        padding-left: 10px;
+        Rectangle {
+            width: 7px;
+            background: Token.color.primary;
+        }
+
+        Text {
+            text: text;
+            font-size: Token.font.title.large.size;
+            font-weight: Token.font.title.large.weight;
+            vertical-alignment: center;
+        }
+    }
+}
 
 export component MyEventPage inherits Page {
-    // TODO: implement MyEvent
-    // optional
-    background := Empty { }
+    property <length> card-width: (self.width - 180px) / 3;
 
-    layout := VerticalLayout {
-        visible: false;
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
+    VerticalLayout {
+        padding: 50px;
+        spacing: 20px;
+        HorizontalLayout {
+            spacing: 40px;
+            HighlightText {
+                text: @tr("未开始");
+            }
+
+            HighlightText {
+                text: @tr("进行中");
+            }
+
+            HighlightText {
+                text: @tr("已结束");
+            }
+        }
+
+        HorizontalLayout {
+            spacing: 20px;
+            ScrollView {
+                width: card-width + 20px;
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 20px;
+                    for event-data in MyEventPageBridge.not-started-model: EventCard {
+                        width: card-width;
+                        event: event-data;
+                        clicked => {
+                            MyEventPageBridge.navigate-to-detail(self.event);
+                        }
+                    }
+                }
+            }
+
+            ScrollView {
+                width: card-width + 20px;
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 20px;
+                    for event-data in MyEventPageBridge.active-model: EventCard {
+                        width: card-width;
+                        event: event-data;
+                        clicked => {
+                            MyEventPageBridge.navigate-to-detail(self.event);
+                        }
+                    }
+                }
+            }
+
+            ScrollView {
+                width: card-width + 20px;
+                VerticalLayout {
+                    padding: 4px;
+                    spacing: 20px;
+                    for event-data in MyEventPageBridge.completed-model: EventCard {
+                        width: card-width;
+                        event: event-data;
+                        clicked => {
+                            MyEventPageBridge.navigate-to-detail(self.event);
+                        }
+                    }
+                }
+            }
+        }
     }
 
-    body := Empty {
-        x: 0;
-        y: 0;
-        width: 100%;
-        height: 100%;
-        placeholder := Rectangle {
-            border-width: 4px;
-            border-color: red;
-            Text {
-                text: "活动日程（我的活动）\n  未开始、进行中、已结束";
-            }
+    PageStateLayer {
+        state: MyEventPageBridge.state;
+        error-message: MyEventPageBridge.error-message;
+        error-retry-message: @tr("重新加载");
+        error-retry => {
+            MyEventPageBridge.load-events();
         }
     }
 }

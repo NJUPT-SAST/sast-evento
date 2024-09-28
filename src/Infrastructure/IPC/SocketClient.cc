@@ -76,7 +76,7 @@ void SocketClient::exitTray() {
 
 void SocketClient::showOrUpdateMessage(int messageId,
                                        std::string const& message,
-                                       std::chrono::steady_clock::time_point const& time) {
+                                       std::chrono::system_clock::time_point const& time) {
     if (messageId == 0) {
         spdlog::warn("Invalid message id");
         return;
@@ -93,7 +93,7 @@ void SocketClient::showOrUpdateMessage(int messageId,
             }
         },
         []() {},
-        time - std::chrono::steady_clock::now(),
+        time - std::chrono::system_clock::now(),
         AsyncExecutor::Delay | AsyncExecutor::Once);
 }
 

@@ -30,10 +30,10 @@ void MenuOverlay::onLogin() {
     auto& self = *this;
     auto userInfo = bridge.getAccountManager().getUserInfo();
     self->set_user_name(slint::SharedString(userInfo.nickname));
-    self->set_user_signature(
-        slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下")));
-    if (userInfo.avatar.has_value())
-        self->set_user_avatar(slint::Image::load_from_path(slint::SharedString(*userInfo.avatar)));
+    // self->set_user_signature(
+    //     slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下")));
+    // if (userInfo.avatar.has_value())
+    //     self->set_user_avatar(slint::Image::load_from_path(slint::SharedString(*userInfo.avatar)));
 }
 
 EVENTO_UI_END
