@@ -29,6 +29,25 @@ void MenuOverlay::onShow() {
 void MenuOverlay::onLogin() {
     auto& self = *this;
     auto userInfo = bridge.getAccountManager().getUserInfo();
+    self.refreshUserInfo(userInfo);
+    evento::executor()->asyncExecute(
+        []() -> Task<Result<UserInfoEntity>> {
+            auto res = co_await networkClient()->getUserInfo();
+            co_return res;
+        },
+        [&self = *this](Result<UserInfoEntity> result) {
+            if (result.isErr()) {
+                spdlog::error("Failed to get user info: {}", result.unwrapErr().what());
+                return;
+            }
+            self.refreshUserInfo(result.unwrap());
+        },
+        10min,
+        AsyncExecutor::Periodic | AsyncExecutor::Delay);
+}
+
+void MenuOverlay::refreshUserInfo(UserInfoEntity const& userInfo) {
+    auto& self = *this;
     self->set_user_name(slint::SharedString(userInfo.nickname));
     self->set_user_signature(
         slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下 ")));
