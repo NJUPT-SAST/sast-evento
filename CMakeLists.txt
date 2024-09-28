@@ -31,6 +31,8 @@ if (WIN32)
       ${VERSION_RC_PATH}
   )
   set(WIN32_MANIFEST_PATH ${CMAKE_SOURCE_DIR}/app.manifest)
+
+  set(BUILD_SAST_LINK_SHARED OFF)
 endif()
 
 # find Slint
