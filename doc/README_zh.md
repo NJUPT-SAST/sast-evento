@@ -38,6 +38,12 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 本项目是 SAST Evento 的桌面客户端版本。
 
+## 预览
+
+<div align=center>
+  <img src="../doc/img/preview.png">
+</div>
+
 ## 项目平台支持
 
 | 平台               | 状态                     | 说明             |

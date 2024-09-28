@@ -38,6 +38,12 @@ To address these issues, we have decided to develop an event assistance system d
 
 This project is the desktop client version of SAST Evento.
 
+## Preview
+
+<div align=center>
+  <img src="doc/img/preview.png">
+</div>
+
 ## Platform Support
 
 | Platform           | Status                   | Instruction                     |
