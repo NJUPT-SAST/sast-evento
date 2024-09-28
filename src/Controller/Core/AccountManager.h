@@ -4,7 +4,6 @@
 #include <Controller/Core/UiBase.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <chrono>
-#include <memory>
 
 EVENTO_UI_START
 
@@ -16,7 +15,6 @@ class AccountManager : private GlobalAgent<AccountManagerBridge>,
 
     bool loginState = false;
     UserInfoEntity userInfo;
-    // refreshToken(expired in 7d) saved to keychain
 
     std::chrono::system_clock::time_point expiredTime;
     net::steady_timer renewAccessTokenTimer;
@@ -43,7 +41,6 @@ private:
     std::optional<std::string> getKeychainRefreshToken() const;
 
     void scheduleRenewAccessToken();
-    void scheduleRenewRefreshToken();
 
     static void setNetworkAccessToken(std::string accessToken);
 

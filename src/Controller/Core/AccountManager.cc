@@ -10,7 +10,6 @@
 #include <optional>
 #include <sast_link.h>
 #include <spdlog/spdlog.h>
-#include <variant> // 添加这个头文件以使用 std::monostate
 
 EVENTO_UI_START
 
@@ -33,43 +32,19 @@ bool AccountManager::isLogin() const {
 }
 
 void AccountManager::performLogin() {
-    /*
-    bool assumeLoginSuccess = true; // 可以根据需要设置条件
-    if (assumeLoginSuccess) {
-        spdlog::info("Assume login success for debugging purposes");
-        this->setLoginState(true);
-        this->userInfo = UserInfoEntity{
-            .id = "dummy_id",
-            .linkId = "dummy_link_id",
-            .studentId = "dummy_student_id",
-            .email = "dummy_email",
-            .nickname = "dummy_nickname",
-            .avatar = "dummy_avatar",
-            .organization = "dummy_organization",
-            .biography = "dummy_biography",
-            .link = {"dummy_link1", "dummy_link2"},
-        };
-        this->setKeychainRefreshToken("dummy_refresh_token");
-        this->setNetworkAccessToken("dummy_access_token");
-        this->scheduleRenewAccessToken();
-        spdlog::info("Assumed login success");
-        return;
-    }
-    */
-    
     evento::executor()->asyncExecute(
         []() -> evento::Task<Result<LoginResEntity>> {
             spdlog::info("Start login");
             auto codeResult = co_await sast_link::login();
             if (!codeResult) {
-                spdlog::error("Login failed: {}\n", codeResult.error());
+                spdlog::error("Login failed: {}", codeResult.error());
                 co_return Err(Error(Error::Unknown, "Login failed"));
             }
             spdlog::info("Login success");
             auto loginResult = co_await evento::networkClient()->loginViaSastLink(
                 codeResult.value());
             if (loginResult.isErr()) {
-                spdlog::error("Login failed: {}\n", loginResult.unwrapErr().what());
+                spdlog::error("Login failed: {}", loginResult.unwrapErr().what());
                 co_return Err(Error(Error::Unknown, "Login failed"));
             }
             spdlog::info("Login success");
@@ -78,6 +53,8 @@ void AccountManager::performLogin() {
         [&self = *this](Result<LoginResEntity> result) {
             if (result.isErr()) {
                 self.setLoginState(false);
+                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
+                                                            MessageType::Error);
                 return;
             }
             auto data = result.unwrap();
@@ -100,7 +77,7 @@ void AccountManager::performRefreshToken() {
             auto result = co_await evento::networkClient()->refreshAccessToken(
                 refreshToken.value_or("NONE"));
             if (result.isErr()) {
-                spdlog::error("Failed to refresh token: {}\n", result.unwrapErr().what());
+                spdlog::error("Failed to refresh token: {}", result.unwrapErr().what());
                 co_return Err(Error(Error::Network, "Failed to refresh token"));
             }
             co_return Ok(std::monostate{});
@@ -122,7 +99,7 @@ void AccountManager::performGetUserInfo() {
         []() -> evento::Task<Result<UserInfoEntity>> {
             auto result = co_await evento::networkClient()->getUserInfo();
             if (result.isErr()) {
-                spdlog::error("Failed to get user info: {}\n", result.unwrapErr().what());
+                spdlog::error("Failed to get user info: {}", result.unwrapErr().what());
                 co_return Err(Error(Error::Unknown, "Failed to get user info"));
             }
             co_return result.unwrap();
@@ -148,7 +125,6 @@ void AccountManager::requestLogin() {
         performRefreshToken();
         performGetUserInfo();
         scheduleRenewAccessToken();
-        scheduleRenewRefreshToken();
         setLoginState(true);
         return;
     }
@@ -159,21 +135,14 @@ void AccountManager::requestLogout() {
     if (!isLogin()) {
         return;
     }
-    // TODO: net logout
     auto& self = *this;
-
-    // TODO: 只清除本地的登录状态和相关的令牌
-    // TODO: 通知后端登出
     self.userInfo = UserInfoEntity();
     setKeychainRefreshToken("");
     setNetworkAccessToken("");
 
-    // 停止刷新令牌的定时器
     renewAccessTokenTimer.cancel();
 
-    // if (logoutSuccess) {
     setLoginState(false);
-    // }
 }
 
 UserInfoEntity AccountManager::getUserInfo() {
@@ -182,7 +151,6 @@ UserInfoEntity AccountManager::getUserInfo() {
 
 void AccountManager::loadConfig() {
     setLoginState(false);
-    // TODO: load last time
     auto [year, month, day] = evento::account.expire.date;
     auto [hour, minute, second, _] = evento::account.expire.time;
     std::tm t = {year, month, day, hour, minute, second};
@@ -192,7 +160,6 @@ void AccountManager::loadConfig() {
 }
 
 void AccountManager::saveConfig() {
-    // TODO: save
     auto expire = std::chrono::system_clock::to_time_t(expiredTime);
     auto expireTm = *std::localtime(&expire);
     evento::account.expire
@@ -206,7 +173,7 @@ void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) co
     keychain::setPassword(package, service, userInfo.id, refreshToken, err);
 
     if (err.code != 0) {
-        spdlog::error("Failed to save refresh token: {}\n", err.message);
+        spdlog::error("Failed to save refresh token: {}", err.message);
     }
 }
 
@@ -215,7 +182,7 @@ std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
     auto refreshToken = keychain::getPassword(package, service, userInfo.id, err);
 
     if (err.code != 0) {
-        spdlog::error("Failed to save refresh token: {}\n", err.message);
+        spdlog::error("Failed to save refresh token: {}", err.message);
     }
 
     if (refreshToken.empty()) {
@@ -231,30 +198,13 @@ void AccountManager::scheduleRenewAccessToken() {
     renewAccessTokenTimer.async_wait(
         [weak_this = weak_from_this(), &self](const boost::system::error_code& ec) {
             if (ec) {
-                spdlog::error("Failed to renew access token: {}\n", ec.message());
+                spdlog::error("Failed to renew access token: {}", ec.message());
                 return;
             }
             if (auto alive = weak_this.lock()) {
                 self.performRefreshToken();
             }
         });
-}
-
-void AccountManager::scheduleRenewRefreshToken() {
-    /*
-    auto& self = *this;
-    _renewRefreshTokenTimer.expires_after(std::chrono::hours(24)); // 设置定时器为24小时
-    _renewRefreshTokenTimer.async_wait(
-        [weak_this = weak_from_this(), &self](const boost::system::error_code& ec) {
-            if (ec) {
-                spdlog::error("Failed to renew refresh token: {}\n", ec.message());
-                return;
-            }
-            if (auto alive = weak_this.lock()) {
-                self.performRefreshToken();
-            }
-        });
-    */
 }
 
 void AccountManager::setNetworkAccessToken(std::string accessToken) {
