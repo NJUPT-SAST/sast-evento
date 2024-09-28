@@ -4,7 +4,6 @@
 #include <Controller/Core/UiBase.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <chrono>
-#include <memory>
 
 EVENTO_UI_START
 
@@ -16,9 +15,12 @@ class AccountManager : private GlobalAgent<AccountManagerBridge>,
 
     bool loginState = false;
     UserInfoEntity userInfo;
-    // refreshToken(expired in 7d) saved to keychain
 
-    std::chrono::system_clock::time_point lastRefreshTokenRenewTime;
+    std::chrono::system_clock::time_point expiredTime;
+    net::steady_timer renewAccessTokenTimer;
+
+    static const inline std::string package = "org.sast.evento";
+    static const inline std::string service = "refresh-token";
 
 public:
     AccountManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
@@ -35,18 +37,19 @@ private:
     void loadConfig();
     void saveConfig();
 
-    static const inline std::string package = "org.sast.evento";
-    static const inline std::string service = "refresh-token";
     void setKeychainRefreshToken(const std::string& refreshToken) const;
-    std::string getKeychainRefreshToken() const;
+    std::optional<std::string> getKeychainRefreshToken() const;
 
     void scheduleRenewAccessToken();
-    void scheduleRenewRefreshToken();
 
     static void setNetworkAccessToken(std::string accessToken);
 
     void setLoginState(bool newState);
     void onStateChanged();
+
+    void performLogin();
+    void performRefreshToken();
+    void performGetUserInfo();
 };
 
 EVENTO_UI_END
