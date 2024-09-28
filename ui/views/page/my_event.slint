@@ -3,42 +3,9 @@ import { ScrollView } from "std-widgets.slint";
 import { Page, EventCard, EventStruct, PageStateLayer, PageState } from "../../components/index.slint";
 
 export global MyEventPageBridge {
-    in property <[EventStruct]> not-started-model: [
-        {
-            id: 1,
-            summary: "软件研发部 C++组授课",
-            summary-abbr: "软",
-            time: "24.9.30 14:30 - 16:00",
-            description: "C++组授课",
-            location: "仙林校区 大活101",
-        },
-        {
-            id: 1,
-            summary: "软件研发部 C++组授课",
-            summary-abbr: "软",
-            time: "24.9.30 14:30 - 16:00",
-            description: "C++组授课",
-            location: "仙林校区 大活101",
-        },
-        {
-            id: 1,
-            summary: "软件研发部 C++组授课",
-            summary-abbr: "软",
-            time: "24.9.30 14:30 - 16:00",
-            description: "C++组授课",
-            location: "仙林校区 大活101",
-        },
-        {
-            id: 1,
-            summary: "软件研发部 C++组授课",
-            summary-abbr: "软",
-            time: "24.9.30 14:30 - 16:00",
-            description: "C++组授课",
-            location: "仙林校区 大活101",
-        },
-    ];
-    in property <[EventStruct]> active-model: not-started-model;
-    in property <[EventStruct]> completed-model: not-started-model;
+    in property <[EventStruct]> not-started-model;
+    in property <[EventStruct]> active-model;
+    in property <[EventStruct]> completed-model;
     in property <PageState> state: PageState.normal;
     in property <string> error-message;
     callback load-events();
@@ -69,18 +36,23 @@ export component MyEventPage inherits Page {
 
     VerticalLayout {
         padding: 50px;
+        padding-top: 10px;
+        padding-bottom: 10px;
         spacing: 20px;
         HorizontalLayout {
-            spacing: 40px;
+            spacing: 20px;
             HighlightText {
+                width: card-width + 20px;
                 text: @tr("未开始");
             }
 
             HighlightText {
+                width: card-width + 20px;
                 text: @tr("进行中");
             }
 
             HighlightText {
+                width: card-width + 20px;
                 text: @tr("已结束");
             }
         }

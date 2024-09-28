@@ -348,3 +348,23 @@ msgstr "Department"
 msgctxt "App"
 msgid "活动日程"
 msgstr "Schedule"
+
+#: page/my_event.slint:76
+msgctxt "MyEventPage"
+msgid "未开始"
+msgstr "Not Started"
+
+#: page/my_event.slint:80
+msgctxt "MyEventPage"
+msgid "进行中"
+msgstr "Active"
+
+#: page/my_event.slint:84
+msgctxt "MyEventPage"
+msgid "已结束"
+msgstr "Completed"
+
+#: page/my_event.slint:140
+msgctxt "MyEventPage"
+msgid "重新加载"
+msgstr "Reload"
