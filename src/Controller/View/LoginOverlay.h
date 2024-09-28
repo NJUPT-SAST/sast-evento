@@ -10,6 +10,7 @@ public:
 
 private:
     void onCreate() override;
+    void onShow() override;
     void onLogin() override;
 };
 

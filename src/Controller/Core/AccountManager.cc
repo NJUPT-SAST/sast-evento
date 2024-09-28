@@ -61,12 +61,10 @@ void AccountManager::performLogin() {
 
             self.userInfo = data.userInfo;
 
-            self.setKeychainRefreshToken(data.refreshToken);
             self.setNetworkAccessToken(data.accessToken);
+            self.setKeychainRefreshToken(data.refreshToken);
             self.scheduleRenewAccessToken();
-
             self.setLoginState(true);
-            spdlog::info("login success");
         });
 }
 
@@ -74,8 +72,11 @@ void AccountManager::performRefreshToken() {
     auto& self = *this;
     evento::executor()->asyncExecute(
         [refreshToken = getKeychainRefreshToken()]() -> evento::Task<Result<std::monostate>> {
-            auto result = co_await evento::networkClient()->refreshAccessToken(
-                refreshToken.value_or("NONE"));
+            if (!refreshToken) {
+                spdlog::error("No refresh token found");
+                co_return Err(Error(Error::Unknown, "No refresh token found"));
+            }
+            auto result = co_await evento::networkClient()->refreshAccessToken(*refreshToken);
             if (result.isErr()) {
                 spdlog::error("Failed to refresh token: {}", result.unwrapErr().what());
                 co_return Err(Error(Error::Network, "Failed to refresh token"));
@@ -86,8 +87,11 @@ void AccountManager::performRefreshToken() {
             if (auto alive = weak_this.lock()) {
                 if (result.isErr()) {
                     self.setLoginState(false);
+                    self.bridge.getMessageManager().showMessage("登录过期，请重新登录",
+                                                                MessageType::Info);
                     return;
                 }
+                self.performGetUserInfo();
                 spdlog::info("refresh token success");
             }
         });
@@ -112,20 +116,13 @@ void AccountManager::performGetUserInfo() {
                 }
                 self.userInfo = result.unwrap();
                 spdlog::info("get user info success");
+                self.setLoginState(true);
             }
         });
 }
 
 void AccountManager::requestLogin() {
     if (isLogin()) {
-        return;
-    }
-    // If the token is expired, login again
-    if (expiredTime - 15min >= std::chrono::system_clock::now()) {
-        performRefreshToken();
-        performGetUserInfo();
-        scheduleRenewAccessToken();
-        setLoginState(true);
         return;
     }
     performLogin();
@@ -143,6 +140,17 @@ void AccountManager::requestLogout() {
     renewAccessTokenTimer.cancel();
 
     setLoginState(false);
+}
+
+void AccountManager::tryLoginDirectly() {
+    if (isLogin()) {
+        return;
+    }
+    spdlog::info("Try login directly, expired time: {}", expiredTime.time_since_epoch().count());
+    // If the token is not expired after 15min, we don't need to login again
+    if (std::chrono::system_clock::now() + 15min < expiredTime) {
+        performRefreshToken();
+    }
 }
 
 UserInfoEntity AccountManager::getUserInfo() {
@@ -186,7 +194,7 @@ std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
     }
 
     if (refreshToken.empty()) {
-        std::nullopt;
+        return std::nullopt;
     }
 
     return refreshToken;
@@ -194,7 +202,7 @@ std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
 
 void AccountManager::scheduleRenewAccessToken() {
     auto& self = *this;
-    renewAccessTokenTimer.expires_after(55min); // 设置定时器为30分钟
+    renewAccessTokenTimer.expires_after(55min);
     renewAccessTokenTimer.async_wait(
         [weak_this = weak_from_this(), &self](const boost::system::error_code& ec) {
             if (ec) {
@@ -216,8 +224,8 @@ void AccountManager::setLoginState(bool newState) {
     if (loginState != newState) {
         loginState = newState;
         self->set_is_login(newState);
+        onStateChanged();
     }
-    onStateChanged();
 }
 
 void AccountManager::onStateChanged() {

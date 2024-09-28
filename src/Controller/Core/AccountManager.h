@@ -30,6 +30,7 @@ public:
     bool isLogin() const;
     void requestLogin();
     void requestLogout();
+    void tryLoginDirectly();
 
     UserInfoEntity getUserInfo();
 

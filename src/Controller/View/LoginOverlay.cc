@@ -16,6 +16,11 @@ void LoginOverlay::onCreate() {
     self->set_version("v" VERSION_FULL);
 }
 
+void LoginOverlay::onShow() {
+    auto& self = *this;
+    self.bridge.getAccountManager().tryLoginDirectly();
+}
+
 void LoginOverlay::onLogin() {
     if (bridge.getViewManager().isVisible(ViewName::LoginOverlay)) {
         bridge.getViewManager().priorView();

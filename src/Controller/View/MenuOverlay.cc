@@ -2,10 +2,10 @@
 #include <Controller/Core/AccountManager.h>
 #include <Controller/UiBridge.h>
 #include <Controller/View/MenuOverlay.h>
+#include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <chrono>
-#include <slint.h>
 
 EVENTO_UI_START
 
@@ -30,10 +30,19 @@ void MenuOverlay::onLogin() {
     auto& self = *this;
     auto userInfo = bridge.getAccountManager().getUserInfo();
     self->set_user_name(slint::SharedString(userInfo.nickname));
-    // self->set_user_signature(
-    //     slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下")));
-    // if (userInfo.avatar.has_value())
-    //     self->set_user_avatar(slint::Image::load_from_path(slint::SharedString(*userInfo.avatar)));
+    self->set_user_signature(
+        slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下 ")));
+    if (userInfo.avatar.has_value())
+        executor()->asyncExecute(networkClient()->getFile(*userInfo.avatar),
+                                 [&self = *this](Result<std::filesystem::path> result) {
+                                     if (result.isErr()) {
+                                         spdlog::error("Failed to get user avatar: {}",
+                                                       result.unwrapErr().what());
+                                         return;
+                                     }
+                                     self->set_user_avatar(slint::Image::load_from_path(
+                                         slint::SharedString(result.unwrap().string().c_str())));
+                                 });
 }
 
 EVENTO_UI_END
