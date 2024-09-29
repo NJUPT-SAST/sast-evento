@@ -31,7 +31,7 @@ struct Evento {
                                              std::format("{}{}{}",
                                                          url.path(),
                                                          url.has_query() ? "?" : "",
-                                                         url.query()),
+                                                         url.encoded_query().data()),
                                              11};
 
         req.set(http::field::host, url.host());

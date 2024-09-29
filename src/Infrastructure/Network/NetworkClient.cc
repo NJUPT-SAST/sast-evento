@@ -836,9 +836,9 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string urlStr,
     auto url = urls::url(urlStr);
     http::request<http::string_body> req{http::verb::get,
                                          std::format("{}{}{}",
-                                                     url.path(),
-                                                     url.has_query() ? "" : "?",
-                                                     url.query()),
+                                                     url.encoded_path().data(),
+                                                     url.has_query() ? "?" : "",
+                                                     url.encoded_query().data()),
                                          11};
 
     if (!dir) {
