@@ -476,6 +476,10 @@ Task<Result<bool>> NetworkClient::addUserFeedback(int eventId, int rating, std::
                                                                {{"eventId", std::to_string(eventId)},
                                                                 {"score", std::to_string(rating)},
                                                                 {"content", content}}));
+
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+    co_return Ok(true);
 #else
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
@@ -498,11 +502,13 @@ Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
                                                       endpoint("/event/checkIn",
                                                                {{"eventId", std::to_string(eventId)},
                                                                 {"code", code}}));
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+    co_return Ok(true);
 #else
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/check-in", eventId), {{"code", code}}));
-#endif
 
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -511,6 +517,7 @@ Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
         co_return Ok(result.unwrap().get<bool>());
 
     co_return Err(Error(Error::Data, "response data type error"));
+#endif
 }
 
 Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
@@ -520,13 +527,15 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
                                                       endpoint("/user/subscribe"),
                                                       {{"eventId", std::to_string(eventId)},
                                                        {"isSubscribe", subscribeStr}});
+    if (result.isErr())
+        co_return Err(result.unwrapErr());
+    co_return Ok(true);
 #else
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
                                              endpoint(std::format("/v2/client/event/{}/subscribe",
                                                                   eventId),
                                                       {{"subscribe", subscribeStr}}));
-#endif
 
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -535,6 +544,7 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
         co_return Ok(result.unwrap().get<bool>());
 
     co_return Err(Error(Error::Data, "response data type error"));
+#endif
 }
 
 Task<Result<bool>> NetworkClient::subscribeDepartment(std::string larkDepartment, bool subscribe) {
