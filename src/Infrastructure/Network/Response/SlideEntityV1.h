@@ -8,7 +8,7 @@
 namespace evento {
 
 struct SlideEntityV1 {
-    int id;
+    int id{};
     std::string title;
     std::string url;
     std::string link;

@@ -51,7 +51,7 @@ private:
     static void setNetworkAccessToken(std::string accessToken);
 
 #ifdef EVENTO_API_V1
-    std::optional<std::string> getKeychainAccessToken() const;
+    [[nodiscard]] std::optional<std::string> getKeychainAccessToken() const;
     void setKeychainAccessToken(const std::string& accessToken) const;
 #endif
 

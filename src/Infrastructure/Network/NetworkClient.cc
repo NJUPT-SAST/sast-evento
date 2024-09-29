@@ -76,10 +76,11 @@ static EventQueryRes eventEntityListV1ToV2(std::vector<EventEntityV1> const& lis
             .state = state,
         });
     }
+    auto total = static_cast<int>(listV2.size());
     return EventQueryRes{
         .elements = std::move(listV2),
         .current = 1,
-        .total = static_cast<int>(listV2.size()),
+        .total = total,
     };
 }
 #endif
