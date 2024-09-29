@@ -4,7 +4,6 @@
 #include <Controller/View/HistoryPage.h>
 #include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
-#include <ranges>
 #include <slint.h>
 #include <spdlog/spdlog.h>
 
@@ -38,43 +37,44 @@ void HistoryPage::loadHistoryEvents(int page, int size) {
     auto& self = *this;
     self->set_state(PageState::Loading);
 
-    executor()->asyncExecute(
-        networkClient()->getHistoryEventList(page, size),
-        [&self = *this, this](Result<EventQueryRes> result) {
-            if (result.isErr()) {
-                self->set_state(PageState::Error);
-                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
-                                                            MessageType::Error);
-                return;
-            }
+    executor()->asyncExecute(loadHistoryEventsTask(page, size),
+                             [&self = *this, this](Result<std::vector<EventFeedbackStruct>> result) {
+                                 if (result.isErr()) {
+                                     return;
+                                 }
 
-            auto res = result.unwrap();
-            self->set_total(res.total);
-            self->set_events(convert::from(res.elements));
+                                 auto list = result.unwrap();
+                                 self->set_total(static_cast<int>(list.size()));
+                                 self->set_models(
+                                     std::make_shared<slint::VectorModel<EventFeedbackStruct>>(
+                                         list));
+                                 self->set_state(PageState::Normal);
+                             });
+}
 
-            feedbacks.clear();
-            auto feedbackSize = res.elements.size();
+Task<Result<std::vector<EventFeedbackStruct>>> HistoryPage::loadHistoryEventsTask(int page,
+                                                                                  int size) {
+    auto& self = *this;
+    auto historyEventsRes = co_await networkClient()->getHistoryEventList(page, size);
+    if (historyEventsRes.isErr()) {
+        self->set_state(PageState::Error);
+        co_return historyEventsRes.unwrapErr();
+    }
 
-            auto trans = [](const auto& e) { return e.id; };
-            for (const auto& eventId : res.elements | std::views::transform(trans)) {
-                executor()->asyncExecute(
-                    networkClient()->getUserFeedback(eventId, 0min),
-                    [&self = *this, feedbackSize](Result<std::optional<FeedbackEntity>> result) {
-                        if (result.isErr()) {
-                            spdlog::warn("feedback load failed: {}", result.unwrapErr().what());
-                            self.feedbacks.emplace_back(FeedbackStruct{});
-                        } else {
-                            self.feedbacks.emplace_back(convert::from(result.unwrap()));
-                        }
-
-                        if (self.feedbacks.size() == feedbackSize) {
-                            self->set_feedbacks(std::make_shared<slint::VectorModel<FeedbackStruct>>(
-                                self.feedbacks));
-                            self->set_state(PageState::Normal);
-                        }
-                    });
-            }
-        });
+    auto historyEvents = historyEventsRes.unwrap();
+    std::vector<EventFeedbackStruct> res;
+    for (auto const& event : historyEvents.elements) {
+        auto feedbackRes = co_await networkClient()->getUserFeedback(event.id);
+        if (feedbackRes.isErr()) {
+            spdlog::warn("feedback load failed: {}", feedbackRes.unwrapErr().what());
+            self.bridge.getMessageManager().showMessage(feedbackRes.unwrapErr().what(),
+                                                        MessageType::Error);
+            res.emplace_back(convert::from(event), FeedbackStruct{});
+        } else {
+            res.emplace_back(convert::from(event), convert::from(feedbackRes.unwrap()));
+        }
+    }
+    co_return res;
 }
 
 void HistoryPage::feedbackEvent(int eventId, int rating, std::string content) {
