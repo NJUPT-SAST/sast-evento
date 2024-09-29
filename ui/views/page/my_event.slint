@@ -110,6 +110,7 @@ export component MyEventPage inherits Page {
         state: MyEventPageBridge.state;
         error-message: MyEventPageBridge.error-message;
         error-retry-message: @tr("重新加载");
+        loading-message: @tr("加载中");
         error-retry => {
             MyEventPageBridge.load-events();
         }
