@@ -22,8 +22,6 @@
 #include <string>
 #include <unordered_map>
 
-#define EVENTO_API_V1
-
 namespace evento {
 
 namespace beast = boost::beast; // from <boost/beast.hpp>
