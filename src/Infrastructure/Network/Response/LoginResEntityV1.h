@@ -7,10 +7,10 @@
 namespace evento {
 
 struct LoginResEntityV1 {
-    std::string accessToken; // expires in 30 days
+    std::string token; // expires in 30 days
     UserInfoEntity userInfo;
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginResEntityV1, accessToken, userInfo);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginResEntityV1, token, userInfo);
 };
 
 } // namespace evento

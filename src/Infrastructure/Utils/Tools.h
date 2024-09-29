@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Infrastructure/Network/ResponseStruct.h>
 #include <boost/url/url_view.hpp>
 #include <boost/url/urls.hpp>
 #include <ctime>
@@ -52,6 +53,22 @@ inline time_t parseIso8601Utc(const char* date) {
 #else
     return timegm(&tt);
 #endif
+}
+
+inline std::string firstDateTimeOfWeek() {
+    auto now = std::chrono::system_clock::now();
+    auto time = std::chrono::system_clock::to_time_t(now);
+    auto tm = std::localtime(&time);
+
+    // Find the start of the week (Monday)
+    int daysSinceMonday = (tm->tm_wday + 6) % 7;
+    auto startOfWeek = now - std::chrono::hours(24 * daysSinceMonday);
+
+    // Format the date
+    std::stringstream ss;
+    auto startOfWeekTime = std::chrono::system_clock::to_time_t(startOfWeek);
+    ss << std::put_time(std::gmtime(&startOfWeekTime), "%Y-%m-%dT%H:%M:%S.000Z");
+    return ss.str();
 }
 
 } // namespace evento

@@ -20,6 +20,9 @@
 #include <optional>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <unordered_map>
+
+#define EVENTO_API_V1
 
 namespace evento {
 
@@ -86,6 +89,10 @@ public:
     Task<Result<bool>> subscribeEvent(int eventId, bool subscribe);
 
     Task<Result<bool>> subscribeDepartment(std::string larkDepartment, bool subscribe);
+
+#ifdef EVENTO_API_V1
+    Task<Result<ParticipateEntity>> getEventParticipate(int eventId);
+#endif
 
     // isCheckedIn: true
     Task<Result<EventQueryRes>> getParticipatedEvent(
@@ -211,6 +218,10 @@ private:
     std::unique_ptr<HttpsAccessManager> _httpsAccessManager;
     std::unique_ptr<CacheManager> _cacheManager;
     friend NetworkClient* networkClient();
+
+#ifdef EVENTO_API_V1
+    std::unordered_map<std::string, int> departmentIdMap;
+#endif
 };
 
 NetworkClient* networkClient();
