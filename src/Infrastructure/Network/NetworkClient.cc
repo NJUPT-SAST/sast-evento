@@ -3,6 +3,7 @@
 #include <Infrastructure/Network/Api/Github.hh>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Tools.h>
+#include <array>
 #include <boost/asio/co_spawn.hpp>
 #include <boost/asio/stream_file.hpp>
 #include <boost/asio/this_coro.hpp>
@@ -818,6 +819,9 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
 Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string urlStr,
                                                            std::optional<std::filesystem::path> dir,
                                                            bool useCache) {
+    if (urlStr.ends_with('\\')) {
+        urlStr.pop_back();
+    }
     spdlog::debug("Downloading file: {}", urlStr);
     auto url = urls::url(urlStr);
     http::request<http::string_body> req{http::verb::get,
@@ -862,12 +866,26 @@ Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string urlStr,
         co_return Err(Error(Error::Data, "file type error"));
     }
 
+    auto data = beast::buffers_to_string(response.body().data());
+    if (data.length() < 4) { // magic number length
+        co_return Err(Error(Error::Data, "file data error"));
+    }
+
     auto value = type->value();
     stem += '.';
-    stem += value.substr(value.find('/') + 1);
+    if (value.substr(0, value.find('/')) == "image") {
+        auto ext = guessImageExtByBytes(std::array<unsigned char, 4>{(unsigned char) data[0],
+                                                                     (unsigned char) data[1],
+                                                                     (unsigned char) data[2],
+                                                                     (unsigned char) data[3]});
+        spdlog::debug("Guess image ext: {}", ext);
+        stem += ext;
+    } else {
+        stem += value.substr(value.find('/') + 1);
+    }
     auto path = *dir / stem;
 
-    if (!co_await saveToDisk(beast::buffers_to_string(response.body().data()), path)) {
+    if (!co_await saveToDisk(data, path)) {
         co_return Err(Error(Error::Data, "save file failed"));
     }
     co_return Ok(path);

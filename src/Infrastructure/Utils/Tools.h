@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Infrastructure/Network/ResponseStruct.h>
+#include <array>
 #include <boost/url/url_view.hpp>
 #include <boost/url/urls.hpp>
 #include <ctime>
@@ -69,6 +70,22 @@ inline std::string firstDateTimeOfWeek() {
     auto startOfWeekTime = std::chrono::system_clock::to_time_t(startOfWeek);
     ss << std::put_time(std::gmtime(&startOfWeekTime), "%Y-%m-%dT%H:%M:%S.000Z");
     return ss.str();
+}
+
+inline std::string guessImageExtByBytes(std::array<unsigned char, 4> bytes) {
+    if (bytes[0] == 0xff && bytes[1] == 0xd8 && bytes[2] == 0xff) {
+        return "jpg";
+    }
+    if (bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4e && bytes[3] == 0x47) {
+        return "png";
+    }
+    if (bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46) {
+        return "gif";
+    }
+    if (bytes[0] == 0x42 && bytes[1] == 0x4d) {
+        return "bmp";
+    }
+    return "unknown";
 }
 
 } // namespace evento
