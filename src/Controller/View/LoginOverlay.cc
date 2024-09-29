@@ -18,7 +18,11 @@ void LoginOverlay::onCreate() {
 
 void LoginOverlay::onShow() {
     auto& self = *this;
-    self.bridge.getAccountManager().tryLoginDirectly();
+    static bool firstShow = true;
+    if (firstShow) {
+        firstShow = false;
+        self.bridge.getAccountManager().tryLoginDirectly();
+    }
 }
 
 void LoginOverlay::onLogin() {
