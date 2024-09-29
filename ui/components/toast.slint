@@ -82,9 +82,12 @@ export component Toast {
         success when message-data.type == MessageType.success: {
             have-icon: true;
             icon: Token.image.icon.check-circle;
+            surface: Token.color.success;
+            on-surface: Token.color.on-success;
         }
         info when message-data.type == MessageType.info: {
-            have-icon: false;
+            have-icon: true;
+            icon: Token.image.icon.info;
         }
     ]
 }
