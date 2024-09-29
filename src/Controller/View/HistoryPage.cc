@@ -57,7 +57,7 @@ Task<Result<std::vector<EventFeedbackStruct>>> HistoryPage::loadHistoryEventsTas
     auto& self = *this;
     auto historyEventsRes = co_await networkClient()->getHistoryEventList(page, size);
     if (historyEventsRes.isErr()) {
-        self->set_state(PageState::Error);
+        slint::invoke_from_event_loop([&self = *this] { self->set_state(PageState::Error); });
         co_return historyEventsRes.unwrapErr();
     }
 

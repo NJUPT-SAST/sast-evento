@@ -9,7 +9,7 @@ export struct EventFeedbackStruct {
 }
 
 export global HistoryPageBridge {
-    in property <[EventFeedbackStruct]> models: [{ }];
+    in property <[EventFeedbackStruct]> models;
     in property <PageState> state: normal;
     in property <int> total: 0;
     out property <int> page-size: 10;
@@ -31,9 +31,10 @@ component CommentItem {
         }
 
         HorizontalLayout {
-            spacing: 8px;
+            spacing: 12px;
+            padding-right: 8px;
             line-edit := LineEdit {
-                width: 80%;
+                width: 60%;
                 height: 40px;
                 font-size: Token.font.body.large.size;
                 text: feedback.content;
@@ -51,14 +52,14 @@ component CommentItem {
             }
         }
     }
-    // if !feedback.success: Rectangle {
-    //     Text {
-    //         text: @tr("网络错误 X.X");
-    //         font-size: Token.font.label.large.size;
-    //         horizontal-alignment: center;
-    //         vertical-alignment: center;
-    //     }
-    // }
+    if !feedback.success: Rectangle {
+        Text {
+            text: @tr("网络错误 X.X");
+            font-size: Token.font.label.large.size;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+        }
+    }
 }
 
 component DividerVirtical inherits Rectangle {
@@ -80,13 +81,11 @@ component DividerVirtical inherits Rectangle {
 }
 
 component HistoryCard inherits Rectangle {
-    height: 100px;
-    border-width: 4px;
-    border-color: red;
     in property <EventStruct> data;
     in property <FeedbackStruct> feedback;
     callback event-clicked(EventStruct);
     callback comment-clicked(int, int, string);
+    height: 100px;
     HorizontalLayout {
         spacing: 5px;
         height: 100px;
@@ -120,8 +119,8 @@ component HistoryCard inherits Rectangle {
             }
             HorizontalLayout {
                 padding: 5px;
-                padding-right: 15px;
-                spacing: 8px;
+                spacing: 15px;
+                alignment: space-between;
                 VerticalLayout {
                     Text {
                         horizontal-alignment: TextHorizontalAlignment.left;
@@ -142,7 +141,8 @@ component HistoryCard inherits Rectangle {
                 }
 
                 CommentItem {
-                    width: 40%;
+                    width: 50%;
+                    feedback: root.feedback;
                     comment-clicked(rate, content) => {
                         root.comment-clicked(data.id, rate, content);
                     }
