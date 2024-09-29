@@ -126,6 +126,13 @@ inline void saveConfig() {
         spdlog::error("Failed to open \"{}\" for saving config.", path.string());
         return;
     }
+    config.insert_or_assign("account",
+                            toml::table{{"user-id", account.userId}, {"expire", account.expire}});
+    config.insert_or_assign("setting",
+                            toml::table{{"minimal-to-tray", settings.minimalToTray},
+                                        {"notice-begin", settings.noticeBegin},
+                                        {"notice-end", settings.noticeEnd},
+                                        {"theme", settings.theme}});
     ofs << config;
 }
 
