@@ -36,7 +36,11 @@ inline time_t parseIso8601Utc(const char* date) {
     struct tm tt = {0};
     double seconds;
     if (sscanf(date,
+#ifdef EVENTO_API_V1
+               "%04d-%02d-%02d %02d:%02d:%lf",
+#else
                "%04d-%02d-%02dT%02d:%02d:%lfZ",
+#endif
                &tt.tm_year,
                &tt.tm_mon,
                &tt.tm_mday,
