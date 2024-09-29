@@ -4,6 +4,7 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/url/url_view.hpp>
+#include <format>
 #include <initializer_list>
 #include <optional>
 
@@ -26,7 +27,12 @@ struct Evento {
         boost::urls::url_view url,
         std::optional<std::string> const& token = std::nullopt,
         std::initializer_list<urls::param> const& formParams = {}) {
-        http::request<http::string_body> req{verb, url.path(), 11};
+        http::request<http::string_body> req{verb,
+                                             std::format("{}{}{}",
+                                                         url.path(),
+                                                         url.has_query() ? "?" : "",
+                                                         url.query()),
+                                             11};
 
         req.set(http::field::host, url.host());
         req.set(http::field::user_agent, "SAST-Evento-Desktop/2");

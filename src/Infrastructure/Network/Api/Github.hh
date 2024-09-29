@@ -4,6 +4,7 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/string_body.hpp>
 #include <boost/url/url_view.hpp>
+#include <format>
 #include <optional>
 
 namespace evento::api {
@@ -22,7 +23,12 @@ struct Github {
         boost::urls::url_view url,
         [[maybe_unused]] std::optional<std::string> const& token = std::nullopt,
         [[maybe_unused]] std::initializer_list<urls::param> const& formParams = {}) {
-        http::request<http::string_body> req{verb, url.path(), 11};
+        http::request<http::string_body> req{verb,
+                                             std::format("{}{}{}",
+                                                         url.path(),
+                                                         url.has_query() ? "?" : "",
+                                                         url.query()),
+                                             11};
 
         req.set(http::field::host, url.host_name());
         req.set(http::field::user_agent, "SAST-Evento-Desktop/2");

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "app.h"
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>

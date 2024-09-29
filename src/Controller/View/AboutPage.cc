@@ -1,4 +1,3 @@
-#include "app.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
@@ -8,7 +7,6 @@
 #include <Infrastructure/Utils/Result.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <Version.h>
-#include <filesystem>
 #include <spdlog/spdlog.h>
 
 EVENTO_UI_START
@@ -50,7 +48,8 @@ void AboutPage::loadContributors() {
 
             for (auto const& contributor : contributors) {
                 executor()->asyncExecute(
-                    networkClient()->getFile(contributor.avatar_url),
+                    networkClient()->getFile(
+                        contributor.avatar_url.substr(0, contributor.avatar_url.find('?'))),
                     [&self = *this, &contributor, total, htmlUrl = contributor.html_url](
                         Result<std::filesystem::path> result) {
                         if (result.isErr()) {

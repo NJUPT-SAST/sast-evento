@@ -95,7 +95,7 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 Task<Result<void>> NetworkClient::refreshAccessToken(std::string refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
                                                       endpoint("/refresh-token"),
-                                                      {{"refreshtoken", refreshToken}});
+                                                      {{"refreshToken", refreshToken}});
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -233,8 +233,10 @@ Task<Result<EventQueryRes>> NetworkClient::getEventList(
 }
 
 Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
-    auto result = co_await this->request<api::Evento>(
-        http::verb::get, endpoint(std::format("api/v2/client/event/{}/attachments", eventId)));
+    auto result = co_await this
+                      ->request<api::Evento>(http::verb::get,
+                                             endpoint(std::format("/v2/client/event/{}/attachments",
+                                                                  eventId)));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -333,8 +335,9 @@ Task<Result<bool>> NetworkClient::subscribeDepartment(std::string larkDepartment
 Task<Result<EventQueryRes>> NetworkClient::getParticipatedEvent(
     std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query"),
-                                                      {{"isCheckedIn", "true"}},
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"isCheckedIn", "true"}}),
+                                                      {},
                                                       cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -353,9 +356,10 @@ Task<Result<EventQueryRes>> NetworkClient::getSubscribedEvent(
     std::chrono::steady_clock::duration cacheTtl) {
     auto startTime = firstDateTimeOfWeek();
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query"),
-                                                      {{"isSubscribed", "true"},
-                                                       {"start", startTime}},
+                                                      endpoint("/v2/client/event/query",
+                                                               {{"isSubscribed", "true"},
+                                                                {"start", startTime}}),
+                                                      {},
                                                       cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -477,8 +481,14 @@ Task<Result<ReleaseEntity>> NetworkClient::getLatestRelease() {
 Task<Result<std::filesystem::path>> NetworkClient::getFile(std::string url,
                                                            std::optional<std::filesystem::path> dir,
                                                            bool useCache) {
+    spdlog::debug("Downloading file: {}", url);
     auto view = urls::url_view(url);
-    http::request<http::string_body> req{http::verb::get, view.path(), 11};
+    http::request<http::string_body> req{http::verb::get,
+                                         std::format("{}{}{}",
+                                                     view.path(),
+                                                     view.has_query() ? "" : "?",
+                                                     view.query()),
+                                         11};
 
     if (!dir) {
         co_return Err(Error(Error::Data, "directory not found"));
