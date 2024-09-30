@@ -17,7 +17,7 @@ struct UserInfoEntity {
     std::optional<std::string> avatar;
     std::optional<std::string> organization;
     std::optional<std::string> biography;
-    std::vector<std::string> link;
+    std::optional<std::vector<std::string>> link;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(UserInfoEntity,
                                                 id,
