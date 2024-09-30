@@ -338,17 +338,17 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    std::vector<EventEntityV1> list;
+    auto json = result.unwrap();
+    if (json.is_null())
+        co_return Err(Error(Error::Data, "No Event"));
+
+    EventEntityV1 entityV1;
     try {
-        nlohmann::from_json(result.unwrap(), list);
+        nlohmann::from_json(json, entityV1);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
-
-    auto res = eventEntityListV1ToV2(list);
-    if (res.total == 0) {
-        co_return Err(Error(Error::Data, "No Event"));
-    }
+    auto res = eventEntityListV1ToV2({entityV1});
 
     auto& event = res.elements.front();
     auto statusResult = co_await getEventParticipate(event.id);
