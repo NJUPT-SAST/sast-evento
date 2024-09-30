@@ -531,9 +531,10 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
 #ifdef EVENTO_API_V1
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/user/subscribe"),
+                                                      endpoint("/user/subscribe",
                                                       {{"eventId", std::to_string(eventId)},
-                                                       {"isSubscribe", subscribeStr}});
+                                                                {"isSubscribe", subscribeStr}}),
+                                                      {});
     if (result.isErr())
         co_return Err(result.unwrapErr());
     co_return Ok(true);
