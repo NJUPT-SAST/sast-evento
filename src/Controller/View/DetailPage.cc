@@ -117,6 +117,8 @@ void DetailPage::subscribe(int eventId, bool subscribe) {
                                  auto message = std::format("{}{}",
                                                             subscribe ? "报名" : "取消报名",
                                                             success ? "成功" : "失败，请重试");
+                                 auto message_type = success ? MessageType::Success
+                                                             : MessageType::Error;
 
                                  if (success) {
                                      auto model = self->get_event_model();
@@ -124,8 +126,7 @@ void DetailPage::subscribe(int eventId, bool subscribe) {
                                      self->set_event_model(model);
                                  }
 
-                                 self.bridge.getMessageManager().showMessage(message,
-                                                                             MessageType::Error);
+                                 self.bridge.getMessageManager().showMessage(message, message_type);
                              });
 }
 
