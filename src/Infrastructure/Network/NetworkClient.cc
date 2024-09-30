@@ -326,7 +326,8 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
 #ifdef EVENTO_API_V1
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/event/info",
-                                                               {{"id", std::to_string(eventId)}}),
+                                                               {{"eventId",
+                                                                 std::to_string(eventId)}}),
                                                       {},
                                                       0min);
 
