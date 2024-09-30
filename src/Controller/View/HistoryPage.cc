@@ -1,3 +1,4 @@
+#include "app.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
@@ -69,9 +70,10 @@ Task<Result<std::vector<EventFeedbackStruct>>> HistoryPage::loadHistoryEventsTas
             spdlog::warn("feedback load failed: {}", feedbackRes.unwrapErr().what());
             self.bridge.getMessageManager().showMessage(feedbackRes.unwrapErr().what(),
                                                         MessageType::Error);
-            res.emplace_back(convert::from(event), FeedbackStruct{});
+            res.emplace_back(EventFeedbackStruct{convert::from(event), FeedbackStruct{}});
         } else {
-            res.emplace_back(convert::from(event), convert::from(feedbackRes.unwrap()));
+            res.emplace_back(
+                EventFeedbackStruct{convert::from(event), convert::from(feedbackRes.unwrap())});
         }
     }
     co_return res;
