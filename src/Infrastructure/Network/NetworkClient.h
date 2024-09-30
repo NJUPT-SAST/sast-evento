@@ -20,7 +20,9 @@
 #include <optional>
 #include <spdlog/spdlog.h>
 #include <string>
+#ifdef EVENTO_API_V1
 #include <unordered_map>
+#endif
 
 namespace evento {
 
@@ -218,6 +220,8 @@ private:
     friend NetworkClient* networkClient();
 
 #ifdef EVENTO_API_V1
+    // department name -> department id
+    // Since v1 api uses department id as identifier.
     std::unordered_map<std::string, int> departmentIdMap;
 #endif
 };
