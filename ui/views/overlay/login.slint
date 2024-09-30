@@ -24,20 +24,20 @@ export component LoginOverlay inherits Overlay {
                 // guest login disabled
                 // ViewManager.prior-view();
             }
-            pointer-event(e) => {
-                // developer shortcut
-                if (e.modifiers.shift && e.modifiers.control && e.kind == PointerEventKind.up) {
-                    if (e.button == PointerEventButton.left) {
-                        debug("[Developer Shortcut] LoginOverlay: force close LoginView");
-                        ViewManager.prior-view();
-                    } else if (e.button == PointerEventButton.right) {
-                        debug("[Developer Shortcut] LoginOverlay: fake login, skip LoginView");
-                        AccountManagerBridge.is-login = true;
-                        debug("[Developer Shortcut] LoginOverlay: AccountManagerBridge.is-login -> true");
-                        ViewManager.prior-view();
-                    }
-                }
-            }
+            // pointer-event(e) => {
+            //     // developer shortcut
+            //     if (e.modifiers.shift && e.modifiers.control && e.kind == PointerEventKind.up) {
+            //         if (e.button == PointerEventButton.left) {
+            //             debug("[Developer Shortcut] LoginOverlay: force close LoginView");
+            //             ViewManager.prior-view();
+            //         } else if (e.button == PointerEventButton.right) {
+            //             debug("[Developer Shortcut] LoginOverlay: fake login, skip LoginView");
+            //             AccountManagerBridge.is-login = true;
+            //             debug("[Developer Shortcut] LoginOverlay: AccountManagerBridge.is-login -> true");
+            //             ViewManager.prior-view();
+            //         }
+            //     }
+            // }
         }
     }
 
