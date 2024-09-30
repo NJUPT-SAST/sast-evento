@@ -30,7 +30,7 @@ void MenuOverlay::onLogin() {
     auto& self = *this;
     auto userInfo = bridge.getAccountManager().getUserInfo();
     self.refreshUserInfo(userInfo);
-    evento::executor()->asyncExecute(
+    executor()->asyncExecute(
         []() -> Task<Result<UserInfoEntity>> {
             auto res = co_await networkClient()->getUserInfo();
             co_return res;

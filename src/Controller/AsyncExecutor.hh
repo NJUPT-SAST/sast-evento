@@ -14,6 +14,7 @@
 #include <slint.h>
 #include <spdlog/spdlog.h>
 #include <thread>
+#include <tuple>
 #include <utility>
 
 using namespace boost::asio::experimental::awaitable_operators;
@@ -171,7 +172,7 @@ private:
                            this](const boost::system::error_code& ec) {
             if (!ec) {
                 // ensure timer is captured
-                [[maybe_unused]] auto _timer_got = timer.get();
+                std::ignore = timer.get();
                 net::co_spawn(_ioc, func(), [callback](std::exception_ptr e) {
                     if (!e) {
                         slint::invoke_from_event_loop(callback);
@@ -205,7 +206,7 @@ private:
                            this](const boost::system::error_code& ec) {
             if (!ec) {
                 // ensure timer is captured
-                timer.get();
+                std::ignore = timer.get();
                 net::co_spawn(_ioc, func(), [callback](std::exception_ptr e, auto value) {
                     if (!e) {
                         slint::invoke_from_event_loop(
