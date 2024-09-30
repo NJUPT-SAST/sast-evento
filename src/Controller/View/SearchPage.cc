@@ -30,7 +30,9 @@ void SearchPage::onCreate() {
     });
 
     self->on_load_department_list([&self = *this] { self.loadDepartmentList(); });
-    self->on_load_department_events([&self = *this](int page) { self.loadDepartmentEvents(page); });
+    self->on_load_department_events([&self = *this](int page, int departmentIdx) {
+        self.loadDepartmentEvents(page, departmentIdx);
+    });
     self->on_navigate_to_detail([this](EventStruct eventStruct) {
         spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
         bridge.getViewManager().navigateTo(ViewName::DetailPage, eventStruct);
@@ -69,39 +71,35 @@ void SearchPage::loadDepartmentList() {
             self->set_department(
                 std::make_shared<slint::VectorModel<slint::StandardListViewItem>>(model));
 
-            if (!model.empty()) {
-                self->set_current_department_index(0);
-            }
-
             self->set_list_state(PageState::Normal);
         });
 }
 
-void SearchPage::loadDepartmentEvents(int page) {
+void SearchPage::loadDepartmentEvents(int page, int departmentIdx) {
     auto& self = *this;
 
-    self->set_list_state(PageState::Loading);
+    self->set_events_state(PageState::Loading);
 
-    executor()->asyncExecute(
-        networkClient()->getDepartmentEventList(std::string(self->get_current_department().text),
-                                                page + 1,
-                                                self->get_page_size()),
-        [&self = *this](Result<EventQueryRes> result) {
-            if (result.isErr()) {
-                self->set_events_state(PageState::Error);
-                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
-                                                            MessageType::Error);
-                return;
-            }
+    executor()->asyncExecute(networkClient()->getDepartmentEventList(
+                                 std::string(self->get_department()->row_data(departmentIdx)->text),
+                                 page + 1,
+                                 self->get_page_size()),
+                             [&self = *this](Result<EventQueryRes> result) {
+                                 if (result.isErr()) {
+                                     self->set_events_state(PageState::Error);
+                                     self.bridge.getMessageManager()
+                                         .showMessage(result.unwrapErr().what(), MessageType::Error);
+                                     return;
+                                 }
 
-            auto res = result.unwrap();
+                                 auto res = result.unwrap();
 
-            self->set_total(res.total);
+                                 self->set_total(res.total);
 
-            self->set_event_model(convert::from(res.elements));
+                                 self->set_event_model(convert::from(res.elements));
 
-            self->set_events_state(PageState::Normal);
-        });
+                                 self->set_events_state(PageState::Normal);
+                             });
 }
 
 EVENTO_UI_END

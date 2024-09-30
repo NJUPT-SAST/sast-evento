@@ -282,11 +282,12 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
 Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     std::string larkDepartment, int page, int size, std::chrono::steady_clock::duration cacheTtl) {
 #ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/event/list"),
-                                                      {{"departmentId",
-                                                        std::to_string(
-                                                            departmentIdMap[larkDepartment])}});
+    auto result = co_await this->request<api::Evento>(
+        http::verb::post,
+        endpoint("/event/list",
+                 {{"departmentId", std::to_string(departmentIdMap[larkDepartment])},
+                  {"typeId", ""},
+                  {"time", ""}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 

@@ -16,7 +16,7 @@ private:
 
     void loadDepartmentList();
 
-    void loadDepartmentEvents(int page);
+    void loadDepartmentEvents(int page, int departmentIdx);
 
     void search(std::string const& keyword);
 
