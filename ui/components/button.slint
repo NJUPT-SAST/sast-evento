@@ -24,7 +24,7 @@ export enum ButtonType{
  * - text
  */
 export component Button {
-    callback clicked <=> _area.clicked;
+    callback clicked;
     // option
     in property <ButtonType> type: text;
     in property <bool> disable;
@@ -129,6 +129,11 @@ export component Button {
 
         _area := TouchArea {
             mouse-cursor: disable ? default : pointer;
+            clicked => {
+                if (!root.disable) {
+                    root.clicked();
+                }
+            }
         }
 
         animate drop-shadow-offset-y, drop-shadow-blur {
