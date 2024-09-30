@@ -71,6 +71,7 @@ void AccountManager::performLogin() {
 #endif
             self.setNetworkAccessToken(data.accessToken);
             self.setLoginState(true);
+            self.saveConfig();
         });
 }
 
