@@ -286,12 +286,16 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
 Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     std::string larkDepartment, int page, int size, std::chrono::steady_clock::duration cacheTtl) {
 #ifdef EVENTO_API_V1
+    // The default logic is to get events in the current week,
+    // here we hardcode the time to 1970-01-01 to get events after 1970-01-01,
+    // which means all events for our project.
+
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint("/event/list",
                  {{"departmentId", std::to_string(departmentIdMap[larkDepartment])},
                   {"typeId", ""},
-                  {"time", ""}}));
+                  {"time", "1970-01-01"}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -532,7 +536,7 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
 #ifdef EVENTO_API_V1
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/user/subscribe",
-                                                      {{"eventId", std::to_string(eventId)},
+                                                               {{"eventId", std::to_string(eventId)},
                                                                 {"isSubscribe", subscribeStr}}),
                                                       {});
     if (result.isErr())
