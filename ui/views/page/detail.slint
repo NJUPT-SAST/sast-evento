@@ -219,6 +219,8 @@ export component DetailPage inherits Page {
             HorizontalLayout {
                 spacing: 20px;
                 Button {
+                    min-width: 0;
+                    preferred-width: 0;
                     have-icon: DetailPageBridge.subscribe-state == PageState.loading;
                     type: filled;
                     content: DetailPageBridge.event-model.is-subscribed ? @tr("取消报名") : @tr("报名");            
@@ -233,6 +235,8 @@ export component DetailPage inherits Page {
                 }
 
                 Button {
+                    min-width: 0;
+                    preferred-width: 0;
                     type: filled;
                     content: DetailPageBridge.event-model.is-check-in ? @tr("已签到") : @tr("签到");
                     disable: DetailPageBridge.event-model.is-check-in || DetailPageBridge.event-model.state == EventState.Completed || DetailPageBridge.event-model.state == EventState.Cancelled;
