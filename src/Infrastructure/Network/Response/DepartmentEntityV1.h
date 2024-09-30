@@ -6,12 +6,10 @@
 
 namespace evento {
 
-struct AttachmentEntity {
+struct DepartmentEntityV1 {
     int id;
-    int eventId;
-    std::string url;
-
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(AttachmentEntity, id, eventId, url);
+    std::string departmentName;
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(DepartmentEntityV1, id, departmentName);
 };
 
 } // namespace evento

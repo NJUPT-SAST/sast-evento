@@ -97,6 +97,7 @@ void MyEventPage::refreshUiModel(Result<EventQueryRes> result) {
     self->set_not_started_model(convert::from(models[(int) EventState::SigningUp]));
     self->set_active_model(convert::from(models[(int) EventState::Active]));
     self->set_completed_model(convert::from(models[(int) EventState::Completed]));
+    self->set_state(PageState::Normal);
 }
 
 EVENTO_UI_END

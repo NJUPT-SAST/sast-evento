@@ -3,6 +3,7 @@
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
+#include <Infrastructure/Utils/Result.h>
 #include <vector>
 
 EVENTO_UI_START
@@ -18,9 +19,11 @@ private:
 
     void loadHistoryEvents(int page, int size);
 
+    Task<Result<std::vector<EventFeedbackStruct>>> loadHistoryEventsTask(int page, int size);
+
     void feedbackEvent(int eventId, int rating, std::string content);
 
-    std::vector<FeedbackStruct> feedbacks;
+    std::vector<EventFeedbackStruct> eventFeedbacks;
 };
 
 EVENTO_UI_END
