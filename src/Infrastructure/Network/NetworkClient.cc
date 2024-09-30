@@ -56,12 +56,16 @@ static EventQueryRes eventEntityListV1ToV2(std::vector<EventEntityV1> const& lis
         case StateV1::Before:
         case StateV1::Registration:
             state = State::SigningUp;
+            break;
         case StateV1::Ongoing:
             state = State::Active;
+            break;
         case StateV1::Cancelled:
             state = State::Cancelled;
+            break;
         case StateV1::Over:
             state = State::Completed;
+            break;
         }
 
         listV2.emplace_back(EventEntity{
