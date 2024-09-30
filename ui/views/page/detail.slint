@@ -2,6 +2,7 @@ import { Token } from "../../global.slint";
 import { Page, Button, EventStruct, EventState, FeedbackStruct, ContentDialog, PageState, LoadingAnimation } from "../../components/index.slint";
 import { VerticalBox, LineEdit, ScrollView } from "std-widgets.slint";
 import { SStar} from "../../modules/surrealism-ui/index.slint";
+import { MessageManager, MessageType } from "../../logic/index.slint";
 
 export global DetailPageBridge {
     callback load-event();
@@ -27,6 +28,7 @@ component IconText {
             width: 18px;
             horizontal-alignment: center;
             vertical-alignment: center;
+            colorize: Token.color.on-surface;
         }
 
         Text {
@@ -72,6 +74,7 @@ component HighlightBlock {
 component EventInfoBlock {
     VerticalLayout {
         spacing: 10px;
+        alignment: start;
         IconText {
             icon: Token.image.icon.time;
             text: DetailPageBridge.event-model.time;
@@ -106,7 +109,6 @@ export component DetailPage inherits Page {
         height: 100%;
         is-show: false;
         dialog-title: @tr("签到");
-
         text-edit := LineEdit {
             width: 100%;
             height: 58px;
@@ -117,12 +119,14 @@ export component DetailPage inherits Page {
 
         confirm-btn-text: @tr("签到");
         cancel-btn-text: @tr("取消");
-
         confirm => {
+            if (text-edit.text == "") {
+                MessageManager.show-message(@tr("签到码不能为空"), MessageType.info);
+                return;
+            }
             DetailPageBridge.check-in(text-edit.text);
             dialog.close();
         }
-
         cancel => {
             dialog.close();
         }
@@ -156,7 +160,6 @@ export component DetailPage inherits Page {
                         height: 40px;
                     }
                 }
-
                 if DetailPageBridge.state == PageState.error: Rectangle {
                     Button {
                         type: filled-tonal;
@@ -166,13 +169,11 @@ export component DetailPage inherits Page {
                         }
                     }
                 }
-
                 if able-to-feedback: Rectangle {
                     width: 80%;
                     height: 1px;
                     background: Token.color.outline-variant;
                 }
-
                 if able-to-feedback: Rectangle {
                     VerticalLayout {
                         spacing: 10px;

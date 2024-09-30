@@ -57,6 +57,7 @@ void SearchPage::loadDepartmentList() {
                 return;
             }
 
+            self.departments.clear();
             for (auto& entity : result.unwrap()) {
                 self.departments.emplace_back(entity.name);
             }

@@ -5,6 +5,7 @@
 #include <Controller/View/DetailPage.h>
 #include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
+#include <Infrastructure/Utils/Result.h>
 #include <string>
 
 EVENTO_UI_START
@@ -79,8 +80,13 @@ void DetailPage::checkIn(int eventId, std::string checkInCode) {
     executor()->asyncExecute(
         networkClient()->checkInEvent(eventId, checkInCode), [&self = *this](Result<bool> result) {
             if (result.isErr()) {
-                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
-                                                            MessageType::Error);
+                auto err = result.unwrapErr();
+                if (err.kind == Error::Data) {
+                    self.bridge.getMessageManager().showMessage("签到失败，可能是签到码不对哦");
+                } else {
+                    self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
+                                                                MessageType::Error);
+                }
                 return;
             }
 

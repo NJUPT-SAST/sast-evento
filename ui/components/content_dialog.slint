@@ -42,8 +42,8 @@ export component ContentDialog inherits Window {
         z: 100;
         height: 100%;
         width: 100%;
-        background: Token.color.on-surface;
-        opacity: 0.5;
+        background: Token.color.shadow;
+        opacity: 0.38;
     }
 
     area := Rectangle {
@@ -77,19 +77,19 @@ export component ContentDialog inherits Window {
                 padding: 24px;
                 Button {
                     type: text;
-                    content: confirm-btn-text;
-                    text-on-surface: Token.color.primary;
+                    content: cancel-btn-text;
+                    text-on-surface: Token.color.secondary;
                     clicked => {
-                        root.confirm();
+                        root.cancel();
                     }
                 }
 
                 Button {
                     type: text;
-                    content: cancel-btn-text;
-                    text-on-surface: Token.color.secondary;
+                    content: confirm-btn-text;
+                    text-on-surface: Token.color.primary;
                     clicked => {
-                        root.cancel();
+                        root.confirm();
                     }
                 }
             }

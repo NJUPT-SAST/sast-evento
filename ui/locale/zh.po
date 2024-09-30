@@ -254,6 +254,11 @@ msgctxt "DetailPage"
 msgid "取消"
 msgstr "取消"
 
+#: views/page/detail.slint:123
+msgctxt "DetailPage"
+msgid "签到码不能为空"
+msgstr "签到码不能为空"
+
 #: views/page/detail.slint:161
 msgctxt "DetailPage"
 msgid "重新加载"

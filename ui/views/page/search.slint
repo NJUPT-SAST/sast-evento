@@ -18,12 +18,10 @@ export global SearchPageBridge {
 
 export component SearchPage inherits Page {
     property <int> current-page-index: 0;
-    property <int> current-department-index: 0;
-
+    property <int> current-department-index: -1;
     changed current-department-index => {
         SearchPageBridge.load-department-events(current-page-index, current-department-index);
     }
-
     TouchArea {
         pointer-event(e) => {
             if (e.button == PointerEventButton.left) {
@@ -72,7 +70,6 @@ export component SearchPage inherits Page {
                     }
                 }
             }
-
             if SearchPageBridge.list-state == PageState.normal: Rectangle {
                 StandardListView {
                     model: SearchPageBridge.department;
@@ -103,7 +100,6 @@ export component SearchPage inherits Page {
                         }
                     }
                 }
-
                 if SearchPageBridge.list-state == PageState.normal && SearchPageBridge.events-state == PageState.normal && SearchPageBridge.event-model.length == 0: Rectangle {
                     Text {
                         text: @tr("这个部门还没有活动哦");
@@ -112,14 +108,12 @@ export component SearchPage inherits Page {
                         color: Token.color.outline;
                     }
                 }
-
                 if SearchPageBridge.events-state == PageState.loading: Rectangle {
                     LoadingAnimation {
                         width: 40px;
                         height: 40px;
                     }
                 }
-
                 if SearchPageBridge.events-state == PageState.error: Rectangle {
                     Button {
                         text: @tr("重新加载");
@@ -128,15 +122,14 @@ export component SearchPage inherits Page {
                         }
                     }
                 }
-
-                if SearchPageBridge.list-state != PageState.normal || (SearchPageBridge.event-model.length == 0 && SearchPageBridge.events-state == PageState.normal): Rectangle {
-                    Text {
-                        text: @tr("什么都没有呢");
-                        font-size: Token.font.body.large.size;
-                        font-weight: Token.font.body.large.weight;
-                        color: Token.color.outline;
-                    }
-                }
+                // if SearchPageBridge.list-state != PageState.normal || root.current-department-index == -1: Rectangle {
+                //     Text {
+                //         text: @tr("什么都没有呢");
+                //         font-size: Token.font.body.large.size;
+                //         font-weight: Token.font.body.large.weight;
+                //         color: Token.color.outline;
+                //     }
+                // }
             }
 
             // if SearchPageBridge.total > SearchPageBridge.page-size: Rectangle {
