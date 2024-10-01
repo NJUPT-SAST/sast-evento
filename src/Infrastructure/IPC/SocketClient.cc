@@ -87,9 +87,14 @@ void SocketClient::showOrUpdateMessage(int messageId,
     _messageMap[messageId] = message;
     evento::executor()->asyncExecute(
         [messageId, this]() -> net::awaitable<void> {
+            // A factory function to create awaitable task when the timer is triggered
             if (_messageMap.contains(messageId)) {
-                co_await ipc()->send(_messageMap[messageId]);
+                auto message = std::move(_messageMap[messageId]);
                 _messageMap.erase(messageId);
+                return this->send(std::move(message));
+            } else {
+                // do nothing
+                return []() -> net::awaitable<void> { co_return; }();
             }
         },
         []() {},
