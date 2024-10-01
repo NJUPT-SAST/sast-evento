@@ -356,7 +356,7 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
 
     auto& event = res.elements.front();
     auto statusResult = co_await getEventParticipate(event.id);
-    if (result.isErr())
+    if (statusResult.isErr())
         co_return Err(result.unwrapErr());
 
     auto status = statusResult.unwrap();
@@ -628,9 +628,6 @@ Task<Result<EventQueryRes>> NetworkClient::getSubscribedEvent(
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
     std::vector<EventEntityV1> list;
     try {
         nlohmann::from_json(result.unwrap(), list);
@@ -642,8 +639,8 @@ Task<Result<EventQueryRes>> NetworkClient::getSubscribedEvent(
 
     for (auto& event : res.elements) {
         auto statusResult = co_await getEventParticipate(event.id);
-        if (result.isErr())
-            co_return Err(result.unwrapErr());
+        if (statusResult.isErr())
+            co_return Err(statusResult.unwrapErr());
 
         auto status = statusResult.unwrap();
         event.isCheckedIn = status.isParticipate;
