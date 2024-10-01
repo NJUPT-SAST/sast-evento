@@ -18,6 +18,13 @@ endif()
 
 project(sast-evento VERSION ${VERSION_SEMANTIC} LANGUAGES CXX)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # That optimization causes a crash when re-logging in, so we disable it.
+  # Additional research is needed to determine the root cause, but wait...
+  # HELP WANTED! I do not know about GNU compiler at all! - @alampy
+  add_compile_options(-fno-ipa-sra -fno-ipa-cp-clone)
+endif()
+
 set(SLINT_STYLE "material" CACHE STRING "Slint style" FORCE)
 set(SLINT_FEATURE_GETTEXT ON CACHE BOOL "Slint gettext feature" FORCE)
 
