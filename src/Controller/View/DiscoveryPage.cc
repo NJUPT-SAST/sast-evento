@@ -27,11 +27,11 @@ void DiscoveryPage::onCreate() {
 void DiscoveryPage::onShow() {
     loadActiveEvents();
     loadLatestEvents();
-    loadHomeSlides();
 
     static bool firstShow = true;
     if (firstShow) {
         firstShow = false;
+        loadHomeSlides();
         slidesAutoRotation();
     }
 }
