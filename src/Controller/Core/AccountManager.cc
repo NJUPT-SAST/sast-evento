@@ -38,17 +38,16 @@ void AccountManager::performLogin() {
             spdlog::info("Start login");
             auto codeResult = co_await sast_link::login();
             if (!codeResult) {
-                spdlog::error("Login failed: {}", codeResult.error());
-                co_return Err(Error(Error::Unknown, "Login failed"));
+                spdlog::error("SAST Link Auth failed: {}", codeResult.error());
+                co_return Err(Error(Error::Unknown, "Auth failed"));
             }
-            spdlog::info("Login success");
+            spdlog::info("SAST Link Auth success");
             auto loginResult = co_await evento::networkClient()->loginViaSastLink(
                 codeResult.value());
             if (loginResult.isErr()) {
                 spdlog::error("Login failed: {}", loginResult.unwrapErr().what());
                 co_return Err(Error(Error::Unknown, "Login failed"));
             }
-            spdlog::info("Login success");
             co_return loginResult.unwrap();
         }(),
         [&self = *this](Result<LoginResEntity> result) {
@@ -58,6 +57,8 @@ void AccountManager::performLogin() {
                                                             MessageType::Error);
                 return;
             }
+            spdlog::info("Login success");
+
             auto data = result.unwrap();
 
             self.userInfo = data.userInfo;
