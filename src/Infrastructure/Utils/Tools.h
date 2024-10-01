@@ -12,24 +12,22 @@ namespace evento {
 namespace urls = boost::urls;
 
 inline void openBrowser(urls::url_view url) {
-    using namespace std::string_literals;
-    std::string url_str = "\""s + url.data() + "\"";
+    constexpr auto commandFmtStr =
 #ifdef PLATFORM_LINUX
-    auto command = "xdg-open " + url_str;
+        R"(xdg-open "{}")";
 #elif defined(PLATFORM_WINDOWS)
-    auto command = "start \"\" " + url_str;
+        R"(start "" "{}")";
 #elif defined(PLATFORM_APPLE)
-    auto command = "open " + url_str;
+        R"(open "{}")";
 #else
 #error "Unsupported platform"
 #endif
-
-    std::thread t([command]() {
-        if (std::system(command.c_str()) != 0) {
-            spdlog::info("open browser failed");
+    auto command = std::format(commandFmtStr, url.data());
+    std::thread{[commandFmtStr, command] {
+        if (auto result = std::system(command.c_str())) {
+            spdlog::error("Failed to open browser, error code: {}", result);
         }
-    });
-    t.detach();
+    }}.detach();
 }
 
 inline time_t parseIso8601Utc(const char* date) {
