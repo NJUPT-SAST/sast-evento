@@ -11,119 +11,95 @@ export component EventCard inherits Card {
         description: "活动内容",
         id: 0
     };
-    header := HorizontalLayout {
-        // width: 100%;
-        height: abbr-circle.height;
-        alignment: LayoutAlignment.space-between;
-        spacing: self.width - abbr-circle.width - pentagon.width;
-        abbr-circle := Rectangle {
-            width: 28px;
-            height: self.width;
-            border-radius: self.width / 2;
-            background: root.on-surface;
-            abbr-text := Text {
-                color: root.inverse-on-surface;
-                text: event.summary-abbr;
-                font-size: Token.font.label.large.size;
-                font-weight: Token.font.label.large.weight;
-            }
-        }
-
-        VerticalLayout {
-            width: 10px;
-            height: abbr-circle.width;
-            Rectangle {
-                width: pentagon.width;
-                height: (abbr-circle.height - pentagon.height) / 2;
+    VerticalLayout {
+        header := HorizontalLayout {
+            height: abbr-circle.height;
+            alignment: LayoutAlignment.space-between;
+            abbr-circle := Rectangle {
+                width: 28px;
+                height: self.width;
+                border-radius: self.width / 2;
+                background: root.on-surface;
+                abbr-text := Text {
+                    color: root.inverse-on-surface;
+                    text: event.summary-abbr;
+                    font-size: Token.font.label.large.size;
+                    font-weight: Token.font.label.large.weight;
+                }
             }
 
             pentagon := Image {
                 width: 10px;
-                height: self.width;
+                vertical-alignment: center;
                 colorize: root.on-surface;
                 source: Token.image.icon.pentagon;
             }
-
-            Rectangle {
-                width: pentagon.width;
-                height: (abbr-circle.height - pentagon.height) / 2;
-            }
         }
-    }
 
-    title := VerticalLayout {
-        height: root.height - root.padding * 2 - abbr-circle.height - info.height;
-        alignment: center;
         event-title := Text {
+            min-height: 0;
+            preferred-height: 0;
+            vertical-stretch: 1;
+            vertical-alignment: center;
             color: root.inverse-surface;
             text: event.summary;
             wrap: word-wrap;
+            overflow: elide;
             font-size: Token.font.title.large.size;
             font-weight: Token.font.title.large.weight;
         }
-    }
 
-    info := VerticalLayout {
-        height: time-label.height * 3 + self.spacing * 2;
-        alignment: center;
-        spacing: 2px;
-        time-label := Rectangle {
+        time-label := HorizontalLayout {
             height: 20px;
-            HorizontalLayout {
-                spacing: 6px;
-                time-icon := Image {
-                    width: 16px;
-                    height: self.width;
-                    source: Token.image.icon.time;
-                    colorize: time-text.color;
-                }
+            spacing: 6px;
+            time-icon := Image {
+                width: 16px;
+                vertical-alignment: center;
+                source: Token.image.icon.time;
+                colorize: time-text.color;
+            }
 
-                time-text := Text {
-                    font-size: Token.font.label.large.size;
-                    text: event.time;
-                    width: parent.width - time-icon.width - parent.spacing;
-                    overflow: elide;
-                }
+            time-text := Text {
+                horizontal-stretch: 1;
+                font-size: Token.font.label.large.size;
+                text: event.time;
+                overflow: elide;
             }
         }
 
-        location-label := Rectangle {
+        location-label := HorizontalLayout {
             height: 20px;
-            HorizontalLayout {
-                spacing: 6px;
-                location-icon := Image {
-                    width: 16px;
-                    height: self.width;
-                    source: Token.image.icon.locate;
-                    colorize: location-text.color;
-                }
+            spacing: 6px;
+            location-icon := Image {
+                width: 16px;
+                vertical-alignment: center;
+                source: Token.image.icon.locate;
+                colorize: location-text.color;
+            }
 
-                location-text := Text {
-                    font-size: Token.font.label.large.size;
-                    text: event.location;
-                    width: parent.width - location-icon.width - parent.spacing;
-                    overflow: elide;
-                }
+            location-text := Text {
+                horizontal-stretch: 1;
+                font-size: Token.font.label.large.size;
+                text: event.location;
+                overflow: elide;
             }
         }
 
-        description-label := Rectangle {
+        description-label := HorizontalLayout {
             height: 20px;
-            HorizontalLayout {
-                spacing: 6px;
-                description-icon := Image {
-                    width: 16px;
-                    height: self.width;
-                    source: Token.image.icon.topic;
-                    colorize: location-text.color;
-                }
+            spacing: 6px;
+            description-icon := Image {
+                width: 16px;
+                vertical-alignment: center;
+                source: Token.image.icon.topic;
+                colorize: location-text.color;
+            }
 
-                description-text := Text {
-                    font-size: Token.font.label.large.size;
-                    text: event.description;
-                    width: parent.width - description-icon.width - parent.spacing;
-                    overflow: elide;
-                }
+            description-text := Text {
+                horizontal-stretch: 1;
+                font-size: Token.font.label.large.size;
+                text: event.description;
+                overflow: elide;
             }
         }
     }

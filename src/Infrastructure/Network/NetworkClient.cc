@@ -56,12 +56,16 @@ static EventQueryRes eventEntityListV1ToV2(std::vector<EventEntityV1> const& lis
         case StateV1::Before:
         case StateV1::Registration:
             state = State::SigningUp;
+            break;
         case StateV1::Ongoing:
             state = State::Active;
+            break;
         case StateV1::Cancelled:
             state = State::Cancelled;
+            break;
         case StateV1::Over:
             state = State::Completed;
+            break;
         }
 
         listV2.emplace_back(EventEntity{
@@ -282,12 +286,16 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
 Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     std::string larkDepartment, int page, int size, std::chrono::steady_clock::duration cacheTtl) {
 #ifdef EVENTO_API_V1
+    // The default logic is to get events in the current week,
+    // here we hardcode the time to 1970-01-01 to get events after 1970-01-01,
+    // which means all events for our project.
+
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint("/event/list",
                  {{"departmentId", std::to_string(departmentIdMap[larkDepartment])},
                   {"typeId", ""},
-                  {"time", ""}}));
+                  {"time", "1970-01-01"}}));
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -334,17 +342,17 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
-    std::vector<EventEntityV1> list;
+    auto json = result.unwrap();
+    if (json.is_null())
+        co_return Err(Error(Error::Data, "No Event"));
+
+    EventEntityV1 entityV1;
     try {
-        nlohmann::from_json(result.unwrap(), list);
+        nlohmann::from_json(json, entityV1);
     } catch (const nlohmann::json::exception& e) {
         co_return Err(Error(Error::JsonDes, e.what()));
     }
-
-    auto res = eventEntityListV1ToV2(list);
-    if (res.total == 0) {
-        co_return Err(Error(Error::Data, "No Event"));
-    }
+    auto res = eventEntityListV1ToV2({entityV1});
 
     auto& event = res.elements.front();
     auto statusResult = co_await getEventParticipate(event.id);
@@ -527,9 +535,10 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
 #ifdef EVENTO_API_V1
     auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/user/subscribe"),
-                                                      {{"eventId", std::to_string(eventId)},
-                                                       {"isSubscribe", subscribeStr}});
+                                                      endpoint("/user/subscribe",
+                                                               {{"eventId", std::to_string(eventId)},
+                                                                {"isSubscribe", subscribeStr}}),
+                                                      {});
     if (result.isErr())
         co_return Err(result.unwrapErr());
     co_return Ok(true);
