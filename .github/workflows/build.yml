@@ -213,7 +213,7 @@ jobs:
         Write-Output "version=$version" >> $Env:GITHUB_OUTPUT
 
     - name: Inno Setup
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2.4
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
       with:
         path: ./deploy/win-installer.iss
         options: /O+ /dMyAppVersion=${{ steps.extract.outputs.version }}
