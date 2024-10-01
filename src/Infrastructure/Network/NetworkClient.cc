@@ -208,8 +208,11 @@ Task<Result<EventQueryRes>> NetworkClient::getActiveEventList(
 Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
     std::chrono::steady_clock::duration cacheTtl) {
 #ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/event/newest"),
+    auto result = co_await this->request<api::Evento>(http::verb::post,
+                                                      endpoint("/event/list",
+                                                               {{"departmentId", ""},
+                                                                {"typeId", ""},
+                                                                {"time", ""}}),
                                                       {},
                                                       cacheTtl);
     if (result.isErr())
