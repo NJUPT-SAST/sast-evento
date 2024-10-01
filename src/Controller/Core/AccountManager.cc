@@ -79,7 +79,7 @@ void AccountManager::performLogin() {
 void AccountManager::performRefreshToken() {
     auto& self = *this;
     evento::executor()->asyncExecute(
-        [refreshToken = getKeychainRefreshToken()]() -> evento::Task<Result<std::monostate>> {
+        [](std::optional<std::string> refreshToken) -> evento::Task<Result<std::monostate>> {
             if (!refreshToken) {
                 spdlog::error("No refresh token found");
                 co_return Err(Error(Error::Unknown, "No refresh token found"));
@@ -90,7 +90,7 @@ void AccountManager::performRefreshToken() {
                 co_return Err(Error(Error::Network, "Failed to refresh token"));
             }
             co_return Ok(std::monostate{});
-        }(),
+        }(this->getKeychainRefreshToken()),
         [&self = *this](Result<std::monostate> result) {
             if (result.isErr()) {
                 self.setLoginState(false);
