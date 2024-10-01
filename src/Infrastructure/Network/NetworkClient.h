@@ -9,7 +9,6 @@
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/awaitable.hpp>
 #include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
 #include <boost/url.hpp>
 #include <chrono>
 #include <concepts>
@@ -129,7 +128,7 @@ public:
     std::optional<std::string> tokenBytes;
 
 private:
-    NetworkClient(net::ssl::context& ctx);
+    NetworkClient();
     static NetworkClient* getInstance();
     //cache data processing
 
@@ -214,7 +213,6 @@ private:
     static Task<bool> saveToDisk(std::string const& data, std::filesystem::path const& path);
 
 private:
-    net::ssl::context& _ctx;
     std::unique_ptr<HttpsAccessManager> _httpsAccessManager;
     std::unique_ptr<CacheManager> _cacheManager;
     friend NetworkClient* networkClient();

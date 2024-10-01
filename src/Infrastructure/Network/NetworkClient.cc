@@ -29,15 +29,12 @@ static const std::string GITHUB_API_GATEWAY = "https://api.github.com/repos";
 constexpr const char MIME_JSON[] = "application/json";
 constexpr const char MIME_FORM_URL_ENCODED[] = "application/x-www-form-urlencoded";
 
-NetworkClient::NetworkClient(net::ssl::context& ctx)
-    : _ctx(ctx)
-    , _httpsAccessManager(std::make_unique<HttpsAccessManager>(_ctx, true))
+NetworkClient::NetworkClient()
+    : _httpsAccessManager(std::make_unique<HttpsAccessManager>(true))
     , _cacheManager(std::make_unique<CacheManager>()) {}
 
 NetworkClient* NetworkClient::getInstance() {
-    static ssl::context ctx(ssl::context::sslv23);
-    ctx.set_default_verify_paths();
-    static NetworkClient s_instance(ctx);
+    static NetworkClient s_instance;
     return &s_instance;
 }
 

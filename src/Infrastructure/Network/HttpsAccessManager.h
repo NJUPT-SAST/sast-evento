@@ -29,12 +29,13 @@ class HttpsAccessManager {
     using tcp = boost::asio::ip::tcp;
 
 public:
-    HttpsAccessManager(net::ssl::context& ctx,
-                       bool ignoreSslError = false,
+    HttpsAccessManager(bool ignoreSslError = false,
                        std::chrono::seconds timeout = std::chrono::seconds(5))
-        : _ctx(ctx)
+        : _ctx(ssl::context::tlsv12_client)
         , ignoreSslError(ignoreSslError)
-        , _timeout(timeout) {}
+        , _timeout(timeout) {
+        _ctx.set_default_verify_paths();
+    }
 
     // async send request to host and return response
     // `req.prepare_payload()` is called in the function
@@ -43,7 +44,7 @@ public:
     bool ignoreSslError = false;
 
 private:
-    net::ssl::context& _ctx;
+    net::ssl::context _ctx;
     std::chrono::seconds _timeout; // respective timeout of ssl handshake & http
 };
 
