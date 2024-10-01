@@ -26,8 +26,7 @@ void MyEventPage::onCreate() {
 void MyEventPage::onLogin() {
     executor()->asyncExecute(
         []() -> net::awaitable<Result<EventQueryRes>> {
-            auto res = co_await networkClient()->getSubscribedEvent();
-            co_return res;
+            return networkClient()->getSubscribedEvent();
         },
         [this](Result<EventQueryRes> result) { refreshUiModel(std::move(result)); },
         5min);

@@ -31,10 +31,7 @@ void MenuOverlay::onLogin() {
     auto userInfo = bridge.getAccountManager().getUserInfo();
     self.refreshUserInfo(userInfo);
     executor()->asyncExecute(
-        []() -> Task<Result<UserInfoEntity>> {
-            auto res = co_await networkClient()->getUserInfo();
-            co_return res;
-        },
+        []() -> Task<Result<UserInfoEntity>> { return networkClient()->getUserInfo(); },
         [&self = *this](Result<UserInfoEntity> result) {
             if (result.isErr()) {
                 spdlog::error("Failed to get user info: {}", result.unwrapErr().what());
