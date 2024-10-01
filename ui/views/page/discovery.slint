@@ -75,12 +75,16 @@ export component DiscoveryPage inherits Page {
         VerticalLayout {
             padding: 50px;
             padding-top: 10px;
-            spacing: 15px;
+            spacing: 5px;
             ImageCarousel {
                 width: 100%;
                 height: root.height * 0.5;
                 current-index <=> DiscoveryPageBridge.image-index;
                 sources: DiscoveryPageBridge.carousel-source;
+            }
+
+            Rectangle {
+                height: 10px;
             }
 
             if DiscoveryPageBridge.active-events-state == PageState.normal && DiscoveryPageBridge.latest-events-state == PageState.normal && DiscoveryPageBridge.active-events.length == 0 && DiscoveryPageBridge.latest-events.length == 0: Text {
@@ -124,6 +128,10 @@ export component DiscoveryPage inherits Page {
                         DiscoveryPageBridge.navigate-to-detail(event-struct);
                     }
                 }
+            }
+
+            Rectangle {
+                height: 5px;
             }
 
             if DiscoveryPageBridge.latest-events.length != 0 || DiscoveryPageBridge.latest-events-state != PageState.normal: Text {
