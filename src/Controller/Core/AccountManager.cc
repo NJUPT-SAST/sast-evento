@@ -138,10 +138,11 @@ void AccountManager::requestLogout() {
     }
     auto& self = *this;
     self.userInfo = UserInfoEntity();
+#ifndef EVENTO_API_V1
     setKeychainRefreshToken("");
-    setNetworkAccessToken("");
-
     renewAccessTokenTimer.cancel();
+#endif
+    setNetworkAccessToken("");
 
     setLoginState(false);
 }
