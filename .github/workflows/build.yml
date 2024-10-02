@@ -25,12 +25,12 @@ jobs:
         - rid: win-x64
           msvc_arch: x64
           rust_target: x86_64-pc-windows-msvc
-          vcpkg_target_triplet: 'x64-windows-static'
+          vcpkg_target_triplet: 'x64-windows-static-md'
           os: windows-latest
         - rid: win-arm64
           msvc_arch: arm64
           rust_target: aarch64-pc-windows-msvc
-          vcpkg_target_triplet: 'arm64-windows-static'
+          vcpkg_target_triplet: 'arm64-windows-static-md'
           os: windows-latest
         - rid: macos-arm64
           rust_target: aarch64-apple-darwin
@@ -192,6 +192,11 @@ jobs:
       fail-fast: false
       matrix:
         rid: [win-x64, win-arm64]
+        include:
+        - rid: win-x64
+          msvc_arch: x64
+        - rid: win-arm64
+          msvc_arch: arm64
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -211,6 +216,15 @@ jobs:
         Expand-Archive -Path ./files.zip -DestinationPath ./files
         $version = Get-Content -Path ./files/sast-evento-version.txt
         Write-Output "version=$version" >> $Env:GITHUB_OUTPUT
+
+    - name: Copy VC Redist
+      shell: pwsh
+      run: |
+        $msvcArch = '${{ matrix.msvc_arch }}'
+        $vsPath = &(Join-Path ${env:ProgramFiles(x86)} "\Microsoft Visual Studio\Installer\vswhere.exe") -property installationpath
+        Import-Module (Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
+        Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments "-arch=$msvcArch -host_arch=x64"
+        Copy-Item -Path $env:VCToolsRedistDir\vc_redist.$msvcArch.exe -Destination ./deploy/vcredist.exe
 
     - name: Inno Setup
       uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
