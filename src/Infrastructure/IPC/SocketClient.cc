@@ -2,7 +2,6 @@
 #include <Infrastructure/IPC/SocketClient.h>
 #include <boost/asio.hpp>
 #include <boost/dll.hpp>
-#include <boost/process.hpp>
 #include <boost/system.hpp>
 #include <spdlog/spdlog.h>
 
@@ -33,7 +32,7 @@ void SocketClient::startTray() {
 #endif
 
     std::error_code ec;
-    bp::child tray(trayPath, bp::std_out > pipe, bp::std_err > bp::null, ec);
+    bp::child tray(trayPath, bp::std_in<bp::close, bp::std_out> pipe, bp::std_err > bp::null, ec);
     if (ec) {
         spdlog::error("Failed to start tray: file = {}, reason = {}",
                       trayPath.string(),
@@ -43,22 +42,28 @@ void SocketClient::startTray() {
 
     std::string line;
     if (!pipe || !std::getline(pipe, line) || line.empty()) {
+        spdlog::error("Failed to start tray: file = {}, reason = {}", trayPath.string(), "no port");
         return;
     }
+    _tray = std::move(tray);
 
     spdlog::info("Tray started at: {}", line);
 
     net::co_spawn(executor()->getIoContext(),
                   connect(std::strtol(line.c_str(), nullptr, 10)),
                   net::detached);
-
-    tray.detach();
 }
 
 void SocketClient::exitTray() {
+    std::error_code ec;
     if (_socket) {
         net::co_spawn(_socket->get_executor(), send("EXIT"), net::detached);
+        _tray.wait(ec);
+    } else {
+        _tray.terminate(ec);
     }
+    auto exit_code = _tray.exit_code();
+    spdlog::info("Tray exited with code: {}", exit_code);
 }
 
 void SocketClient::showOrUpdateMessage(int messageId,
