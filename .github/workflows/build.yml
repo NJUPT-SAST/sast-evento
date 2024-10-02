@@ -40,7 +40,10 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
       with:
-          submodules: recursive
+        submodules: recursive
+        # Fetch all history for version generation
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: Set up GCC
       if: startsWith(matrix.rid, 'linux-')
@@ -64,6 +67,12 @@ jobs:
           $deps = 'autoconf', 'automake', 'autoconf-archive', 'libtool'
           brew install @deps
         }
+  
+    - name: Setup libraries for building Slint
+      if: startsWith(matrix.rid, 'linux-')
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libfontconfig-dev libfreetype-dev
 
     - name: Install Qt
       uses: jurplel/install-qt-action@v4
@@ -356,7 +365,7 @@ jobs:
         path: ./sast-evento.dmg
 
   publish-release:
-    if: github.event_name == 'push' && github.ref_type == 'tag'
+    name: Publish release
     runs-on: ubuntu-latest
     needs:
       - package-win
@@ -373,17 +382,46 @@ jobs:
         shell: pwsh
         run: |
           Set-Location ./artifacts
+
+          $version = "unknown"
+          if (Test-Path ./files-linux-x64/files.tar.gz) {
+            tar -xzf ./files-linux-x64/files.tar.gz ./sast-evento-version.txt
+            if (Test-Path ./sast-evento-version.txt) {
+              $version = Get-Content -Path ./sast-evento-version.txt
+              Remove-Item -Force ./sast-evento-version.txt
+            }
+          }
+          Write-Host "SAST Evento Version: $version"
+
           Remove-Item -Force -Recurse ./files-*
+
           Get-ChildItem -Directory -Path . | ForEach-Object {
-              Write-Host "Compressing $($_.Name)"
-              $dirPath = $_.FullName
+            Write-Host "Processing $($_.Name)"
+
+            $newName = "sast-evento-$version-$($_.Name)"
+            Rename-Item -Path $_.FullName -NewName $newName
+
+            $dirPath = Split-Path -Path $_.FullName -Parent
+            $dirPath = Join-Path -Path $dirPath -ChildPath $newName
+
+            $items = Get-ChildItem -Path $dirPath
+            if ($items.Count -eq 1 -and $items[0] -is [System.IO.FileInfo]) {
+              $singleFile = $items[0]
+              $newFilePath = "$dirPath" + $singleFile.Extension
+              Move-Item -Path $singleFile.FullName -Destination $newFilePath
+            } else {
               $zipPath = "$dirPath.zip"
               Compress-Archive -Path $dirPath -DestinationPath $zipPath
-              Remove-Item -Path $dirPath -Recurse
+            }
+            Remove-Item -Path $dirPath -Recurse
           }
+
+          Write-Host "Artifacts are ready"
+          Get-ChildItem -Path . -Recurse
 
       - name: Release (GitHub)
         uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref_type == 'tag'
         with:
           artifacts: ./artifacts/*
           allowUpdates: true
