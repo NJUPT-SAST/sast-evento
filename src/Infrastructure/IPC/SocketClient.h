@@ -3,6 +3,7 @@
 #include <boost/asio/awaitable.hpp>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/process.hpp>
 #include <chrono>
 #include <functional>
 #include <unordered_map>
@@ -34,6 +35,8 @@ public:
     inline static SocketClient* _instance = nullptr;
 
 private:
+    boost::process::child _tray;
+
     net::awaitable<void> handleReceive(std::string const& message);
 
     net::awaitable<void> connect(std::uint16_t port);
