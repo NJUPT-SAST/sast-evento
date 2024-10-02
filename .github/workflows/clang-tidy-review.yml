@@ -24,6 +24,11 @@ jobs:
           version: 14
           platform: x64
 
+      - name: Setup libraries for building Slint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libfontconfig-dev libfreetype-dev
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
         with:
