@@ -85,17 +85,17 @@ export component EventCard inherits Card {
             }
         }
 
-        description-label := HorizontalLayout {
+        if event.description != "": description-label := HorizontalLayout {
             height: 20px;
             spacing: 6px;
-            description-icon := Image {
+            Image {
                 width: 16px;
                 vertical-alignment: center;
                 source: Token.image.icon.topic;
                 colorize: location-text.color;
             }
 
-            description-text := Text {
+            Text {
                 horizontal-stretch: 1;
                 font-size: Token.font.label.large.size;
                 text: event.description;

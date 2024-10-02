@@ -80,22 +80,22 @@ component EventInfoBlock {
             text: DetailPageBridge.event-model.time;
         }
 
-        IconText {
+        if DetailPageBridge.event-model.location != "": IconText {
             icon: Token.image.icon.locate;
             text: DetailPageBridge.event-model.location;
         }
 
-        IconText {
+        if DetailPageBridge.event-model.larkDepartmentName != "": IconText {
             icon: Token.image.icon.department;
             text: DetailPageBridge.event-model.larkDepartmentName;
         }
 
-        IconText {
+        if DetailPageBridge.event-model.tag != "": IconText {
             icon: Token.image.icon.tag;
             text: DetailPageBridge.event-model.tag;
         }
 
-        IconText {
+        if DetailPageBridge.event-model.description != "": IconText {
             icon: Token.image.icon.topic;
             text: DetailPageBridge.event-model.description;
         }
@@ -103,7 +103,7 @@ component EventInfoBlock {
 }
 
 export component DetailPage inherits Page {
-    property <bool> able-to-feedback: DetailPageBridge.state == PageState.normal && DetailPageBridge.event-model.is-check-in && DetailPageBridge.event-model.state == EventState.Completed;
+    property <bool> able-to-feedback: DetailPageBridge.state == PageState.normal && !DetailPageBridge.feedback-model.has-feedbacked && DetailPageBridge.event-model.is-check-in && DetailPageBridge.event-model.state == EventState.Completed;
     dialog := ContentDialog {
         width: 100%;
         height: 100%;

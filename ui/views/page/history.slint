@@ -81,7 +81,7 @@ component DividerVirtical inherits Rectangle {
 }
 
 component HistoryCard inherits Rectangle {
-    in property <EventStruct> data;
+    in property <EventStruct> event;
     in property <FeedbackStruct> feedback;
     callback event-clicked(EventStruct);
     callback comment-clicked(int, int, string);
@@ -94,7 +94,7 @@ component HistoryCard inherits Rectangle {
             width: 20%;
             Text {
                 width: parent.width;
-                text: data.time + "\n" + data.location;
+                text: event.time + "\n" + event.location;
                 font-size: Token.font.body.large.size;
                 font-weight: Token.font.body.large.weight;
                 color: Token.color.outline;
@@ -115,7 +115,7 @@ component HistoryCard inherits Rectangle {
             height: 100px;
             width: 75%;
             clicked => {
-                root.event-clicked(data);
+                root.event-clicked(event);
             }
             HorizontalLayout {
                 padding: 5px;
@@ -125,26 +125,26 @@ component HistoryCard inherits Rectangle {
                     Text {
                         horizontal-alignment: TextHorizontalAlignment.left;
                         vertical-alignment: TextVerticalAlignment.top;
-                        text: data.summary;
+                        text: event.summary;
                         overflow: elide;
                         font-size: Token.font.headline.small.size;
                         font-weight: Token.font.headline.small.weight;
                         color: Token.color.on-surface;
                     }
 
-                    Text {
+                    if event.description != "": Text {
                         font-size: Token.font.label.large.size;
-                        text: data.description;
+                        text: event.description;
                         overflow: elide;
                         color: Token.color.on-surface;
                     }
                 }
 
-                CommentItem {
+                if event.is-check-in && !feedback.has-feedbacked: CommentItem {
                     width: 50%;
                     feedback: root.feedback;
                     comment-clicked(rate, content) => {
-                        root.comment-clicked(data.id, rate, content);
+                        root.comment-clicked(event.id, rate, content);
                     }
                 }
             }
@@ -168,7 +168,7 @@ export component HistoryPage inherits Page {
                 spacing: 10px;
                 padding: 5px;
                 for model in HistoryPageBridge.models: HistoryCard {
-                    data: model.event;
+                    event: model.event;
                     feedback: model.feedback;
                     event-clicked => {
                         HistoryPageBridge.navigate-to-detail(model.event);
