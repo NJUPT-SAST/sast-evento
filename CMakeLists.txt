@@ -47,6 +47,11 @@ find_package(Slint QUIET)
 if (NOT Slint_FOUND)
   message("Slint could not be located in the CMake module search path. Downloading it from Git and building it locally")
   include(FetchContent)
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.25)
+    set(FETCHCONTENT_SYSTEM_IF_AVAILABLE SYSTEM)
+  else()
+    set(FETCHCONTENT_SYSTEM_IF_AVAILABLE)
+  endif()
   FetchContent_Declare(
     Slint
     GIT_REPOSITORY https://github.com/slint-ui/slint.git
@@ -54,6 +59,7 @@ if (NOT Slint_FOUND)
     # `release/1.0` will auto-upgrade to the latest Slint >= 1.0.0 and < 1.1.0
     GIT_TAG release/1
     SOURCE_SUBDIR api/cpp
+    ${FETCHCONTENT_SYSTEM_IF_AVAILABLE}
   )
   FetchContent_MakeAvailable(Slint)
 endif (NOT Slint_FOUND)
