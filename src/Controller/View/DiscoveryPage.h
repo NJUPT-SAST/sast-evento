@@ -18,6 +18,7 @@ private:
     void loadActiveEvents();
     void loadLatestEvents();
     void loadHomeSlides();
+    Task<void> loadHomeSlidesTask();
     void slidesAutoRotation();
 };
 

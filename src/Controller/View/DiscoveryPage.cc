@@ -48,8 +48,8 @@ void DiscoveryPage::loadActiveEvents() {
                                      return;
                                  }
                                  auto eventQueryRes = result.unwrap();
-                                 self->set_active_events_state(PageState::Normal);
                                  self->set_active_events(convert::from(eventQueryRes.elements));
+                                 self->set_active_events_state(PageState::Normal);
                              });
 }
 
@@ -65,35 +65,34 @@ void DiscoveryPage::loadLatestEvents() {
                                      return;
                                  }
                                  auto eventQueryRes = result.unwrap();
-                                 self->set_latest_events_state(PageState::Normal);
                                  self->set_latest_events(convert::from(eventQueryRes.elements));
+                                 self->set_latest_events_state(PageState::Normal);
                              });
 }
 
 void DiscoveryPage::loadHomeSlides() {
     auto& self = *this;
-    executor()->asyncExecute(
-        networkClient()->getHomeSlide(10min), [&self = *this, this](Result<SlideEntityList> result) {
-            if (result.isErr()) {
-                return;
-            }
-            auto list = result.unwrap();
-            auto total = std::min(static_cast<std::size_t>(3), list.size());
-            for (int i = 0; i < total; ++i) {
-                executor()->asyncExecute(networkClient()->getFile(list[i].url),
-                                         [&self = *this, i](Result<std::filesystem::path> result) {
-                                             if (result.isErr()) {
-                                                 spdlog::warn("image load failed: {}",
-                                                              result.unwrapErr().what());
-                                                 return;
-                                             }
-                                             self->get_carousel_source()->set_row_data(
-                                                 i,
-                                                 slint::Image::load_from_path(
-                                                     result.unwrap().string().c_str()));
-                                         });
-            }
+    executor()->asyncExecute(loadHomeSlidesTask(), []() {});
+}
+
+Task<void> DiscoveryPage::loadHomeSlidesTask() {
+    auto result = co_await networkClient()->getHomeSlide();
+    if (result.isErr()) {
+        co_return;
+    }
+    auto list = result.unwrap();
+    auto total = std::min(static_cast<std::size_t>(3), list.size());
+    for (int i = 0; i < total; ++i) {
+        auto fileResult = co_await networkClient()->getFile(list[i].url);
+        if (fileResult.isErr()) {
+            spdlog::warn("image load failed: {}", fileResult.unwrapErr().what());
+            co_return;
+        }
+        auto imagePath = fileResult.unwrap();
+        slint::blocking_invoke_from_event_loop([&, &self = *this]() {
+            self->invoke_set_slide(i, slint::Image::load_from_path(imagePath.string().c_str()));
         });
+    }
 }
 
 void DiscoveryPage::slidesAutoRotation() {

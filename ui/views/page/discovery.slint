@@ -9,11 +9,17 @@ export global DiscoveryPageBridge {
     in property <PageState> latest-events-state: PageState.normal;
     in property <[EventStruct]> active-events: [];
     in property <[EventStruct]> latest-events: [];
-    in property <[image]> carousel-source: [
+    out property <[image]> carousel-source: [
         Token.image.display.event.default[0],
         Token.image.display.event.default[1],
         Token.image.display.event.default[2],
     ];
+    public function set-slide(index: int, img: image) {
+        if (index >= 3) {
+            return;
+        }
+        carousel-source[index] = img;
+    }
     callback load-active-events();
     callback load-latest-events();
     callback navigate-to-detail(EventStruct);

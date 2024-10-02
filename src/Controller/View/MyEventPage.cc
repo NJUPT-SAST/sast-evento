@@ -29,7 +29,8 @@ void MyEventPage::onLogin() {
             return networkClient()->getSubscribedEvent();
         },
         [this](Result<EventQueryRes> result) { refreshUiModel(std::move(result)); },
-        5min);
+        1min,
+        AsyncExecutor::Delay | AsyncExecutor::Periodic);
 }
 
 void MyEventPage::onShow() {
