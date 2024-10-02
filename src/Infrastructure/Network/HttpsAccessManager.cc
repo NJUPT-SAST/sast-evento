@@ -1,19 +1,9 @@
-#include "HttpsAccessManager.h"
-#include <Infrastructure/Utils/Debug.h>
-#include <Infrastructure/Utils/Error.h>
+#include <Infrastructure/Network/HttpsAccessManager.h>
 #include <Infrastructure/Utils/Result.h>
-#include <boost/asio/as_tuple.hpp>
-#include <boost/asio/awaitable.hpp>
-#include <boost/asio/ssl/error.hpp>
-#include <boost/asio/ssl/stream.hpp>
-#include <boost/beast/http/message.hpp>
-#include <boost/beast/http/string_body.hpp>
+#include <boost/beast/ssl.hpp>
 #include <boost/system/system_error.hpp>
-#include <boost/url.hpp>
 
 namespace evento {
-
-constexpr const char USER_AGENT[] = "SAST-Evento-Desktop/1";
 
 Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
                                                    http::request<http::string_body> req) {
@@ -94,7 +84,6 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
         // If we get here then the connection is closed gracefully
         co_return Ok(res);
 
-    debug(), ec, ec.message();
     co_return Err(Error(Error::Network, ec.message()));
 }
 

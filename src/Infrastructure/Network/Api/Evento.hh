@@ -1,9 +1,7 @@
 #pragma once
 
-#include <boost/beast/http/field.hpp>
-#include <boost/beast/http/message.hpp>
-#include <boost/beast/http/string_body.hpp>
-#include <boost/url/url_view.hpp>
+#include <boost/beast.hpp>
+#include <boost/url.hpp>
 #include <format>
 #include <initializer_list>
 #include <optional>

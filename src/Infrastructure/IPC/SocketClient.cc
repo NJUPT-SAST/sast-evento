@@ -1,22 +1,9 @@
-#include "SocketClient.h"
 #include <Controller/AsyncExecutor.hh>
-#include <boost/asio/awaitable.hpp>
-#include <boost/asio/co_spawn.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/detached.hpp>
-#include <boost/asio/ip/address.hpp>
-#include <boost/asio/read.hpp>
-#include <boost/asio/steady_timer.hpp>
-#include <boost/asio/this_coro.hpp>
-#include <boost/asio/use_awaitable.hpp>
-#include <boost/asio/write.hpp>
+#include <Infrastructure/IPC/SocketClient.h>
+#include <boost/asio.hpp>
 #include <boost/dll.hpp>
 #include <boost/process.hpp>
-#include <boost/system/detail/error_code.hpp>
-#include <chrono>
-#include <cstdlib>
-#include <memory>
-#include <slint.h>
+#include <boost/system.hpp>
 #include <spdlog/spdlog.h>
 
 namespace evento {

@@ -1,22 +1,9 @@
-#include "NetworkClient.h"
 #include <Infrastructure/Network/Api/Evento.hh>
 #include <Infrastructure/Network/Api/Github.hh>
+#include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <array>
-#include <boost/asio/co_spawn.hpp>
-#include <boost/asio/stream_file.hpp>
-#include <boost/asio/this_coro.hpp>
-#include <boost/asio/use_awaitable.hpp>
-#include <boost/beast.hpp>
-#include <boost/system/detail/error_code.hpp>
-#include <boost/url/url.hpp>
-#include <filesystem>
-#include <initializer_list>
-#include <memory>
-#include <nlohmann/json.hpp>
-#include <optional>
-#include <string>
 #if defined(PLATFORM_APPLE)
 #include <fstream>
 #endif

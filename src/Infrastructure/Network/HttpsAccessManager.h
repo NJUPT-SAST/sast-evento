@@ -1,13 +1,10 @@
 #pragma once
 
 #include <Infrastructure/Utils/Result.h>
-#include <boost/asio/awaitable.hpp>
-#include <boost/asio/ssl/context.hpp>
-#include <boost/asio/use_awaitable.hpp>
-#include <boost/beast/core.hpp>
-#include <boost/beast/http.hpp>
-#include <boost/beast/ssl.hpp>
-#include <boost/url/url.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
+#include <boost/beast.hpp>
+#include <boost/url.hpp>
 #include <chrono>
 #include <string>
 
