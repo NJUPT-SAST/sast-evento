@@ -121,7 +121,7 @@ jobs:
       with:
         configurePreset: 'native'
         buildPreset: 'native'
-        # buildPresetAdditionalArgs: "['-j3']"
+        configurePresetAdditionalArgs: "['-DSPEED_UP_DEBUG_BUILD=ON']"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

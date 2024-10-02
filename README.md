@@ -134,6 +134,8 @@ For Windows platform, you can use static linking to avoid some strange problems:
 cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRIPLET=<x64 or arm64>-windows-static
 ```
 
+If you want to speed up the build process in **Debug** mode, you can add `-DSPEED_UP_DEBUG_BUILD=ON` option.
+
 ### Project Dependencies
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)

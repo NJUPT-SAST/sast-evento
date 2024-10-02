@@ -134,6 +134,8 @@ cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg
 cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRIPLET=<x64 or arm64>-windows-static
 ```
 
+如果您想加快 **Debug** 模式下的构建过程，可以添加 `-DSPEED_UP_DEBUG_BUILD=ON` 选项。
+
 ### 项目依赖
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)

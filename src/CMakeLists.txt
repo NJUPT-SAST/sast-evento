@@ -21,17 +21,18 @@ if (LINUX)
   set(INTL_LIBRARY Intl::Intl)
 endif()
 
-if (CMAKE_CONFIGURATION_TYPES MATCHES "Release")
-  set(SLINT_GENERATE_COMPILE_UNITS 1)
-  set(SLINT_RESOURCES_POLICY "embed-files")
-else()
-  message("Embedding resources in the executable")  
+if (SPEED_UP_DEBUG_BUILD)
+  message("Using absolute path of resources in the executable")  
   set(SLINT_GENERATE_COMPILE_UNITS 10)
   set(SLINT_RESOURCES_POLICY "as-absolute-path")
+else()
+  message("Embedding resources as files")
+  set(SLINT_GENERATE_COMPILE_UNITS 1)
+  set(SLINT_RESOURCES_POLICY "embed-files")
 endif()
 
 slint_target_sources(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/ui/app.slint 
-  COMPILATION_UNITS ${UI_UNITS}
+  COMPILATION_UNITS ${SLINT_GENERATE_COMPILE_UNITS}
 )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY SLINT_EMBED_RESOURCES ${SLINT_RESOURCES_POLICY})
