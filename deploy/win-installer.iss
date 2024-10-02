@@ -37,7 +37,12 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: ".\..\files\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+Source: "vcredist.exe"; DestDir: {tmp}; Flags: deleteafterinstall
+
+[Run]
+Filename: {tmp}\vcredist.exe; \
+    Parameters: "/passive /norestart"; \
+    StatusMsg: "Installing MSVC Redistributables..."
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
