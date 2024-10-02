@@ -12,7 +12,11 @@
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build",
             "installDir": "${sourceDir}/build/install/${presetName}",
-            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "cacheVariables": {
+                "SLINT_FEATURE_RENDERER_SKIA": true,
+                "SLINT_FEATURE_RENDERER_FEMTOVG": false
+            }
         },
         {
             "name": "native",
