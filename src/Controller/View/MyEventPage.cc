@@ -42,7 +42,7 @@ void MyEventPage::loadSubscribedEvents() {
     auto& self = *this;
     self->set_state(PageState::Loading);
 
-    executor()->asyncExecute(networkClient()->getSubscribedEvent(),
+    executor()->asyncExecute(networkClient()->getSubscribedEvent(0min),
                              [&self = *this](Result<EventQueryRes> result) {
                                  if (result.isErr()) {
                                      self->set_state(PageState::Error);
