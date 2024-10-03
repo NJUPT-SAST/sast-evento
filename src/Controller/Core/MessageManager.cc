@@ -31,17 +31,15 @@ int MessageManager::showMessage(std::string content,
                                 std::chrono::steady_clock::duration timeout) {
     auto& self = *this;
     auto id = nextId++;
+    auto messageDuration = std::chrono::duration_cast<std::chrono::milliseconds>(timeout
+                                                                                 + animationLength);
 
     UiUtility::StylishLog::general(logOrigin,
                                    std::format("new message [{}] content = \"{}\"", id, content));
     newToast(id, {.content = slint::SharedString(content), .type = type});
 
     // set auto hide
-    evento::executor()->asyncExecute(
-        doNothing,
-        [this, id] { hideMessage(id); },
-        timeout + animationLength,
-        AsyncExecutor::Once | AsyncExecutor::Delay);
+    slint::Timer::single_shot(messageDuration, [this, id] { hideMessage(id); });
 
     return id;
 }
@@ -71,7 +69,8 @@ void MessageManager::newToast(int id, MessageData data) {
     UiUtility::StylishLog::messageOperation(logOrigin, id, "instantiate toast, data added");
 
     // make animation available
-    slint::invoke_from_event_loop([this, id] { showToast(id); });
+    using namespace std::chrono_literals;
+    slint::Timer::single_shot(1ms, [this, id] { showToast(id); });
 }
 
 void MessageManager::showToast(int id) {
@@ -91,11 +90,7 @@ void MessageManager::hideToast(int id) {
     UiUtility::StylishLog::messageOperation(logOrigin, id, "hide");
 
     // wait animation finished
-    evento::executor()->asyncExecute(
-        doNothing,
-        [this, id] { deleteToast(id); },
-        animationLength,
-        AsyncExecutor::Once | AsyncExecutor::Delay);
+    slint::Timer::single_shot(animationLength, [this, id] { deleteToast(id); });
 }
 
 void MessageManager::deleteToast(int id) {
