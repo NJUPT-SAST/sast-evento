@@ -407,7 +407,11 @@ jobs:
             $items = Get-ChildItem -Path $dirPath
             if ($items.Count -eq 1 -and $items[0] -is [System.IO.FileInfo]) {
               $singleFile = $items[0]
-              $newFilePath = "$dirPath" + $singleFile.Extension
+              $newFilePath = if ($singleFile.Name -match '\.pkg\.tar\.zst$') {
+                "$dirPath.pkg.tar.zst"
+              } else {
+                "$dirPath" + $singleFile.Extension
+              }
               Move-Item -Path $singleFile.FullName -Destination $newFilePath
             } else {
               $zipPath = "$dirPath.zip"
