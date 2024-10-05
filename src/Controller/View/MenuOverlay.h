@@ -3,6 +3,7 @@
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
 #include <Controller/Core/UiBase.h>
+#include <Infrastructure/Utils/Result.h>
 
 EVENTO_UI_START
 
@@ -14,6 +15,8 @@ private:
     void onCreate() override;
     void onShow() override;
     void onLogin() override;
+
+    static Task<Result<slint::Image>> loadUserInfoTask();
     void refreshUserInfo(UserInfoEntity const& userInfo);
 };
 

@@ -87,10 +87,10 @@ Task<void> DiscoveryPage::loadHomeSlidesTask() {
             spdlog::warn("image load failed: {}", fileResult.unwrapErr().what());
             co_return;
         }
-        auto imagePath = fileResult.unwrap();
-        slint::blocking_invoke_from_event_loop([&, &self = *this]() {
-            self->invoke_set_slide(i, slint::Image::load_from_path(imagePath.string().c_str()));
-        });
+
+        auto image = slint::Image::load_from_path(fileResult.unwrap().string().c_str());
+        slint::blocking_invoke_from_event_loop(
+            [&, &self = *this]() { self->invoke_set_slide(i, image); });
     }
 }
 

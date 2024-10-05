@@ -24,23 +24,38 @@ void MenuOverlay::onShow() {
                              [&]() { self->set_is_show(true); },
                              std::chrono::milliseconds(200),
                              AsyncExecutor::Once | AsyncExecutor::Delay);
+    executor()->asyncExecute(loadUserInfoTask(), [&self = *this](Result<slint::Image> result) {
+        if (result.isErr()) {
+            self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
+                                                        MessageType::Error);
+            spdlog::error("Failed to load user info: {}", result.unwrapErr().what());
+            return;
+        }
+        self->set_user_avatar(result.unwrap());
+    });
 }
 
 void MenuOverlay::onLogin() {
     auto& self = *this;
     auto userInfo = bridge.getAccountManager().getUserInfo();
     self.refreshUserInfo(userInfo);
-    executor()->asyncExecute(
-        []() -> Task<Result<UserInfoEntity>> { return networkClient()->getUserInfo(); },
-        [&self = *this](Result<UserInfoEntity> result) {
-            if (result.isErr()) {
-                spdlog::error("Failed to get user info: {}", result.unwrapErr().what());
-                return;
-            }
-            self.refreshUserInfo(result.unwrap());
-        },
-        10min,
-        AsyncExecutor::Periodic | AsyncExecutor::Delay);
+}
+
+Task<Result<slint::Image>> MenuOverlay::loadUserInfoTask() {
+    auto result = co_await networkClient()->getUserInfo();
+    if (result.isErr()) {
+        co_return Err(result.unwrapErr());
+    }
+    auto userInfo = result.unwrap();
+    if (userInfo.avatar.has_value()) {
+        auto avatar = co_await networkClient()->getFile(*userInfo.avatar);
+        if (avatar.isErr()) {
+            co_return Err(avatar.unwrapErr());
+        }
+        co_return Ok(
+            slint::Image::load_from_path(slint::SharedString(avatar.unwrap().string().c_str())));
+    }
+    co_return Err(Error(Error::Data, "User avatar not found"));
 }
 
 void MenuOverlay::refreshUserInfo(UserInfoEntity const& userInfo) {
