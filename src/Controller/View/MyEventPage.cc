@@ -38,6 +38,10 @@ void MyEventPage::onShow() {
     loadSubscribedEvents();
 };
 
+void MyEventPage::onLogout() {
+    ipc()->deleteAllMessage();
+}
+
 void MyEventPage::loadSubscribedEvents() {
     auto& self = *this;
     self->set_state(PageState::Loading);

@@ -16,6 +16,8 @@ private:
     void onCreate() override;
     void onLogin() override;
     void onShow() override;
+    void onLogout() override;
+
     void loadSubscribedEvents();
     void refreshUiModel(Result<EventQueryRes> result);
 };

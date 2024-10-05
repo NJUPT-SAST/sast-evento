@@ -104,6 +104,10 @@ void SocketClient::cancelMessage(int messageId) {
     }
 }
 
+void SocketClient::deleteAllMessage() {
+    _messageMap.clear();
+}
+
 net::awaitable<void> SocketClient::connect(std::uint16_t port) {
     _socket = std::make_unique<net::ip::tcp::socket>(co_await net::this_coro::executor);
     net::ip::tcp::endpoint endpoint(net::ip::make_address("127.0.0.1"), port);

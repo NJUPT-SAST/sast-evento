@@ -25,6 +25,7 @@ public:
                              std::chrono::system_clock::time_point const& time);
 
     void cancelMessage(int messageId);
+    void deleteAllMessage();
 
     struct MessageType {
         static constexpr std::string_view ShowWindow = "SHOW";
