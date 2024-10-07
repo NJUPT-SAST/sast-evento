@@ -8,7 +8,7 @@
 #include <spdlog/spdlog.h>
 
 class Logger {
-    using LoggerType = spdlog::logger;
+    using LoggerType = spdlog::async_logger;
 
 public:
     using Level = spdlog::level::level_enum;

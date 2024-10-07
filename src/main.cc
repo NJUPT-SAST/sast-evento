@@ -11,9 +11,13 @@
 #endif
 
 int main(int argc, char** argv) {
-    Logger logger(Logger::Level::debug,
-                  (std::filesystem::temp_directory_path() / "NJUPT-SAST" / "logs" / "evento.log")
-                      .string());
+    Logger logger(
+#ifdef EVENTO_DEBUG
+        Logger::Level::debug,
+#else
+        Logger::Level::info,
+#endif
+        (std::filesystem::temp_directory_path() / "NJUPT-SAST" / "logs" / "evento.log").string());
     evento::initConfig();
     spdlog::info("SAST Evento version: v" VERSION_FULL);
 
