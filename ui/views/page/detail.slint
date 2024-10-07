@@ -23,17 +23,20 @@ component IconText {
     HorizontalLayout {
         spacing: 5px;
         alignment: start;
-        Image {
-            source: root.icon;
-            width: 18px;
-            horizontal-alignment: center;
-            vertical-alignment: center;
-            colorize: Token.color.on-surface;
+        VerticalLayout {
+            padding-top: 2.4px;
+            Image {
+                source: root.icon;
+                width: 18px;
+                horizontal-alignment: center;
+                vertical-alignment: top;
+                colorize: Token.color.on-surface;
+            }
         }
 
         Text {
             text: root.text;
-            vertical-alignment: TextVerticalAlignment.center;
+            vertical-alignment: TextVerticalAlignment.top;
             font-size: 16px;
             wrap: TextWrap.char-wrap;
         }
@@ -77,7 +80,7 @@ component EventInfoBlock {
         alignment: start;
         IconText {
             icon: Token.image.icon.time;
-            text: DetailPageBridge.event-model.time;
+            text: "你好 ";//DetailPageBridge.event-model.time;
         }
 
         if DetailPageBridge.event-model.location != "": IconText {
