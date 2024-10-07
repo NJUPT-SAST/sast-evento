@@ -28,15 +28,17 @@ export global DiscoveryPageBridge {
 export component ImageCarousel inherits Rectangle {
     in property <[image]> sources;
     in-out property <int> current-index: 0;
+    property <float> current-index-float: current-index;
     border-radius: 12px;
     clip: true;
 
+    animate current-index-float {
+        duration: 300ms;
+        easing: ease-in;
+    }
+
     HorizontalLayout {
-        x: -(current-index * root.width);
-        animate x {
-            duration: 300ms;
-            easing: ease-in;
-        }
+        x: -(current-index-float * root.width);
         for src in sources: Image {
             width: root.width;
             height: root.height;

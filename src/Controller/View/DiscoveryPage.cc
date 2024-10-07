@@ -27,12 +27,7 @@ void DiscoveryPage::onCreate() {
 void DiscoveryPage::onShow() {
     loadActiveEvents();
     loadLatestEvents();
-
-    static bool firstShow = true;
-    if (firstShow) {
-        firstShow = false;
-        loadHomeSlides();
-    }
+    loadHomeSlides();
 }
 
 void DiscoveryPage::loadActiveEvents() {
@@ -71,7 +66,13 @@ void DiscoveryPage::loadLatestEvents() {
 
 void DiscoveryPage::loadHomeSlides() {
     auto& self = *this;
-    executor()->asyncExecute(loadHomeSlidesTask(), [this]() { slidesAutoRotation(); });
+    executor()->asyncExecute(loadHomeSlidesTask(), [this]() {
+        static bool firstShow = true;
+        if (firstShow) {
+            firstShow = false;
+            slidesAutoRotation();
+        }
+    });
 }
 
 Task<void> DiscoveryPage::loadHomeSlidesTask() {
