@@ -16,7 +16,7 @@ private:
     void onShow() override;
     void onLogin() override;
 
-    static Task<Result<slint::Image>> loadUserInfoTask();
+    Task<Result<slint::Image>> loadUserInfoTask();
     void refreshUserInfo(UserInfoEntity const& userInfo);
 };
 

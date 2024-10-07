@@ -13,11 +13,11 @@ class AccountManager : private GlobalAgent<AccountManagerBridge>,
     UiBridge& bridge;
     std::string logOrigin = "AccountManager";
 
-    bool loginState = false;
-    UserInfoEntity userInfo;
+    bool _loginState = false;
+    UserInfoEntity _userInfo;
 
-    std::chrono::system_clock::time_point expiredTime;
-    net::steady_timer renewAccessTokenTimer;
+    std::chrono::system_clock::time_point _expiredTime;
+    net::steady_timer _renewAccessTokenTimer;
 
     static const inline std::string package = "org.sast.evento";
     static const inline std::string service =
@@ -37,7 +37,7 @@ public:
     void requestLogout();
     void tryLoginDirectly();
 
-    UserInfoEntity getUserInfo();
+    UserInfoEntity& userInfo();
 
 private:
     void loadConfig();

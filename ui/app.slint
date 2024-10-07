@@ -85,6 +85,7 @@ component CircleButton inherits Rectangle {
     in property <image> image;
     in property <color> surface: Token.color.surface-container;
     in property <color> on-surface: Token.color.on-surface;
+    in property <bool> is-avatar: false;
     callback clicked <=> area.clicked;
     clip: true;
     height: 48px;
@@ -101,7 +102,20 @@ component CircleButton inherits Rectangle {
         is-press: area.pressed;
     }
 
-    Image {
+    if is-avatar: Rectangle {
+        width: 48px;
+        height: 48px;
+        border-radius: self.width / 2;
+        clip: true;
+        Image {
+            height: 48px;
+            width: 48px;
+            source: image;
+            image-fit: cover;
+        }
+    }
+
+    if !is-avatar: Image {
         height: 24px;
         width: 24px;
         source: image;
@@ -250,7 +264,8 @@ export component App inherits Window {
             }
 
             CircleButton {
-                image: Token.image.icon.me;
+                image: MenuOverlayBridge.user-avatar;
+                is-avatar: true;
                 clicked => {
                     ViewManager.navigate-to(ViewName.MenuOverlay);
                 }

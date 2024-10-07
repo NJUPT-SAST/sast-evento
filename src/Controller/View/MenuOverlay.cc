@@ -38,9 +38,7 @@ void MenuOverlay::onShow() {
 }
 
 void MenuOverlay::onLogin() {
-    auto& self = *this;
-    auto userInfo = bridge.getAccountManager().getUserInfo();
-    self.refreshUserInfo(userInfo);
+    refreshUserInfo(bridge.getAccountManager().userInfo());
 }
 
 Task<Result<slint::Image>> MenuOverlay::loadUserInfoTask() {
@@ -57,6 +55,7 @@ Task<Result<slint::Image>> MenuOverlay::loadUserInfoTask() {
         co_return Ok(
             slint::Image::load_from_path(slint::SharedString(avatar.unwrap().string().c_str())));
     }
+    bridge.getAccountManager().userInfo() = std::move(userInfo);
     co_return Err(Error(Error::Data, "User avatar not found"));
 }
 

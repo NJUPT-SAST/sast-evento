@@ -17,7 +17,7 @@ EVENTO_UI_START
 AccountManager::AccountManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge)
     : GlobalAgent(uiEntry)
     , bridge(bridge)
-    , renewAccessTokenTimer(evento::executor()->getIoContext()) {
+    , _renewAccessTokenTimer(evento::executor()->getIoContext()) {
     auto& self = *this;
     self->on_request_login([this] { return requestLogin(); });
     self->on_request_logout([this] { return requestLogout(); });
@@ -29,7 +29,7 @@ AccountManager::~AccountManager() {
 }
 
 bool AccountManager::isLogin() const {
-    return loginState;
+    return _loginState;
 }
 
 void AccountManager::performLogin() {
@@ -61,10 +61,10 @@ void AccountManager::performLogin() {
 
             auto data = result.unwrap();
 
-            self.userInfo = data.userInfo;
+            self._userInfo = data.userInfo;
 #ifdef EVENTO_API_V1
             self.setKeychainAccessToken(data.accessToken);
-            self.expiredTime = std::chrono::system_clock::now() + std::chrono::days(3);
+            self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(3);
 #else
             self.setKeychainRefreshToken(data.refreshToken);
             self.scheduleRenewAccessToken();
@@ -126,7 +126,7 @@ void AccountManager::performGetUserInfo() {
                 self.setLoginState(false);
                 return;
             }
-            self.userInfo = result.unwrap();
+            self._userInfo = result.unwrap();
             spdlog::info("get user info success");
             self.setLoginState(true);
         });
@@ -144,7 +144,7 @@ void AccountManager::requestLogout() {
         return;
     }
     auto& self = *this;
-    self.userInfo = UserInfoEntity();
+    self._userInfo = UserInfoEntity();
 #ifndef EVENTO_API_V1
     setKeychainRefreshToken("");
     renewAccessTokenTimer.cancel();
@@ -158,7 +158,7 @@ void AccountManager::tryLoginDirectly() {
     if (isLogin()) {
         return;
     }
-    if (std::chrono::system_clock::now() + 15min < expiredTime) {
+    if (std::chrono::system_clock::now() + 15min < _expiredTime) {
         auto& self = *this;
         self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
         return;
@@ -180,8 +180,8 @@ void AccountManager::tryLoginDirectly() {
 #endif
 }
 
-UserInfoEntity AccountManager::getUserInfo() {
-    return userInfo;
+UserInfoEntity& AccountManager::userInfo() {
+    return _userInfo;
 }
 
 void AccountManager::loadConfig() {
@@ -190,22 +190,22 @@ void AccountManager::loadConfig() {
     auto [hour, minute, second, _] = evento::account.expire.time;
     std::tm t = {year, month, day, hour, minute, second};
 
-    expiredTime = std::chrono::system_clock::from_time_t(std::mktime(&t));
-    userInfo.id = evento::account.userId;
+    _expiredTime = std::chrono::system_clock::from_time_t(std::mktime(&t));
+    _userInfo.id = evento::account.userId;
 }
 
 void AccountManager::saveConfig() {
-    auto expire = std::chrono::system_clock::to_time_t(expiredTime);
+    auto expire = std::chrono::system_clock::to_time_t(_expiredTime);
     auto expireTm = *std::localtime(&expire);
     evento::account.expire
         = toml::date_time{toml::date{expireTm.tm_year + 1900, expireTm.tm_mon + 1, expireTm.tm_mday},
                           toml::time{expireTm.tm_hour, expireTm.tm_min, expireTm.tm_sec}};
-    evento::account.userId = userInfo.id;
+    evento::account.userId = _userInfo.id;
 }
 
 void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) const {
     keychain::Error err;
-    keychain::setPassword(package, service, userInfo.id, refreshToken, err);
+    keychain::setPassword(package, service, _userInfo.id, refreshToken, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         spdlog::error("Failed to save refresh token: {}", err.message);
@@ -216,7 +216,7 @@ void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) co
 
 std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
     keychain::Error err;
-    auto refreshToken = keychain::getPassword(package, service, userInfo.id, err);
+    auto refreshToken = keychain::getPassword(package, service, _userInfo.id, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         spdlog::error("Failed to get refresh token: {}", err.message);
@@ -232,8 +232,8 @@ std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
 
 void AccountManager::scheduleRenewAccessToken() {
     auto& self = *this;
-    renewAccessTokenTimer.expires_after(55min);
-    renewAccessTokenTimer.async_wait([&self = *this](const boost::system::error_code& ec) {
+    _renewAccessTokenTimer.expires_after(55min);
+    _renewAccessTokenTimer.async_wait([&self = *this](const boost::system::error_code& ec) {
         if (ec) {
             spdlog::error("Failed to renew access token: {}", ec.message());
             return;
@@ -249,7 +249,7 @@ void AccountManager::setNetworkAccessToken(std::string accessToken) {
 #ifdef EVENTO_API_V1
 std::optional<std::string> AccountManager::getKeychainAccessToken() const {
     keychain::Error err;
-    auto accessToken = keychain::getPassword(package, service, userInfo.id, err);
+    auto accessToken = keychain::getPassword(package, service, _userInfo.id, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         debug(), (int) err.type;
@@ -266,7 +266,7 @@ std::optional<std::string> AccountManager::getKeychainAccessToken() const {
 
 void AccountManager::setKeychainAccessToken(const std::string& accessToken) const {
     keychain::Error err;
-    keychain::setPassword(package, service, userInfo.id, accessToken, err);
+    keychain::setPassword(package, service, _userInfo.id, accessToken, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         debug(), (int) err.type;
@@ -279,8 +279,8 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
 
 void AccountManager::setLoginState(bool newState) {
     auto& self = *this;
-    if (loginState != newState) {
-        loginState = newState;
+    if (_loginState != newState) {
+        _loginState = newState;
         self->set_is_login(newState);
         onStateChanged();
     }
