@@ -33,7 +33,6 @@ void MenuOverlay::onShow() {
             }
             return;
         }
-        self->set_user_avatar(result.unwrap());
     });
 }
 
@@ -55,6 +54,7 @@ Task<Result<slint::Image>> MenuOverlay::loadUserInfoTask() {
         co_return Ok(
             slint::Image::load_from_path(slint::SharedString(avatar.unwrap().string().c_str())));
     }
+    refreshUserInfo(userInfo);
     bridge.getAccountManager().userInfo() = std::move(userInfo);
     co_return Err(Error(Error::Data, "User avatar not found"));
 }
