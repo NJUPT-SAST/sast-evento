@@ -64,7 +64,7 @@ void AccountManager::performLogin() {
             self.userInfo = data.userInfo;
 #ifdef EVENTO_API_V1
             self.setKeychainAccessToken(data.accessToken);
-            self.expiredTime = std::chrono::system_clock::now() + std::chrono::days(30);
+            self.expiredTime = std::chrono::system_clock::now() + std::chrono::days(3);
 #else
             self.setKeychainRefreshToken(data.refreshToken);
             self.scheduleRenewAccessToken();
@@ -110,12 +110,19 @@ void AccountManager::performGetUserInfo() {
             auto result = co_await evento::networkClient()->getUserInfo();
             if (result.isErr()) {
                 spdlog::error("Failed to get user info: {}", result.unwrapErr().what());
-                co_return Err(Error(Error::Unknown, "Failed to get user info"));
+                co_return result.unwrapErr();
             }
             co_return result.unwrap();
         }(),
         [&self = *this](Result<UserInfoEntity> result) {
             if (result.isErr()) {
+                if (result.unwrapErr().kind == Error::Data) {
+                    self.bridge.getMessageManager().showMessage("登录过期，请重新登录",
+                                                                MessageType::Info);
+                } else {
+                    self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
+                                                                MessageType::Error);
+                }
                 self.setLoginState(false);
                 return;
             }
@@ -152,6 +159,8 @@ void AccountManager::tryLoginDirectly() {
         return;
     }
     if (std::chrono::system_clock::now() + 15min < expiredTime) {
+        auto& self = *this;
+        self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
         return;
     }
 

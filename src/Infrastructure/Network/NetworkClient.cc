@@ -901,6 +901,10 @@ void NetworkClient::clearCache() {
     _cacheManager->clear();
 }
 
+void NetworkClient::clearMemoryCache() {
+    _cacheManager->clearMemoryCache();
+}
+
 std::string NetworkClient::getTotalCacheSizeFormatString() {
     if (auto dir = _cacheManager->cacheDir()) {
         std::uintmax_t size = 0;
@@ -952,9 +956,16 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
         return Err(err);
     }
 
+    constexpr auto errorMessageFieldName =
+#ifdef EVENTO_API_V1
+        "errMsg";
+#else
+        "message";
+#endif
+
     if (!res["success"].is_boolean() || !res["success"].get<bool>()) {
-        if (res.contains("message")) {
-            return Err(Error(Error::Data, res["message"].get<std::string>()));
+        if (res.contains(errorMessageFieldName)) {
+            return Err(Error(Error::Data, res[errorMessageFieldName].get<std::string>()));
         }
         return Err(err);
     }

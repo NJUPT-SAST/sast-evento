@@ -117,6 +117,7 @@ public:
         bool useCache = true);
 
     void clearCache();
+    void clearMemoryCache();
 
     std::string getTotalCacheSizeFormatString();
 

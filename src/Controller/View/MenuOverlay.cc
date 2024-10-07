@@ -26,9 +26,11 @@ void MenuOverlay::onShow() {
                              AsyncExecutor::Once | AsyncExecutor::Delay);
     executor()->asyncExecute(loadUserInfoTask(), [&self = *this](Result<slint::Image> result) {
         if (result.isErr()) {
-            self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
-                                                        MessageType::Error);
             spdlog::error("Failed to load user info: {}", result.unwrapErr().what());
+            if (result.unwrapErr().kind != Error::Data) {
+                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
+                                                            MessageType::Error);
+            }
             return;
         }
         self->set_user_avatar(result.unwrap());
