@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [linux-x64, win-x64, win-arm64, macos-arm64]
+        rid: [linux-x64, win-x64, macos-arm64]
         include:
         - rid: linux-x64
           rust_target: x86_64-unknown-linux-gnu
@@ -26,11 +26,6 @@ jobs:
           msvc_arch: x64
           rust_target: x86_64-pc-windows-msvc
           vcpkg_target_triplet: 'x64-windows-static-md'
-          os: windows-latest
-        - rid: win-arm64
-          msvc_arch: arm64
-          rust_target: aarch64-pc-windows-msvc
-          vcpkg_target_triplet: 'arm64-windows-static-md'
           os: windows-latest
         - rid: macos-arm64
           rust_target: aarch64-apple-darwin
@@ -200,12 +195,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [win-x64, win-arm64]
+        rid: [win-x64]
         include:
         - rid: win-x64
           msvc_arch: x64
-        - rid: win-arm64
-          msvc_arch: arm64
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
