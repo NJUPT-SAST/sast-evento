@@ -12,8 +12,8 @@ public:
 
 private:
     void onCreate() override;
-
     void onShow() override;
+    void onLogout() override;
 };
 
 EVENTO_UI_END

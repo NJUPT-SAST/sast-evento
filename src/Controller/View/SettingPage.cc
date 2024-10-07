@@ -68,4 +68,8 @@ void SettingPage::onShow() {
     self->set_cache_size(slint::SharedString(networkClient()->getTotalCacheSizeFormatString()));
 }
 
+void SettingPage::onLogout() {
+    networkClient()->clearMemoryCache();
+}
+
 EVENTO_UI_END

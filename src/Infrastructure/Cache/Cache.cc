@@ -118,4 +118,10 @@ void CacheManager::clear() {
     }
 }
 
+void CacheManager::clearMemoryCache() {
+    _cacheList.clear();
+    _cacheMap.clear();
+    _currentCacheSize = 0;
+}
+
 } // namespace evento
