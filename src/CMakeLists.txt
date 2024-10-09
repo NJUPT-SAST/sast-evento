@@ -15,7 +15,7 @@ if (LINUX)
   target_compile_definitions(${PROJECT_NAME} PRIVATE 
     BOOST_ASIO_HAS_IO_URING 
   )
-  find_library(URING_LIBRARY NAMES liburing.a REQUIRED)
+  find_library(URING_LIBRARY NAMES liburing.a liburing.so REQUIRED)
   message(STATUS "Found liburing: ${URING_LIBRARY}")
   find_package(Intl REQUIRED)
   set(INTL_LIBRARY Intl::Intl)
@@ -62,9 +62,8 @@ target_link_libraries(${PROJECT_NAME}
     spdlog::spdlog
     Boost::boost
     Boost::system
+    Boost::filesystem
     Boost::url
-    Boost::beast
-    Boost::process
     OpenSSL::Crypto
     OpenSSL::SSL
     nlohmann_json::nlohmann_json
