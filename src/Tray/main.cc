@@ -16,6 +16,12 @@ void exitApp() {
 
 int main(int argc, char* argv[]) {
 #ifdef __APPLE__
+    // Prevent Qt being too clever
+    // See also https://github.com/qt/qtbase/blob/6.5.0/src/plugins/platforms/cocoa/qcocoaintegration.mm#L133-L139
+    qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "1");
+
+    // Transform the process into a UI element application,
+    // which doesn't have a Dock icon or menu bar.
     ProcessSerialNumber psn = {0, kCurrentProcess};
     TransformProcessType(&psn, kProcessTransformToUIElementApplication);
 #endif
