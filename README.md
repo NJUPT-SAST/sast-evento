@@ -64,7 +64,7 @@ This project is the desktop client version of SAST Evento.
 
 For Linux users, you could use the following command to install.
 
-Arch Linux:
+Arch Linux
 
 ```bash
 paru -S sast-evento
