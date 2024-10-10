@@ -28,6 +28,7 @@ A cross-platform desktop client based on Slint
 ## Brief
 
 SAST Evento is an event management system for SAST. During our activities, we often encounter the following problems:
+
 - The collection of event information is still done through traditional shared spreadsheets, which is inefficient.
 - Manual investigation is required to resolve conflicts in event scheduling and venue availability.
 - The event schedule template needs to be manually updated every week and cannot be generated automatically.
@@ -46,17 +47,29 @@ This project is the desktop client version of SAST Evento.
 
 ## Platform Support
 
-| Platform           | Status                   | Instruction                     |
-| ------------------ | ------------------------ | ------------------------------- |
-| Windows x64        | ✅                        |
-| Windows arm64      | :heavy_exclamation_mark: | Application cannot run normally |
-| macOS arm64        | ✅                        |
-| macOS x64          | :x:                      | No packaging plan               |
-| Linux x64 (pacman) | ✅                        |
-| Linux x64 (deb)    | ✅                        |
-| Linux x64 (rpm)    | :x:                      | No packaging plan               |
-| Linux x64 (nix)    | :x:                      | No packaging plan               |
-| Linux arm64        | :x:                      | No packaging plan               |
+| Platform           | Status | Instruction       |
+| ------------------ | ------ | ----------------- |
+| Windows x64        | ✅      |
+| Windows arm64      | :x:    | No packaging plan |
+| macOS arm64        | ✅      |
+| macOS x64          | :x:    | No packaging plan |
+| Linux x64 (pacman) | ✅      |
+| Linux x64 (deb)    | ✅      |
+| Linux x64 (rpm)    | :x:    | No packaging plan |
+| Linux x64 (nix)    | :x:    | No packaging plan |
+| Linux arm64        | :x:    | No packaging plan |
+
+## Install
+
+For Linux users, you could use the following command to install.
+
+Arch Linux
+
+```bash
+paru -S sast-evento
+# or
+yay -S sast-evento
+```
 
 ## Development
 
@@ -91,7 +104,9 @@ git submodule update --init --recursive
 ```
 
 ### Commit Check Hook
+
 This project uses [pre-commit](https://pre-commit.com/) for commit checks to ensure code style consistency. Please install the pre-commit tool first:
+
 ```bash
 # For Arch Linux
 sudo pacman -S pre-commit
@@ -109,6 +124,7 @@ pre-commit install
 > If you find the results provided by the tool unreliable, you can temporarily skip the commit check by using `git commit --no-verify`.
 
 ### Build
+
 > [!TIP]  
 > We recommend using VScode to open and edit the project. We have reserved the `.vscode` folder for basic settings and extensions.
 
@@ -125,7 +141,7 @@ cmake --build --preset native
 If you use vcpkg to install Qt6, you need to add the following build options to the CMake command:
 
 ```bash
-cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg 
+cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg
 ```
 
 For Windows platform, you can use static linking to avoid some strange problems:
@@ -137,6 +153,7 @@ cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRI
 If you want to speed up the build process in **Debug** mode, you can add `-DSPEED_UP_DEBUG_BUILD=ON` option.
 
 ### Project Dependencies
+
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)
 - [Boost.Process](https://github.com/boostorg/process)

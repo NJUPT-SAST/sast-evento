@@ -28,6 +28,7 @@
 ## 简介
 
 SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程中一般都会遇到下面的问题：
+
 - 活动信息收集仍然通过传统的共享表格，效率低
 - 活动时间安排冲突需要手动排查、活动场地冲突也要手动排查
 - 活动计划表虽然模板一样，但是每周都需要人手动更新，没法自动生成
@@ -46,17 +47,29 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 ## 项目平台支持
 
-| 平台               | 状态                     | 说明             |
-| ------------------ | ------------------------ | ---------------- |
-| Windows x64        | ✅                        |
-| Windows arm64      | :heavy_exclamation_mark: | 程序无法正常运行 |
-| macOS arm64        | ✅                        |
-| macOS x64          | :x:                      | 暂无打包计划     |
-| Linux x64 (pacman) | ✅                        |
-| Linux x64 (deb)    | ✅                        |
-| Linux x64 (rpm)    | :x:                      | 暂无打包计划     |
-| Linux x64 (nix)    | :x:                      | 暂无打包计划     |
-| Linux arm64        | :x:                      | 暂无打包计划     |
+| 平台               | 状态 | 说明         |
+| ------------------ | ---- | ------------ |
+| Windows x64        | ✅   |
+| Windows arm64      | :x:  | 暂无打包计划 |
+| macOS arm64        | ✅   |
+| macOS x64          | :x:  | 暂无打包计划 |
+| Linux x64 (pacman) | ✅   |
+| Linux x64 (deb)    | ✅   |
+| Linux x64 (rpm)    | :x:  | 暂无打包计划 |
+| Linux x64 (nix)    | :x:  | 暂无打包计划 |
+| Linux arm64        | :x:  | 暂无打包计划 |
+
+## 安装
+
+对于 Linux 用户，你可以使用下面的命令安装：
+
+Arch Linux
+
+```bash
+paru -S sast-evento-bin
+# or
+yay -S sast-evento-bin
+```
 
 ## 参与开发
 
@@ -91,7 +104,9 @@ git submodule update --init --recursive
 ```
 
 ### 提交检查 Hook
+
 本项目使用 [pre-commit](https://pre-commit.com/) 来进行提交检查，以确保代码风格一致性。请先安装 pre-commit 工具：
+
 ```bash
 # For Arch Linux
 sudo pacman -S pre-commit
@@ -109,6 +124,7 @@ pre-commit install
 > 如果您认为工具提供的结果不可靠，可使用 `git commit --no-verify` 临时跳过提交检查。
 
 ### 构建
+
 > [!TIP]  
 > 我们建议使用 VScode 打开和编辑项目。我们特别保留 `.vscode` 文件夹用于基本设置和扩展。
 
@@ -125,7 +141,7 @@ cmake --build --preset native
 如果您使用 vcpkg 安装 Qt6，您需要在 CMake 命令中添加以下构建选项：
 
 ```bash
-cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg 
+cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg
 ```
 
 对于 Windows 平台，您可以使用静态链接来避免一些奇怪的问题：
@@ -137,6 +153,7 @@ cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRI
 如果您想加快 **Debug** 模式下的构建过程，可以添加 `-DSPEED_UP_DEBUG_BUILD=ON` 选项。
 
 ### 项目依赖
+
 - [Boost.Beast](https://github.com/boostorg/beast)
 - [Boost.Url](https://github.com/boostorg/url)
 - [Boost.Process](https://github.com/boostorg/process)
