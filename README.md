@@ -70,6 +70,10 @@ paru -S sast-evento
 # or
 yay -S sast-evento
 ```
+> [!TIP]  
+> You can install `sast-evento-bin` package if you want to install the pre-built binary package, or `sast-evento-git` package if you want to use `dev` branch.
+
+If you don't like AUR or if you are using other platforms, you can download the latest release from the [GitHub Release](https://github.com/NJUPT-SAST/sast-evento/releases) page.
 
 ## Development
 
