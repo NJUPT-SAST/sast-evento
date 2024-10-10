@@ -75,12 +75,12 @@ yay -S sast-evento
 Gentoo Linux
 
 ```bash
+# Add corcodile overlay.
 emerge -av eselect-repository
 eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
-# Add corcodile overlay.
 
-emerge -av spdlog::corcodile sast-evento
 # Using spdlog in overlay to fix the bundled fmt issue.
+emerge -av spdlog::corcodile sast-evento
 ```
 
 ## Development
