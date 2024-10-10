@@ -72,7 +72,7 @@ paru -S sast-evento
 yay -S sast-evento
 ```
 
-Gentoo Linux:
+Gentoo Linux
 
 ```bash
 emerge -av eselect-repository
