@@ -72,7 +72,7 @@ paru -S sast-evento-bin
 yay -S sast-evento-bin
 ```
 
-Gentoo Linux:
+Gentoo Linux
 
 ```bash
 # Add corcodile overlay.
