@@ -61,7 +61,9 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 ## 安装
 
-对于 Arch Linux 用户，您可以使用下面的命令安装：
+对于 Linux 用户，您可以使用下面的命令安装：
+
+Arch Linux
 
 ```bash
 paru -S sast-evento-bin
