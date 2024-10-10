@@ -49,12 +49,13 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 | 平台               | 状态 | 说明         |
 | ------------------ | ---- | ------------ |
-| Windows x64        | ✅   |
+| Windows x64        | ✅   |              |
 | Windows arm64      | :x:  | 暂无打包计划 |
-| macOS arm64        | ✅   |
+| macOS arm64        | ✅   |              |
 | macOS x64          | :x:  | 暂无打包计划 |
-| Linux x64 (pacman) | ✅   |
-| Linux x64 (deb)    | ✅   |
+| Linux x64 (pacman) | ✅   |              |
+| Linux x64 (portage)| ✅   |              |
+| Linux x64 (deb)    | ✅   |              |
 | Linux x64 (rpm)    | :x:  | 暂无打包计划 |
 | Linux x64 (nix)    | :x:  | 暂无打包计划 |
 | Linux arm64        | :x:  | 暂无打包计划 |
@@ -74,6 +75,17 @@ yay -S sast-evento-bin
 > 如果您想安装预编译的二进制包，请使用 `sast-evento-bin` 包，或者如果您想使用 `dev` 分支，请使用 `sast-evento-git` 包。
 
 如果不想使用 AUR，或者使用其他系统，您可以在 [GitHub Release](https://github.com/NJUPT-SAST/sast-evento/releases) 页面下载最新的安装包。
+
+Gentoo Linux
+
+```bash
+# Add corcodile overlay.
+emerge -av eselect-repository
+eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
+
+# Using spdlog in overlay to fix the bundled fmt issue.
+emerge -av spdlog::corcodile sast-evento
+```
 
 ## 参与开发
 

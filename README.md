@@ -49,12 +49,13 @@ This project is the desktop client version of SAST Evento.
 
 | Platform           | Status | Instruction       |
 | ------------------ | ------ | ----------------- |
-| Windows x64        | ✅      |
+| Windows x64        | ✅     |                   |
 | Windows arm64      | :x:    | No packaging plan |
-| macOS arm64        | ✅      |
+| macOS arm64        | ✅     |                   |
 | macOS x64          | :x:    | No packaging plan |
-| Linux x64 (pacman) | ✅      |
-| Linux x64 (deb)    | ✅      |
+| Linux x64 (pacman) | ✅     |                   |
+| Linux x64 (portage)| ✅     |                   |
+| Linux x64 (deb)    | ✅     |                   |
 | Linux x64 (rpm)    | :x:    | No packaging plan |
 | Linux x64 (nix)    | :x:    | No packaging plan |
 | Linux arm64        | :x:    | No packaging plan |
@@ -74,6 +75,17 @@ yay -S sast-evento
 > You can install `sast-evento-bin` package if you want to install the pre-built binary package, or `sast-evento-git` package if you want to use `dev` branch.
 
 If you don't like AUR or if you are using other platforms, you can download the latest release from the [GitHub Release](https://github.com/NJUPT-SAST/sast-evento/releases) page.
+
+Gentoo Linux
+
+```bash
+# Add corcodile overlay.
+emerge -av eselect-repository
+eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
+
+# Using spdlog in overlay to fix the bundled fmt issue.
+emerge -av spdlog::corcodile sast-evento
+```
 
 ## Development
 
