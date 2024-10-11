@@ -47,43 +47,43 @@ This project is the desktop client version of SAST Evento.
 
 ## Platform Support
 
-| Platform           | Status | Instruction       |
-| ------------------ | ------ | ----------------- |
-| Windows x64        | ✅     |                   |
-| Windows arm64      | :x:    | No packaging plan |
-| macOS arm64        | ✅     |                   |
-| macOS x64          | :x:    | No packaging plan |
-| Linux x64 (pacman) | ✅     |                   |
-| Linux x64 (portage)| ✅     |                   |
-| Linux x64 (deb)    | ✅     |                   |
-| Linux x64 (rpm)    | :x:    | No packaging plan |
-| Linux x64 (nix)    | :x:    | No packaging plan |
-| Linux arm64        | :x:    | No packaging plan |
+| Platform            | Status | Instruction       |
+| ------------------- | ------ | ----------------- |
+| Windows x64         | ✅      |                   |
+| Windows arm64       | :x:    | No packaging plan |
+| macOS arm64         | ✅      |                   |
+| macOS x64           | :x:    | No packaging plan |
+| Linux x64 (pacman)  | ✅      |                   |
+| Linux x64 (portage) | ✅      |                   |
+| Linux x64 (deb)     | ✅      |                   |
+| Linux x64 (rpm)     | :x:    | No packaging plan |
+| Linux x64 (nix)     | :x:    | No packaging plan |
+| Linux arm64         | :x:    | No packaging plan |
 
-## Install
+## Installation
 
-For Linux users, you could use the following command to install.
+Normally, you could download the latest version from the [release page](https://github.com/NJUPT-SAST/sast-evento/releases). If you are using one of the following Linux distributions, you can install the package directly through the package manager.
 
-Arch Linux
+### Arch Linux
 
 ```bash
 paru -S sast-evento
 # or
 yay -S sast-evento
 ```
-> [!TIP]  
+> [!NOTE]  
 > You can install `sast-evento-bin` package if you want to install the pre-built binary package, or `sast-evento-git` package if you want to use `dev` branch.
 
-If you don't like AUR or if you are using other platforms, you can download the latest release from the [GitHub Release](https://github.com/NJUPT-SAST/sast-evento/releases) page.
+### Gentoo Linux
 
-Gentoo Linux
-
+Add `corcodile` overlay.
 ```bash
-# Add corcodile overlay.
 emerge -av eselect-repository
 eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
+```
 
-# Using spdlog in overlay to fix the bundled fmt issue.
+Using `spdlog` in overlay to fix the bundled `fmt` issue.
+```bash
 emerge -av spdlog::corcodile sast-evento
 ```
 

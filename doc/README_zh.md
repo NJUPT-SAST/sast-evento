@@ -47,43 +47,43 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 
 ## 项目平台支持
 
-| 平台               | 状态 | 说明         |
-| ------------------ | ---- | ------------ |
-| Windows x64        | ✅   |              |
-| Windows arm64      | :x:  | 暂无打包计划 |
-| macOS arm64        | ✅   |              |
-| macOS x64          | :x:  | 暂无打包计划 |
-| Linux x64 (pacman) | ✅   |              |
-| Linux x64 (portage)| ✅   |              |
-| Linux x64 (deb)    | ✅   |              |
-| Linux x64 (rpm)    | :x:  | 暂无打包计划 |
-| Linux x64 (nix)    | :x:  | 暂无打包计划 |
-| Linux arm64        | :x:  | 暂无打包计划 |
+| 平台                | 状态 | 说明         |
+| ------------------- | ---- | ------------ |
+| Windows x64         | ✅    |              |
+| Windows arm64       | :x:  | 暂无打包计划 |
+| macOS arm64         | ✅    |              |
+| macOS x64           | :x:  | 暂无打包计划 |
+| Linux x64 (pacman)  | ✅    |              |
+| Linux x64 (portage) | ✅    |              |
+| Linux x64 (deb)     | ✅    |              |
+| Linux x64 (rpm)     | :x:  | 暂无打包计划 |
+| Linux x64 (nix)     | :x:  | 暂无打包计划 |
+| Linux arm64         | :x:  | 暂无打包计划 |
 
 ## 安装
 
-对于 Linux 用户，您可以使用下面的命令安装：
+通常，您可以从[发布页面](https://github.com/NJUPT-SAST/sast-evento/releases)下载最新版本。如果您使用的是以下 Linux 发行版，您可以直接通过包管理器安装该软件包。
 
-Arch Linux
+### Arch Linux
 
 ```bash
-paru -S sast-evento-bin
-# or
-yay -S sast-evento-bin
+paru -S sast-evento
+# 或者
+yay -S sast-evento
 ```
-> [!TIP]  
-> 如果您想安装预编译的二进制包，请使用 `sast-evento-bin` 包，或者如果您想使用 `dev` 分支，请使用 `sast-evento-git` 包。
+> [!NOTE]  
+> 如果您想安装预构建的二进制包，可以安装 `sast-evento-bin` 包；如果您想使用 `dev` 分支，可以安装 `sast-evento-git` 包。
 
-如果不想使用 AUR，或者使用其他系统，您可以在 [GitHub Release](https://github.com/NJUPT-SAST/sast-evento/releases) 页面下载最新的安装包。
+### Gentoo Linux
 
-Gentoo Linux
-
+添加 `corcodile` overlay。
 ```bash
-# Add corcodile overlay.
 emerge -av eselect-repository
 eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
+```
 
-# Using spdlog in overlay to fix the bundled fmt issue.
+使用 overlay 中的 `spdlog` 以修复捆绑的 `fmt` 问题。
+```bash
 emerge -av spdlog::corcodile sast-evento
 ```
 
