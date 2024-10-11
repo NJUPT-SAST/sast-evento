@@ -48,8 +48,7 @@ void AboutPage::loadContributors() {
 
             for (auto const& contributor : contributors) {
                 executor()->asyncExecute(
-                    networkClient()->getFile(
-                        contributor.avatar_url.substr(0, contributor.avatar_url.find('?'))),
+                    networkClient()->getFile(contributor.avatar_url + "&s=40"),
                     [&self = *this, &contributor, total, htmlUrl = contributor.html_url](
                         Result<std::filesystem::path> result) {
                         if (result.isErr()) {

@@ -1,7 +1,9 @@
 #include <Infrastructure/Network/HttpsAccessManager.h>
 #include <Infrastructure/Utils/Result.h>
+#include <boost/asio/error.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/system/system_error.hpp>
+#include <chrono>
 
 namespace evento {
 
@@ -22,10 +24,10 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
                                           net::error::get_ssl_category());
 
     // Look up the domain name
-    auto const results = co_await resolver.async_resolve(host, "443");
+    auto const results = co_await resolver.async_resolve(host, "https");
 
     // Set the timeout.
-    beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+    beast::get_lowest_layer(stream).expires_after(_timeout);
 
     // Make the connection on the IP address we get from a lookup
     try {
@@ -38,7 +40,7 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     }
 
     // Set the timeout.
-    beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(30));
+    beast::get_lowest_layer(stream).expires_after(_timeout);
 
     // Perform the SSL handshake
     try {
@@ -76,11 +78,12 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
         }
         co_return Err(Error(Error::Network, e.what()));
     }
-    beast::get_lowest_layer(stream).expires_after(_timeout);
+    beast::get_lowest_layer(stream).expires_after(std::chrono::seconds(2));
 
     // Gracefully close the stream - do not threat every error as an exception!
     auto [ec] = co_await stream.async_shutdown(net::as_tuple(net::use_awaitable));
-    if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated))
+    if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated)
+        || ec == beast::error::timeout)
         // If we get here then the connection is closed gracefully
         co_return Ok(res);
 

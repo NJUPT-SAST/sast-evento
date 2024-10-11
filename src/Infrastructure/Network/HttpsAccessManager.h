@@ -27,7 +27,7 @@ class HttpsAccessManager {
 
 public:
     HttpsAccessManager(bool ignoreSslError = false,
-                       std::chrono::seconds timeout = std::chrono::seconds(5))
+                       std::chrono::seconds timeout = std::chrono::seconds(15))
         : _ctx(ssl::context::tlsv12_client)
         , ignoreSslError(ignoreSslError)
         , _timeout(timeout) {
