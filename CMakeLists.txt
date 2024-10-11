@@ -38,8 +38,6 @@ if (WIN32)
       ${VERSION_RC_PATH}
   )
   set(WIN32_MANIFEST_PATH ${CMAKE_SOURCE_DIR}/app.manifest)
-
-  set(BUILD_SAST_LINK_SHARED OFF)
 endif()
 
 # find Slint
@@ -83,7 +81,9 @@ set(SOURCE_LOCALE_DIR "${CMAKE_SOURCE_DIR}/ui/locale")
 
 # source code
 add_subdirectory(src)
+
 # sast-link-sdk
+option(BUILD_SAST_LINK_SHARED "Build SAST Link SDK as shared library" OFF)
 add_subdirectory(3rdpart/sast-link-cxx-sdk)
 
 # credential storage
