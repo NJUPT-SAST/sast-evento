@@ -6,26 +6,26 @@
   SAST Evento
 </h1>
 <p align="center">
-A cross-platform desktop client based on Slint
+  A cross-platform desktop client based on Slint
 </p>
 
 <p align="center">
-    <img src="https://img.shields.io/badge/language-C%2B%2B20-yellow.svg">
-    <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgreen.svg">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg">
+  <img src="https://img.shields.io/badge/language-C%2B%2B20-yellow.svg">
+  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgreen.svg">
+  <img src="https://img.shields.io/badge/license-MIT-blue.svg">
 </p>
 
 <p align="center">
   <a href="https://slint.dev">
-      <img alt="#MadeWithSlint" src="https://raw.githubusercontent.com/slint-ui/slint/master/logo//MadeWithSlint-logo-light.svg" height="60">
+    <img alt="#MadeWithSlint" src="https://raw.githubusercontent.com/slint-ui/slint/master/logo//MadeWithSlint-logo-light.svg" height="60">
   </a>
 </p>
 
 <p align="center">
-    English | <a href="./doc/README_zh.md">简体中文</a>
+  English | <a href="./doc/README_zh.md">简体中文</a>
 </p>
 
-## Brief
+## :pushpin: Brief
 
 SAST Evento is an event management system for SAST. During our activities, we often encounter the following problems:
 
@@ -39,28 +39,28 @@ To address these issues, we have decided to develop an event assistance system d
 
 This project is the desktop client version of SAST Evento.
 
-## Preview
+## :mag: Preview
 
 <div align=center>
   <img src="doc/img/preview.png">
 </div>
 
-## Platform Support
+## :cyclone: Platform Support
 
-| Platform            | Status | Instruction       |
-| ------------------- | ------ | ----------------- |
-| Windows x64         | ✅      |                   |
-| Windows arm64       | :x:    | No packaging plan |
-| macOS arm64         | ✅      |                   |
-| macOS x64           | :x:    | No packaging plan |
-| Linux x64 (pacman)  | ✅      |                   |
-| Linux x64 (portage) | ✅      |                   |
-| Linux x64 (deb)     | ✅      |                   |
-| Linux x64 (rpm)     | :x:    | No packaging plan |
-| Linux x64 (nix)     | :x:    | No packaging plan |
-| Linux arm64         | :x:    | No packaging plan |
+| Platform             | Status | Instruction                      |
+| -------------------- | ------ | -------------------------------- |
+| Windows x64          | ✅      |                                  |
+| Windows arm64        | :x:    | Waiting for Slint upstream fixes |
+| macOS arm64          | ✅      |                                  |
+| macOS x64            | :x:    | PRs are welcome                  |
+| Linux x64 (pacman)   | ✅      |                                  |
+| Linux x64 (portage)  | ✅      |                                  |
+| Linux x64 (deb)      | ✅      |                                  |
+| Linux x64 (rpm)      | :x:    | PRs are welcome                  |
+| Linux x64 (nix)      | :x:    | PRs are welcome                  |
+| Linux x64 (AppImage) | :x:    | PRs are welcome                  |
 
-## Installation
+## 📦 Installation
 
 Normally, you could download the latest version from the [release page](https://github.com/NJUPT-SAST/sast-evento/releases). If you are using one of the following Linux distributions, you can install the package directly through the package manager.
 
@@ -87,7 +87,32 @@ Using `spdlog` in overlay to fix the bundled `fmt` issue.
 emerge -av spdlog::corcodile sast-evento
 ```
 
-## Development
+## :open_file_folder: Files Produced
+
+### Configuration
+
+The configuration file is located in the config folder. Under normal circumstances, you do not need to modify this file directly. The config folder is located in the following paths:
+
+- Windows: `%TEMP%\NJUPT-SAST-C++\SAST-Evento`
+- macOS & Linux: `$HOME/.config/NJUPT-SAST-C++/SAST-Evento`
+
+### Log
+
+The log file is located in the log folder. Remember to submit the log file when you report bugs. The log folder is located in the following paths:
+
+- Windows: `%TEMP%\NJUPT-SAST\logs`
+- macOS: `$TEMPDIR/NJUPT-SAST/logs`
+- Linux: `/tmp/NJUPT-SAST/logs`
+
+### Cache
+ 
+The cache folder is located in the following paths:
+
+- Windows: `%LocalAppData%\Programs\evento`
+- macOS: `$HOME/Library/Caches/evento`
+- Linux: `$HOME/.cache/evento`
+
+## :triangular_ruler: Development
 
 ### Prerequisites
 
@@ -167,6 +192,23 @@ cmake --preset native -DVCPKG_MANIFEST_FEATURES=qt-from-vcpkg -DVCPKG_TARGET_TRI
 ```
 
 If you want to speed up the build process in **Debug** mode, you can add `-DSPEED_UP_DEBUG_BUILD=ON` option.
+
+## :rainbow: Contributing
+
+Pull requests and any feedback are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+### Thanks to all contributors
+
+[![Contributors](https://contrib.rocks/image?repo=NJUPT-SAST/sast-evento)]("https://github.com/NJUPT-SAST/sast-evento/graphs/contributors")
+
+## :link: Links
+
+### Relative Projects
+
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=NJUPT-SAST&repo=sast-evento-backend)](https://github.com/NJUPT-SAST/sast-evento-backend)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=NJUPT-SAST&repo=sast-evento-mobile)](https://github.com/NJUPT-SAST/sast-evento-mobile)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=NJUPT-SAST&repo=sast-link-backend)](https://github.com/NJUPT-SAST/sast-evento-link)
+[![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=NJUPT-SAST&repo=sast-link)](https://github.com/NJUPT-SAST/sast-link)
 
 ### Project Dependencies
 
