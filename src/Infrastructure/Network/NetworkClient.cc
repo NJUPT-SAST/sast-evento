@@ -196,7 +196,7 @@ Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
                                                       endpoint("/event/list",
                                                                {{"departmentId", ""},
                                                                 {"typeId", ""},
-                                                                {"time", ""}}),
+                                                                {"time", firstDateTimeOfWeek()}}),
                                                       {},
                                                       cacheTtl);
     if (result.isErr())
