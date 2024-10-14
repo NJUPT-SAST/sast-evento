@@ -18,6 +18,7 @@ expire = <date-time>
 minimal-to-tray = <bool>
 notice-begin = <bool>
 notice-end = <bool>
+auto-login = <bool>
 theme = <int>
 */
 
@@ -69,14 +70,7 @@ static void loadSetting() {
     auto noticeBegin = setting["notice-begin"].value_or(false);
     auto noticeEnd = setting["notice-end"].value_or(false);
     auto minimalToTray = setting["minimal-to-tray"].value_or(false);
-    auto autoLogin = setting["auto-login"].value_or(
-#ifdef PLATFORM_WINDOWS
-        false
-#else
-        true
-#endif
-    );
-
+    auto autoLogin = setting["auto-login"].value_or(true);
     evento::settings = {
         .minimalToTray = minimalToTray,
         .noticeBegin = noticeBegin,

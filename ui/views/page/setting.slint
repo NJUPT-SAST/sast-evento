@@ -137,13 +137,6 @@ export component SettingPage inherits Page {
                 }
             }
 
-            if SettingPageBridge.is-windows(): Text {
-                color: Token.color.error;
-                font-size: Token.font.body.small.size;
-                font-weight: Token.font.body.small.weight;
-                text: "*若您是中文用户名，请勿开启自动登录功能，否则会导致程序崩溃";
-            }
-
             SettingItem {
                 name: @tr("磁盘缓存：") + SettingPageBridge.cache-size;
                 Button {

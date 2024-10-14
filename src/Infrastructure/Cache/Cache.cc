@@ -6,6 +6,11 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
+#ifdef PLATFORM_WINDOWS
+#include <shlobj.h>
+#include <windows.h>
+#endif
+
 namespace evento {
 
 namespace fs = std::filesystem;
@@ -31,13 +36,25 @@ bool CacheManager::isExpired(const CacheEntry& entry) {
 std::optional<std::filesystem::path> CacheManager::cacheDir() {
     fs::path cacheFileDir;
 #ifdef PLATFORM_WINDOWS
-    auto localAppData = std::getenv("LOCALAPPDATA");
-    if (localAppData == nullptr) {
+    auto localAppData = []() -> std::optional<std::wstring> {
+        PWSTR path = nullptr;
+        HRESULT hr = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, nullptr, &path);
+        if (SUCCEEDED(hr)) {
+            std::wstring localAppDataPath(path);
+            CoTaskMemFree(path);
+            return localAppDataPath;
+        } else {
+            return std::nullopt;
+        }
+    }();
+    if (!localAppData.has_value()) {
         spdlog::warn("LOCALAPPDATA environment variable not found");
         return std::nullopt;
     }
-    cacheFileDir = fs::path(localAppData) / "Programs" / "evento";
-
+    cacheFileDir = fs::path(localAppData->data()) / L"evento";
+    if (!fs::exists(cacheFileDir) || !fs::is_directory(cacheFileDir)) {
+        fs::create_directory(cacheFileDir);
+    }
 #elif defined(PLATFORM_LINUX)
     auto xdgCacheHome = std::getenv("XDG_CACHE_HOME");
     if (xdgCacheHome == nullptr) {
