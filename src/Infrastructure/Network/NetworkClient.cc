@@ -1004,7 +1004,7 @@ Task<bool> NetworkClient::saveToDisk(std::string const& data, std::filesystem::p
 #else
 
     net::stream_file file(co_await net::this_coro::executor,
-                          path.string().c_str(),
+                          path.string(),
                           net::stream_file::write_only | net::stream_file::create);
     if (!file.is_open()) {
         co_return false;

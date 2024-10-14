@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
     spdlog::info("SAST Evento version: v" VERSION_FULL);
 
 #ifdef PLATFORM_LINUX
-    bindtextdomain("sast-evento", evento::localePath.string().c_str());
+    bindtextdomain("sast-evento", evento::localePath.u8string());
     std::locale::global(std::locale(""));
     spdlog::info("locale: {}", std::locale::global(std::locale("")).name());
 #endif

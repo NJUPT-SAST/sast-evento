@@ -89,7 +89,8 @@ Task<void> DiscoveryPage::loadHomeSlidesTask() {
             co_return;
         }
 
-        auto image = slint::Image::load_from_path(fileResult.unwrap().string().c_str());
+        auto image = slint::Image::load_from_path(
+            slint::SharedString(fileResult.unwrap().u8string()));
         slint::blocking_invoke_from_event_loop(
             [&, &self = *this]() { self->invoke_set_slide(i, image); });
     }

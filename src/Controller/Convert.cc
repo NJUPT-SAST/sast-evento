@@ -97,7 +97,7 @@ std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEnt
 }
 
 ContributorStruct from(const std::filesystem::path& avatar, const std::string& htmlUrl) {
-    return {.avatar = slint::Image::load_from_path(avatar.string().c_str()),
+    return {.avatar = slint::Image::load_from_path(slint::SharedString(avatar.u8string())),
             .html_url = slint::SharedString(htmlUrl)};
 }
 

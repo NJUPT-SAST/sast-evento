@@ -51,8 +51,7 @@ Task<Result<slint::Image>> MenuOverlay::loadUserInfoTask() {
         if (avatar.isErr()) {
             co_return Err(avatar.unwrapErr());
         }
-        co_return Ok(
-            slint::Image::load_from_path(slint::SharedString(avatar.unwrap().string().c_str())));
+        co_return Ok(slint::Image::load_from_path(slint::SharedString(avatar.unwrap().u8string())));
     }
     refreshUserInfo(userInfo);
     bridge.getAccountManager().userInfo() = std::move(userInfo);
@@ -73,7 +72,7 @@ void MenuOverlay::refreshUserInfo(UserInfoEntity const& userInfo) {
                                          return;
                                      }
                                      self->set_user_avatar(slint::Image::load_from_path(
-                                         slint::SharedString(result.unwrap().string().c_str())));
+                                         slint::SharedString(result.unwrap().u8string())));
                                  });
 }
 

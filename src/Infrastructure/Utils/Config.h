@@ -141,7 +141,8 @@ inline void saveConfig() {
                             toml::table{{"minimal-to-tray", settings.minimalToTray},
                                         {"notice-begin", settings.noticeBegin},
                                         {"notice-end", settings.noticeEnd},
-                                        {"theme", settings.theme}});
+                                        {"theme", settings.theme},
+                                        {"auto-login", settings.autoLogin}});
     ofs << config;
 }
 
