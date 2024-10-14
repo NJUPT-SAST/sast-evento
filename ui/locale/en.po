@@ -186,17 +186,22 @@ msgstr "It will take effect on next startup"
 #: views/page/setting.slint:95
 msgctxt "SettingPage"
 msgid "活动开始前提醒"
-msgstr "Remind before event"
+msgstr "Remind Before Event"
 
 #: views/page/setting.slint:105
 msgctxt "SettingPage"
 msgid "活动结束后提醒反馈"
-msgstr "Remind after event"
+msgstr "Remind After Event"
 
 #: views/page/setting.slint:115
 msgctxt "SettingPage"
 msgid "关闭窗口后最小化到托盘"
 msgstr "Minimal to Tray"
+
+#: views/page/setting.slint:131
+msgctxt "SettingPage"
+msgid "自动登录"
+msgstr "Auto Login"
 
 #: views/page/setting.slint:127
 msgctxt "SettingPage"

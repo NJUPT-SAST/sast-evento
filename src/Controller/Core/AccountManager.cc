@@ -248,6 +248,10 @@ void AccountManager::setNetworkAccessToken(std::string accessToken) {
 
 #ifdef EVENTO_API_V1
 std::optional<std::string> AccountManager::getKeychainAccessToken() const {
+    if (!settings.autoLogin) {
+        return std::nullopt;
+    }
+
     keychain::Error err;
     auto accessToken = keychain::getPassword(package, service, _userInfo.id, err);
 
@@ -265,6 +269,9 @@ std::optional<std::string> AccountManager::getKeychainAccessToken() const {
 }
 
 void AccountManager::setKeychainAccessToken(const std::string& accessToken) const {
+    if (!settings.autoLogin) {
+        return;
+    }
     keychain::Error err;
     keychain::setPassword(package, service, _userInfo.id, accessToken, err);
 

@@ -8,6 +8,7 @@ export global SettingPageBridge {
     in-out property <bool> notice-begin;
     in-out property <bool> notice-end;
     in-out property <bool> minimal-to-tray;
+    in-out property <bool> auto-login;
     in property <string> cache-size: "0B";
     public function change-theme() {
         if (theme-index == 1) {
@@ -20,7 +21,9 @@ export global SettingPageBridge {
     callback notice-begin-changed();
     callback notice-end-changed();
     callback minimal-to-tray-changed();
+    callback auto-login-changed();
     callback clear-cache();
+    pure callback is-windows() -> bool;
 }
 
 component SettingItem inherits Rectangle {
@@ -112,6 +115,8 @@ export component SettingPage inherits Page {
                 }
             }
 
+            Divider { }
+
             SettingItem {
                 name: @tr("关闭窗口后最小化到托盘");
                 Switch {
@@ -122,7 +127,22 @@ export component SettingPage inherits Page {
                 }
             }
 
-            Divider { }
+            SettingItem {
+                name: @tr("自动登录");
+                Switch {
+                    checked <=> SettingPageBridge.auto-login;
+                    toggled => {
+                        SettingPageBridge.auto-login-changed();
+                    }
+                }
+            }
+
+            if SettingPageBridge.is-windows(): Text {
+                color: Token.color.error;
+                font-size: Token.font.body.small.size;
+                font-weight: Token.font.body.small.weight;
+                text: "*若您是中文用户名，请勿开启自动登录功能，否则会导致程序崩溃";
+            }
 
             SettingItem {
                 name: @tr("磁盘缓存：") + SettingPageBridge.cache-size;

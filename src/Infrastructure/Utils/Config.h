@@ -47,6 +47,7 @@ inline struct Settings {
     bool minimalToTray;
     bool noticeBegin;
     bool noticeEnd;
+    bool autoLogin;
     int theme;
 } settings;
 
@@ -68,11 +69,19 @@ static void loadSetting() {
     auto noticeBegin = setting["notice-begin"].value_or(false);
     auto noticeEnd = setting["notice-end"].value_or(false);
     auto minimalToTray = setting["minimal-to-tray"].value_or(false);
+    auto autoLogin = setting["auto-login"].value_or(
+#ifdef PLATFORM_WINDOWS
+        false
+#else
+        true
+#endif
+    );
 
     evento::settings = {
         .minimalToTray = minimalToTray,
         .noticeBegin = noticeBegin,
         .noticeEnd = noticeEnd,
+        .autoLogin = autoLogin,
         .theme = themeIdx,
     };
 }

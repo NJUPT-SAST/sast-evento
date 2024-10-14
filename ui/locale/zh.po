@@ -198,6 +198,11 @@ msgctxt "SettingPage"
 msgid "关闭窗口后最小化到托盘"
 msgstr "关闭窗口后最小化到托盘"
 
+#: views/page/setting.slint:131
+msgctxt "SettingPage"
+msgid "自动登录"
+msgstr "自动登录"
+
 #: views/page/setting.slint:127
 msgctxt "SettingPage"
 msgid "磁盘缓存："
