@@ -6,6 +6,7 @@
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <chrono>
+#include <slint.h>
 
 EVENTO_UI_START
 
@@ -53,7 +54,7 @@ Task<Result<slint::Image>> MenuOverlay::loadUserInfoTask() {
         }
         co_return Ok(slint::Image::load_from_path(slint::SharedString(avatar.unwrap().u8string())));
     }
-    refreshUserInfo(userInfo);
+    slint::blocking_invoke_from_event_loop([&] { refreshUserInfo(userInfo); });
     bridge.getAccountManager().userInfo() = std::move(userInfo);
     co_return Err(Error(Error::Data, "User avatar not found"));
 }
