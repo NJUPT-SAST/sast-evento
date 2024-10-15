@@ -64,6 +64,7 @@ target_link_libraries(${PROJECT_NAME}
     Boost::system
     Boost::filesystem
     Boost::url
+    Boost::stacktrace
     OpenSSL::Crypto
     OpenSSL::SSL
     nlohmann_json::nlohmann_json
