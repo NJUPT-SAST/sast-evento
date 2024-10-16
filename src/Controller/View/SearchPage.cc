@@ -4,6 +4,7 @@
 #include <Controller/View/SearchPage.h>
 #include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
+#include <boost/algorithm/string.hpp>
 #include <ranges>
 
 EVENTO_UI_START
@@ -16,7 +17,13 @@ void SearchPage::onCreate() {
     auto& self = *this;
 
     self->on_filter_department([&self = *this](slint::SharedString keyword) {
-        auto isMatch = [&keyword](slint::SharedString item) { return item.starts_with(keyword); };
+        auto isMatch = [&keyword](slint::SharedString item) {
+            std::string lowerKeyword = keyword.data();
+            std::string lowerItem = item.data();
+            boost::to_lower(lowerKeyword);
+            boost::to_lower(lowerItem);
+            return std::string_view(lowerItem).find(lowerKeyword) != std::string::npos;
+        };
 
         std::vector<slint::StandardListViewItem> results;
 
