@@ -1,5 +1,6 @@
 #include <Controller/Convert.h>
 #include <Infrastructure/Utils/Tools.h>
+#include <boost/algorithm/string.hpp>
 #include <spdlog/spdlog.h>
 
 namespace evento::convert {
@@ -69,6 +70,7 @@ slint::SharedString firstUnicode(const std::string& str) {
 } // namespace details
 
 EventStruct from(const EventEntity& entity) {
+    boost::algorithm::trim(entity.summary);
     return {
         .id = entity.id,
         .summary = slint::SharedString(entity.summary),

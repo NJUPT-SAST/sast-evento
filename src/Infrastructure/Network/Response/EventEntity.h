@@ -9,7 +9,7 @@ namespace evento {
 
 struct EventEntity {
     int id;
-    std::string summary;
+    mutable std::string summary;
     std::string description;
     std::string start;
     std::string end;
