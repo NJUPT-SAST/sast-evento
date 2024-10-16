@@ -41,7 +41,6 @@ mkdir -p "$TMP_DIR/usr/share/applications"
 cat > "$TMP_DIR/usr/share/applications/sast-evento.desktop" << EOF
 [Desktop Entry]
 Name=SAST Evento
-Version=$VERSION
 Comment=An event management system developed and used by NJUPT SAST
 Exec=sast-evento
 Icon=sast-evento

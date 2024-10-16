@@ -12,7 +12,6 @@ depends=(qt6-base)
 provides=(sast-evento)
 conflicts=(sast-evento)
 package() {
-  eventover=$(cat "${srcdir}/sast-evento-version.txt")
   mkdir -p "${pkgdir}/opt/sast-evento"
   bsdtar --numeric-owner --group=0 --owner=0 -xzf "${srcdir}/files.tar.gz" -C "${pkgdir}/opt/sast-evento"
   install -D -m644 "${srcdir}/icon.svg" "${pkgdir}/usr/share/icons/hicolor/scalable/apps/sast-evento.svg"
@@ -20,7 +19,6 @@ package() {
   cat > "${pkgdir}/usr/share/applications/sast-evento.desktop" << EOF
 [Desktop Entry]
 Name=SAST Evento
-Version=${eventover}
 Comment=An event management system developed and used by NJUPT SAST
 Exec=sast-evento
 Icon=sast-evento
