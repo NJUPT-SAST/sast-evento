@@ -1,6 +1,7 @@
 #include <Controller/Convert.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <boost/algorithm/string.hpp>
+#include <ranges>
 #include <spdlog/spdlog.h>
 
 namespace evento::convert {
@@ -90,9 +91,21 @@ EventStruct from(const EventEntity& entity) {
 }
 
 std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEntity>& list) {
+    auto transformedList = list | std::views::transform([&](const EventEntity& entity) {
+                               auto startTime = parseIso8601Utc(entity.start.c_str());
+                               auto startDuration = std::chrono::system_clock::from_time_t(startTime)
+                                                    - std::chrono::system_clock::now();
+                               return std::make_pair(std::chrono::abs(startDuration),
+                                                     std::cref(entity));
+                           });
+
+    std::map<std::chrono::duration<double>, std::reference_wrapper<const EventEntity>>
+        sortedList(transformedList.begin(), transformedList.end());
+
     std::vector<EventStruct> model;
     model.reserve(list.size());
-    for (auto& entity : list) {
+
+    for (const auto& [_, entity] : sortedList) {
         model.push_back(from(entity));
     }
     return std::make_shared<slint::VectorModel<EventStruct>>(model);
