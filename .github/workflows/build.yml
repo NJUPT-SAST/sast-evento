@@ -372,49 +372,46 @@ jobs:
           path: ./artifacts
 
       - name: Organize artifacts
-        shell: pwsh
+        shell: bash
         run: |
-          Set-Location ./artifacts
-
-          $version = "unknown"
-          if (Test-Path ./files-linux-x64/files.tar.gz) {
-            tar -xzf ./files-linux-x64/files.tar.gz ./sast-evento-version.txt
-            if (Test-Path ./sast-evento-version.txt) {
-              $version = Get-Content -Path ./sast-evento-version.txt
-              Remove-Item -Force ./sast-evento-version.txt
-            }
-          }
-          Write-Host "SAST Evento Version: $version"
-
-          Remove-Item -Force -Recurse ./files-*
-
-          Get-ChildItem -Directory -Path . | ForEach-Object {
-            Write-Host "Processing $($_.Name)"
-
-            $newName = "sast-evento-$version-$($_.Name)"
-            Rename-Item -Path $_.FullName -NewName $newName
-
-            $dirPath = Split-Path -Path $_.FullName -Parent
-            $dirPath = Join-Path -Path $dirPath -ChildPath $newName
-
-            $items = Get-ChildItem -Path $dirPath
-            if ($items.Count -eq 1 -and $items[0] -is [System.IO.FileInfo]) {
-              $singleFile = $items[0]
-              $newFilePath = if ($singleFile.Name -match '\.pkg\.tar\.zst$') {
-                "$dirPath.pkg.tar.zst"
-              } else {
-                "$dirPath" + $singleFile.Extension
-              }
-              Move-Item -Path $singleFile.FullName -Destination $newFilePath
-            } else {
-              $zipPath = "$dirPath.zip"
-              Compress-Archive -Path $dirPath -DestinationPath $zipPath
-            }
-            Remove-Item -Path $dirPath -Recurse
-          }
-
-          Write-Host "Artifacts are ready"
-          Get-ChildItem -Path . -Recurse
+          cd "${GITHUB_ACTION_PATH}/artifacts" || exit 1
+          version="unknown"
+          if [[ -f ./files-linux-x64/files.tar.gz ]]; then
+              # 解压版本文件
+              tar -xzf ./files-linux-x64/files.tar.gz ./sast-evento-version.txt
+              if [[ -f ./sast-evento-version.txt ]]; then
+                  # 设置版本号
+                  version=$(cat ./sast-evento-version.txt)
+                  rm -f ./sast-evento-version.txt
+              fi
+          fi
+          echo "SAST Evento Version: $version"
+          rm -rf ./files-*
+          # 处理文件
+          for dir in */; do
+              echo "Processing $dir"
+              new_name="sast-evento-$version-${dir%/}"
+              mv "$dir" "$new_name"
+              # Change to the new directory name
+              items=("$new_name"/*)
+              if [[ ${#items[@]} -eq 1 && -f ${items[0]} ]]; then
+                  single_file=${items[0]}
+                  if [[ $single_file =~ \.pkg\.tar\.zst$ ]]; then
+                      new_file_path="$new_name.pkg.tar.zst"
+                  else
+                      new_file_path="$new_name${single_file##*.}"
+                  fi
+                  mv "$single_file" "$new_file_path"
+              else
+                  zip_path="$new_name.zip"
+                  zip -r "$zip_path" "$new_name"
+              fi
+              rm -rf "$new_name"
+          done
+          # Generate SHA256 hash and save it to a file
+          sha256sum * > sha256sums.txt
+          echo "Artifacts are ready"
+          ls -lh
 
       - name: Release (GitHub)
         uses: ncipollo/release-action@v1
