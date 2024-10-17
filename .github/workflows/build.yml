@@ -374,7 +374,7 @@ jobs:
       - name: Organize artifacts
         shell: bash
         run: |
-          cd "${GITHUB_ACTION_PATH}/artifacts" || exit 1
+          cd "${GITHUB_WORKSPACE}/artifacts" || exit 1
           version="unknown"
           if [[ -f ./files-linux-x64/files.tar.gz ]]; then
               # 解压版本文件
