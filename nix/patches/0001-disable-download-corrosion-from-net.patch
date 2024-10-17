@@ -1,0 +1,19 @@
+diff --git a/api/cpp/CMakeLists.txt b/api/cpp/CMakeLists.txt
+index 14e646180..80897ad0c 100644
+--- a/api/cpp/CMakeLists.txt
++++ b/api/cpp/CMakeLists.txt
+@@ -9,14 +9,6 @@ project(Slint HOMEPAGE_URL "https://slint.dev/" LANGUAGES C CXX VERSION 1.9.0)
+ include(FeatureSummary)
+ include(CMakeDependentOption)
+ 
+-include(FetchContent)
+-FetchContent_Declare(
+-    Corrosion
+-    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+-    GIT_TAG v0.4.9
+-)
+-FetchContent_MakeAvailable(Corrosion)
+-
+ list(PREPEND CMAKE_MODULE_PATH ${Corrosion_SOURCE_DIR}/cmake)
+ find_package(Rust 1.77 REQUIRED MODULE)
+ 
