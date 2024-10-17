@@ -69,6 +69,8 @@ void SearchPage::loadDepartmentList() {
                 self.departments.emplace_back(entity.name);
             }
 
+            std::sort(self.departments.begin(), self.departments.end());
+
             std::vector<slint::StandardListViewItem> model;
 
             model.reserve(self.departments.size());
