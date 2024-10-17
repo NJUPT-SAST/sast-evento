@@ -300,6 +300,7 @@ jobs:
       run: |
         mv ./files.tar.gz ./deploy/pacman/files.tar.gz
         cp ./ui/assets/image/icon/evento.svg ./deploy/pacman/icon.svg
+        cp ./deploy/sast-evento.desktop ./deploy/pacman/sast-evento.desktop
         cat | docker run -i --rm -v $(pwd)/deploy/pacman:/pkg -w /pkg archlinux/archlinux:base-devel /bin/bash -e << EOF
           useradd build -m
           passwd -d build

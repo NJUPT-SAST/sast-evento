@@ -36,20 +36,7 @@ EOF
 
 mkdir -p "$TMP_DIR/usr/share/icons/hicolor/scalable/apps"
 install -D -m644 "$SCRIPTPATH/../ui/assets/image/icon/evento.svg" "$TMP_DIR/usr/share/icons/hicolor/scalable/apps/sast-evento.svg"
-
-mkdir -p "$TMP_DIR/usr/share/applications"
-cat > "$TMP_DIR/usr/share/applications/sast-evento.desktop" << EOF
-[Desktop Entry]
-Name=SAST Evento
-Comment=An event management system developed and used by NJUPT SAST
-Exec=sast-evento
-Icon=sast-evento
-Terminal=false
-Type=Application
-Categories=Education;
-Terminal=false
-EOF
-chmod 644 "$TMP_DIR/usr/share/applications/sast-evento.desktop"
+install -D -m644 "$SCRIPTPATH/sast-evento.desktop" "$TMP_DIR/usr/share/applications/sast-evento.desktop"
 
 dpkg-deb --build "$TMP_DIR" "sast-evento.deb"
 rm -rf "${TMP_DIR:?}"
