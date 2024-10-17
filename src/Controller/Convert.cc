@@ -34,6 +34,14 @@ slint::SharedString convertTimeRange(const std::string& startTimeStr,
                                                endDate.tm_year + 1900,
                                                endStr)};
     }
+
+    auto now = std::chrono::system_clock::now();
+    auto nowTimeT = std::chrono::system_clock::to_time_t(now);
+    auto nowDate = *std::gmtime(&nowTimeT);
+    if (startDate.tm_year != nowDate.tm_year) {
+        startStr = std::format("{:04}.{}", startDate.tm_year + 1900, startStr);
+    }
+
     if (startDate.tm_mon != endDate.tm_mon || startDate.tm_mday != endDate.tm_mday) {
         return slint::SharedString{startStr + " - " + endStr};
     }
