@@ -165,6 +165,7 @@ void AccountManager::tryLoginDirectly() {
     }
 
     spdlog::info("Try login directly, expired time: {}", _expiredTime.time_since_epoch().count());
+    self->set_loading(true);
 
 #ifdef EVENTO_API_V1
     if (auto token = getKeychainAccessToken()) {
@@ -179,6 +180,7 @@ void AccountManager::tryLoginDirectly() {
     }
 #endif
     else {
+        self->set_loading(false);
         self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
     }
 }
@@ -289,6 +291,7 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
 
 void AccountManager::setLoginState(bool newState) {
     auto& self = *this;
+    self->set_loading(false);
     if (_loginState != newState) {
         _loginState = newState;
         self->set_is_login(newState);

@@ -1,5 +1,6 @@
 export global AccountManagerBridge {
     in-out property <bool> is-login;
+    in-out property <bool> loading: false;
     callback request-login();
     callback request-logout();
 }
