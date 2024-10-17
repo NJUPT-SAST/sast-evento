@@ -26,7 +26,7 @@ mkdir -p "$TMP_DIR/DEBIAN"
 cat > "$TMP_DIR/DEBIAN/control" << EOF
 Package: sast-evento
 Version: $VERSION
-Architecture: x64
+Architecture: amd64
 Priority: optional
 Essential: no
 Depends: libqt6network6, libqt6widgets6
