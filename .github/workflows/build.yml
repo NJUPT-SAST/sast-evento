@@ -54,7 +54,7 @@ jobs:
       if: startsWith(matrix.rid, 'macos-')
       uses: KyleMayes/install-llvm-action@v2
       with:
-        version: "17"
+        version: "15"
 
     - name: Setup toolchains for building Qt
       if: ${{ !matrix.qt_arch }}
