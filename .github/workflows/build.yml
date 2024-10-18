@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [linux-x64, win-x64, macos-arm64]
+        rid: [linux-x64, win-x64, macos-arm64, macos-x64]
         include:
         - rid: linux-x64
           rust_target: x86_64-unknown-linux-gnu
@@ -30,6 +30,9 @@ jobs:
         - rid: macos-arm64
           rust_target: aarch64-apple-darwin
           os: macos-latest
+        - rid: macos-x64
+          rust_target: x86_64-apple-darwin
+          os: macos-13
 
     steps:
     - name: Checkout repository
@@ -46,6 +49,12 @@ jobs:
       with:
         version: 14
         platform: x64
+
+    - name: Install LLVM and Clang
+      if: startsWith(matrix.rid, 'macos-')
+      uses: KyleMayes/install-llvm-action@v2
+      with:
+        version: "18.1"
 
     - name: Setup toolchains for building Qt
       if: ${{ !matrix.qt_arch }}
@@ -323,7 +332,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [macos-arm64]
+        rid: [macos-arm64, macos-x64]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
