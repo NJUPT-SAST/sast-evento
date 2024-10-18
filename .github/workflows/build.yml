@@ -28,7 +28,14 @@ jobs:
           vcpkg_target_triplet: 'x64-windows-static-md'
           os: windows-latest
         - rid: macos-arm64
+          osx_arch: arm64
           rust_target: aarch64-apple-darwin
+          vcpkg_target_triplet: 'arm64-osx'
+          os: macos-latest
+        - rid: macos-x64
+          osx_arch: x86_64
+          rust_target: x86_64-apple-darwin
+          vcpkg_target_triplet: 'x64-osx'
           os: macos-latest
 
     steps:
@@ -112,12 +119,20 @@ jobs:
         $rid = '${{ matrix.rid }}'
         $vcpkgTargetTriplet = '${{ matrix.vcpkg_target_triplet }}'
         $qtArch = '${{ matrix.qt_arch }}'
+        $osxArch = '${{ matrix.osx_arch }}'
         $additionalConfigureArgs = @()
         if ($rid.StartsWith('win-')) {
           $vsPath = &(Join-Path ${env:ProgramFiles(x86)} "\Microsoft Visual Studio\Installer\vswhere.exe") -property installationpath
           Import-Module (Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll")
           Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments '-arch=${{ matrix.msvc_arch }} -host_arch=x64'
           $additionalConfigureArgs += '-DPKG_CONFIG_EXECUTABLE:FILEPATH=./build/vcpkg_installed/x64-windows/tools/pkgconf/pkgconf.exe'
+        }
+        if ($osxArch) {
+          $additionalConfigureArgs += "-DCMAKE_OSX_ARCHITECTURES=$osxArch"
+
+          # For https://github.com/rust-skia/rust-skia
+          $env:CLANGCC = "clang -arch $osxArch"
+          $env:CLANGCXX = "clang++ -arch $osxArch"
         }
         if ($vcpkgTargetTriplet) {
           $additionalConfigureArgs += "-DVCPKG_TARGET_TRIPLET:STRING=$vcpkgTargetTriplet"
@@ -323,7 +338,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rid: [macos-arm64]
+        rid: [macos-arm64, macos-x64]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
