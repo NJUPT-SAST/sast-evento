@@ -73,7 +73,7 @@ jobs:
       uses: jurplel/install-qt-action@v4
       if: matrix.qt_arch
       with:
-        version: '6.6.3'
+        version: '6.2.0'
         arch: ${{ matrix.qt_arch }}
         cache: true
 
