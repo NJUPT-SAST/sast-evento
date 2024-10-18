@@ -1,6 +1,7 @@
 #include <Infrastructure/Network/HttpsAccessManager.h>
 #include <Infrastructure/Utils/Result.h>
 #include <boost/asio/error.hpp>
+#include <boost/beast/http/field.hpp>
 #include <boost/beast/ssl.hpp>
 #include <boost/system/system_error.hpp>
 #include <chrono>
@@ -83,11 +84,16 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     // Gracefully close the stream - do not threat every error as an exception!
     auto [ec] = co_await stream.async_shutdown(net::as_tuple(net::use_awaitable));
     if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated)
-        || ec == beast::error::timeout)
+        || ec == beast::error::timeout) {
         // If we get here then the connection is closed gracefully
+        if (res.result() == http::status::found) {
+            auto location = res.base().at("Location");
+            req.set(http::field::host, location);
+            co_return co_await makeReply(location, req);
+        }
         co_return Ok(res);
+    }
 
     co_return Err(Error(Error::Network, ec.message()));
 }
-
 } // namespace evento
