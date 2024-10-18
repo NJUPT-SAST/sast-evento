@@ -400,7 +400,7 @@ jobs:
                   if [[ $single_file =~ \.pkg\.tar\.zst$ ]]; then
                       new_file_path="$new_name.pkg.tar.zst"
                   else
-                      new_file_path="$new_name${single_file##*.}"
+                      new_file_path="$new_name.${single_file##*.}"
                   fi
                   mv "$single_file" "$new_file_path"
               else
