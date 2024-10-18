@@ -10,7 +10,21 @@
 #include <locale>
 #endif
 
+#include "Infrastructure/System/Crash.h"
+#include "Infrastructure/System/Signal.h"
+
+void signalCallback(int signal) {
+    std::string msg = "Signal " + std::to_string(signal) + " received.";
+    saveCrashLog(msg);
+}
+
 int main(int argc, char** argv) {
+    SignalHandler::getInstance().registerHandler(SIGABRT, signalCallback);
+    SignalHandler::getInstance().registerHandler(SIGSEGV, signalCallback);
+
+    // 触发一个段错误来测试
+    int* ptr = nullptr;
+    *ptr = 1;  // 这里会触发SIGSEGV
     Logger logger(
 #ifdef EVENTO_DEBUG
         Logger::Level::debug,

@@ -64,7 +64,7 @@ endif (NOT Slint_FOUND)
 
 # find vcpkg-installed
 find_package(spdlog REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system url filesystem)
+find_package(Boost REQUIRED COMPONENTS system url filesystem stacktrace)
 find_package(OpenSSL 3.3.0 REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(PkgConfig REQUIRED)
