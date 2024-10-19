@@ -1,5 +1,7 @@
 #include <Controller/Convert.h>
 #include <Infrastructure/Utils/Tools.h>
+#include <boost/algorithm/string.hpp>
+#include <ranges>
 #include <spdlog/spdlog.h>
 
 namespace evento::convert {
@@ -32,6 +34,14 @@ slint::SharedString convertTimeRange(const std::string& startTimeStr,
                                                endDate.tm_year + 1900,
                                                endStr)};
     }
+
+    auto now = std::chrono::system_clock::now();
+    auto nowTimeT = std::chrono::system_clock::to_time_t(now);
+    auto nowDate = *std::gmtime(&nowTimeT);
+    if (startDate.tm_year != nowDate.tm_year) {
+        startStr = std::format("{:04}.{}", startDate.tm_year + 1900, startStr);
+    }
+
     if (startDate.tm_mon != endDate.tm_mon || startDate.tm_mday != endDate.tm_mday) {
         return slint::SharedString{startStr + " - " + endStr};
     }
@@ -69,6 +79,7 @@ slint::SharedString firstUnicode(const std::string& str) {
 } // namespace details
 
 EventStruct from(const EventEntity& entity) {
+    boost::algorithm::trim(entity.summary);
     return {
         .id = entity.id,
         .summary = slint::SharedString(entity.summary),
@@ -88,9 +99,21 @@ EventStruct from(const EventEntity& entity) {
 }
 
 std::shared_ptr<slint::VectorModel<EventStruct>> from(const std::vector<EventEntity>& list) {
+    auto transformedList = list | std::views::transform([&](const EventEntity& entity) {
+                               auto startTime = parseIso8601Utc(entity.start.c_str());
+                               auto startDuration = std::chrono::system_clock::from_time_t(startTime)
+                                                    - std::chrono::system_clock::now();
+                               return std::make_pair(std::chrono::abs(startDuration),
+                                                     std::cref(entity));
+                           });
+
+    std::map<std::chrono::duration<double>, std::reference_wrapper<const EventEntity>>
+        sortedList(transformedList.begin(), transformedList.end());
+
     std::vector<EventStruct> model;
     model.reserve(list.size());
-    for (auto& entity : list) {
+
+    for (const auto& [_, entity] : sortedList) {
         model.push_back(from(entity));
     }
     return std::make_shared<slint::VectorModel<EventStruct>>(model);

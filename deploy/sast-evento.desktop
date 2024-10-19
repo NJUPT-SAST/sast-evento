@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=SAST Evento
+Comment=An event management system developed and used by NJUPT SAST
+Exec=sast-evento
+Icon=sast-evento
+Terminal=false
+Type=Application
+Categories=Education;

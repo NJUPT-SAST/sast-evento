@@ -91,16 +91,16 @@ emerge -av spdlog::corcodile sast-evento
 
 ### Configuration
 
-The configuration file is located in the config folder. Under normal circumstances, you do not need to modify this file directly. The config folder is located in the following paths:
+Under normal circumstances, you do not need to modify this file directly. The configuration file is located in the following paths:
 
-- Windows: `%TEMP%\NJUPT-SAST-C++\SAST-Evento`
-- macOS & Linux: `$HOME/.config/NJUPT-SAST-C++/SAST-Evento`
+- Windows: `%AppData%\Local\NJUPT-SAST-C++\SAST-Evento\config.toml`
+- macOS & Linux: `$HOME/.config/NJUPT-SAST-C++/SAST-Evento/config.toml`
 
 ### Log
 
 The log file is located in the log folder. Remember to submit the log file when you report bugs. The log folder is located in the following paths:
 
-- Windows: `%TEMP%\NJUPT-SAST\logs`
+- Windows: `%Temp%\NJUPT-SAST\logs`
 - macOS: `$TEMPDIR/NJUPT-SAST/logs`
 - Linux: `/tmp/NJUPT-SAST/logs`
 
@@ -108,7 +108,7 @@ The log file is located in the log folder. Remember to submit the log file when 
  
 The cache folder is located in the following paths:
 
-- Windows: `%LocalAppData%\Programs\evento`
+- Windows: `%LocalAppData%\evento`
 - macOS: `$HOME/Library/Caches/evento`
 - Linux: `$HOME/.cache/evento`
 

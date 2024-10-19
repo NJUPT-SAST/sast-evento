@@ -27,15 +27,15 @@
 
 ## :pushpin: 简介
 
-SAST Evento 是一个为 SAST 设计的活动管理系统。在我们的活动中，我们经常遇到以下问题：
+SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程中一般都会遇到下面的问题：
 
-- 活动信息的收集仍然通过传统的共享电子表格进行，效率低下。
-- 需要手动调查以解决活动安排和场地可用性冲突。
-- 活动日程模板需要每周手动更新，无法自动生成。
-- 学生的参与度和反馈不高，活动的成果无法量化。
-- 缺乏对活动的高质量反馈。
+- 活动信息收集仍然通过传统的共享表格，效率低
+- 活动时间安排冲突需要手动排查、活动场地冲突也要手动排查
+- 活动计划表虽然模板一样，但是每周都需要人手动更新，没法自动生成
+- 同学们活动没有的反馈不高，活动完的收获没法量化
+- 活动的质量没有比较好的反馈
 
-为了解决这些问题，我们决定在 SoC 期间开发一个活动辅助系统，帮助部门负责人和指导老师顺利管理日常活动，减少沟通负担。
+针对上面的问题，我们决定 SoC 期间制作一个活动辅助系统帮助部长和讲师们更加顺畅地完成日常活动，减少沟通负担。
 
 这个项目是 SAST Evento 的桌面客户端版本。
 
@@ -91,16 +91,16 @@ emerge -av spdlog::corcodile sast-evento
 
 ### 配置
 
-配置文件位于 config 文件夹中。在正常情况下，您不需要直接修改此文件。config 文件夹位于以下路径：
+在通常情况下，您不需要直接修改此文件。配置文件位于以下路径：
 
-- Windows: `%TEMP%\NJUPT-SAST-C++\SAST-Evento`
-- macOS 和 Linux: `$HOME/.config/NJUPT-SAST-C++/SAST-Evento`
+- Windows: `%AppData%\Local\NJUPT-SAST-C++\SAST-Evento\config.toml`
+- macOS 和 Linux: `$HOME/.config/NJUPT-SAST-C++/SAST-Evento/config.toml`
 
 ### 日志
 
 日志文件位于 log 文件夹中。报告错误时请提交日志文件。log 文件夹位于以下路径：
 
-- Windows: `%TEMP%\NJUPT-SAST\logs`
+- Windows: `%Temp%\NJUPT-SAST\logs`
 - macOS: `$TEMPDIR/NJUPT-SAST/logs`
 - Linux: `/tmp/NJUPT-SAST/logs`
 
@@ -108,7 +108,7 @@ emerge -av spdlog::corcodile sast-evento
 
 缓存文件夹位于以下路径：
 
-- Windows: `%LocalAppData%\Programs\evento`
+- Windows: `%LocalAppData%\evento`
 - macOS: `$HOME/Library/Caches/evento`
 - Linux: `$HOME/.cache/evento`
 
@@ -144,7 +144,7 @@ git clone --recursive https://github.com/NJUPT-SAST/sast-evento.git
 git submodule update --init --recursive
 ```
 
- ### 提交检查钩子
+ ### 提交检查 Hook
 
 此项目使用 [pre-commit](https://pre-commit.com/) 进行提交检查，以确保代码风格一致性。请先安装 pre-commit 工具：
 

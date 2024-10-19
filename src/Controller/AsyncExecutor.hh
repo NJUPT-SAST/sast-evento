@@ -148,7 +148,10 @@ private:
     AsyncExecutor() {
         _iocThread = std::thread([this] {
             net::signal_set signals{_ioc, SIGINT, SIGTERM};
-            signals.async_wait([&](auto, auto) { _ioc.stop(); });
+            signals.async_wait([&](auto, auto) {
+                _ioc.stop();
+                slint::quit_event_loop();
+            });
             net::executor_work_guard<decltype(_ioc.get_executor())> work{_ioc.get_executor()};
             _ioc.run();
         });

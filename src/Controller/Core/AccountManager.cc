@@ -158,11 +158,14 @@ void AccountManager::tryLoginDirectly() {
     if (isLogin()) {
         return;
     }
+    auto& self = *this;
     if (std::chrono::system_clock::now() + 15min < _expiredTime) {
-        auto& self = *this;
         self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
         return;
     }
+
+    spdlog::info("Try login directly, expired time: {}", _expiredTime.time_since_epoch().count());
+    self->set_loading(true);
 
 #ifdef EVENTO_API_V1
     if (auto token = getKeychainAccessToken()) {
@@ -171,13 +174,15 @@ void AccountManager::tryLoginDirectly() {
         performGetUserInfo();
     }
 #else
-    spdlog::info("Try login directly, expired time: {}", expiredTime.time_since_epoch().count());
-
     // If the token is not expired after 15min, we don't need to login again
     if (getKeychainRefreshToken()) {
         performRefreshToken();
     }
 #endif
+    else {
+        self->set_loading(false);
+        self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
+    }
 }
 
 UserInfoEntity& AccountManager::userInfo() {
@@ -286,6 +291,7 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
 
 void AccountManager::setLoginState(bool newState) {
     auto& self = *this;
+    self->set_loading(false);
     if (_loginState != newState) {
         _loginState = newState;
         self->set_is_login(newState);

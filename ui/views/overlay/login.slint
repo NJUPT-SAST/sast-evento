@@ -2,7 +2,7 @@ import { Token } from "../../global.slint";
 import { Overlay, Empty, StyledText } from "../../components/index.slint";
 import { ViewManager, MessageManager, MessageType, AccountManagerBridge } from "../../logic/index.slint";
 import { SButton } from "../../modules/surrealism-ui/index.slint";
-import { Button, ButtonType } from "../../components/index.slint";
+import { Button, ButtonType, LoadingAnimation } from "../../components/index.slint";
 
 export global LoginOverlayBridge {
     in-out property <string> version:"v0.0.0-00000000";
@@ -72,7 +72,8 @@ export component LoginOverlay inherits Overlay {
                     icon-size: 31px;
                     filled-surface: Token.color.inverse-surface;
                     filled-on-surface: Token.color.inverse-on-surface;
-                    Path {
+                    // disable: AccountManagerBridge.loading;
+                    if !AccountManagerBridge.loading: Path {
                         width: 31px;
                         height: 26px;
                         viewbox-width: 31;
@@ -81,6 +82,9 @@ export component LoginOverlay inherits Overlay {
                         stroke: parent.filled-on-surface;
                         stroke-width: 2px;
                         fill-rule: FillRule.evenodd;
+                    }
+                    if AccountManagerBridge.loading: LoadingAnimation {
+                        color: parent.filled-on-surface;
                     }
 
                     clicked => {

@@ -26,6 +26,7 @@ void LoginOverlay::onShow() {
 }
 
 void LoginOverlay::onLogin() {
+    auto& self = *this;
     if (bridge.getViewManager().isVisible(ViewName::LoginOverlay)) {
         bridge.getViewManager().priorView();
     }
