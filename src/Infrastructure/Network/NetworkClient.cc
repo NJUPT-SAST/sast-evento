@@ -25,81 +25,12 @@ NetworkClient* NetworkClient::getInstance() {
     return &s_instance;
 }
 
-#ifdef EVENTO_API_V1
-static EventQueryRes eventEntityListV1ToV2(std::vector<EventEntityV1> const& listV1) {
-    std::vector<EventEntity> listV2;
-    for (auto const& entityV1 : listV1) {
-        std::string departmentNames;
-        for (auto const& department : entityV1.departments) {
-            departmentNames += department.departmentName + " ";
-        }
-
-        State state;
-        switch (entityV1.state) {
-        case StateV1::Uninitialized:
-        case StateV1::Before:
-        case StateV1::Registration:
-            state = State::SigningUp;
-            break;
-        case StateV1::Ongoing:
-            state = State::Active;
-            break;
-        case StateV1::Cancelled:
-            state = State::Cancelled;
-            break;
-        case StateV1::Over:
-            state = State::Completed;
-            break;
-        }
-
-        listV2.emplace_back(EventEntity{
-            .id = entityV1.id,
-            .summary = entityV1.title,
-            .description = entityV1.description,
-            .start = entityV1.gmtEventStart,
-            .end = entityV1.gmtEventEnd,
-            .location = entityV1.location,
-            .tag = entityV1.tag,
-            .larkDepartmentName = departmentNames,
-            .state = state,
-        });
-    }
-    auto total = static_cast<int>(listV2.size());
-    return EventQueryRes{
-        .elements = std::move(listV2),
-        .current = 1,
-        .total = total,
-    };
-}
-#endif
-
 Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(std::string code) {
-#ifdef EVENTO_API_V1
     auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/user/login/link"),
+                                                      endpoint("/v2/login/link"),
                                                       {{"code", code},
                                                        {"type", "0"},
-                                                       {"update", "true"}});
-
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    LoginResEntityV1 entity;
-    try {
-        nlohmann::from_json(result.unwrap(), entity);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    co_return Ok(LoginResEntity{
-        .accessToken = entity.token,
-        .userInfo = entity.userInfo,
-    });
-
-#else
-    auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/login/link"),
-                                                      {{"code", code}, {"type", "0"}});
+                                                       {"codeVerifier", "sast_forever"}});
 
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -112,15 +43,11 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(std::string code) {
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get, endpoint("/user/info"));
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get, endpoint("/v2/user/profile"));
-#endif
+
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -136,7 +63,7 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
 Task<Result<void>> NetworkClient::refreshAccessToken(std::string refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/refresh-token"),
+                                                      endpoint("/v2/refresh-token"),
                                                       {{"refreshToken", refreshToken}});
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -153,23 +80,6 @@ Task<Result<void>> NetworkClient::refreshAccessToken(std::string refreshToken) {
 
 Task<Result<EventQueryRes>> NetworkClient::getActiveEventList(
     std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/event/conducting"),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    std::vector<EventEntityV1> list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    co_return Ok(eventEntityListV1ToV2(list));
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"active", "true"}}),
@@ -186,34 +96,13 @@ Task<Result<EventQueryRes>> NetworkClient::getActiveEventList(
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
     std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/event/list",
-                                                               {{"departmentId", ""},
-                                                                {"typeId", ""},
-                                                                {"time", firstDateTimeOfWeek()}}),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    std::vector<EventEntityV1> list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    co_return Ok(eventEntityListV1ToV2(list));
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
-                                                               {{"start", "now"}}),
+                                                               {{"start", firstDateTimeOfWeek()}}),
                                                       {},
                                                       cacheTtl);
     if (result.isErr())
@@ -227,35 +116,18 @@ Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
     int page, int size, std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/event/history"),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    std::vector<EventEntityV1> list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    co_return Ok(eventEntityListV1ToV2(list));
-#else
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query",
-                                                               {{"page", std::to_string(page)},
-                                                                {"size", std::to_string(size)},
-                                                                {"end", "now"}}),
-                                                      {},
-                                                      cacheTtl);
+    auto result = co_await this->request<api::Evento>(
+        http::verb::get,
+        endpoint("/v2/client/event/query",
+                 {{"page", std::to_string(page)},
+                  {"size", std::to_string(size)},
+                  {"end", stdChrono2Iso8601Utc(std::chrono::system_clock::now())}}),
+        {},
+        cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -267,34 +139,10 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     std::string larkDepartment, int page, int size, std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    // The default logic is to get events in the current week,
-    // here we hardcode the time to 1970-01-01 to get events after 1970-01-01,
-    // which means all events for our project.
-
-    auto result = co_await this->request<api::Evento>(
-        http::verb::post,
-        endpoint("/event/list",
-                 {{"departmentId", std::to_string(departmentIdMap[larkDepartment])},
-                  {"typeId", ""},
-                  {"time", "1970-01-01"}}));
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    std::vector<EventEntityV1> list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    co_return Ok(eventEntityListV1ToV2(list));
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"page", std::to_string(page)},
@@ -314,44 +162,9 @@ Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/event/info",
-                                                               {{"eventId",
-                                                                 std::to_string(eventId)}}),
-                                                      {},
-                                                      0min);
-
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    auto json = result.unwrap();
-    if (json.is_null())
-        co_return Err(Error(Error::Data, "No Event"));
-
-    EventEntityV1 entityV1;
-    try {
-        nlohmann::from_json(json, entityV1);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-    auto res = eventEntityListV1ToV2({entityV1});
-
-    auto& event = res.elements.front();
-    auto statusResult = co_await getEventParticipate(event.id);
-    if (statusResult.isErr())
-        co_return Err(result.unwrapErr());
-
-    auto status = statusResult.unwrap();
-    event.isCheckedIn = status.isParticipate;
-    event.isSubscribed = status.isSubscribe;
-
-    co_return Ok(res);
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
                                                                {{"id", std::to_string(eventId)}}),
@@ -368,7 +181,6 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<EventQueryRes>> NetworkClient::getEventList(
@@ -410,38 +222,6 @@ Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
 
 Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(
     int eventId, std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/feedback/user/info",
-                                                               {{"eventId",
-                                                                 std::to_string(eventId)}}),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    if (result.unwrap().is_null()) {
-        std::optional<FeedbackEntity> res = std::nullopt;
-        co_return Ok(res);
-    }
-
-    FeedbackEntityV1 entity;
-
-    try {
-        nlohmann::from_json(result.unwrap(), entity);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    auto res = FeedbackEntity{
-        .id = entity.id,
-        .eventId = entity.eventId,
-        .rating = entity.score,
-        .feedback = entity.content,
-    };
-
-    co_return Ok(std::make_optional<FeedbackEntity>(res));
-#else
     auto result = co_await this
                       ->request<api::Evento>(http::verb::get,
                                              endpoint(std::format("/v2/client/event/{}/feedback",
@@ -464,26 +244,13 @@ Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<bool>> NetworkClient::addUserFeedback(int eventId, int rating, std::string content) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/feedback/info",
-                                                               {{"eventId", std::to_string(eventId)},
-                                                                {"score", std::to_string(rating)},
-                                                                {"content", content}}));
-
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-    co_return Ok(true);
-#else
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/feedback", eventId),
                  {{"rating", std::to_string(rating)}, {"content", content}}));
-#endif
 
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -495,15 +262,6 @@ Task<Result<bool>> NetworkClient::addUserFeedback(int eventId, int rating, std::
 }
 
 Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/event/checkIn",
-                                                               {{"eventId", std::to_string(eventId)},
-                                                                {"code", code}}));
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-    co_return Ok(true);
-#else
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/check-in", eventId), {{"code", code}}));
@@ -515,21 +273,10 @@ Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
         co_return Ok(result.unwrap().get<bool>());
 
     co_return Err(Error(Error::Data, "response data type error"));
-#endif
 }
 
 Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/user/subscribe",
-                                                               {{"eventId", std::to_string(eventId)},
-                                                                {"isSubscribe", subscribeStr}}),
-                                                      {});
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-    co_return Ok(true);
-#else
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
                                              endpoint(std::format("/v2/client/event/{}/subscribe",
@@ -543,7 +290,6 @@ Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
         co_return Ok(result.unwrap().get<bool>());
 
     co_return Err(Error(Error::Data, "response data type error"));
-#endif
 }
 
 Task<Result<bool>> NetworkClient::subscribeDepartment(std::string larkDepartment, bool subscribe) {
@@ -561,29 +307,6 @@ Task<Result<bool>> NetworkClient::subscribeDepartment(std::string larkDepartment
 
     co_return Err(Error(Error::Data, "response data type error"));
 }
-
-#ifdef EVENTO_API_V1
-Task<Result<ParticipateEntity>> NetworkClient::getEventParticipate(int eventId) {
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/user/participate",
-                                                               {{"eventId",
-                                                                 std::to_string(eventId)}}),
-                                                      {},
-                                                      0min);
-
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    ParticipateEntity entity{};
-    try {
-        nlohmann::from_json(result.unwrap(), entity);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    co_return Ok(entity);
-}
-#endif
 
 Task<Result<EventQueryRes>> NetworkClient::getParticipatedEvent(
     std::chrono::steady_clock::duration cacheTtl) {
@@ -607,35 +330,6 @@ Task<Result<EventQueryRes>> NetworkClient::getParticipatedEvent(
 
 Task<Result<EventQueryRes>> NetworkClient::getSubscribedEvent(
     std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/user/subscribed"),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    std::vector<EventEntityV1> list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    auto res = eventEntityListV1ToV2(list);
-
-    for (auto& event : res.elements) {
-        auto statusResult = co_await getEventParticipate(event.id);
-        if (statusResult.isErr())
-            co_return Err(statusResult.unwrapErr());
-
-        auto status = statusResult.unwrap();
-        event.isCheckedIn = status.isParticipate;
-        event.isSubscribed = status.isSubscribe;
-    }
-
-    co_return Ok(res);
-#else
     auto startTime = firstDateTimeOfWeek();
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
@@ -654,42 +348,10 @@ Task<Result<EventQueryRes>> NetworkClient::getSubscribedEvent(
     }
 
     co_return Ok(entity);
-#endif
 }
 
 Task<Result<SlideEntityList>> NetworkClient::getHomeSlide(
     std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/slide/home/list"),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    SlideEntityListV1 list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    SlideEntityList res(list.slides.size());
-
-    std::transform(list.slides.begin(),
-                   list.slides.end(),
-                   res.begin(),
-                   [](SlideEntityV1 const& entity) {
-                       return SlideEntity{
-                           .id = entity.id,
-                           .eventId = 0,
-                           .url = entity.url,
-                           .link = entity.link,
-                       };
-                   });
-
-    co_return Ok(res);
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/slide"),
                                                       {},
@@ -706,7 +368,6 @@ Task<Result<SlideEntityList>> NetworkClient::getHomeSlide(
     }
 
     co_return Ok(list);
-#endif
 }
 
 Task<Result<SlideEntityList>> NetworkClient::getEventSlide(
@@ -732,33 +393,6 @@ Task<Result<SlideEntityList>> NetworkClient::getEventSlide(
 
 Task<Result<DepartmentEntityList>> NetworkClient::getDepartmentList(
     std::chrono::steady_clock::duration cacheTtl) {
-#ifdef EVENTO_API_V1
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/event/departments"),
-                                                      {},
-                                                      cacheTtl);
-    if (result.isErr())
-        co_return Err(result.unwrapErr());
-
-    std::vector<DepartmentEntityV1> list;
-    try {
-        nlohmann::from_json(result.unwrap(), list);
-    } catch (const nlohmann::json::exception& e) {
-        co_return Err(Error(Error::JsonDes, e.what()));
-    }
-
-    DepartmentEntityList res(list.size());
-
-    std::transform(list.begin(), list.end(), res.begin(), [this](DepartmentEntityV1 const& entity) {
-        departmentIdMap[entity.departmentName] = entity.id;
-        return DepartmentEntity{
-            .id = std::to_string(entity.id),
-            .name = entity.departmentName,
-        };
-    });
-
-    co_return Ok(res);
-#else
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/lark/department"),
                                                       {},
@@ -774,7 +408,6 @@ Task<Result<DepartmentEntityList>> NetworkClient::getDepartmentList(
     }
 
     co_return Ok(list);
-#endif
 }
 
 urls::url NetworkClient::endpoint(std::string_view endpoint) {
@@ -956,12 +589,7 @@ JsonResult NetworkClient::handleEventoResponse(http::response<http::dynamic_body
         return Err(err);
     }
 
-    constexpr auto errorMessageFieldName =
-#ifdef EVENTO_API_V1
-        "errMsg";
-#else
-        "message";
-#endif
+    constexpr auto errorMessageFieldName = "errMsg";
 
     if (!res["success"].is_boolean() || !res["success"].get<bool>()) {
         if (res.contains(errorMessageFieldName)) {
