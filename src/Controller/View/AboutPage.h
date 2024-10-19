@@ -16,7 +16,7 @@ private:
     void onShow() override;
 
     void loadContributors();
-    void checkUpdate();
+    void checkUpdate(bool quite = false);
 
     std::vector<ContributorStruct> _contributors;
 };

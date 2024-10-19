@@ -22,6 +22,7 @@ void AboutPage::onCreate() {
     self->on_open_web([this](slint::SharedString url) { openBrowser(std::string(url)); });
     self->on_load_contributors([this] { loadContributors(); });
     self->on_check_update([this] { checkUpdate(); });
+    checkUpdate(true);
 }
 
 void AboutPage::onShow() {
@@ -70,13 +71,13 @@ void AboutPage::loadContributors() {
         });
 }
 
-void AboutPage::checkUpdate() {
+void AboutPage::checkUpdate(bool quite) {
     auto& self = *this;
 
     self->set_check_update_status(PageState::Loading);
 
     executor()->asyncExecute(
-        networkClient()->getLatestRelease(), [&self = *this](Result<ReleaseEntity> result) {
+        networkClient()->getLatestRelease(), [&self = *this, quite](Result<ReleaseEntity> result) {
             if (result.isErr()) {
                 self->set_check_update_status(PageState::Normal);
                 self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
@@ -89,7 +90,8 @@ void AboutPage::checkUpdate() {
             self->set_check_update_status(PageState::Normal);
 
             if (std::string_view(VERSION_SEMANTIC).starts_with(entity.tag_name)) {
-                self.bridge.getMessageManager().showMessage("已是最新版本");
+                if (!quite)
+                    self.bridge.getMessageManager().showMessage("已是最新版本");
                 return;
             }
 

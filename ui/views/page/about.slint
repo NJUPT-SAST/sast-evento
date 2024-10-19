@@ -1,5 +1,5 @@
 import { Token } from "../../global.slint";
-import { Page, Empty, ContentDialog, PageState } from "../../components/index.slint";
+import { Page, PageState } from "../../components/index.slint";
 import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
 import { Button, ButtonType, LoadingAnimation, StyledText } from "../../components/index.slint";
@@ -96,36 +96,6 @@ component Link {
 }
 
 export component AboutPage inherits Page {
-    popup := ContentDialog {
-        z: 999;
-        width: root.width;
-        height: root.height;
-        dialog-title: @tr("更新日志");
-        confirm-btn-text: @tr("更新");
-        cancel-btn-text: @tr("取消");
-        is-show <=> AboutPageBridge.show-popup;
-        ScrollView {
-            VerticalLayout {
-                text := Text {
-                    width: 100%;
-                    text: AboutPageBridge.update-log;
-                    font-size: Token.font.body.large.size;
-                    font-weight: Token.font.body.large.weight;
-                    color: Token.color.on-surface;
-                    wrap: TextWrap.char-wrap;
-                }
-            }
-        }
-
-        confirm => {
-            AboutPageBridge.open-web("https://github.com/NJUPT-SAST/sast-evento/releases/latest");
-            popup.close();
-        }
-        cancel => {
-            popup.close();
-        }
-    }
-
     ScrollView {
         verticallayout := VerticalLayout {
             alignment: LayoutAlignment.start;
