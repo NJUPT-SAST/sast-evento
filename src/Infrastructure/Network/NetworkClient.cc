@@ -98,7 +98,7 @@ Task<Result<LoginResEntity>> NetworkClient::loginViaSastLink(std::string code) {
 
 #else
     auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/login/link"),
+                                                      endpoint("/v2/login/link"),
                                                       {{"code", code}, {"type", "0"}});
 
     if (result.isErr())
@@ -136,7 +136,7 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
 Task<Result<void>> NetworkClient::refreshAccessToken(std::string refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/refresh-token"),
+                                                      endpoint("/v2/refresh-token"),
                                                       {{"refreshToken", refreshToken}});
     if (result.isErr())
         co_return Err(result.unwrapErr());
@@ -211,11 +211,12 @@ Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
 
     co_return Ok(eventEntityListV1ToV2(list));
 #else
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query",
-                                                               {{"start", "now"}}),
-                                                      {},
-                                                      cacheTtl);
+    auto result = co_await this->request<api::Evento>(
+        http::verb::get,
+        endpoint("/v2/client/event/query",
+                 {{"start", stdChrono2Iso8601Utc(std::chrono::system_clock::now())}}),
+        {},
+        cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -249,13 +250,14 @@ Task<Result<EventQueryRes>> NetworkClient::getHistoryEventList(
 
     co_return Ok(eventEntityListV1ToV2(list));
 #else
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query",
-                                                               {{"page", std::to_string(page)},
-                                                                {"size", std::to_string(size)},
-                                                                {"end", "now"}}),
-                                                      {},
-                                                      cacheTtl);
+    auto result = co_await this->request<api::Evento>(
+        http::verb::get,
+        endpoint("/v2/client/event/query",
+                 {{"page", std::to_string(page)},
+                  {"size", std::to_string(size)},
+                  {"end", stdChrono2Iso8601Utc(std::chrono::system_clock::now())}}),
+        {},
+        cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 

@@ -58,6 +58,13 @@ inline time_t parseIso8601Utc(const char* date) {
 #endif
 }
 
+inline std::string stdChrono2Iso8601Utc(std::chrono::system_clock::time_point time) {
+    std::stringstream ss;
+    auto timeT = std::chrono::system_clock::to_time_t(time);
+    ss << std::put_time(std::gmtime(&timeT), "%Y-%m-%dT%H:%M:%S.000Z");
+    return ss.str();
+}
+
 inline std::string firstDateTimeOfWeek() {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);

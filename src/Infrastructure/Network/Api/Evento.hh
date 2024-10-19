@@ -35,7 +35,11 @@ struct Evento {
         req.set(http::field::host, url.host());
         req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
         if (token) // set token if exists
+#ifdef EVENTO_API_V1
             req.set("TOKEN", *token);
+#else
+            req.set(http::field::authorization, std::format("Bearer {}", *token));
+#endif
 
         if (verb == http::verb::post) {
             req.set(http::field::content_type, MIME_FORM_URL_ENCODED);

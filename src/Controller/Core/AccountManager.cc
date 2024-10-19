@@ -68,7 +68,7 @@ void AccountManager::performLogin() {
 #else
             self.setKeychainRefreshToken(data.refreshToken);
             self.scheduleRenewAccessToken();
-            self.expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
+            self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
 #endif
             self.setNetworkAccessToken(data.accessToken);
             self.setLoginState(true);
@@ -147,7 +147,7 @@ void AccountManager::requestLogout() {
     self._userInfo = UserInfoEntity();
 #ifndef EVENTO_API_V1
     setKeychainRefreshToken("");
-    renewAccessTokenTimer.cancel();
+    _renewAccessTokenTimer.cancel();
 #endif
     setNetworkAccessToken("");
 
