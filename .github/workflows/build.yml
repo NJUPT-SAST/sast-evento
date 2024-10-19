@@ -343,6 +343,63 @@ jobs:
         name: pacman-${{ matrix.rid }}
         path: ./deploy/pacman/*.pkg.tar.zst
 
+  package-appimage:
+    name: Package ${{ matrix.rid }} (AppImage)
+    runs-on: ubuntu-24.04
+    needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        rid: [linux-x64]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+            submodules: false
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.0'
+          cache: true
+
+      - name: install Fcitx5 for Qt
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y extra-cmake-modules ninja-build
+          git clone --depth 1 --branch 5.1.1 https://github.com/fcitx/fcitx5-qt
+          cmake -DBUILD_ONLY_PLUGIN=ON -DENABLE_QT4=OFF -DENABLE_QT5=OFF -DENABLE_QT6=ON -G Ninja -S ./fcitx5-qt -B ./fcitx5-qt-build -DCMAKE_PREFIX_PATH=$QT_ROOT_DIR -DCMAKE_BUILD_TYPE=Release
+          cmake --build ./fcitx5-qt-build --parallel --config Release
+          cmake --install ./fcitx5-qt-build
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: files-${{ matrix.rid }}
+
+      - name: Construct AppDir
+        run: |
+          mkdir appdir
+          install -D -m644 "./ui/assets/image/icon/evento.svg" "./appdir/sast-evento.svg"
+          install -D -m644 "./deploy/sast-evento.desktop" "./appdir/sast-evento.desktop"
+          mkdir -p "./appdir/opt/sast-evento"
+          tar -xzf ./files.tar.gz -C "./appdir/opt/sast-evento"
+
+      - name: Create AppImage
+        run: |
+          echo "::group::Install dependencies"
+          sudo apt-get install -y fuse
+          pip install pyelftools
+          echo "::endgroup::"
+          export PYTHONUNBUFFERED=1
+          python ./deploy/create-appimage --app-dir ./appdir --executables ./appdir/opt/sast-evento/sast-evento:./appdir/opt/sast-evento/sast-evento-tray --target ./sast-evento.AppImage
+
+      - name: Upload package
+        uses: actions/upload-artifact@v4
+        with:
+          name: appimage-${{ matrix.rid }}
+          path: ./*.AppImage
+
   package-macos:
     name: Package ${{ matrix.rid }} (dmg)
     runs-on: macos-latest
@@ -392,6 +449,7 @@ jobs:
       - package-win
       - package-deb
       - package-pacman
+      - package-appimage
       - package-macos
     steps:
       - name: Download all artifacts
