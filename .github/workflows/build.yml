@@ -49,6 +49,11 @@ jobs:
         fetch-depth: 0
         fetch-tags: true
 
+    # Workaround for https://github.com/rust-skia/rust-skia/issues/1049
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.12' 
+
     - name: Set up GCC
       if: startsWith(matrix.rid, 'linux-')
       uses: egor-tensin/setup-gcc@v1.3
