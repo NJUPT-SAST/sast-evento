@@ -61,16 +61,16 @@ void AccountManager::performLogin() {
 
             auto data = result.unwrap();
 
-            self._userInfo = data.userInfo;
-#ifdef EVENTO_API_V1
-            self.setKeychainAccessToken(data.accessToken);
+            self._userInfo = data.user;
+            // #ifdef EVENTO_API_V1
+            self.setKeychainAccessToken(data.token);
             self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(3);
-#else
-            self.setKeychainRefreshToken(data.refreshToken);
-            self.scheduleRenewAccessToken();
-            self.expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
-#endif
-            self.setNetworkAccessToken(data.accessToken);
+            // #else
+            // self.setKeychainRefreshToken(data.refreshToken);
+            // self.scheduleRenewAccessToken();
+            // self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
+            // #endif
+            self.setNetworkAccessToken(data.token);
             self.setLoginState(true);
             self.saveConfig();
         });
@@ -147,7 +147,7 @@ void AccountManager::requestLogout() {
     self._userInfo = UserInfoEntity();
 #ifndef EVENTO_API_V1
     setKeychainRefreshToken("");
-    renewAccessTokenTimer.cancel();
+    _renewAccessTokenTimer.cancel();
 #endif
     setNetworkAccessToken("");
 
@@ -167,18 +167,18 @@ void AccountManager::tryLoginDirectly() {
     spdlog::info("Try login directly, expired time: {}", _expiredTime.time_since_epoch().count());
     self->set_loading(true);
 
-#ifdef EVENTO_API_V1
+    // #ifdef EVENTO_API_V1
     if (auto token = getKeychainAccessToken()) {
         spdlog::info("Token is found. Login directly!");
         setNetworkAccessToken(*token);
         performGetUserInfo();
     }
-#else
-    // If the token is not expired after 15min, we don't need to login again
-    if (getKeychainRefreshToken()) {
-        performRefreshToken();
-    }
-#endif
+    // #else
+    //     // If the token is not expired after 15min, we don't need to login again
+    //     if (getKeychainRefreshToken()) {
+    //         performRefreshToken();
+    //     }
+    // #endif
     else {
         self->set_loading(false);
         self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
@@ -196,7 +196,7 @@ void AccountManager::loadConfig() {
     std::tm t = {year, month, day, hour, minute, second};
 
     _expiredTime = std::chrono::system_clock::from_time_t(std::mktime(&t));
-    _userInfo.id = evento::account.userId;
+    _userInfo.linkId = evento::account.userId;
 }
 
 void AccountManager::saveConfig() {
@@ -205,12 +205,12 @@ void AccountManager::saveConfig() {
     evento::account.expire
         = toml::date_time{toml::date{expireTm.tm_year + 1900, expireTm.tm_mon + 1, expireTm.tm_mday},
                           toml::time{expireTm.tm_hour, expireTm.tm_min, expireTm.tm_sec}};
-    evento::account.userId = _userInfo.id;
+    evento::account.userId = _userInfo.linkId;
 }
 
 void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) const {
     keychain::Error err;
-    keychain::setPassword(package, service, _userInfo.id, refreshToken, err);
+    keychain::setPassword(package, service, _userInfo.linkId, refreshToken, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         spdlog::error("Failed to save refresh token: {}", err.message);
@@ -221,7 +221,7 @@ void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) co
 
 std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
     keychain::Error err;
-    auto refreshToken = keychain::getPassword(package, service, _userInfo.id, err);
+    auto refreshToken = keychain::getPassword(package, service, _userInfo.linkId, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         spdlog::error("Failed to get refresh token: {}", err.message);
@@ -251,14 +251,14 @@ void AccountManager::setNetworkAccessToken(std::string accessToken) {
     evento::networkClient()->tokenBytes = accessToken;
 }
 
-#ifdef EVENTO_API_V1
+// #ifdef EVENTO_API_V1
 std::optional<std::string> AccountManager::getKeychainAccessToken() const {
     if (!settings.autoLogin) {
         return std::nullopt;
     }
 
     keychain::Error err;
-    auto accessToken = keychain::getPassword(package, service, _userInfo.id, err);
+    auto accessToken = keychain::getPassword(package, service, _userInfo.linkId, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         debug(), (int) err.type;
@@ -278,7 +278,7 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
         return;
     }
     keychain::Error err;
-    keychain::setPassword(package, service, _userInfo.id, accessToken, err);
+    keychain::setPassword(package, service, _userInfo.linkId, accessToken, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         debug(), (int) err.type;
@@ -287,7 +287,7 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
     }
     spdlog::info("Save access token success");
 }
-#endif
+// #endif
 
 void AccountManager::setLoginState(bool newState) {
     auto& self = *this;

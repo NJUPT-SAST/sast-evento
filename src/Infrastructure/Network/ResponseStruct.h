@@ -18,3 +18,4 @@
 #include "Response/SlideEntity.h"         // IWYU pragma: export
 #include "Response/SlideEntityV1.h"       // IWYU pragma: export
 #include "Response/UserInfoEntity.h"      // IWYU pragma: export
+#include "Response/UserInfoEntityV1.h"    // IWYU pragma: export

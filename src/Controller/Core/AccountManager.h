@@ -21,11 +21,11 @@ class AccountManager : private GlobalAgent<AccountManagerBridge>,
 
     static const inline std::string package = "org.sast.evento";
     static const inline std::string service =
-#ifdef EVENTO_API_V1
+        // #ifdef EVENTO_API_V1
         "access-token";
-#else
-        "refresh-token";
-#endif
+    // #else
+    //         "refresh-token";
+    // #endif
 
 public:
     AccountManager(slint::ComponentHandle<UiEntryName> uiEntry, UiBridge& bridge);
@@ -50,10 +50,10 @@ private:
 
     static void setNetworkAccessToken(std::string accessToken);
 
-#ifdef EVENTO_API_V1
+    // #ifdef EVENTO_API_V1
     [[nodiscard]] std::optional<std::string> getKeychainAccessToken() const;
     void setKeychainAccessToken(const std::string& accessToken) const;
-#endif
+    // #endif
 
     void setLoginState(bool newState);
     void onStateChanged();

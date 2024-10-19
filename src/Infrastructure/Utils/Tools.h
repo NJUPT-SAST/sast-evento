@@ -34,11 +34,7 @@ inline time_t parseIso8601Utc(const char* date) {
     struct tm tt = {0};
     double seconds;
     if (sscanf(date,
-#ifdef EVENTO_API_V1
-               "%04d-%02d-%02d %02d:%02d:%lf",
-#else
                "%04d-%02d-%02dT%02d:%02d:%lfZ",
-#endif
                &tt.tm_year,
                &tt.tm_mon,
                &tt.tm_mday,
@@ -58,10 +54,16 @@ inline time_t parseIso8601Utc(const char* date) {
 #endif
 }
 
+inline std::string stdChrono2Iso8601Utc(std::chrono::system_clock::time_point time) {
+    std::stringstream ss;
+    auto timeT = std::chrono::system_clock::to_time_t(time);
+    ss << std::put_time(std::gmtime(&timeT), "%Y-%m-%dT%H:%M:%S");
+    return ss.str();
+}
+
 inline std::string firstDateTimeOfWeek() {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
-    auto tm = std::gmtime(&time);
     auto tm = std::gmtime(&time);
 
     // Find the start of the week (Monday)
