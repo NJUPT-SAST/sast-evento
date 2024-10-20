@@ -61,18 +61,12 @@ void AccountManager::performLogin() {
 
             auto data = result.unwrap();
 
-            self._userInfo = data.user;
-            // #ifdef EVENTO_API_V1
-            self.setKeychainAccessToken(data.token);
-            self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(3);
-            // #else
-            // self.setKeychainRefreshToken(data.refreshToken);
-            // self.scheduleRenewAccessToken();
-            // self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
-            // #endif
-            self.setNetworkAccessToken(data.token);
-            self.setLoginState(true);
-            self.saveConfig();
+            self.setKeychainRefreshToken(data.refreshToken);
+            self.scheduleRenewAccessToken();
+            self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
+
+            self.setNetworkAccessToken(data.accessToken);
+            self.performGetUserInfo();
         });
 }
 
@@ -129,6 +123,7 @@ void AccountManager::performGetUserInfo() {
             self._userInfo = result.unwrap();
             spdlog::info("get user info success");
             self.setLoginState(true);
+            self.saveConfig();
         });
 }
 
@@ -145,10 +140,10 @@ void AccountManager::requestLogout() {
     }
     auto& self = *this;
     self._userInfo = UserInfoEntity();
-#ifndef EVENTO_API_V1
+
     setKeychainRefreshToken("");
     _renewAccessTokenTimer.cancel();
-#endif
+
     setNetworkAccessToken("");
 
     setLoginState(false);
@@ -167,19 +162,10 @@ void AccountManager::tryLoginDirectly() {
     spdlog::info("Try login directly, expired time: {}", _expiredTime.time_since_epoch().count());
     self->set_loading(true);
 
-    // #ifdef EVENTO_API_V1
-    if (auto token = getKeychainAccessToken()) {
-        spdlog::info("Token is found. Login directly!");
-        setNetworkAccessToken(*token);
-        performGetUserInfo();
-    }
-    // #else
-    //     // If the token is not expired after 15min, we don't need to login again
-    //     if (getKeychainRefreshToken()) {
-    //         performRefreshToken();
-    //     }
-    // #endif
-    else {
+    // If the token is not expired after 15min, we don't need to login again
+    if (getKeychainRefreshToken()) {
+        performRefreshToken();
+    } else {
         self->set_loading(false);
         self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
     }

@@ -4,6 +4,7 @@
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <Infrastructure/Utils/Tools.h>
 #include <array>
+#include <nlohmann/json.hpp>
 #if defined(PLATFORM_APPLE)
 #include <fstream>
 #endif
@@ -63,8 +64,9 @@ Task<Result<UserInfoEntity>> NetworkClient::getUserInfo() {
 
 Task<Result<void>> NetworkClient::refreshAccessToken(std::string refreshToken) {
     auto result = co_await this->request<api::Evento>(http::verb::post,
-                                                      endpoint("/v2/refresh-token"),
-                                                      {{"refreshToken", refreshToken}});
+                                                      endpoint("/v2/login/refresh-token"),
+                                                      nlohmann::basic_json<>{
+                                                          {"refreshToken", refreshToken}});
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
@@ -100,11 +102,12 @@ Task<Result<EventQueryRes>> NetworkClient::getActiveEventList(
 
 Task<Result<EventQueryRes>> NetworkClient::getLatestEventList(
     std::chrono::steady_clock::duration cacheTtl) {
-    auto result = co_await this->request<api::Evento>(http::verb::get,
-                                                      endpoint("/v2/client/event/query",
-                                                               {{"start", firstDateTimeOfWeek()}}),
-                                                      {},
-                                                      cacheTtl);
+    auto result = co_await this->request<api::Evento>(
+        http::verb::get,
+        endpoint("/v2/client/event/query",
+                 {{"start", stdChrono2Iso8601Utc(std::chrono::system_clock::now())}}),
+        {},
+        cacheTtl);
     if (result.isErr())
         co_return Err(result.unwrapErr());
 
