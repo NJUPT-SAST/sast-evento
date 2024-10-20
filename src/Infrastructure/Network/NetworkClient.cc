@@ -937,7 +937,7 @@ urls::url NetworkClient::githubEndpoint(std::string_view endpoint,
     return r;
 }
 
-JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> response) {
+JsonResult NetworkClient::handleEventoResponse(http::response<http::dynamic_body> response) {
     if (response.result() != http::status::ok) {
         return Err(Error(response.result_int()));
     }
@@ -976,6 +976,31 @@ JsonResult NetworkClient::handleResponse(http::response<http::dynamic_body> resp
     auto data = res.contains("data") ? res["data"] : nlohmann::json::object();
 
     return Ok(data);
+}
+
+Task<JsonResult> NetworkClient::handleGithubResponse(http::response<http::dynamic_body> response) {
+    auto status = response.result();
+    std::string data;
+    if (status == http::status::found || status == http::status::moved_permanently
+        || status == http::status::temporary_redirect) {
+        auto location = response.base().at("Location");
+        spdlog::info("Redirecting to {}", location);
+        auto redirectUrl = urls::url_view(location);
+        co_return co_await this->request<api::Github>(http::verb::get, redirectUrl);
+    } else if (status != http::status::ok) {
+        co_return Err(Error(response.result_int()));
+    }
+
+    data = beast::buffers_to_string(response.body().data());
+
+    nlohmann::basic_json<> res;
+    try {
+        res = nlohmann::json::parse(data);
+        debug(), res.dump();
+    } catch (const nlohmann::json::parse_error& e) {
+        co_return Err(Error(Error::JsonDes, e.what()));
+    }
+    co_return Ok(res);
 }
 
 Task<bool> NetworkClient::saveToDisk(std::string const& data, std::filesystem::path const& path) {

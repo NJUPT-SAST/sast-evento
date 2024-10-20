@@ -86,11 +86,6 @@ Task<ResponseResult> HttpsAccessManager::makeReply(std::string host,
     if (!ec || ec == net::error::eof || (ignoreSslError && ec == ssl::error::stream_truncated)
         || ec == beast::error::timeout) {
         // If we get here then the connection is closed gracefully
-        if (res.result() == http::status::found) {
-            auto location = res.base().at("Location");
-            req.set(http::field::host, location);
-            co_return co_await makeReply(location, req);
-        }
         co_return Ok(res);
     }
 

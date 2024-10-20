@@ -159,7 +159,7 @@ private:
         if (reply.isErr())
             co_return reply.unwrapErr();
 
-        auto result = handleResponse(reply.unwrap());
+        auto result = handleEventoResponse(reply.unwrap());
 
         if (cacheTtl != 0s && result.isOk()) {
             // Update cache
@@ -186,15 +186,9 @@ private:
         if (reply.isErr())
             co_return reply.unwrapErr();
 
-        nlohmann::basic_json<> res;
-        try {
-            res = nlohmann::json::parse(beast::buffers_to_string(reply.unwrap().body().data()));
-            debug(), res.dump();
-        } catch (const nlohmann::json::parse_error& e) {
-            co_return Err(Error(Error::JsonDes, e.what()));
-        }
+        auto result = co_await handleGithubResponse(reply.unwrap());
 
-        co_return res;
+        co_return result;
     }
 
     // url builder
@@ -206,7 +200,8 @@ private:
     static urls::url githubEndpoint(std::string_view endpoint,
                                     std::initializer_list<urls::param> const& queryParams);
     //response handler for github api
-    static JsonResult handleResponse(http::response<http::dynamic_body> response);
+    static JsonResult handleEventoResponse(http::response<http::dynamic_body> response);
+    Task<JsonResult> handleGithubResponse(http::response<http::dynamic_body> response);
 
     static Task<bool> saveToDisk(std::string const& data, std::filesystem::path const& path);
 
