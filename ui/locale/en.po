@@ -68,21 +68,6 @@ msgctxt "MenuOverlay"
 msgid "退出登录"
 msgstr "Logout"
 
-#: views/page/about.slint:103
-msgctxt "AboutPage"
-msgid "更新日志"
-msgstr "Update Log"
-
-#: views/page/about.slint:104
-msgctxt "AboutPage"
-msgid "更新"
-msgstr "Update"
-
-#: views/page/about.slint:105
-msgctxt "AboutPage"
-msgid "取消"
-msgstr "Cancel"
-
 #: views/page/about.slint:135
 msgctxt "AboutPage"
 msgid "关于"
@@ -105,8 +90,8 @@ msgstr "Bugs Report"
 
 #: views/page/about.slint:217
 msgctxt "AboutPage"
-msgid "网页端"
-msgstr "Web Link"
+msgid "Evento 宇宙"
+msgstr "Evento Universe"
 
 #: views/page/about.slint:238
 msgctxt "AboutPage"
@@ -358,6 +343,21 @@ msgstr "Department"
 msgctxt "App"
 msgid "活动日程"
 msgstr "Schedule"
+
+#: app.slint:288
+msgctxt "App"
+msgid "更新日志"
+msgstr "Update Log"
+
+#: app.slint:289
+msgctxt "App"
+msgid "更新"
+msgstr "Update"
+
+#: app.slint:290
+msgctxt "App"
+msgid "取消"
+msgstr "Cancel"
 
 #: page/my_event.slint:46
 msgctxt "MyEventPage"

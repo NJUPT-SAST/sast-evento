@@ -68,21 +68,6 @@ msgctxt "MenuOverlay"
 msgid "退出登录"
 msgstr "退出登录"
 
-#: views/page/about.slint:103
-msgctxt "AboutPage"
-msgid "更新日志"
-msgstr "更新日志"
-
-#: views/page/about.slint:104
-msgctxt "AboutPage"
-msgid "更新"
-msgstr "更新"
-
-#: views/page/about.slint:105
-msgctxt "AboutPage"
-msgid "取消"
-msgstr "取消"
-
 #: views/page/about.slint:135
 msgctxt "AboutPage"
 msgid "关于"
@@ -105,8 +90,8 @@ msgstr "漏洞报告"
 
 #: views/page/about.slint:217
 msgctxt "AboutPage"
-msgid "网页端"
-msgstr "网页端"
+msgid "Evento 宇宙"
+msgstr "Evento 宇宙"
 
 #: views/page/about.slint:238
 msgctxt "AboutPage"
@@ -359,6 +344,20 @@ msgctxt "App"
 msgid "活动日程"
 msgstr "活动日程"
 
+#: app.slint:288
+msgctxt "App"
+msgid "更新日志"
+msgstr "更新日志"
+
+#: app.slint:289
+msgctxt "App"
+msgid "更新"
+msgstr "更新"
+
+#: app.slint:290
+msgctxt "App"
+msgid "取消"
+msgstr "取消"
 
 #: page/my_event.slint:46
 msgctxt "MyEventPage"

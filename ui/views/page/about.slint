@@ -185,7 +185,7 @@ export component AboutPage inherits Page {
                     HorizontalLayout {
                         alignment: space-between;
                         Text {
-                            text: @tr("网页端");
+                            text: @tr("Evento 宇宙");
                             font-size: Token.font.body.large.size;
                             font-weight: Token.font.body.large.weight;
                             color: Token.color.on-surface;
@@ -193,10 +193,10 @@ export component AboutPage inherits Page {
                         }
 
                         Link {
-                            text: "https://evento.sast.fun";
+                            text: "https://app.sast.fun/evento";
                             font: Token.font.body.large;
                             clicked => {
-                                AboutPageBridge.open-web("https://evento.sast.fun");
+                                AboutPageBridge.open-web("https://app.sast.fun/evento");
                             }
                         }
                     }
