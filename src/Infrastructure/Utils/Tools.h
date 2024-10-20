@@ -34,11 +34,7 @@ inline time_t parseIso8601Utc(const char* date) {
     struct tm tt = {0};
     double seconds;
     if (sscanf(date,
-#ifdef EVENTO_API_V1
-               "%04d-%02d-%02d %02d:%02d:%lf",
-#else
                "%04d-%02d-%02dT%02d:%02d:%lfZ",
-#endif
                &tt.tm_year,
                &tt.tm_mon,
                &tt.tm_mday,
@@ -61,7 +57,7 @@ inline time_t parseIso8601Utc(const char* date) {
 inline std::string stdChrono2Iso8601Utc(std::chrono::system_clock::time_point time) {
     std::stringstream ss;
     auto timeT = std::chrono::system_clock::to_time_t(time);
-    ss << std::put_time(std::gmtime(&timeT), "%Y-%m-%dT%H:%M:%S.000Z");
+    ss << std::put_time(std::gmtime(&timeT), "%Y-%m-%dT%H:%M:%S");
     return ss.str();
 }
 
@@ -74,11 +70,7 @@ inline std::string firstDateTimeOfWeek() {
     int daysSinceMonday = (tm->tm_wday + 6) % 7;
     auto startOfWeek = now - std::chrono::hours(24 * daysSinceMonday);
 
-    // Format the date
-    std::stringstream ss;
-    auto startOfWeekTime = std::chrono::system_clock::to_time_t(startOfWeek);
-    ss << std::put_time(std::gmtime(&startOfWeekTime), "%Y-%m-%dT%H:%M:%S.000Z");
-    return ss.str();
+    return stdChrono2Iso8601Utc(startOfWeek);
 }
 
 inline std::string guessImageExtByBytes(std::array<unsigned char, 4> bytes) {
