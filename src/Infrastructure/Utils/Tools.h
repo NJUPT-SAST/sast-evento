@@ -34,16 +34,15 @@ inline time_t parseIso8601Utc(const char* date) {
     struct tm tt = {0};
     double seconds;
     if (sscanf(date,
-               "%04d-%02d-%02dT%02d:%02d:%lfZ",
+               "%04d-%02d-%02dT%02d:%02d:%02d",
                &tt.tm_year,
                &tt.tm_mon,
                &tt.tm_mday,
                &tt.tm_hour,
                &tt.tm_min,
-               &seconds)
+               &tt.tm_sec)
         != 6)
         return -1;
-    tt.tm_sec = (int) seconds;
     tt.tm_mon -= 1;
     tt.tm_year -= 1900;
     tt.tm_isdst = -1;
