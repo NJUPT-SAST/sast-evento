@@ -1,16 +1,15 @@
 // IWYU pragma: private, include <Infrastructure/Network/ResponseStruct.h>
 #pragma once
 
-#include "UserInfoEntity.h"
 #include <nlohmann/json.hpp>
 
 namespace evento {
 
 struct LoginResEntity {
-    std::string token; // expires in 1 hour
-    UserInfoEntity user;
+    std::string accessToken;  // expires in 1h
+    std::string refreshToken; // expires in 7 days
 
-    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginResEntity, token, user);
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(LoginResEntity, accessToken, refreshToken);
 };
 
 } // namespace evento

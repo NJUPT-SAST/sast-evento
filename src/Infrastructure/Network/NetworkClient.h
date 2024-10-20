@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <initializer_list>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 
 namespace evento {
@@ -164,6 +165,38 @@ private:
                                    .ttl = cacheTtl,
                                    .size = entrySize});
         }
+
+        co_return result;
+    }
+
+    template<std::same_as<api::Evento> Api>
+    Task<JsonResult> request(http::verb verb,
+                             urls::url_view url,
+                             nlohmann::basic_json<> const& params) {
+        spdlog::info("Requesting: {}", url.data());
+
+        http::request<http::string_body> req{verb,
+                                             std::format("{}{}{}",
+                                                         url.path(),
+                                                         url.has_query() ? "?" : "",
+                                                         url.encoded_query().data()),
+                                             11};
+
+        req.set(http::field::host, url.host());
+        req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
+        req.set(http::field::content_type, "application/json");
+        req.body() = params.dump();
+
+        debug(), req;
+
+        auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+
+        if (reply.isErr())
+            co_return reply.unwrapErr();
+
+        debug(), reply.unwrap();
+
+        auto result = handleEventoResponse(reply.unwrap());
 
         co_return result;
     }
