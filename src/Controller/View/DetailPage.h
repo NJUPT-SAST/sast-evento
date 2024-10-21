@@ -17,9 +17,9 @@ private:
 
     void loadEvent();
     void loadFeedback();
-    void checkIn(int eventId, std::string checkInCode);
-    void subscribe(int eventId, bool subscribe);
-    void feedbackEvent(int eventId, int rate, std::string content);
+    void checkIn(eventId_t eventId, std::string checkInCode);
+    void subscribe(eventId_t eventId, bool subscribe);
+    void feedbackEvent(eventId_t eventId, int rate, std::string content);
 };
 
 EVENTO_UI_END

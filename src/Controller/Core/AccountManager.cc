@@ -179,19 +179,51 @@ void AccountManager::loadConfig() {
     setLoginState(false);
     auto [year, month, day] = evento::account.expire.date;
     auto [hour, minute, second, _] = evento::account.expire.time;
-    std::tm t = {year, month, day, hour, minute, second};
+    spdlog::info("Loading config with date: {}-{}-{} and time: {}:{}:{}",
+                 year,
+                 month,
+                 day,
+                 hour,
+                 minute,
+                 second);
 
-    _expiredTime = std::chrono::system_clock::from_time_t(std::mktime(&t));
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23
+        || minute < 0 || minute > 59 || second < 0 || second > 60) {
+        spdlog::error("Invalid date or time values");
+        return;
+    }
+    std::tm t = {};
+    t.tm_year = year - 1900;
+    t.tm_mon = month - 1;
+    t.tm_mday = day;
+    t.tm_hour = hour;
+    t.tm_min = minute;
+    t.tm_sec = second;
+    t.tm_isdst = -1;
+
+    time_t time = std::mktime(&t);
+    if (time == -1) {
+        spdlog::error("Failed to convert time to time_t");
+        return;
+    }
+
+    _expiredTime = std::chrono::system_clock::from_time_t(time);
     _userInfo.linkId = evento::account.userId;
 }
 
 void AccountManager::saveConfig() {
     auto expire = std::chrono::system_clock::to_time_t(_expiredTime);
-    auto expireTm = *std::localtime(&expire);
-    evento::account.expire
-        = toml::date_time{toml::date{expireTm.tm_year + 1900, expireTm.tm_mon + 1, expireTm.tm_mday},
-                          toml::time{expireTm.tm_hour, expireTm.tm_min, expireTm.tm_sec}};
-    evento::account.userId = _userInfo.linkId;
+    if (auto expireTm = std::localtime(&expire)) {
+        evento::account.expire = toml::date_time{toml::date{expireTm->tm_year + 1900,
+                                                            expireTm->tm_mon + 1,
+                                                            expireTm->tm_mday},
+                                                 toml::time{expireTm->tm_hour,
+                                                            expireTm->tm_min,
+                                                            expireTm->tm_sec}};
+        evento::account.userId = _userInfo.linkId;
+    } else {
+        spdlog::error("Failed to convert time to time_t");
+    }
 }
 
 void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) const {

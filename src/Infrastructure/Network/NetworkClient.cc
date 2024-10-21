@@ -167,10 +167,10 @@ Task<Result<EventQueryRes>> NetworkClient::getDepartmentEventList(
     co_return Ok(entity);
 }
 
-Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
+Task<Result<EventQueryRes>> NetworkClient::getEventById(eventId_t eventId) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint("/v2/client/event/query",
-                                                               {{"id", std::to_string(eventId)}}),
+                                                               {{"id", eventId}}),
                                                       {},
                                                       0min);
     if (result.isErr())
@@ -205,7 +205,7 @@ Task<Result<EventQueryRes>> NetworkClient::getEventList(
     co_return Ok(entity);
 }
 
-Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
+Task<Result<AttachmentEntity>> NetworkClient::getAttachment(eventId_t eventId) {
     auto result = co_await this
                       ->request<api::Evento>(http::verb::get,
                                              endpoint(std::format("/v2/client/event/{}/attachments",
@@ -224,7 +224,7 @@ Task<Result<AttachmentEntity>> NetworkClient::getAttachment(int eventId) {
 }
 
 Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(
-    int eventId, std::chrono::steady_clock::duration cacheTtl) {
+    eventId_t eventId, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this
                       ->request<api::Evento>(http::verb::get,
                                              endpoint(std::format("/v2/client/event/{}/feedback",
@@ -249,7 +249,9 @@ Task<Result<std::optional<FeedbackEntity>>> NetworkClient::getUserFeedback(
     co_return Ok(entity);
 }
 
-Task<Result<bool>> NetworkClient::addUserFeedback(int eventId, int rating, std::string content) {
+Task<Result<bool>> NetworkClient::addUserFeedback(eventId_t eventId,
+                                                  int rating,
+                                                  std::string content) {
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/feedback", eventId),
@@ -264,7 +266,7 @@ Task<Result<bool>> NetworkClient::addUserFeedback(int eventId, int rating, std::
     co_return Err(Error(Error::Data, "response data type error"));
 }
 
-Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
+Task<Result<bool>> NetworkClient::checkInEvent(eventId_t eventId, std::string code) {
     auto result = co_await this->request<api::Evento>(
         http::verb::post,
         endpoint(std::format("/v2/client/event/{}/check-in", eventId), {{"code", code}}));
@@ -278,7 +280,7 @@ Task<Result<bool>> NetworkClient::checkInEvent(int eventId, std::string code) {
     co_return Err(Error(Error::Data, "response data type error"));
 }
 
-Task<Result<bool>> NetworkClient::subscribeEvent(int eventId, bool subscribe) {
+Task<Result<bool>> NetworkClient::subscribeEvent(eventId_t eventId, bool subscribe) {
     std::string subscribeStr = subscribe ? "true" : "false";
     auto result = co_await this
                       ->request<api::Evento>(http::verb::post,
@@ -374,7 +376,7 @@ Task<Result<SlideEntityList>> NetworkClient::getHomeSlide(
 }
 
 Task<Result<SlideEntityList>> NetworkClient::getEventSlide(
-    int eventId, std::chrono::steady_clock::duration cacheTtl) {
+    eventId_t eventId, std::chrono::steady_clock::duration cacheTtl) {
     auto result = co_await this->request<api::Evento>(http::verb::get,
                                                       endpoint(
                                                           std::format("/v2/client/event/{}/slide",

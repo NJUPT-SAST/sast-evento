@@ -7,9 +7,11 @@
 
 namespace evento {
 
+using eventId_t = std::string;
+
 struct SlideEntity {
     int id;
-    int eventId;
+    eventId_t eventId;
     std::string url;
     std::string link;
 
