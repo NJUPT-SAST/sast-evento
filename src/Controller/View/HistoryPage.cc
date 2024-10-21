@@ -19,8 +19,8 @@ void HistoryPage::onCreate() {
 
     self->on_load_events(
         [this](int pageIndex, int size) { loadHistoryEvents(pageIndex + 1, size); });
-    self->on_comment([this](int eventId, int rating, slint::SharedString content) {
-        feedbackEvent(eventId, rating, content.data());
+    self->on_comment([this](slint::SharedString eventId, int rating, slint::SharedString content) {
+        feedbackEvent(eventId.data(), rating, content.data());
     });
     self->on_navigate_to_detail([this](EventStruct eventStruct) {
         spdlog::debug("navigate to DetailPage, current event is {}", eventStruct.summary.data());
@@ -79,7 +79,7 @@ Task<Result<std::vector<EventFeedbackStruct>>> HistoryPage::loadHistoryEventsTas
     co_return res;
 }
 
-void HistoryPage::feedbackEvent(int eventId, int rating, std::string content) {
+void HistoryPage::feedbackEvent(eventId_t eventId, int rating, std::string content) {
     auto& self = *this;
     auto trans = [](const auto& e) { return e.id; };
     executor()

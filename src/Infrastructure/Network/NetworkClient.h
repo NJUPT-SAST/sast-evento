@@ -66,21 +66,21 @@ public:
         int size = 10,
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventQueryRes>> getEventById(int eventId);
+    Task<Result<EventQueryRes>> getEventById(eventId_t eventId);
 
     Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params,
                                              std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<AttachmentEntity>> getAttachment(int eventId);
+    Task<Result<AttachmentEntity>> getAttachment(eventId_t eventId);
 
     Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(
-        int eventId, std::chrono::steady_clock::duration cacheTtl = 1min);
+        eventId_t eventId, std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string content);
+    Task<Result<bool>> addUserFeedback(eventId_t eventId, int rating, std::string content);
 
-    Task<Result<bool>> checkInEvent(int eventId, std::string code);
+    Task<Result<bool>> checkInEvent(eventId_t eventId, std::string code);
 
-    Task<Result<bool>> subscribeEvent(int eventId, bool subscribe);
+    Task<Result<bool>> subscribeEvent(eventId_t eventId, bool subscribe);
 
     Task<Result<bool>> subscribeDepartment(std::string larkDepartment, bool subscribe);
 
@@ -95,7 +95,7 @@ public:
 
     Task<Result<SlideEntityList>> getHomeSlide(std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<SlideEntityList>> getEventSlide(int eventId,
+    Task<Result<SlideEntityList>> getEventSlide(eventId_t eventId,
                                                 std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<DepartmentEntityList>> getDepartmentList(
