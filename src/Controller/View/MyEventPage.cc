@@ -79,7 +79,7 @@ void MyEventPage::refreshUiModel(Result<EventQueryRes> result) {
     if (evento::settings.noticeBegin)
         for (auto const& entity : models[(int) EventState::SigningUp]) {
             auto time = parseIso8601Utc(entity.start.c_str());
-            ipc()->showOrUpdateMessage(entity.id,
+            ipc()->showOrUpdateMessage(entity.id.data(),
                                        std::format("活动 {} 还有 15 分钟就要开始了，记得参加哦",
                                                    entity.summary),
                                        std::chrono::system_clock::from_time_t(time) - 15min);
@@ -88,14 +88,14 @@ void MyEventPage::refreshUiModel(Result<EventQueryRes> result) {
     if (evento::settings.noticeEnd)
         for (auto const& entity : models[(int) EventState::Active]) {
             auto time = parseIso8601Utc(entity.end.c_str());
-            ipc()->showOrUpdateMessage(entity.id,
+            ipc()->showOrUpdateMessage(entity.id.data(),
                                        std::format("活动 {} 结束了，记得反馈哦", entity.summary),
                                        std::chrono::system_clock::from_time_t(time));
         }
 
     for (auto const& entity : models[(int) EventState::Cancelled]) {
         auto time = parseIso8601Utc(entity.start.c_str());
-        ipc()->cancelMessage(entity.id);
+        ipc()->cancelMessage(entity.id.data());
     }
 
     self->set_not_started_model(convert::from(models[(int) EventState::SigningUp]));

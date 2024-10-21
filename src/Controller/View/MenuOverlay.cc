@@ -63,7 +63,7 @@ void MenuOverlay::refreshUserInfo(UserInfoEntity const& userInfo) {
     auto& self = *this;
     self->set_user_name(slint::SharedString(userInfo.nickname));
     self->set_user_signature(
-        slint::SharedString(userInfo.biography.value_or("这个人很神秘，什么也没留下 ")));
+        slint::SharedString(userInfo.bio.value_or("这个人很神秘，什么也没留下 ")));
     if (userInfo.avatar.has_value())
         executor()->asyncExecute(networkClient()->getFile(*userInfo.avatar),
                                  [&self = *this](Result<std::filesystem::path> result) {
