@@ -66,10 +66,10 @@ void SocketClient::exitTray() {
     spdlog::info("Tray exited with code: {}", exit_code);
 }
 
-void SocketClient::showOrUpdateMessage(int messageId,
+void SocketClient::showOrUpdateMessage(messageId_t messageId,
                                        std::string const& message,
                                        std::chrono::system_clock::time_point const& time) {
-    if (messageId == 0) {
+    if (messageId.empty()) {
         spdlog::warn("Invalid message id");
         return;
     }
@@ -94,8 +94,8 @@ void SocketClient::showOrUpdateMessage(int messageId,
         AsyncExecutor::Delay | AsyncExecutor::Once);
 }
 
-void SocketClient::cancelMessage(int messageId) {
-    if (messageId == 0) {
+void SocketClient::cancelMessage(messageId_t messageId) {
+    if (messageId.empty()) {
         spdlog::warn("Invalid message id");
         return;
     }

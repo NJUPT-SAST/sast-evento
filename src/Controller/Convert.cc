@@ -81,7 +81,7 @@ slint::SharedString firstUnicode(const std::string& str) {
 EventStruct from(const EventEntity& entity) {
     boost::algorithm::trim(entity.summary);
     return {
-        .id = entity.id,
+        .id = slint::SharedString(entity.id),
         .summary = slint::SharedString(entity.summary),
         .summary_abbr = details::firstUnicode(entity.summary),
         .description = slint::SharedString(entity.description),

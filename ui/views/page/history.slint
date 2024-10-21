@@ -15,7 +15,7 @@ export global HistoryPageBridge {
     in-out property <int> current-page-index: 0;
     callback load-events(int, int);
     callback navigate-to-detail(EventStruct);
-    callback comment(int, int, string);
+    callback comment(string, int, string);
 }
 
 component CommentItem {
@@ -83,7 +83,7 @@ component HistoryCard inherits Rectangle {
     in property <EventStruct> event;
     in property <FeedbackStruct> feedback;
     callback event-clicked(EventStruct);
-    callback comment-clicked(int, int, string);
+    callback comment-clicked(string, int, string);
     height: 100px;
     HorizontalLayout {
         spacing: 5px;
