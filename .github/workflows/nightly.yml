@@ -1,0 +1,51 @@
+name: "Nightly"
+
+on:
+  schedule:
+    - cron: "5 7 * * *"
+  workflow_dispatch:
+
+jobs:
+  tag-nightly:
+    name: "Tag Nightly"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-tags: true
+      - name: Update Nightly Tag
+        shell: pwsh
+        id: update-nightly-tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          $devHeadCommit = git rev-parse dev
+          $nightlyTagCommit = git rev-parse nightly 2>$null
+          if ($devHeadCommit -ne $nightlyTagCommit) {
+            git tag -f nightly dev
+            git push origin nightly --force
+            echo "Nightly tag updated to commit $devHeadCommit"
+            echo "updated=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "Nightly tag is already up to date"
+            echo "updated=false" >> $env:GITHUB_OUTPUT
+          }
+      - name: Trigger Nightly Build
+        if: steps.update-nightly-tag.outputs.updated == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Tags created by the GitHub Actions bot do not trigger workflows
+            // so we need to manually trigger the nightly workflow
+
+            github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'build.yml',
+              ref: 'nightly',
+            })

@@ -5,6 +5,7 @@ on:
   push:
     tags:
       - '[0-9]+.[0-9]+.[0-9]+'
+      - 'nightly'
   workflow_dispatch:
 
 permissions: write-all
@@ -507,3 +508,4 @@ jobs:
           allowUpdates: true
           draft: false
           omitBody: true
+          prerelease: ${{ github.ref == 'refs/tags/nightly' }}
