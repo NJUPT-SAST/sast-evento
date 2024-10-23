@@ -83,13 +83,13 @@ jobs:
       with:
         version: 6.6.3
         arch: gcc_64
-        cache: true
         cache-key-prefix: ${{ runner.os }}-qt
 
     - name: Setup Rust toolchain
       uses: moonrepo/setup-rust@v1
       with:
         channel: stable
+        cache: false
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
@@ -98,12 +98,12 @@ jobs:
       with:
         path: |
           ${{ github.workspace }}/build/_deps
-          ${{ github.workspace }}/build/lib
           ${{ github.workspace }}/build/*/cargo/build
           !${{ github.workspace }}/build/*/cargo/build/**/incremental
           ${{ github.workspace }}/build/corrosion/**/target
           !${{ github.workspace }}/build/corrosion/**/target/**/incremental
-        key: corrosion-linux-x64
+        key: corrosion-linux-x64-${{ github.run_id }}
+        restore-keys: corrosion-linux-x64-
 
     - name: Setup CMake
       uses: lukka/get-cmake@latest
@@ -122,11 +122,14 @@ jobs:
 
     - if: matrix.build-mode == 'manual'
       name: Build with CMake
-      uses: lukka/run-cmake@v10
-      with:
-        configurePreset: 'native'
-        buildPreset: 'native'
-        configurePresetAdditionalArgs: "['-DSPEED_UP_DEBUG_BUILD=ON']"
+      shell: pwsh
+      run: |
+        $additionalConfigureArgs = @()
+        $additionalConfigureArgs += "-DVCPKG_HOST_TRIPLET:STRING=x64-linux-release"
+        $additionalConfigureArgs += "-DVCPKG_TARGET_TRIPLET:STRING=x64-linux-release"
+        $additionalConfigureArgs += "-DSPEED_UP_DEBUG_BUILD=ON"
+        cmake --preset native @additionalConfigureArgs
+        cmake --build --preset native
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3

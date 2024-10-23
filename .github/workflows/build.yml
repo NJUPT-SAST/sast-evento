@@ -21,6 +21,8 @@ jobs:
         include:
         - rid: linux-x64
           rust_target: x86_64-unknown-linux-gnu
+          vcpkg_host_triplet: 'x64-linux-release'
+          vcpkg_target_triplet: 'x64-linux-release'
           os: ubuntu-24.04
           qt_arch: gcc_64
         - rid: win-x64
@@ -38,6 +40,10 @@ jobs:
         - rid: macos-x64
           osx_arch: x86_64
           rust_target: x86_64-apple-darwin
+          # Even on ARM64 macOS, it's out of the box to use x64 tools.
+          # Using x64 tools avoids the need to build Qt twice,
+          # and despite the Rosetta 2 overhead, it still offers faster performance.
+          vcpkg_host_triplet: 'x64-osx-release'
           vcpkg_target_triplet: 'x64-osx-release'
           os: macos-latest
 
@@ -90,13 +96,13 @@ jobs:
       with:
         version: '6.2.0'
         arch: ${{ matrix.qt_arch }}
-        cache: true
 
     - name: Setup Rust toolchain
       uses: moonrepo/setup-rust@v1
       with:
         channel: stable
         targets: ${{ matrix.rust_target }}
+        cache: false
       env:
         GITHUB_TOKEN: ${{ github.token }}
 
