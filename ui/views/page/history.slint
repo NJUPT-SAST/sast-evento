@@ -1,6 +1,5 @@
 import { Token } from "../../global.slint";
-import { Page, Button, EventStruct, ButtonType, PageState, LoadingAnimation, Card, FeedbackStruct } from "../../components/index.slint";
-import { SStar, SPagination } from "../../modules/surrealism-ui/index.slint";
+import { Page, Button, EventStruct, ButtonType, PageState, LoadingAnimation, Card, FeedbackStruct, RateStars } from "../../components/index.slint";
 import { ScrollView, LineEdit } from "std-widgets.slint";
 
 export struct EventFeedbackStruct {
@@ -24,9 +23,9 @@ component CommentItem {
     callback comment-clicked(int, string);
     if feedback.success: VerticalLayout {
         spacing: 8px;
-        star := SStar {
+        star := RateStars {
+            count: 5;
             score: feedback.rate;
-            theme: Dark;
             disabled: feedback.has-feedbacked;
         }
 

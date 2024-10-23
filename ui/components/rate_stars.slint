@@ -1,0 +1,29 @@
+import { Token } from "../global.slint";
+
+export component RateStars {
+    in property <int> count: 5;
+    in-out property <int> score: 0;
+    in property <bool> disabled: true;
+    in property <color> normal-color: Colors.gold;
+    in property <color> disabled-color: Token.color.on-surface.with-alpha(0.12);
+    in property <length> icon-size: 20px;
+    HorizontalLayout {
+        spacing: 5px;
+        padding: 5px;
+        for i in count: Image {
+            source: score - 1 >= i ? Token.image.icon.star-full : Token.image.icon.star-empty;
+            colorize: disabled ? disabled-color : normal-color;
+            width: icon-size;
+            height: icon-size;
+            TouchArea {
+                width: parent.width;
+                height: parent.height;
+                clicked => {
+                    if (!disabled) {
+                        score = i + 1;
+                    }
+                }
+            }
+        }
+    }
+}

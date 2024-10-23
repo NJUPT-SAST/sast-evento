@@ -2,7 +2,6 @@ import { EventoImageToken } from "./assets/index.slint";
 import { MdStyleToken } from "./logic/md_style_token.slint";
 
 import { Palette } from "std-widgets.slint";
-import { Themes } from "./modules/surrealism-ui/use/index.slint";
 
 export { 
     MdFontData,
@@ -11,7 +10,6 @@ export {
 
 export global Token {
     out property is-darkmode <=> MdStyleToken.is-darkmode;
-    out property <Themes> surrealism-ui-default-theme: is-darkmode ? Dark : Light;
     out property image <=> EventoImageToken.image;
     out property font <=> MdStyleToken.font;
     out property color <=> MdStyleToken.color;

@@ -3,8 +3,6 @@ import { Page, PageState } from "../../components/index.slint";
 import { AboutSlint, ScrollView } from "std-widgets.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
 import { Button, ButtonType, LoadingAnimation, StyledText } from "../../components/index.slint";
-import { Icon } from "../../modules/surrealism-ui/src/icon/icon.slint";
-import { UseIcons } from "../../modules/surrealism-ui/use/src/icon.slint";
 
 export struct ContributorStruct {
     avatar: image,
@@ -78,8 +76,8 @@ component Link {
 
     HorizontalLayout {
         spacing: 5px;
-        Icon {
-            source: UseIcons.icons.Share;
+        Image {
+            source: Token.image.icon.share;
             height: 15px;
             width: 15px;
             colorize: area.has-hover ? Token.color.primary : Token.color.on-surface;

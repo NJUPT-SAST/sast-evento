@@ -1,7 +1,6 @@
 import { Token } from "../../global.slint";
 import { Page, EventCardGroup, EventStruct, StateLayer, PageState, LoadingAnimation } from "../../components/index.slint";
 import { Button, LineEdit, ScrollView, ListView, StandardListView } from "std-widgets.slint";
-import { SPagination } from "../../modules/surrealism-ui/index.slint";
 
 export global SearchPageBridge {
     in property <[StandardListViewItem]> department: [];
@@ -132,26 +131,6 @@ export component SearchPage inherits Page {
                 //     }
                 // }
             }
-
-            // if SearchPageBridge.total > SearchPageBridge.page-size: Rectangle {
-            //     height: 30px;
-            //     SPagination {
-            //         page-size: SearchPageBridge.page-size;
-            //         total: SearchPageBridge.total;
-            //         theme: Token.surrealism-ui-default-theme;
-            //         active <=> root.current-page-index;
-
-            //         pre => {
-            //             SearchPageBridge.load-department-events(root.current-page-index);
-            //         }
-            //         next => {
-            //             SearchPageBridge.load-department-events(root.current-page-index);
-            //         }
-            //         clicked => {
-            //             SearchPageBridge.load-department-events(root.current-page-index);
-            //         }
-            //     }
-            // }
         }
     }
 }

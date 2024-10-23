@@ -40,7 +40,6 @@ import {
     SettingPageBridge
 } from "./views/index.slint";
 import { StateLayer } from "./components/index.slint";
-import { GlobalProps } from "modules/surrealism-ui/themes/src/index.slint";
 import "assets/font/MiSans-Regular.ttf";
 
 // export for C++ interact
@@ -226,7 +225,7 @@ export component App inherits Window {
     background: Token.color.surface;
     icon: Token.image.icon.evento;
     init => {
-        GlobalProps.theme = Token.surrealism-ui-default-theme;
+        // GlobalProps.theme = Token.surrealism-ui-default-theme;
     }
     VerticalLayout {
         heading := HorizontalLayout {

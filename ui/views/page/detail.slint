@@ -1,7 +1,6 @@
 import { Token } from "../../global.slint";
-import { Page, Button, EventStruct, EventState, FeedbackStruct, ContentDialog, PageState, LoadingAnimation } from "../../components/index.slint";
+import { Page, Button, EventStruct, EventState, FeedbackStruct, ContentDialog, PageState, LoadingAnimation, RateStars } from "../../components/index.slint";
 import { VerticalBox, LineEdit, ScrollView } from "std-widgets.slint";
-import { SStar} from "../../modules/surrealism-ui/index.slint";
 import { MessageManager, MessageType } from "../../logic/index.slint";
 
 export global DetailPageBridge {
@@ -187,7 +186,8 @@ export component DetailPage inherits Page {
                             font-weight: Token.font.title.large.weight;
                         }
 
-                        star := SStar {
+                        star := RateStars {
+                            count: 5;
                             score: DetailPageBridge.feedback-model.rate;
                         }
 
