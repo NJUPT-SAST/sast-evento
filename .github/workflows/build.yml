@@ -502,10 +502,11 @@ jobs:
 
       - name: Release (GitHub)
         uses: ncipollo/release-action@v1
-        if: github.event_name == 'push' && github.ref_type == 'tag'
+        if: github.ref_type == 'tag'
         with:
           artifacts: ./artifacts/*
           allowUpdates: true
           draft: false
           omitBody: true
           prerelease: ${{ github.ref == 'refs/tags/nightly' }}
+          removeArtifacts: ${{ github.ref == 'refs/tags/nightly' }}
