@@ -62,6 +62,7 @@ inline std::string firstDateTimeOfWeek() {
     auto now = std::chrono::system_clock::now();
     auto time = std::chrono::system_clock::to_time_t(now);
     auto tm = std::gmtime(&time);
+    auto tm = std::gmtime(&time);
 
     // Find the start of the week (Monday)
     int daysSinceMonday = (tm->tm_wday + 6) % 7;
@@ -70,7 +71,7 @@ inline std::string firstDateTimeOfWeek() {
     // Format the date
     std::stringstream ss;
     auto startOfWeekTime = std::chrono::system_clock::to_time_t(startOfWeek);
-    ss << std::put_time(std::gmtime(&startOfWeekTime), "%Y-%m-%dT00:00:00.000Z");
+    ss << std::put_time(std::gmtime(&startOfWeekTime), "%Y-%m-%dT00:00:00");
     return ss.str();
 }
 
