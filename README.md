@@ -58,7 +58,7 @@ This project is the desktop client version of SAST Evento.
 | Linux x64 (deb)      | ✅      |                                  |
 | Linux x64 (rpm)      | :x:    | PRs are welcome                  |
 | Linux x64 (nix)      | :x:    | PRs are welcome                  |
-| Linux x64 (AppImage) | :x:    | PRs are welcome                  |
+| Linux x64 (AppImage) | ✅      |                                  |
 
 ## 📦 Installation
 

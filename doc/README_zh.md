@@ -58,7 +58,7 @@ SAST Evento 是一个 SAST 的事件管理系统，平时我们在活动过程�
 | Linux x64 (deb)      | ✅    |                     |
 | Linux x64 (rpm)      | :x:  | 欢迎提交 PR         |
 | Linux x64 (nix)      | :x:  | 欢迎提交 PR         |
-| Linux x64 (AppImage) | :x:  | 欢迎提交 PR         |
+| Linux x64 (AppImage) | ✅    |                     |
 
 ## 📦 安装
 
