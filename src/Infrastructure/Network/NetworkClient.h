@@ -15,10 +15,8 @@
 #include <filesystem>
 #include <initializer_list>
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#ifdef EVENTO_API_V1
-#include <unordered_map>
-#endif
 
 namespace evento {
 
@@ -68,27 +66,23 @@ public:
         int size = 10,
         std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<EventQueryRes>> getEventById(int eventId);
+    Task<Result<EventQueryRes>> getEventById(eventId_t eventId);
 
     Task<Result<EventQueryRes>> getEventList(std::initializer_list<urls::param> params,
                                              std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<AttachmentEntity>> getAttachment(int eventId);
+    Task<Result<AttachmentEntity>> getAttachment(eventId_t eventId);
 
     Task<Result<std::optional<FeedbackEntity>>> getUserFeedback(
-        int eventId, std::chrono::steady_clock::duration cacheTtl = 1min);
+        eventId_t eventId, std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<bool>> addUserFeedback(int eventId, int rating, std::string content);
+    Task<Result<bool>> addUserFeedback(eventId_t eventId, int rating, std::string content);
 
-    Task<Result<bool>> checkInEvent(int eventId, std::string code);
+    Task<Result<bool>> checkInEvent(eventId_t eventId, std::string code);
 
-    Task<Result<bool>> subscribeEvent(int eventId, bool subscribe);
+    Task<Result<bool>> subscribeEvent(eventId_t eventId, bool subscribe);
 
     Task<Result<bool>> subscribeDepartment(std::string larkDepartment, bool subscribe);
-
-#ifdef EVENTO_API_V1
-    Task<Result<ParticipateEntity>> getEventParticipate(int eventId);
-#endif
 
     // isCheckedIn: true
     Task<Result<EventQueryRes>> getParticipatedEvent(
@@ -101,7 +95,7 @@ public:
 
     Task<Result<SlideEntityList>> getHomeSlide(std::chrono::steady_clock::duration cacheTtl = 1min);
 
-    Task<Result<SlideEntityList>> getEventSlide(int eventId,
+    Task<Result<SlideEntityList>> getEventSlide(eventId_t eventId,
                                                 std::chrono::steady_clock::duration cacheTtl = 1min);
 
     Task<Result<DepartmentEntityList>> getDepartmentList(
@@ -175,6 +169,38 @@ private:
         co_return result;
     }
 
+    template<std::same_as<api::Evento> Api>
+    Task<JsonResult> request(http::verb verb,
+                             urls::url_view url,
+                             nlohmann::basic_json<> const& params) {
+        spdlog::info("Requesting: {}", url.data());
+
+        http::request<http::string_body> req{verb,
+                                             std::format("{}{}{}",
+                                                         url.path(),
+                                                         url.has_query() ? "?" : "",
+                                                         url.encoded_query().data()),
+                                             11};
+
+        req.set(http::field::host, url.host());
+        req.set(http::field::user_agent, "SAST-Evento-Desktop/2");
+        req.set(http::field::content_type, "application/json");
+        req.body() = params.dump();
+
+        debug(), req;
+
+        auto reply = co_await _httpsAccessManager->makeReply(url.host(), req);
+
+        if (reply.isErr())
+            co_return reply.unwrapErr();
+
+        debug(), reply.unwrap();
+
+        auto result = handleEventoResponse(reply.unwrap());
+
+        co_return result;
+    }
+
     template<std::same_as<api::Github> Api>
     Task<JsonResult> request(http::verb verb,
                              urls::url_view url,
@@ -209,12 +235,6 @@ private:
     std::unique_ptr<HttpsAccessManager> _httpsAccessManager;
     std::unique_ptr<CacheManager> _cacheManager;
     friend NetworkClient* networkClient();
-
-#ifdef EVENTO_API_V1
-    // department name -> department id
-    // Since v1 api uses department id as identifier.
-    std::unordered_map<std::string, int> departmentIdMap;
-#endif
 };
 
 NetworkClient* networkClient();
