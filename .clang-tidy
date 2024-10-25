@@ -120,7 +120,6 @@ Checks: >-
   portability-simd-intrinsics,
   readability-avoid-const-params-in-decls,
   readability-const-return-type,
-  readability-convert-member-functions-to-static,
   readability-delete-null-pointer,
   readability-inconsistent-declaration-parameter-name,
   readability-make-member-function-const,
