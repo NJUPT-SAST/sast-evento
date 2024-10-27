@@ -10,7 +10,19 @@
 #include <locale>
 #endif
 
+#include "Infrastructure/System/Crash.h"
+#include "Infrastructure/System/Signal.h"
+
+void signalCallback(int signal) {
+    // Here we can save crash log
+    std::string msg = "Signal " + std::to_string(signal) + " received.";
+    saveCrashLog(msg);
+}
+
 int main(int argc, char** argv) {
+    // Here we register signal handler
+    SignalHandler::getInstance().registerHandler(SIGABRT, signalCallback);
+    SignalHandler::getInstance().registerHandler(SIGSEGV, signalCallback);
     Logger logger(
 #ifdef EVENTO_DEBUG
         Logger::Level::debug,
