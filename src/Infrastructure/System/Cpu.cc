@@ -1,10 +1,10 @@
 #include "Cpu.h"
 #include "Os.h"
-
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
 #include <vector>
+
 
 #ifdef _WIN32
 // clang-format off
@@ -118,16 +118,15 @@ auto getCurrentCpuTemperature() -> float {
     }
 
     // Initialize security.
-    hres = CoInitializeSecurity(
-        NULL,
-        -1,
-        NULL,
-        NULL,
-        RPC_C_AUTHN_LEVEL_DEFAULT,
-        RPC_C_IMP_LEVEL_IMPERSONATE,
-        NULL,
-        EOAC_NONE,
-        NULL);
+    hres = CoInitializeSecurity(NULL,
+                                -1,
+                                NULL,
+                                NULL,
+                                RPC_C_AUTHN_LEVEL_DEFAULT,
+                                RPC_C_IMP_LEVEL_IMPERSONATE,
+                                NULL,
+                                EOAC_NONE,
+                                NULL);
 
     if (FAILED(hres)) {
         spdlog::error("Failed to initialize security. Error code = {}", hres);
@@ -136,12 +135,12 @@ auto getCurrentCpuTemperature() -> float {
     }
 
     // Obtain the initial locator to WMI.
-    IWbemLocator *pLoc = NULL;
-    hres = CoCreateInstance(
-        CLSID_WbemLocator,
-        0,
-        CLSCTX_INPROC_SERVER,
-        IID_IWbemLocator, (LPVOID *)&pLoc);
+    IWbemLocator* pLoc = NULL;
+    hres = CoCreateInstance(CLSID_WbemLocator,
+                            0,
+                            CLSCTX_INPROC_SERVER,
+                            IID_IWbemLocator,
+                            (LPVOID*) &pLoc);
 
     if (FAILED(hres)) {
         spdlog::error("Failed to create IWbemLocator object. Error code = {}", hres);
@@ -149,18 +148,10 @@ auto getCurrentCpuTemperature() -> float {
         return temperature;
     }
 
-    IWbemServices *pSvc = NULL;
+    IWbemServices* pSvc = NULL;
 
     // Connect to the root\cimv2 namespace with the current user.
-    hres = pLoc->ConnectServer(
-        _bstr_t(L"ROOT\\CIMV2"),
-        NULL,
-        NULL,
-        0,
-        NULL,
-        0,
-        0,
-        &pSvc);
+    hres = pLoc->ConnectServer(_bstr_t(L"ROOT\\CIMV2"), NULL, NULL, 0, NULL, 0, 0, &pSvc);
 
     if (FAILED(hres)) {
         spdlog::error("Could not connect. Error code = {}", hres);
@@ -170,15 +161,14 @@ auto getCurrentCpuTemperature() -> float {
     }
 
     // Set security levels on the proxy.
-    hres = CoSetProxyBlanket(
-        pSvc,
-        RPC_C_AUTHN_WINNT,
-        RPC_C_AUTHZ_NONE,
-        NULL,
-        RPC_C_AUTHN_LEVEL_CALL,
-        RPC_C_IMP_LEVEL_IMPERSONATE,
-        NULL,
-        EOAC_NONE);
+    hres = CoSetProxyBlanket(pSvc,
+                             RPC_C_AUTHN_WINNT,
+                             RPC_C_AUTHZ_NONE,
+                             NULL,
+                             RPC_C_AUTHN_LEVEL_CALL,
+                             RPC_C_IMP_LEVEL_IMPERSONATE,
+                             NULL,
+                             EOAC_NONE);
 
     if (FAILED(hres)) {
         spdlog::error("Could not set proxy blanket. Error code = {}", hres);
@@ -189,7 +179,7 @@ auto getCurrentCpuTemperature() -> float {
     }
 
     // Use the IWbemServices pointer to make requests of WMI.
-    IEnumWbemClassObject *pEnumerator = NULL;
+    IEnumWbemClassObject* pEnumerator = NULL;
     hres = pSvc->ExecQuery(
         bstr_t("WQL"),
         bstr_t("SELECT * FROM Win32_PerfFormattedData_Counters_ThermalZoneInformation"),
@@ -205,7 +195,7 @@ auto getCurrentCpuTemperature() -> float {
         return temperature;
     }
 
-    IWbemClassObject *pclsObj = NULL;
+    IWbemClassObject* pclsObj = NULL;
     ULONG uReturn = 0;
 
     while (pEnumerator) {
@@ -218,7 +208,7 @@ auto getCurrentCpuTemperature() -> float {
         VARIANT vtProp;
         hr = pclsObj->Get(L"Temperature", 0, &vtProp, 0, 0);
         if (SUCCEEDED(hr) && (vtProp.vt == VT_I4)) {
-            temperature = static_cast<float>(vtProp.intVal) / 10.0F;  // Adjust if necessary
+            temperature = static_cast<float>(vtProp.intVal) / 10.0F; // Adjust if necessary
         }
         VariantClear(&vtProp);
         pclsObj->Release();

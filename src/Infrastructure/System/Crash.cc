@@ -10,7 +10,6 @@
 #include <sstream>
 #include <unordered_map>
 
-
 #ifndef _MSC_VER
 #include <unistd.h>
 #endif
