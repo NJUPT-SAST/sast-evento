@@ -1,5 +1,4 @@
 #include "Os.h"
-
 #include <array>
 #include <format>
 #include <fstream>
@@ -11,8 +10,8 @@
 #ifdef _WIN32
 #include <windows.h>
 #elif __linux__
-#include <unistd.h>
 #include <fstream>
+#include <unistd.h>
 #elif __APPLE__
 #include <sys/utsname.h>
 #endif
@@ -42,8 +41,7 @@ auto getComputerName() -> std::optional<std::string> {
 #elif defined(__APPLE__)
     CFStringRef name = SCDynamicStoreCopyComputerName(NULL, NULL);
     if (name != NULL) {
-        CFStringGetCString(name, buffer.data(), buffer.size(),
-                           kCFStringEncodingUTF8);
+        CFStringGetCString(name, buffer.data(), buffer.size(), kCFStringEncodingUTF8);
         CFRelease(name);
         return std::string(buffer.data());
     }
@@ -58,8 +56,7 @@ auto getComputerName() -> std::optional<std::string> {
     return std::nullopt;
 }
 
-auto parseFile(const std::string& filePath)
-    -> std::pair<std::string, std::string> {
+auto parseFile(const std::string& filePath) -> std::pair<std::string, std::string> {
     std::ifstream file(filePath);
     if (!file.is_open()) {
         spdlog::error("Cannot open file: {}", filePath);
@@ -71,7 +68,7 @@ auto parseFile(const std::string& filePath)
 
     while (std::getline(file, line)) {
         if (line.empty() || line[0] == '#') {
-            continue;  // Skip empty lines and comments
+            continue; // Skip empty lines and comments
         }
 
         size_t delimiterPos = line.find('=');
@@ -102,10 +99,12 @@ auto getOperatingSystemInfo() -> OperatingSystemInfo {
     OSVERSIONINFOEX osvi;
     ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
     osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-    if (GetVersionEx((LPOSVERSIONINFO)&osvi) != 0) {
+    if (GetVersionEx((LPOSVERSIONINFO) &osvi) != 0) {
         osInfo.osName = "Windows";
-        osInfo.osVersion = std::format("{}.{} (Build {})", osvi.dwMajorVersion,
-                                       osvi.dwMinorVersion, osvi.dwBuildNumber);
+        osInfo.osVersion = std::format("{}.{} (Build {})",
+                                       osvi.dwMajorVersion,
+                                       osvi.dwMinorVersion,
+                                       osvi.dwBuildNumber);
     } else {
         spdlog::error("Failed to get OS version");
     }
@@ -167,11 +166,9 @@ auto getOperatingSystemInfo() -> OperatingSystemInfo {
 
     const std::string COMPILER =
 #if defined(__clang__)
-        std::format("Clang {}.{}.{}", __clang_major__, __clang_minor__,
-                    __clang_patchlevel__);
+        std::format("Clang {}.{}.{}", __clang_major__, __clang_minor__, __clang_patchlevel__);
 #elif defined(__GNUC__)
-        std::format("GCC {}.{}.{}", __GNUC__, __GNUC_MINOR__,
-                    __GNUC_PATCHLEVEL__);
+        std::format("GCC {}.{}.{}", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
 #elif defined(_MSC_VER)
         std::format("MSVC {}", _MSC_FULL_VER);
 #else
@@ -192,8 +189,7 @@ auto isWsl() -> bool {
         procVersion.close();
         // Check if the line contains "Microsoft" which is a typical indicator
         // of WSL
-        return line.find("microsoft") != std::string::npos ||
-               line.find("WSL") != std::string::npos;
+        return line.find("microsoft") != std::string::npos || line.find("WSL") != std::string::npos;
     }
     return false;
 }

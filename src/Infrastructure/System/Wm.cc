@@ -1,6 +1,6 @@
 #include "Wm.h"
-
 #include <format>
+
 
 #ifdef _WIN32
 // clang-format off
@@ -11,7 +11,7 @@
 #pragma comment(lib, "dwmapi.lib")
 #endif
 #elif __linux__
-#include <cstdlib>  // For Linux system commands
+#include <cstdlib> // For Linux system commands
 #endif
 
 auto getSystemInfo() -> SystemInfo {
@@ -21,7 +21,7 @@ auto getSystemInfo() -> SystemInfo {
     // Windows: Get desktop environment, window manager, theme, icons, font,
     // cursor, etc.
 
-    info.desktopEnvironment = "Fluent";  // Windows Fluent Design
+    info.desktopEnvironment = "Fluent"; // Windows Fluent Design
 
     // Get the status of the window manager (DWM)
     BOOL isDWMEnabled = FALSE;
@@ -39,20 +39,27 @@ auto getSystemInfo() -> SystemInfo {
     if (RegOpenKeyExW(HKEY_CURRENT_USER,
                       L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\P"
                       L"ersonalize",
-                      0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+                      0,
+                      KEY_READ,
+                      &hKey)
+        == ERROR_SUCCESS) {
         DWORD dataSize = sizeof(DWORD);
-        RegQueryValueExW(hKey, L"AppsUseLightTheme", nullptr, nullptr,
+        RegQueryValueExW(hKey,
+                         L"AppsUseLightTheme",
+                         nullptr,
+                         nullptr,
                          reinterpret_cast<LPBYTE>(&appsUseLightTheme),
                          &dataSize);
-        RegQueryValueExW(hKey, L"SystemUsesLightTheme", nullptr, nullptr,
+        RegQueryValueExW(hKey,
+                         L"SystemUsesLightTheme",
+                         nullptr,
+                         nullptr,
                          reinterpret_cast<LPBYTE>(&systemUsesLightTheme),
                          &dataSize);
         RegCloseKey(hKey);
     }
-    info.wmTheme =
-        "Oem - Blue (System: " +
-        std::string(systemUsesLightTheme ? "Light" : "Dark") +
-        ", Apps: " + std::string(appsUseLightTheme ? "Light" : "Dark") + ")";
+    info.wmTheme = "Oem - Blue (System: " + std::string(systemUsesLightTheme ? "Light" : "Dark")
+                   + ", Apps: " + std::string(appsUseLightTheme ? "Light" : "Dark") + ")";
 
     // Icon information (Recycle Bin)
     info.icons = "Recycle Bin";
@@ -77,7 +84,8 @@ auto getSystemInfo() -> SystemInfo {
     metrics.iPaddedBorderWidth = 0;
     metrics.cbSize = sizeof(NONCLIENTMETRICS);
     SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(metrics), &metrics, 0);
-    info.font = std::format("{} ({}pt)", metrics.lfMessageFont.lfFaceName,
+    info.font = std::format("{} ({}pt)",
+                            metrics.lfMessageFont.lfFaceName,
                             metrics.lfMessageFont.lfHeight);
 
     // Get cursor information
@@ -123,8 +131,8 @@ auto getSystemInfo() -> SystemInfo {
     }
 
     // Icons (Recycle Bin)
-    info.icons = "Recycle Bin";  // Getting icons on Linux is complex, hardcoded
-                                 // as an example
+    info.icons = "Recycle Bin"; // Getting icons on Linux is complex, hardcoded
+                                // as an example
 
     // Get font information
     pipe = popen("gsettings get org.gnome.desktop.interface font-name", "r");

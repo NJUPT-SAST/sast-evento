@@ -1,16 +1,15 @@
 #include "Crash.h"
-
 #include "Cpu.h"
 #include "Memory.h"
 #include "Os.h"
 #include "Wm.h"
-
 #include <ctime>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <sstream>
 #include <unordered_map>
+
 
 #ifndef _MSC_VER
 #include <unistd.h>
@@ -31,8 +30,7 @@ auto getSystemInfoStr() -> std::string {
     auto osInfo = getOperatingSystemInfo();
     sss << "System Information:\n";
     sss << "-------------------\n";
-    sss << "Operating system: " << osInfo.osName << " " << osInfo.osVersion
-        << "\n";
+    sss << "Operating system: " << osInfo.osName << " " << osInfo.osVersion << "\n";
     sss << "Architecture: " << osInfo.architecture << "\n";
     sss << "Kernel version: " << osInfo.kernelVersion << "\n";
     sss << "Computer name: " << osInfo.computerName << "\n";
@@ -54,7 +52,6 @@ auto getSystemInfoStr() -> std::string {
     sss << "  L1I: " << cache.l1i << " KB\n";
     sss << "  L2: " << cache.l2 << " KB\n";
     sss << "  L3: " << cache.l3 << " KB\n\n";
-    
 
     sss << "Memory Status:\n";
     sss << "--------------\n";
@@ -94,7 +91,7 @@ auto getChinaTimestampString() -> std::string {
 
 auto Environ() -> std::unordered_map<std::string, std::string> {
     std::unordered_map<std::string, std::string> env;
-    for (char **envp = environ; *envp != nullptr; ++envp) {
+    for (char** envp = environ; *envp != nullptr; ++envp) {
         std::string envStr(*envp);
         size_t pos = envStr.find('=');
         if (pos != std::string::npos) {
@@ -107,7 +104,7 @@ auto Environ() -> std::unordered_map<std::string, std::string> {
 void saveCrashLog(std::string_view error_msg) {
     std::string systemInfo = getSystemInfoStr();
     std::string environmentInfo;
-    for (const auto &[key, value] : Environ()) {
+    for (const auto& [key, value] : Environ()) {
         environmentInfo += key + ": " + value + "\n";
     }
 
@@ -139,8 +136,7 @@ void saveCrashLog(std::string_view error_msg) {
         // Handle error
         return;
     }
-    ssss << "crash_report/crash_" << std::put_time(&localTime, "%Y%m%d_%H%M%S")
-         << ".log";
+    ssss << "crash_report/crash_" << std::put_time(&localTime, "%Y%m%d_%H%M%S") << ".log";
     std::filesystem::path dirPath("crash_report");
     if (!std::filesystem::exists(dirPath)) {
         std::filesystem::create_directory(dirPath);
@@ -154,23 +150,30 @@ void saveCrashLog(std::string_view error_msg) {
     // Create a dump file
 #ifdef _WIN32
     std::stringstream wss;
-    wss << "crash_report/crash_" << std::put_time(&localTime, "%Y%m%d_%H%M%S")
-        << ".dmp";
+    wss << "crash_report/crash_" << std::put_time(&localTime, "%Y%m%d_%H%M%S") << ".dmp";
     std::string dumpFile = wss.str();
-    HANDLE hFile =
-        CreateFile(dumpFile.c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-                   CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+    HANDLE hFile = CreateFile(dumpFile.c_str(),
+                              GENERIC_READ | GENERIC_WRITE,
+                              0,
+                              nullptr,
+                              CREATE_ALWAYS,
+                              FILE_ATTRIBUTE_NORMAL,
+                              nullptr);
     if (hFile == INVALID_HANDLE_VALUE) {
         return;
     }
     MINIDUMP_EXCEPTION_INFORMATION mdei;
     mdei.ThreadId = GetCurrentThreadId();
-    EXCEPTION_POINTERS *pep = nullptr;
+    EXCEPTION_POINTERS* pep = nullptr;
     mdei.ExceptionPointers = pep;
     mdei.ClientPointers = FALSE;
-    MiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile,
-                      MiniDumpNormal, (pep != nullptr) ? &mdei : nullptr,
-                      nullptr, nullptr);
+    MiniDumpWriteDump(GetCurrentProcess(),
+                      GetCurrentProcessId(),
+                      hFile,
+                      MiniDumpNormal,
+                      (pep != nullptr) ? &mdei : nullptr,
+                      nullptr,
+                      nullptr);
     CloseHandle(hFile);
 #endif
 }

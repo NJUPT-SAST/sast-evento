@@ -11,11 +11,11 @@
  * understanding the CPU's capabilities.
  */
 struct CacheSizes {
-    size_t l1d;      ///< The size of the L1 data cache in bytes.
-    size_t l1i;      ///< The size of the L1 instruction cache in bytes.
-    size_t l2;       ///< The size of the L2 cache in bytes.
-    size_t l3;       ///< The size of the L3 cache in bytes.
-};  ///< Ensure the structure is aligned to a 32-byte boundary.
+    size_t l1d; ///< The size of the L1 data cache in bytes.
+    size_t l1i; ///< The size of the L1 instruction cache in bytes.
+    size_t l2;  ///< The size of the L2 cache in bytes.
+    size_t l3;  ///< The size of the L3 cache in bytes.
+}; ///< Ensure the structure is aligned to a 32-byte boundary.
 
 /**
  * @brief Retrieves the current CPU usage percentage.

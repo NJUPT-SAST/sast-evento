@@ -9,8 +9,9 @@
 // clang-format on
 #pragma comment(lib, "dbghelp.lib")
 #else
-#include <execinfo.h>
 #include <cxxabi.h>
+#include <execinfo.h>
+
 #endif
 
 SignalHandler& SignalHandler::getInstance() {
@@ -45,25 +46,23 @@ std::string SignalHandler::getStackTrace() {
     stack.AddrStack.Offset = context.Rsp;
     stack.AddrStack.Mode = AddrModeFlat;
 
-    for (ULONG frame = 0; ; frame++) {
-        BOOL more = StackWalk64(
-            IMAGE_FILE_MACHINE_AMD64,
-            process,
-            thread,
-            &stack,
-            &context,
-            NULL,
-            SymFunctionTableAccess64,
-            SymGetModuleBase64,
-            NULL
-        );
+    for (ULONG frame = 0;; frame++) {
+        BOOL more = StackWalk64(IMAGE_FILE_MACHINE_AMD64,
+                                process,
+                                thread,
+                                &stack,
+                                &context,
+                                NULL,
+                                SymFunctionTableAccess64,
+                                SymGetModuleBase64,
+                                NULL);
 
         if (!more || stack.AddrPC.Offset == 0) {
             break;
         }
 
         char buffer[sizeof(SYMBOL_INFO) + MAX_SYM_NAME * sizeof(TCHAR)];
-        PSYMBOL_INFO symbol = (PSYMBOL_INFO)buffer;
+        PSYMBOL_INFO symbol = (PSYMBOL_INFO) buffer;
         symbol->SizeOfStruct = sizeof(SYMBOL_INFO);
         symbol->MaxNameLen = MAX_SYM_NAME;
 
@@ -81,7 +80,7 @@ std::string SignalHandler::getStackTrace() {
     char** messages = backtrace_symbols(array, size);
 
     for (int i = 1; i < size && messages != NULL; ++i) {
-        char* mangled_name = 0, * offset_begin = 0, * offset_end = 0;
+        char *mangled_name = 0, *offset_begin = 0, *offset_end = 0;
 
         for (char* p = messages[i]; *p; ++p) {
             if (*p == '(') {
@@ -102,10 +101,12 @@ std::string SignalHandler::getStackTrace() {
             int status;
             char* demangled_name = abi::__cxa_demangle(mangled_name, 0, 0, &status);
             if (status == 0) {
-                result += std::string(messages[i]) + ": " + demangled_name + "+" + offset_begin + offset_end + "\n";
+                result += std::string(messages[i]) + ": " + demangled_name + "+" + offset_begin
+                          + offset_end + "\n";
                 free(demangled_name);
             } else {
-                result += std::string(messages[i]) + ": " + mangled_name + "+" + offset_begin + offset_end + "\n";
+                result += std::string(messages[i]) + ": " + mangled_name + "+" + offset_begin
+                          + offset_end + "\n";
             }
         } else {
             result += std::string(messages[i]) + "\n";
