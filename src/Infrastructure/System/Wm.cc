@@ -1,7 +1,6 @@
 #include "Wm.h"
 #include <format>
 
-
 #ifdef _WIN32
 // clang-format off
 #include <windows.h>

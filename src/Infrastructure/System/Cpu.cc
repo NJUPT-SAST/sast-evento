@@ -5,7 +5,6 @@
 #include <sstream>
 #include <vector>
 
-
 #ifdef _WIN32
 // clang-format off
 #include <windows.h>
