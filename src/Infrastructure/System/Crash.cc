@@ -81,7 +81,11 @@ auto getChinaTimestampString() -> std::string {
     auto now = std::chrono::system_clock::now();
     std::time_t nowC = std::chrono::system_clock::to_time_t(now);
     std::tm localTime;
+#if PLATFORM_WINDOWS
     if (localtime_s(&localTime, &nowC) != 0) {
+#else
+    if (localtime_r(&localTime, &nowC) != 0) {
+#endif
     }
     std::stringstream sss;
     sss << std::put_time(&localTime, "%Y-%m-%d %H:%M:%S");
@@ -131,7 +135,11 @@ void saveCrashLog(std::string_view error_msg) {
     auto now = std::chrono::system_clock::now();
     std::time_t nowC = std::chrono::system_clock::to_time_t(now);
     std::tm localTime;
+#if PLATFORM_WINDOWS
     if (localtime_s(&localTime, &nowC) != 0) {
+#else
+    if (localtime_r(&localTime, &nowC) != 0) {
+#endif
         // Handle error
         return;
     }
