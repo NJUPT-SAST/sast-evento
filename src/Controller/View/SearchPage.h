@@ -2,6 +2,8 @@
 
 #include <Controller/Core/BasicView.h>
 #include <Controller/Core/GlobalAgent.hh>
+#include <Infrastructure/Network/ResponseStruct.h>
+#include <vector>
 
 EVENTO_UI_START
 
@@ -21,6 +23,8 @@ private:
     void search(std::string const& keyword);
 
     std::vector<slint::SharedString> departments;
+
+    std::vector<EventEntity> cntDepartmentEvents;
 };
 
 EVENTO_UI_END

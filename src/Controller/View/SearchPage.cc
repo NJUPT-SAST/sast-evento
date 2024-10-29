@@ -5,6 +5,7 @@
 #include <Infrastructure/Network/NetworkClient.h>
 #include <Infrastructure/Network/ResponseStruct.h>
 #include <boost/algorithm/string.hpp>
+#include <iterator>
 #include <ranges>
 
 EVENTO_UI_START
@@ -90,26 +91,36 @@ void SearchPage::loadDepartmentEvents(int page, int departmentIdx) {
 
     self->set_events_state(PageState::Loading);
 
-    executor()->asyncExecute(networkClient()->getDepartmentEventList(
-                                 std::string(self->get_department()->row_data(departmentIdx)->text),
-                                 page + 1,
-                                 self->get_page_size()),
-                             [&self = *this](Result<EventQueryRes> result) {
-                                 if (result.isErr()) {
-                                     self->set_events_state(PageState::Error);
-                                     self.bridge.getMessageManager()
-                                         .showMessage(result.unwrapErr().what(), MessageType::Error);
-                                     return;
-                                 }
+    executor()->asyncExecute(
+        networkClient()
+            ->getDepartmentEventList(std::string(
+                                         self->get_department()->row_data(departmentIdx)->text),
+                                     page + 1,
+                                     self->get_page_size()),
+        [&self = *this, page](Result<EventQueryRes> result) {
+            if (result.isErr()) {
+                self->set_events_state(PageState::Error);
+                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),
+                                                            MessageType::Error);
+                return;
+            }
 
-                                 auto res = result.unwrap();
+            auto res = result.unwrap();
 
-                                 self->set_total(res.total);
+            if (page == 0) {
+                self.cntDepartmentEvents = std::move(res.elements);
+            } else {
+                self.cntDepartmentEvents.insert(self.cntDepartmentEvents.end(),
+                                                std::make_move_iterator(res.elements.begin()),
+                                                std::make_move_iterator(res.elements.end()));
+            }
 
-                                 self->set_event_model(convert::from(res.elements));
+            self->set_total(res.total);
 
-                                 self->set_events_state(PageState::Normal);
-                             });
+            self->set_event_model(convert::from(self.cntDepartmentEvents));
+
+            self->set_events_state(PageState::Normal);
+        });
 }
 
 EVENTO_UI_END
