@@ -82,9 +82,8 @@ emerge -av eselect-repository
 eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
 ```
 
-使用 overlay 中的 `spdlog` 解决捆绑的 `fmt` 问题。
 ```bash
-emerge -av spdlog::corcodile sast-evento
+emerge -av app-misc/sast-evento --autounmask
 ```
 
 ## :open_file_folder: 生成的文件
