@@ -82,9 +82,8 @@ emerge -av eselect-repository
 eselect repository add corcodile git https://github.com/f3rmata/corcodile.git
 ```
 
-Using `spdlog` in overlay to fix the bundled `fmt` issue.
 ```bash
-emerge -av spdlog::corcodile sast-evento
+emerge -av app-misc/sast-evento --autounmask
 ```
 
 ## :open_file_folder: Files Produced

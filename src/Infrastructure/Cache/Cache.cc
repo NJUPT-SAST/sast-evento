@@ -123,6 +123,8 @@ std::optional<CacheEntry> CacheManager::get(std::string const& key) {
         return std::nullopt;
     }
 
+    _cacheList.splice(_cacheList.begin(), _cacheList, it->second);
+
     return it->second->second;
 }
 
