@@ -984,7 +984,7 @@ Task<JsonResult> NetworkClient::handleGithubResponse(http::response<http::dynami
     if (status == http::status::found || status == http::status::moved_permanently
         || status == http::status::temporary_redirect) {
         auto location = response.base().at("Location");
-        spdlog::info("Redirecting to {}", location);
+        spdlog::info("Redirecting to {}", std::string(location));
         auto redirectUrl = urls::url_view(location);
         co_return co_await this->request<api::Github>(http::verb::get, redirectUrl);
     } else if (status != http::status::ok) {
