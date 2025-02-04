@@ -64,6 +64,7 @@ target_link_libraries(${PROJECT_NAME}
     Boost::system
     Boost::filesystem
     Boost::url
+    cpptrace::cpptrace
     OpenSSL::Crypto
     OpenSSL::SSL
     nlohmann_json::nlohmann_json
@@ -74,6 +75,19 @@ target_link_libraries(${PROJECT_NAME}
     ${INTL_LIBRARY}
     ${URING_LIBRARY}
 )
+
+if(WIN32)
+  target_link_libraries(${PROJECT_NAME} PRIVATE pdh wbemuuid)
+endif()
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    if(MSVC)
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi /DEBUG")
+    else()
+        set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -g")
+    endif()
+endif()
+
 
 # On Windows, copy the Slint DLL next to the application binary so that it's found.
 if (WIN32)
