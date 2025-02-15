@@ -6,6 +6,7 @@
         "boost-dll",
         "boost-url",
         "boost-process",
+        "cpptrace",
         "openssl",
         "nlohmann-json",
         "spdlog",
