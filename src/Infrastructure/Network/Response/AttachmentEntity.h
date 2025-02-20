@@ -8,7 +8,7 @@ namespace evento {
 
 struct AttachmentEntity {
     int id;
-    int eventId;
+    std::string eventId;
     std::string url;
 
     NLOHMANN_DEFINE_TYPE_INTRUSIVE(AttachmentEntity, id, eventId, url);

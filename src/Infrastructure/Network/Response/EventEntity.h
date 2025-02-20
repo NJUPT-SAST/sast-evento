@@ -7,8 +7,10 @@
 #include <string>
 namespace evento {
 
+using eventId_t = std::string;
+
 struct EventEntity {
-    int id;
+    eventId_t id;
     mutable std::string summary;
     std::string description;
     std::string start;

@@ -61,18 +61,12 @@ void AccountManager::performLogin() {
 
             auto data = result.unwrap();
 
-            self._userInfo = data.userInfo;
-#ifdef EVENTO_API_V1
-            self.setKeychainAccessToken(data.accessToken);
-            self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(3);
-#else
             self.setKeychainRefreshToken(data.refreshToken);
             self.scheduleRenewAccessToken();
-            self.expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
-#endif
+            self._expiredTime = std::chrono::system_clock::now() + std::chrono::days(7);
+
             self.setNetworkAccessToken(data.accessToken);
-            self.setLoginState(true);
-            self.saveConfig();
+            self.performGetUserInfo();
         });
 }
 
@@ -129,6 +123,7 @@ void AccountManager::performGetUserInfo() {
             self._userInfo = result.unwrap();
             spdlog::info("get user info success");
             self.setLoginState(true);
+            self.saveConfig();
         });
 }
 
@@ -145,10 +140,10 @@ void AccountManager::requestLogout() {
     }
     auto& self = *this;
     self._userInfo = UserInfoEntity();
-#ifndef EVENTO_API_V1
+
     setKeychainRefreshToken("");
-    renewAccessTokenTimer.cancel();
-#endif
+    _renewAccessTokenTimer.cancel();
+
     setNetworkAccessToken("");
 
     setLoginState(false);
@@ -167,19 +162,10 @@ void AccountManager::tryLoginDirectly() {
     spdlog::info("Try login directly, expired time: {}", _expiredTime.time_since_epoch().count());
     self->set_loading(true);
 
-#ifdef EVENTO_API_V1
-    if (auto token = getKeychainAccessToken()) {
-        spdlog::info("Token is found. Login directly!");
-        setNetworkAccessToken(*token);
-        performGetUserInfo();
-    }
-#else
     // If the token is not expired after 15min, we don't need to login again
     if (getKeychainRefreshToken()) {
         performRefreshToken();
-    }
-#endif
-    else {
+    } else {
         self->set_loading(false);
         self.bridge.getMessageManager().showMessage("登录过期，请重新登录", MessageType::Info);
     }
@@ -193,24 +179,56 @@ void AccountManager::loadConfig() {
     setLoginState(false);
     auto [year, month, day] = evento::account.expire.date;
     auto [hour, minute, second, _] = evento::account.expire.time;
-    std::tm t = {year, month, day, hour, minute, second};
+    spdlog::info("Loading config with date: {}-{}-{} and time: {}:{}:{}",
+                 year,
+                 month,
+                 day,
+                 hour,
+                 minute,
+                 second);
 
-    _expiredTime = std::chrono::system_clock::from_time_t(std::mktime(&t));
-    _userInfo.id = evento::account.userId;
+    if (year < 1900 || month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23
+        || minute < 0 || minute > 59 || second < 0 || second > 60) {
+        spdlog::error("Invalid date or time values");
+        return;
+    }
+    std::tm t = {};
+    t.tm_year = year - 1900;
+    t.tm_mon = month - 1;
+    t.tm_mday = day;
+    t.tm_hour = hour;
+    t.tm_min = minute;
+    t.tm_sec = second;
+    t.tm_isdst = -1;
+
+    time_t time = std::mktime(&t);
+    if (time == -1) {
+        spdlog::error("Failed to convert time to time_t");
+        return;
+    }
+
+    _expiredTime = std::chrono::system_clock::from_time_t(time);
+    _userInfo.linkId = evento::account.userId;
 }
 
 void AccountManager::saveConfig() {
     auto expire = std::chrono::system_clock::to_time_t(_expiredTime);
-    auto expireTm = *std::localtime(&expire);
-    evento::account.expire
-        = toml::date_time{toml::date{expireTm.tm_year + 1900, expireTm.tm_mon + 1, expireTm.tm_mday},
-                          toml::time{expireTm.tm_hour, expireTm.tm_min, expireTm.tm_sec}};
-    evento::account.userId = _userInfo.id;
+    if (auto expireTm = std::localtime(&expire)) {
+        evento::account.expire = toml::date_time{toml::date{expireTm->tm_year + 1900,
+                                                            expireTm->tm_mon + 1,
+                                                            expireTm->tm_mday},
+                                                 toml::time{expireTm->tm_hour,
+                                                            expireTm->tm_min,
+                                                            expireTm->tm_sec}};
+        evento::account.userId = _userInfo.linkId;
+    } else {
+        spdlog::error("Failed to convert time to time_t");
+    }
 }
 
 void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) const {
     keychain::Error err;
-    keychain::setPassword(package, service, _userInfo.id, refreshToken, err);
+    keychain::setPassword(package, service, _userInfo.linkId, refreshToken, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         spdlog::error("Failed to save refresh token: {}", err.message);
@@ -221,7 +239,7 @@ void AccountManager::setKeychainRefreshToken(const std::string& refreshToken) co
 
 std::optional<std::string> AccountManager::getKeychainRefreshToken() const {
     keychain::Error err;
-    auto refreshToken = keychain::getPassword(package, service, _userInfo.id, err);
+    auto refreshToken = keychain::getPassword(package, service, _userInfo.linkId, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         spdlog::error("Failed to get refresh token: {}", err.message);
@@ -251,14 +269,14 @@ void AccountManager::setNetworkAccessToken(std::string accessToken) {
     evento::networkClient()->tokenBytes = accessToken;
 }
 
-#ifdef EVENTO_API_V1
+// #ifdef EVENTO_API_V1
 std::optional<std::string> AccountManager::getKeychainAccessToken() const {
     if (!settings.autoLogin) {
         return std::nullopt;
     }
 
     keychain::Error err;
-    auto accessToken = keychain::getPassword(package, service, _userInfo.id, err);
+    auto accessToken = keychain::getPassword(package, service, _userInfo.linkId, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         debug(), (int) err.type;
@@ -278,7 +296,7 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
         return;
     }
     keychain::Error err;
-    keychain::setPassword(package, service, _userInfo.id, accessToken, err);
+    keychain::setPassword(package, service, _userInfo.linkId, accessToken, err);
 
     if (err.type != keychain::ErrorType::NoError) {
         debug(), (int) err.type;
@@ -287,7 +305,7 @@ void AccountManager::setKeychainAccessToken(const std::string& accessToken) cons
     }
     spdlog::info("Save access token success");
 }
-#endif
+// #endif
 
 void AccountManager::setLoginState(bool newState) {
     auto& self = *this;

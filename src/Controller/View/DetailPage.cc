@@ -1,4 +1,3 @@
-#include "app.h"
 #include <Controller/AsyncExecutor.hh>
 #include <Controller/Convert.h>
 #include <Controller/UiBridge.h>
@@ -19,13 +18,14 @@ void DetailPage::onCreate() {
     self->on_load_feedback([&self = *this]() { self.loadFeedback(); });
     self->on_load_event([&self = *this]() { self.loadEvent(); });
     self->on_feedback([&self = *this](int rate, slint::SharedString content) {
-        self.feedbackEvent(self->get_event_model().id, rate, content.data());
+        self.feedbackEvent(self->get_event_model().id.data(), rate, content.data());
     });
     self->on_check_in([&self = *this](slint::SharedString checkInCode) {
-        self.checkIn(self->get_event_model().id, checkInCode.data());
+        self.checkIn(self->get_event_model().id.data(), checkInCode.data());
     });
-    self->on_subscribe(
-        [&self = *this](bool subscribe) { self.subscribe(self->get_event_model().id, subscribe); });
+    self->on_subscribe([&self = *this](bool subscribe) {
+        self.subscribe(self->get_event_model().id.data(), subscribe);
+    });
 }
 
 void DetailPage::onShow() {
@@ -39,7 +39,7 @@ void DetailPage::onShow() {
 
 void DetailPage::loadEvent() {
     auto& self = *this;
-    executor()->asyncExecute(networkClient()->getEventById(self->get_event_model().id),
+    executor()->asyncExecute(networkClient()->getEventById(self->get_event_model().id.data()),
                              [&self = *this](Result<EventQueryRes> result) {
                                  if (result.isErr()) {
                                      self.bridge.getMessageManager()
@@ -61,7 +61,7 @@ void DetailPage::loadEvent() {
 void DetailPage::loadFeedback() {
     auto& self = *this;
     self->set_state(PageState::Loading);
-    executor()->asyncExecute(networkClient()->getUserFeedback(self->get_event_model().id),
+    executor()->asyncExecute(networkClient()->getUserFeedback(self->get_event_model().id.data()),
                              [&self = *this](Result<std::optional<FeedbackEntity>> result) {
                                  if (result.isErr()) {
                                      self->set_state(PageState::Error);
@@ -75,7 +75,7 @@ void DetailPage::loadFeedback() {
                              });
 }
 
-void DetailPage::checkIn(int eventId, std::string checkInCode) {
+void DetailPage::checkIn(eventId_t eventId, std::string checkInCode) {
     auto& self = *this;
     executor()->asyncExecute(
         networkClient()->checkInEvent(eventId, checkInCode), [&self = *this](Result<bool> result) {
@@ -103,9 +103,9 @@ void DetailPage::checkIn(int eventId, std::string checkInCode) {
         });
 }
 
-void DetailPage::subscribe(int eventId, bool subscribe) {
+void DetailPage::subscribe(std::string eventId_t, bool subscribe) {
     auto& self = *this;
-    executor()->asyncExecute(networkClient()->subscribeEvent(eventId, subscribe),
+    executor()->asyncExecute(networkClient()->subscribeEvent(eventId_t, subscribe),
                              [&self = *this, subscribe](Result<bool> result) {
                                  if (result.isErr()) {
                                      self.bridge.getMessageManager()
@@ -130,10 +130,10 @@ void DetailPage::subscribe(int eventId, bool subscribe) {
                              });
 }
 
-void DetailPage::feedbackEvent(int eventId, int rate, std::string content) {
+void DetailPage::feedbackEvent(std::string eventId_t, int rate, std::string content) {
     auto& self = *this;
     executor()
-        ->asyncExecute(networkClient()->addUserFeedback(eventId, rate, content),
+        ->asyncExecute(networkClient()->addUserFeedback(eventId_t, rate, content),
                        [&self = *this, rate, content](Result<bool> result) {
                            if (result.isErr()) {
                                self.bridge.getMessageManager().showMessage(result.unwrapErr().what(),

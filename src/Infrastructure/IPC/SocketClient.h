@@ -10,6 +10,7 @@
 
 namespace evento {
 
+using messageId_t = std::string;
 namespace net = boost::asio;
 
 class SocketClient {
@@ -20,11 +21,11 @@ public:
     void startTray();
     void exitTray();
 
-    void showOrUpdateMessage(int messageId,
+    void showOrUpdateMessage(messageId_t messageId,
                              std::string const& message,
                              std::chrono::system_clock::time_point const& time);
 
-    void cancelMessage(int messageId);
+    void cancelMessage(messageId_t messageId);
     void deleteAllMessage();
 
     struct MessageType {
@@ -48,7 +49,7 @@ private:
     std::unique_ptr<net::ip::tcp::socket> _socket;
     std::unordered_map<std::string_view, std::function<void()>> _actions;
 
-    std::unordered_map<int, std::string> _messageMap;
+    std::unordered_map<messageId_t, std::string> _messageMap;
 };
 
 SocketClient* ipc();

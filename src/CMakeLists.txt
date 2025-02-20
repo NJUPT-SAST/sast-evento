@@ -54,7 +54,7 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<CONFIG:Release>:EVENTO_RELEASE>
     ${PLATFORM}
     LOCALE_DIR="${SOURCE_LOCALE_DIR}"
-    EVENTO_API_V1
+    # EVENTO_API_V1
 )
 
 target_link_libraries(${PROJECT_NAME}
