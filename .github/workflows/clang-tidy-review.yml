@@ -72,7 +72,7 @@ jobs:
         run: cmake --preset native -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
       - name: Run clang-tidy
-        uses: ZedThree/clang-tidy-review@v0.20.1
+        uses: ZedThree/clang-tidy-review@v0.21.0
         id: review
         with:
           build_dir: build
