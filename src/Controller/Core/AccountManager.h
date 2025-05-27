@@ -48,7 +48,7 @@ private:
 
     void scheduleRenewAccessToken();
 
-    static void setNetworkAccessToken(std::string accessToken);
+    static void setNetworkAccessToken(std::optional<std::string> accessToken);
 
 #ifdef EVENTO_API_V1
     [[nodiscard]] std::optional<std::string> getKeychainAccessToken() const;

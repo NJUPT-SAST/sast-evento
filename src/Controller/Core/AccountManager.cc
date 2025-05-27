@@ -149,7 +149,7 @@ void AccountManager::requestLogout() {
     setKeychainRefreshToken("");
     renewAccessTokenTimer.cancel();
 #endif
-    setNetworkAccessToken("");
+    setNetworkAccessToken(std::nullopt);
 
     setLoginState(false);
 }
@@ -172,6 +172,10 @@ void AccountManager::tryLoginDirectly() {
         spdlog::info("Token is found. Login directly!");
         setNetworkAccessToken(*token);
         performGetUserInfo();
+        if (!isLogin()) {
+            // backtrack
+            setNetworkAccessToken(std::nullopt);
+        }
     }
 #else
     // If the token is not expired after 15min, we don't need to login again
@@ -247,7 +251,7 @@ void AccountManager::scheduleRenewAccessToken() {
     });
 }
 
-void AccountManager::setNetworkAccessToken(std::string accessToken) {
+void AccountManager::setNetworkAccessToken(std::optional<std::string> accessToken) {
     evento::networkClient()->tokenBytes = accessToken;
 }
 

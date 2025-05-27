@@ -342,13 +342,19 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
     auto res = eventEntityListV1ToV2({entityV1});
 
     auto& event = res.elements.front();
-    auto statusResult = co_await getEventParticipate(event.id);
-    if (statusResult.isErr())
-        co_return Err(statusResult.unwrapErr());
+    if (this->tokenBytes.has_value()) {
+        auto statusResult = co_await getEventParticipate(event.id);
+        if (statusResult.isErr())
+            co_return Err(statusResult.unwrapErr());
 
-    auto status = statusResult.unwrap();
-    event.isCheckedIn = status.isParticipate;
-    event.isSubscribed = status.isSubscribe;
+        auto status = statusResult.unwrap();
+        event.isCheckedIn = status.isParticipate;
+        event.isSubscribed = status.isSubscribe;
+    } else {
+        // If the user is not logged in, we assume the event is not checked in or subscribed
+        event.isCheckedIn = false;
+        event.isSubscribed = false;
+    }
 
     co_return Ok(res);
 #else
