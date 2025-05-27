@@ -344,7 +344,7 @@ Task<Result<EventQueryRes>> NetworkClient::getEventById(int eventId) {
     auto& event = res.elements.front();
     auto statusResult = co_await getEventParticipate(event.id);
     if (statusResult.isErr())
-        co_return Err(result.unwrapErr());
+        co_return Err(statusResult.unwrapErr());
 
     auto status = statusResult.unwrap();
     event.isCheckedIn = status.isParticipate;
