@@ -263,7 +263,7 @@ jobs:
         Copy-Item -Path $env:VCToolsRedistDir\vc_redist.$msvcArch.exe -Destination ./deploy/vcredist.exe
 
     - name: Inno Setup
-      uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
+      uses: Minionguyjpro/Inno-Setup-Action@v1.2.6
       with:
         path: ./deploy/win-installer.iss
         options: /O+ /dMyAppVersion=${{ steps.extract.outputs.version }}
