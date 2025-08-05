@@ -240,7 +240,7 @@ jobs:
           submodules: false
 
     - name: Download artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: files-${{ matrix.rid }}
 
@@ -289,7 +289,7 @@ jobs:
           submodules: false
 
     - name: Download artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: files-${{ matrix.rid }}
 
@@ -325,7 +325,7 @@ jobs:
           submodules: false
 
     - name: Download artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: files-${{ matrix.rid }}
 
@@ -380,7 +380,7 @@ jobs:
           cmake --install ./fcitx5-qt-build
 
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: files-${{ matrix.rid }}
 
@@ -422,7 +422,7 @@ jobs:
           submodules: false
 
     - name: Download artifact
-      uses: actions/download-artifact@v4
+      uses: actions/download-artifact@v5
       with:
         name: files-${{ matrix.rid }}
 
@@ -460,7 +460,7 @@ jobs:
       - package-macos
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           path: ./artifacts
 
